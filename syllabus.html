@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LAN-153 IT Security Essentials - Interactive Syllabus</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #ffffff 0%, #f0f8f0 50%, #e8f5e8 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c5530 0%, #1a3d1f 100%);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .navigation {
+            background: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        select {
+            padding: 10px 15px;
+            border: 2px solid #2c5530;
+            border-radius: 8px;
+            background: white;
+            color: #2c5530;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        select:hover {
+            background: #f0f8f0;
+        }
+
+        .edit-toggle {
+            background: #2c5530;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .edit-toggle:hover {
+            background: #1a3d1f;
+            transform: translateY(-2px);
+        }
+
+        .edit-mode {
+            background: #dc3545 !important;
+        }
+
+        .content {
+            background: white;
+            margin: 2rem 0;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border-left: 5px solid #2c5530;
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            color: #2c5530;
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #2c5530;
+        }
+
+        h3 {
+            color: #1a3d1f;
+            font-size: 1.4rem;
+            margin: 1.5rem 0 1rem 0;
+            padding: 0.5rem;
+            background: #f0f8f0;
+            border-radius: 8px;
+        }
+
+        h4 {
+            color: #2c5530;
+            font-size: 1.2rem;
+            margin: 1rem 0 0.5rem 0;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .info-card {
+            background: #f8fdf8;
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 1px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        .info-card h4 {
+            color: #2c5530;
+            margin-bottom: 0.5rem;
+        }
+
+        .editable {
+            transition: all 0.3s ease;
+        }
+
+        .edit-mode .editable {
+            background: #fff3cd;
+            border: 2px dashed #856404;
+            padding: 8px;
+            border-radius: 5px;
+            cursor: text;
+        }
+
+        .edit-mode .editable:hover {
+            background: #ffeaa7;
+        }
+
+        input[type="text"], input[type="email"], input[type="tel"], input[type="date"], textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .schedule-week {
+            background: #f8fdf8;
+            margin: 1rem 0;
+            padding: 1.5rem;
+            border-radius: 10px;
+            border-left: 4px solid #2c5530;
+        }
+
+        .schedule-week h4 {
+            color: #2c5530;
+            margin-bottom: 1rem;
+        }
+
+        .assignment-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .assignment-list li {
+            background: white;
+            margin: 0.5rem 0;
+            padding: 0.8rem;
+            border-radius: 6px;
+            border-left: 3px solid #2c5530;
+            transition: all 0.3s ease;
+        }
+
+        .assignment-list li:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .grade-breakdown {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .grade-item {
+            background: #f0f8f0;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #2c5530;
+        }
+
+        .grade-item h4 {
+            color: #2c5530;
+            margin-bottom: 0.5rem;
+        }
+
+        .grade-percentage {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1a3d1f;
+        }
+
+        .learning-outcomes {
+            background: #f8fdf8;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+        }
+
+        .learning-outcomes ol {
+            padding-left: 1.5rem;
+        }
+
+        .learning-outcomes li {
+            margin: 0.5rem 0;
+            padding: 0.3rem 0;
+        }
+
+        .footer {
+            background: #2c5530;
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .nav-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .content {
+                padding: 1rem;
+                margin: 1rem 0;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>LAN-153: IT Security Essentials (Security+)</h1>
+            <p>Moraine Valley Community College - Fall 2025</p>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <div class="container">
+            <div class="nav-controls">
+                <select id="sectionSelect">
+                    <option value="instructor">Instructor Information</option>
+                    <option value="course">Course Information</option>
+                    <option value="schedule">Course Schedule</option>
+                    <option value="materials">Materials & Policies</option>
+                    <option value="grading">Grading & Assignments</option>
+                    <option value="outcomes">Learning Outcomes</option>
+                </select>
+                <button class="edit-toggle" onclick="toggleEditMode()">Toggle Edit Mode</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Instructor Information Section -->
+        <div class="content section active" id="instructor">
+            <h2>Instructor and Section Information</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h4>Instructor</h4>
+                    <p><strong>Name:</strong> <span class="editable" data-field="instructor_name">Dr. John Sands</span></p>
+                    <p><strong>Office:</strong> <span class="editable" data-field="office_location">T518</span></p>
+                    <p><strong>Phone:</strong> <span class="editable" data-field="office_phone">708-974-5426</span></p>
+                    <p><strong>Email:</strong> <span class="editable" data-field="instructor_email">sands@morainevalley.edu</span></p>
+                </div>
+                <div class="info-card">
+                    <h4>Office Hours</h4>
+                    <p><span class="editable" data-field="office_hours">Mon 5PM, Tues 12PM, Wed 12PM, Thur 6PM</span></p>
+                </div>
+                <div class="info-card">
+                    <h4>Course Details</h4>
+                    <p><strong>Semester:</strong> <span class="editable" data-field="semester">Fall 2025</span></p>
+                    <p><strong>Section:</strong> <span class="editable" data-field="section_number">LAN153-300</span></p>
+                    <p><strong>Format:</strong> <span class="editable" data-field="course_format">Online</span></p>
+                    <p><strong>Meeting Day:</strong> <span class="editable" data-field="meeting_day">Saturday</span></p>
+                </div>
+                <div class="info-card">
+                    <h4>Important Dates</h4>
+                    <p><strong>First Day:</strong> <span class="editable" data-field="first_day">8/18/2025</span></p>
+                    <p><strong>Last Day:</strong> <span class="editable" data-field="last_day">10/10/2025</span></p>
+                    <p><strong>Final Exam:</strong> <span class="editable" data-field="final_exam_date">10/06/2025</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Course Information Section -->
+        <div class="content section" id="course">
+            <h2>Course Information</h2>
+            <div class="info-card">
+                <h3>Course Description</h3>
+                <p><strong>Prerequisite:</strong> LAN-122 or consent of instructor</p>
+                <p><strong>Credit Hours:</strong> 3</p>
+                <p><strong>Contact Hours:</strong> 4 (2 Lecture/Demonstration + 2 Lab/Studio)</p>
+                <p class="editable" data-field="course_description">This course introduces the basic principles of network security. The student will be introduced to computer network vulnerabilities and threats and how to safeguard computer networks from those vulnerabilities and threats. This course will expose the student to network security planning, network security technology, network security organization and the legal and ethical issues associated with network security. This course is designed to prepare the successful student for the CompTIA Security+ certification.</p>
+            </div>
+
+            <div class="info-card">
+                <h3>Major Course Concepts</h3>
+                <h4>A. Network Security Basics</h4>
+                <ul>
+                    <li>Security Definitions, Network security principles and objectives</li>
+                    <li>Network security architecture, model, and layers</li>
+                    <li>Network threats, confidentiality, integrity and availability</li>
+                    <li>Accountability, auditability, and non-repudiation</li>
+                    <li>Case study of the network security policy of the student's parent organization</li>
+                </ul>
+
+                <h4>B. Network Security Planning</h4>
+                <ul>
+                    <li>Network risk management and network security policy</li>
+                    <li>Continuity of operations and security maintenance</li>
+                    <li>Policy, procedures, standards, and guidelines</li>
+                    <li>Case study of a risk assessment of the student's parent organization</li>
+                </ul>
+
+                <h4>C. Network Security Technology</h4>
+                <ul>
+                    <li>Cryptography, virtual private networks, firewalls and intrusion detection system</li>
+                    <li>Scanning and analysis tools and access controls</li>
+                </ul>
+
+                <h4>D. Network Security Organization</h4>
+                <ul>
+                    <li>The organization and security</li>
+                    <li>Personnel and security</li>
+                    <li>The Computer Incident Response Team (CIRT)</li>
+                    <li>The security function to include organization, location, responsibility, and resources</li>
+                    <li>Case study to create a Computer Incident Response Team</li>
+                </ul>
+
+                <h4>E. Legal, Privacy, and Ethical Issues</h4>
+                <ul>
+                    <li>US Laws and Network Security</li>
+                    <li>Privacy and network security</li>
+                    <li>Ethics and Network Security</li>
+                    <li>Class exercise in developing a code of Network Security ethics</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Schedule Section -->
+        <div class="content section" id="schedule">
+            <h2>Course Schedule</h2>
+            <p><strong>Canvas Link:</strong> <a href="https://canvas.morainevalley.edu/courses/79381/pages/class-schedule?module_item_id=3719300" target="_blank">Detailed Schedule</a></p>
+
+            <div class="schedule-week">
+                <h4>Week 1: Domain 1 - General Security Concepts</h4>
+                <ul class="assignment-list">
+                    <li class="editable" data-field="week1_lab1">Lab 01A: Analyze and Differentiate Types of Malware and Application Attacks</li>
+                    <li class="editable" data-field="week1_lab2">Lab 01B: Cryptography Concepts</li>
+                    <li class="editable" data-field="week1_exercise">Exercise 1: Cybersecurity Controls</li>
+                    <li class="editable" data-field="week1_exam">Exam 1: Domain 1</li>
+                </ul>
+            </div>
+
+            <div class="schedule-week">
+                <h4>Week 2: Domain 2 - Threats, Vulnerabilities, and Mitigations (22%)</h4>
+                <ul class="assignment-list">
+                    <li class="editable" data-field="week2_lab1">Lab 02A: Password Cracking with Linux and Windows</li>
+                    <li class="editable" data-field="week2_lab2">Lab 02B: [TBD]</li>
+                    <li class="editable" data-field="week2_exercise">Exercise 2: Using Hashing Tools</li>
+                    <li class="editable" data-field="week2_exam">Exam 2: Domain 2</li>
+                </ul>
+            </div>
+
+            <div class="schedule-week">
+                <h4>Week 3: Domain 3 - Security Architecture (18%)</h4>
+                <ul class="assignment-list">
+                    <li class="editable" data-field="week3_lab1">Lab 03A: Investigating ARP Poisoning</li>
+                    <li class="editable" data-field="week3_lab2">Lab 03B: Basic Command Line Tool Techniques</li>
+                    <li class="editable" data-field="week3_exercise">Exercise 3: NIST SP800-171 Domains</li>
+                    <li class="editable" data-field="week3_exam">Exam 3: Domain 3</li>
+                </ul>
+            </div>
+
+            <div class="schedule-week">
+                <h4>Week 4: Domain 4 - Security Operations Part 1 (28%)</h4>
+                <ul class="assignment-list">
+                    <li class="editable" data-field="week4_lab">Lab 04: Performing Active Reconnaissance</li>
+                    <li class="editable" data-field="week4_exercise">Exercise 4: Asset Inventory & Categorization Report</li>
+                </ul>
+            </div>
+
+            <div class="schedule-week">
+                <h4>Week 5: Domain 4 - Security Operations Part 2 (28%)</h4>
+                <ul class="assignment-list">
+                    <li class="editable" data-field="week5_lab1">Lab 05A: Capturing Network Traffic</li>
+                    <li class="editable" data-field="week5_lab2">Lab 05B: Identifying & Analyzing Network/Host Intrusion Detection Alerts</li>
+                    <li class="editable" data-field="week5_exercise">Exercise 5: Access Control Matrix</li>
+                    <li class="editable" data-field="week5_exam">Exam 4: Domain 4</li>
+                </ul>
+            </div>
+
+            <div class="schedule-week">
+                <h4>Week 6: Domain 5 - Security Program Management Part 1 (20%)</h4>
+                <ul class="assignment-list">
+                    <li class="editable" data-field="week6_lab">Lab 06: Wireless Networking Attack and Mitigation Techniques</li>
+                    <li class="editable" data-field="week6_exercise">Exercise 6: Vulnerability Scan Reports</li>
+                </ul>
+            </div>
+
+            <div class="schedule-week">
+                <h4>Week 7: Domain 5 - Security Program Management Part 2 (20%)</h4>
+                <ul class="assignment-list">
+                    <li class="editable" data-field="week7_lab">Lab 07: Implementing Common Protocols and Services for Basic Security</li>
+                    <li class="editable" data-field="week7_exercise">Exercise 7: Incident Response Plan (IRP)</li>
+                    <li class="editable" data-field="week7_exam">Exam 5: Domain 5</li>
+                </ul>
+            </div>
+
+            <div class="schedule-week">
+                <h4>Week 8: Final Assessments</h4>
+                <ul class="assignment-list">
+                    <li class="editable" data-field="week8_final">Final Exam</li>
+                    <li class="editable" data-field="week8_project">Final Project</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Materials & Policies Section -->
+        <div class="content section" id="materials">
+            <h2>Materials & Policies</h2>
+            
+            <div class="info-card">
+                <h3>Required Materials</h3>
+                <ul>
+                    <li>Materials provided by instructor</li>
+                    <li><strong>Optional:</strong> CompTIA Security+ Certification Kit: Exam SY0-701</li>
+                </ul>
+            </div>
+
+            <div class="info-card">
+                <h3>Attendance Policy</h3>
+                <p>Attendance is expected and required. Instructors have the authority to assign points to student's attendance and participation. Excessive absence can affect final grade.</p>
+            </div>
+
+            <div class="info-card">
+                <h3>Academic Integrity</h3>
+                <p>Cheating and plagiarism is not allowed in this class. Any student caught in the act of cheating/plagiarism will be declined based on the severity of the offense up to and including immediate dismissal from class and may result in a grade of "F" in the course.</p>
+            </div>
+
+            <div class="info-card">
+                <h3>Make-up Policy</h3>
+                <p>There are no makeup assignments unless otherwise indicated by the instructor of this course.</p>
+            </div>
+
+            <div class="info-card">
+                <h3>Extra Credit Policy</h3>
+                <p>There are no extra credit assignments in this class.</p>
+            </div>
+        </div>
+
+        <!-- Grading Section -->
+        <div class="content section" id="grading">
+            <h2>Grading & Assignments</h2>
+            
+            <div class="grade-breakdown">
+                <div class="grade-item">
+                    <h4>Labs (10)</h4>
+                    <div class="grade-percentage">50%</div>
+                </div>
+                <div class="grade-item">
+                    <h4>Major Tests (5)</h4>
+                    <div class="grade-percentage">25%</div>
+                </div>
+                <div class="grade-item">
+                    <h4>Exercises (7)</h4>
+                    <div class="grade-percentage">15%</div>
+                </div>
+                <div class="grade-item">
+                    <h4>Final Exam</h4>
+                    <div class="grade-percentage">10%</div>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <h3>Grading Scale</h3>
+                <ul>
+                    <li><strong>A:</strong> 92-100%</li>
+                    <li><strong>B:</strong> 85-91%</li>
+                    <li><strong>C:</strong> 77-84%</li>
+                    <li><strong>D:</strong> 70-76%</li>
+                    <li><strong>F:</strong> Below 70%</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Learning Outcomes Section -->
+        <div class="content section" id="outcomes">
+            <h2>Expected Learning Outcomes</h2>
+            <div class="learning-outcomes">
+                <p>Upon successful completion of this course, students will be able to:</p>
+                <ol>
+                    <li>Understand computer, network and information security</li>
+                    <li>Explain why network security is important</li>
+                    <li>Explain network security prevention, detection and response</li>
+                    <li>Define and explain the concept of network confidentiality, integrity and availability</li>
+                    <li>Define and explain the concept of non-repudiation</li>
+                    <li>Understanding management's role in the development, implementation and maintenance of network security</li>
+                    <li>Understand the value of education, training and awareness programs to the organization</li>
+                    <li>Understand security architecture, its principles, components and employment</li>
+                    <li>Define risk management and its role in security policy and security architecture</li>
+                    <li>Understand the relationship between risk, threats, vulnerabilities and countermeasures</li>
+                    <li>Identify and describe risk mitigation strategies</li>
+                    <li>Define and describe Disaster Recovery Plans</li>
+                    <li>Define and describe an Incident Response Plan</li>
+                    <li>Define and describe a Business Continuity Plan</li>
+                    <li>Describe the various functions related to database security</li>
+                    <li>Describe and understand a feasibility study</li>
+                    <li>Understand the need for constantly evaluating the status of security management</li>
+                    <li>Understand the difference between policies, procedures, standards and guidelines</li>
+                    <li>Understand the process of encryption and define the key cryptography terms</li>
+                    <li>Understand the difference between asymmetric and symmetric encryption</li>
+                    <li>Discuss scanning and analysis tools</li>
+                    <li>Describe the various types of firewalls</li>
+                    <li>Describe the various types of Intrusion Detection Systems</li>
+                    <li>Describe the operation of Virtual Private Networks</li>
+                    <li>Understand the importance of authentication and the characteristics of a good password</li>
+                    <li>Describe the various approaches to biometrics access control</li>
+                    <li>Understand the position of the network security element within the organization</li>
+                    <li>Understand the skills required to staff the network security element</li>
+                    <li>Describe the functional elements associated with network security</li>
+                    <li>Understand the relationship between an organization's employment practices and policies and the network security function</li>
+                    <li>Understand the position of the CIRT element within the security function</li>
+                    <li>Explain the various credentials that can be acquired by the security professional and their value</li>
+                    <li>Identify and explain the major laws relating to network security</li>
+                    <li>Understand the issue of privacy and its impact upon the network security function</li>
+                    <li>Understand the issue of ethics and its relationship to the security function</li>
+                    <li>Explain the difference between ethics and laws, and explain the purpose of a code of ethics</li>
+                    <li>Understand the potential for organizational liability with regard to network security</li>
+                    <li>Understand and describe the tradeoffs security, privacy and operations</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="container">
+            <p>&copy; 2025 Moraine Valley Community College - Division of Academic Affairs</p>
+            <p>Interactive Syllabus - LAN-153 IT Security Essentials</p>
+        </div>
+    </div>
+
+    <script>
+        let editMode = false;
+        const syllabusData = {};
+
+        // Initialize syllabus data from existing content
+        function initializeSyllabusData() {
+            document.querySelectorAll('.editable').forEach(element => {
+                const field = element.getAttribute('data-field');
+                syllabusData[field] = element.textContent.trim();
+            });
+        }
+
+        // Navigation functionality
+        document.getElementById('sectionSelect').addEventListener('change', function() {
+            const selectedSection = this.value;
+            showSection(selectedSection);
+        });
+
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+        }
+
+        // Edit mode functionality
+        function toggleEditMode() {
+            editMode = !editMode;
+            const body = document.body;
+            const button = document.querySelector('.edit-toggle');
+            
+            if (editMode) {
+                body.classList.add('edit-mode');
+                button.textContent = 'Exit Edit Mode';
+                button.classList.add('edit-mode');
+                enableEditing();
+            } else {
+                body.classList.remove('edit-mode');
+                button.textContent = 'Toggle Edit Mode';
+                button.classList.remove('edit-mode');
+                disableEditing();
+            }
+        }
+
+        function enableEditing() {
+            document.querySelectorAll('.editable').forEach(element => {
+                element.contentEditable = true;
+                element.addEventListener('blur', saveEditableContent);
+                element.addEventListener('keydown', handleEditableKeydown);
+            });
+        }
+
+        function disableEditing() {
+            document.querySelectorAll('.editable').forEach(element => {
+                element.contentEditable = false;
+                element.removeEventListener('blur', saveEditableContent);
+                element.removeEventListener('keydown', handleEditableKeydown);
+            });
+        }
+
+        function saveEditableContent(event) {
+            const field = event.target.getAttribute('data-field');
+            const newValue = event.target.textContent.trim();
+            syllabusData[field] = newValue;
+            
+            // Visual feedback for saved changes
+            event.target.style.background = '#d4edda';
+            setTimeout(() => {
+                event.target.style.background = '';
+            }, 1000);
+        }
+
+        function handleEditableKeydown(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                event.target.blur();
+            }
+        }
+
+        // Export functionality
+        function exportSyllabus() {
+            const exportData = {
+                timestamp: new Date().toISOString(),
+                course: 'LAN-153',
+                semester: 'Fall 2025',
+                data: syllabusData
+            };
+            
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'LAN153_syllabus_export.json';
+            link.click();
+            
+            URL.revokeObjectURL(url);
+        }
+
+        // Import functionality
+        function importSyllabus() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        try {
+                            const importData = JSON.parse(e.target.result);
+                            if (importData.data) {
+                                Object.assign(syllabusData, importData.data);
+                                updateDisplayFromData();
+                                alert('Syllabus data imported successfully!');
+                            }
+                        } catch (error) {
+                            alert('Error importing file: Invalid JSON format');
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            };
+            input.click();
+        }
+
+        function updateDisplayFromData() {
+            document.querySelectorAll('.editable').forEach(element => {
+                const field = element.getAttribute('data-field');
+                if (syllabusData[field]) {
+                    element.textContent = syllabusData[field];
+                }
+            });
+        }
+
+        // Auto-save functionality
+        function autoSave() {
+            localStorage.setItem('lan153_syllabus_draft', JSON.stringify(syllabusData));
+        }
+
+        function loadDraft() {
+            const draft = localStorage.getItem('lan153_syllabus_draft');
+            if (draft) {
+                try {
+                    const draftData = JSON.parse(draft);
+                    Object.assign(syllabusData, draftData);
+                    updateDisplayFromData();
+                } catch (error) {
+                    console.log('No valid draft found');
+                }
+            }
+        }
+
+        // Add auto-save to editable content changes
+        function saveEditableContent(event) {
+            const field = event.target.getAttribute('data-field');
+            const newValue = event.target.textContent.trim();
+            syllabusData[field] = newValue;
+            autoSave();
+            
+            // Visual feedback for saved changes
+            event.target.style.background = '#d4edda';
+            setTimeout(() => {
+                event.target.style.background = '';
+            }, 1000);
+        }
+
+        // Search functionality
+        function searchSyllabus() {
+            const searchTerm = prompt('Enter search term:');
+            if (searchTerm) {
+                const searchRegex = new RegExp(searchTerm, 'gi');
+                const sections = document.querySelectorAll('.section');
+                let found = false;
+
+                sections.forEach(section => {
+                    const content = section.textContent;
+                    if (searchRegex.test(content)) {
+                        // Show the section containing the search term
+                        const sectionId = section.id;
+                        document.getElementById('sectionSelect').value = sectionId;
+                        showSection(sectionId);
+                        
+                        // Highlight the search term
+                        highlightSearchTerm(section, searchTerm);
+                        found = true;
+                    }
+                });
+
+                if (!found) {
+                    alert('Search term not found in syllabus.');
+                }
+            }
+        }
+
+        function highlightSearchTerm(container, term) {
+            const walker = document.createTreeWalker(
+                container,
+                NodeFilter.SHOW_TEXT,
+                null,
+                false
+            );
+
+            const textNodes = [];
+            let node;
+            while (node = walker.nextNode()) {
+                textNodes.push(node);
+            }
+
+            textNodes.forEach(textNode => {
+                const text = textNode.textContent;
+                const regex = new RegExp(`(${term})`, 'gi');
+                if (regex.test(text)) {
+                    const highlightedText = text.replace(regex, '<mark style="background: yellow; padding: 2px;">$1</mark>');
+                    const span = document.createElement('span');
+                    span.innerHTML = highlightedText;
+                    textNode.parentNode.replaceChild(span, textNode);
+                    
+                    // Remove highlights after 5 seconds
+                    setTimeout(() => {
+                        span.outerHTML = span.textContent;
+                    }, 5000);
+                }
+            });
+        }
+
+        // Print functionality
+        function printSyllabus() {
+            const printWindow = window.open('', '_blank');
+            const currentSection = document.querySelector('.section.active');
+            const sectionTitle = document.querySelector('#sectionSelect option:checked').textContent;
+            
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>LAN-153 Syllabus - ${sectionTitle}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+                        h1, h2, h3 { color: #2c5530; }
+                        .header { text-align: center; border-bottom: 2px solid #2c5530; padding-bottom: 20px; margin-bottom: 30px; }
+                        .info-card { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+                        .schedule-week { margin: 15px 0; padding: 10px; border-left: 4px solid #2c5530; }
+                        .assignment-list { list-style: none; }
+                        .assignment-list li { margin: 5px 0; padding: 5px; background: #f5f5f5; }
+                        @media print {
+                            body { margin: 20px; }
+                            .no-print { display: none; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>LAN-153: IT Security Essentials (Security+)</h1>
+                        <p>Moraine Valley Community College - Fall 2025</p>
+                        <p><strong>Section:</strong> ${sectionTitle}</p>
+                    </div>
+                    ${currentSection.innerHTML}
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(event) {
+            if (event.ctrlKey || event.metaKey) {
+                switch(event.key) {
+                    case 'e':
+                        event.preventDefault();
+                        toggleEditMode();
+                        break;
+                    case 's':
+                        event.preventDefault();
+                        autoSave();
+                        alert('Draft saved!');
+                        break;
+                    case 'f':
+                        event.preventDefault();
+                        searchSyllabus();
+                        break;
+                    case 'p':
+                        event.preventDefault();
+                        printSyllabus();
+                        break;
+                }
+            }
+        });
+
+        // Add additional controls to navigation
+        function addAdditionalControls() {
+            const navControls = document.querySelector('.nav-controls');
+            
+            const additionalControls = document.createElement('div');
+            additionalControls.style.display = 'flex';
+            additionalControls.style.gap = '10px';
+            additionalControls.style.flexWrap = 'wrap';
+            
+            additionalControls.innerHTML = `
+                <button onclick="searchSyllabus()" class="edit-toggle" style="background: #17a2b8;">Search (Ctrl+F)</button>
+                <button onclick="printSyllabus()" class="edit-toggle" style="background: #6c757d;">Print (Ctrl+P)</button>
+                <button onclick="exportSyllabus()" class="edit-toggle" style="background: #28a745;">Export</button>
+                <button onclick="importSyllabus()" class="edit-toggle" style="background: #ffc107; color: #000;">Import</button>
+            `;
+            
+            navControls.appendChild(additionalControls);
+        }
+
+        // Progress tracking
+        function trackProgress() {
+            const today = new Date();
+            const startDate = new Date('2025-08-18');
+            const endDate = new Date('2025-10-10');
+            
+            if (today >= startDate && today <= endDate) {
+                const totalDays = (endDate - startDate) / (1000 * 60 * 60 * 24);
+                const daysPassed = (today - startDate) / (1000 * 60 * 60 * 24);
+                const progressPercentage = Math.round((daysPassed / totalDays) * 100);
+                
+                const progressBar = document.createElement('div');
+                progressBar.innerHTML = `
+                    <div style="background: #e9ecef; border-radius: 10px; margin: 10px 0; overflow: hidden;">
+                        <div style="background: linear-gradient(90deg, #28a745, #20c997); height: 20px; width: ${progressPercentage}%; transition: width 0.5s ease; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: bold;">
+                            ${progressPercentage}% Complete
+                        </div>
+                    </div>
+                    <p style="text-align: center; margin: 5px 0; font-size: 14px; color: #6c757d;">
+                        Course Progress: Day ${Math.ceil(daysPassed)} of ${Math.ceil(totalDays)}
+                    </p>
+                `;
+                
+                const header = document.querySelector('.header .container');
+                header.appendChild(progressBar);
+            }
+        }
+
+        // Responsive navigation for mobile
+        function makeNavigationResponsive() {
+            const navControls = document.querySelector('.nav-controls');
+            
+            if (window.innerWidth <= 768) {
+                navControls.style.flexDirection = 'column';
+                navControls.style.alignItems = 'stretch';
+            } else {
+                navControls.style.flexDirection = 'row';
+                navControls.style.alignItems = 'center';
+            }
+        }
+
+        window.addEventListener('resize', makeNavigationResponsive);
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeSyllabusData();
+            loadDraft();
+            addAdditionalControls();
+            trackProgress();
+            makeNavigationResponsive();
+            
+            // Add help tooltip
+            const helpText = document.createElement('div');
+            helpText.innerHTML = `
+                <div style="position: fixed; bottom: 20px; right: 20px; background: #2c5530; color: white; padding: 10px; border-radius: 8px; font-size: 12px; max-width: 200px; z-index: 1000;">
+                    <strong>Keyboard Shortcuts:</strong><br>
+                    Ctrl+E: Toggle Edit Mode<br>
+                    Ctrl+S: Save Draft<br>
+                    Ctrl+F: Search<br>
+                    Ctrl+P: Print Section
+                </div>
+            `;
+            document.body.appendChild(helpText);
+            
+            // Hide help after 10 seconds
+            setTimeout(() => {
+                helpText.style.display = 'none';
+            }, 10000);
+        });
+            
