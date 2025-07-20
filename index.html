@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LAN-153 IT Security Essentials Syllabus</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ffffff 0%, #f0f8f0 100%);
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2d5016 0%, #4a7c23 100%);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .navigation {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+        }
+        
+        .nav-controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        select, button {
+            padding: 0.8rem 1.2rem;
+            border: 2px solid #4a7c23;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        select {
+            background: white;
+            min-width: 200px;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: #2d5016;
+            box-shadow: 0 0 0 3px rgba(74, 124, 35, 0.1);
+        }
+        
+        button {
+            background: #4a7c23;
+            color: white;
+            cursor: pointer;
+            border: none;
+            font-weight: 600;
+        }
+        
+        button:hover {
+            background: #2d5016;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(74, 124, 35, 0.3);
+        }
+        
+        button.secondary {
+            background: #666;
+        }
+        
+        button.secondary:hover {
+            background: #333;
+        }
+        
+        .content-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .content-section:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .section-header {
+            background: linear-gradient(135deg, #4a7c23 0%, #2d5016 100%);
+            color: white;
+            padding: 1.5rem;
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+        
+        .section-content {
+            padding: 2rem;
+        }
+        
+        .editable {
+            background: #f8fff8;
+            border: 2px dashed #4a7c23;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .editable:hover {
+            background: #f0f8f0;
+            border-color: #2d5016;
+        }
+        
+        .edit-mode .editable {
+            background: #fffacd;
+            border: 2px solid #ff6b35;
+            cursor: pointer;
+        }
+        
+        .edit-mode .editable:hover {
+            background: #fff8dc;
+            transform: scale(1.02);
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #4a7c23;
+            box-shadow: 0 0 0 3px rgba(74, 124, 35, 0.1);
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+        
+        .info-item {
+            background: #f8fff8;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #4a7c23;
+        }
+        
+        .info-item strong {
+            color: #2d5016;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .schedule-table th {
+            background: #2d5016;
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .schedule-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+            background: white;
+        }
+        
+        .schedule-table tr:nth-child(even) td {
+            background: #f8fff8;
+        }
+        
+        .schedule-table tr:hover td {
+            background: #f0f8f0;
+        }
+        
+        .grade-breakdown {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .grade-item {
+            background: linear-gradient(135deg, #4a7c23 0%, #2d5016 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(74, 124, 35, 0.3);
+        }
+        
+        .grade-item h4 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .grade-item .percentage {
+            font-size: 2rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .edit-indicator {
+            background: #ff6b35;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-left: 1rem;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        .save-changes {
+            background: #28a745;
+            margin-top: 1rem;
+        }
+        
+        .save-changes:hover {
+            background: #218838;
+        }
+        
+        .download-instructions {
+            background: #e8f5e8;
+            border: 2px solid #4a7c23;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .download-instructions h3 {
+            color: #2d5016;
+            margin-bottom: 0.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .nav-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            select, button {
+                width: 100%;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .grade-breakdown {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media print {
+            .navigation, .edit-indicator, button, .download-instructions {
+                display: none !important;
+            }
+            
+            .content-section {
+                page-break-inside: avoid;
+                margin-bottom: 20px;
+            }
+            
+            .header {
+                background: #2d5016 !important;
+                color: white !important;
+                -webkit-print-color-adjust: exact;
+            }
+            
+            body {
+                background: white !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>LAN-153: IT Security Essentials (Security+)</h1>
+        <p>Moraine Valley Community College - Fall 2025</p>
+    </div>
+
+    <div class="container">
+        <div class="download-instructions">
+            <h3>📥 Download Instructions</h3>
+            <p>To save this syllabus: Right-click this page → "Save as..." → Choose "Web Page, Complete" → Save as "LAN153_Syllabus.html"</p>
+        </div>
+
+        <div class="navigation">
+            <div class="nav-controls">
+                <select id="sectionSelect">
+                    <option value="">Select Section</option>
+                    <option value="instructor">Instructor Information</option>
+                    <option value="course">Course Information</option>
+                    <option value="schedule">Course Schedule</option>
+                    <option value="assignments">Assignments & Grading</option>
+                    <option value="policies">Policies & Procedures</option>
+                </select>
+                <button onclick="toggleEditMode()">
+                    <span id="editModeText">Enable Edit Mode</span>
+                </button>
+                <button onclick="showAllSections()" class="secondary">Show All Sections</button>
+                <button onclick="exportSyllabusData()" class="secondary">Export Data</button>
+                <button onclick="window.print()" class="secondary">Print Syllabus</button>
+                <span id="editIndicator" class="edit-indicator hidden">EDIT MODE ACTIVE</span>
+            </div>
+        </div>
+
+        <!-- Instructor Information Section -->
+        <div id="instructor" class="content-section">
+            <div class="section-header">
+                Part 1: Instructor and Section Information
+            </div>
+            <div class="section-content">
+                <div class="info-grid">
+                    <div class="info-item editable" data-field="instructor-name">
+                        <strong>Instructor:</strong>
+                        <span class="content">Dr. John Sands</span>
+                    </div>
+                    <div class="info-item editable" data-field="office-location">
+                        <strong>Office Location:</strong>
+                        <span class="content">T518</span>
+                    </div>
+                    <div class="info-item editable" data-field="office-hours">
+                        <strong>Office Hours:</strong>
+                        <span class="content">Mon 5PM, Tues 12PM, Wed 12PM, Thur 6PM</span>
+                    </div>
+                    <div class="info-item editable" data-field="phone">
+                        <strong>Office Phone:</strong>
+                        <span class="content">708-974-5426</span>
+                    </div>
+                    <div class="info-item editable" data-field="email">
+                        <strong>Email:</strong>
+                        <span class="content">sands@morainevalley.edu</span>
+                    </div>
+                    <div class="info-item editable" data-field="semester">
+                        <strong>Semester:</strong>
+                        <span class="content">Fall 2025</span>
+                    </div>
+                    <div class="info-item editable" data-field="section">
+                        <strong>Section:</strong>
+                        <span class="content">LAN153-300</span>
+                    </div>
+                    <div class="info-item editable" data-field="room">
+                        <strong>Room:</strong>
+                        <span class="content">Online</span>
+                    </div>
+                    <div class="info-item editable" data-field="meeting-time">
+                        <strong>Meeting Time:</strong>
+                        <span class="content">Saturday</span>
+                    </div>
+                    <div class="info-item editable" data-field="start-date">
+                        <strong>First Day of Class:</strong>
+                        <span class="content">8/18/2025</span>
+                    </div>
+                    <div class="info-item editable" data-field="end-date">
+                        <strong>Last Day of Class:</strong>
+                        <span class="content">10/10/2025</span>
+                    </div>
+                    <div class="info-item editable" data-field="final-exam">
+                        <strong>Final Exam Date:</strong>
+                        <span class="content">10/06/2025</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Course Information Section -->
+        <div id="course" class="content-section">
+            <div class="section-header">
+                Part 2: Course Information
+            </div>
+            <div class="section-content">
+                <h3>Course Identification</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <strong>Course Number:</strong> LAN-153
+                    </div>
+                    <div class="info-item">
+                        <strong>Course Title:</strong> IT Security Essentials (Security+)
+                    </div>
+                    <div class="info-item">
+                        <strong>Credit Hours:</strong> 3
+                    </div>
+                    <div class="info-item">
+                        <strong>Contact Hours:</strong> 4 (2 Lecture/Demo + 2 Lab/Studio)
+                    </div>
+                    <div class="info-item">
+                        <strong>Prerequisite:</strong> LAN-122 or consent of instructor
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 2rem;">Course Description</h3>
+                <p>This course introduces the basic principles of network security. Students will be introduced to computer network vulnerabilities and threats and how to safeguard computer networks from those vulnerabilities and threats. This course will expose students to network security planning, network security technology, network security organization and the legal and ethical issues associated with network security. This course is designed to prepare successful students for the CompTIA Security+ certification.</p>
+
+                <h3 style="margin-top: 2rem;">Major Course Concepts</h3>
+                <div style="margin-top: 1rem;">
+                    <h4 style="color: #2d5016; margin-bottom: 0.5rem;">A. Network Security Basics</h4>
+                    <ul style="margin-left: 1.5rem; margin-bottom: 1rem;">
+                        <li>Security Definitions, Network security principles and objectives</li>
+                        <li>Network security architecture, model, and layers</li>
+                        <li>Network threats, confidentiality, integrity and availability</li>
+                        <li>Accountability, auditability, and non-repudiation</li>
+                    </ul>
+
+                    <h4 style="color: #2d5016; margin-bottom: 0.5rem;">B. Network Security Planning</h4>
+                    <ul style="margin-left: 1.5rem; margin-bottom: 1rem;">
+                        <li>Network risk management and network security policy</li>
+                        <li>Continuity of operations and security maintenance</li>
+                        <li>Policy, procedures, standards, and guidelines</li>
+                    </ul>
+
+                    <h4 style="color: #2d5016; margin-bottom: 0.5rem;">C. Network Security Technology</h4>
+                    <ul style="margin-left: 1.5rem; margin-bottom: 1rem;">
+                        <li>Cryptography, virtual private networks, firewalls and intrusion detection systems</li>
+                        <li>Scanning and analysis tools and access controls</li>
+                    </ul>
+
+                    <h4 style="color: #2d5016; margin-bottom: 0.5rem;">D. Network Security Organization</h4>
+                    <ul style="margin-left: 1.5rem; margin-bottom: 1rem;">
+                        <li>The organization and security</li>
+                        <li>Personnel and security</li>
+                        <li>The Computer Incident Response Team (CIRT)</li>
+                    </ul>
+
+                    <h4 style="color: #2d5016; margin-bottom: 0.5rem;">E. Legal, Privacy, and Ethical Issues</h4>
+                    <ul style="margin-left: 1.5rem;">
+                        <li>US Laws and Network Security</li>
+                        <li>Privacy and network security</li>
+                        <li>Ethics and Network Security</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Course Schedule Section -->
+        <div id="schedule" class="content-section">
+            <div class="section-header">
+                Part 3: Course Schedule
+            </div>
+            <div class="section-content">
+                <div class="editable" data-field="schedule-content">
+                    <table class="schedule-table">
+                        <thead>
+                            <tr>
+                                <th>Week</th>
+                                <th>Domain/Topic</th>
+                                <th>Labs & Exercises</th>
+                                <th>Assessment</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Week 1</strong></td>
+                                <td>Domain 1 - General Security Concepts</td>
+                                <td>Lab 01A: Malware Analysis<br>Lab 01B: Cryptography Concepts<br>Exercise 1: Cybersecurity Controls</td>
+                                <td>Exam 1: Domain 1</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Week 2</strong></td>
+                                <td>Domain 2 - Threats, Vulnerabilities, and Mitigations (22%)</td>
+                                <td>Lab 02A: Password Cracking<br>Lab 02B: TBD<br>Exercise 2: Hashing Tools</td>
+                                <td>Exam 2: Domain 2</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Week 3</strong></td>
+                                <td>Domain 3 - Security Architecture (18%)</td>
+                                <td>Lab 03A: ARP Poisoning Investigation<br>Lab 03B: Command Line Tools<br>Exercise 3: NIST SP800-171</td>
+                                <td>Exam 3: Domain 3</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Week 4</strong></td>
+                                <td>Domain 4 - Security Operations Part 1 (28%)</td>
+                                <td>Lab 04: Active Reconnaissance<br>Exercise 4: Asset Inventory Report</td>
+                                <td>-</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Week 5</strong></td>
+                                <td>Domain 4 - Security Operations Part 2 (28%)</td>
+                                <td>Lab 05A: Network Traffic Capture<br>Lab 05B: Intrusion Detection<br>Exercise 5: Access Control Matrix</td>
+                                <td>Exam 4: Domain 4</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Week 6</strong></td>
+                                <td>Domain 5 - Security Program Management Part 1 (20%)</td>
+                                <td>Lab 06: Wireless Security<br>Exercise 6: Vulnerability Scan Reports</td>
+                                <td>-</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Week 7</strong></td>
+                                <td>Domain 5 - Security Program Management Part 2 (20%)</td>
+                                <td>Lab 07: Protocol Implementation<br>Exercise 7: Incident Response Plan</td>
+                                <td>Exam 5: Domain 5</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Week 8</strong></td>
+                                <td>Final Assessments</td>
+                                <td>Final Project</td>
+                                <td>Final Comprehensive Exam</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assignments & Grading Section -->
+        <div id="assignments" class="content-section">
+            <div class="section-header">
+                Part 4: Assignments & Grading
+            </div>
+            <div class="section-content">
+                <h3>Grade Distribution</h3>
+                <div class="grade-breakdown editable" data-field="grade-distribution">
+                    <div class="grade-item">
+                        <h4>Labs</h4>
+                        <div class="percentage">50%</div>
+                        <p>(10 Labs Total)</p>
+                    </div>
+                    <div class="grade-item">
+                        <h4>Exercises</h4>
+                        <div class="percentage">15%</div>
+                        <p>(7 Exercises Total)</p>
+                    </div>
+                    <div class="grade-item">
+                        <h4>Major Tests</h4>
+                        <div class="percentage">25%</div>
+                        <p>(5 Domain Exams)</p>
+                    </div>
+                    <div class="grade-item">
+                        <h4>Final Exam</h4>
+                        <div class="percentage">10%</div>
+                        <p>(Comprehensive)</p>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 2rem;">Grading Scale</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <strong>A:</strong> 92-100%
+                    </div>
+                    <div class="info-item">
+                        <strong>B:</strong> 85-91%
+                    </div>
+                    <div class="info-item">
+                        <strong>C:</strong> 77-84%
+                    </div>
+                    <div class="info-item">
+                        <strong>D:</strong> 70-76%
+                    </div>
+                    <div class="info-item">
+                        <strong>F:</strong> Below 70%
+                    </div>
+                </div>
+
+                <div class="editable" data-field="assignment-policies" style="margin-top: 2rem;">
+                    <h3>Assignment Policies</h3>
+                    <ul style="margin-left: 1.5rem; margin-top: 1rem;">
+                        <li><strong>Make-up Policy:</strong> No makeup assignments unless otherwise indicated by the instructor</li>
+                        <li><strong>Extra Credit:</strong> No extra credit assignments available in this class</li>
+                        <li><strong>Late Work:</strong> Contact instructor for late submission policies</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Policies & Procedures Section -->
+        <div id="policies" class="content-section">
+            <div class="section-header">
+                Part 5: Policies & Procedures
+            </div>
+            <div class="section-content">
+                <h3>Attendance Policy</h3>
+                <p>Attendance is expected and required. Instructors have the authority to assign points to student attendance and participation. Excessive absence can affect final grade.</p>
+
+                <h3 style="margin-top: 2rem;">Academic Integrity</h3>
+                <p>Cheating and plagiarism are not allowed in this class. Any student caught in the act of cheating/plagiarism will be disciplined based on the severity of the offense up to and including immediate dismissal from class and may result in a grade of "F" in the course.</p>
+
+                <h3 style="margin-top: 2rem;">Code of Student Conduct</h3>
+                <p>Each student is responsible for adhering to the Code of Student Conduct as stated in the college catalog.</p>
+
+                <h3 style="margin-top: 2rem;">Cautionary Statement</h3>
+                <p>Students with an impaired ability to concentrate may risk jeopardizing safety in the classroom for themselves, their classmates and their instructor. If your ability to concentrate is impaired you should discuss this matter with your instructor prior to operating equipment or performing a laboratory procedure.</p>
+
+                <h3 style="margin-top: 2rem;">Required Materials</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <strong>Textbook:</strong> Provided by instructor
+                    </div>
+                    <div class="info-item">
+                        <strong>Optional:</strong> CompTIA Security+ Certification Kit: Exam SY0-701
+                    </div>
+                    <div class="info-item">
+                        <strong>Documentation Style:</strong> MLA and APA accepted
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let editMode = false;
+        const syllabusData = {};
+
+        // Initialize event listeners
+        document.getElementById('sectionSelect').addEventListener('change', function() {
+            const selectedSection = this.value;
+            if (selectedSection) {
+                showSection(selectedSection);
+            }
+        });
+
+        function showSection(sectionId) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(section => {
+                section.classList.add('hidden');
+            });
+
+            // Show selected section
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.remove('hidden');
+                targetSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function showAllSections() {
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(section => {
+                section.classList.remove('hidden');
+            });
+            document.getElementById('sectionSelect').value = '';
+        }
+
+        function toggleEditMode() {
+            editMode = !editMode;
+            const body = document.body;
+            const editModeText = document.getElementById('editModeText');
+            const editIndicator = document.getElementById('editIndicator');
+
+            if (editMode) {
+                body.classList.add('edit-mode');
+                editModeText.textContent = 'Exit Edit Mode';
+                editIndicator.classList.remove('hidden');
+                setupEditableElements();
+            } else {
+                body.classList.remove('edit-mode');
+                editModeText.textContent = 'Enable Edit Mode';
+                editIndicator.classList.add('hidden');
+                removeEditableElements();
+            }
+        }
+
+        function setupEditableElements() {
+            const editables = document.querySelectorAll('.editable');
+            editables.forEach(element => {
+                element.addEventListener('click', makeEditable);
+                element.title = 'Click to edit this section';
+            });
+        }
+
+        function removeEditableElements() {
+            const editables = document.querySelectorAll('.editable');
+            editables.forEach(element => {
+                element.removeEventListener('click', makeEditable);
+                element.title = '';
+            });
+        }
+
+        function makeEditable(event) {
+            if (!editMode) return;
+
+            const element = event.currentTarget;
+            const field = element.dataset.field;
+            
+            if (field === 'schedule-content') {
+                editScheduleTable(element);
+            } else if (field === 'grade-distribution') {
+                editGradeDistribution(element);
+            } else if (field === 'assignment-policies') {
+                editAssignmentPolicies(element);
+            } else {
+                editSimpleField(element, field);
+            }
+        }
+
+        function editScheduleTable(element) {
+            const table = element.querySelector('.schedule-table tbody');
+            if (!table) return;
+
+            const rows = table.querySelectorAll('tr');
+            rows.forEach((row, index) => {
+                const cells = row.querySelectorAll('td');
+                cells.forEach((cell, cellIndex) => {
+                    if (cellIndex > 0) { // Skip week number column
+                        const currentValue = cell.innerHTML;
+                        const textarea = document.createElement('textarea');
+                        textarea.value = currentValue.replace(/<br>/g, '\n');
+                        textarea.style.width = '100%';
+                        textarea.style.height = '60px';
+                        
+                        cell.innerHTML = '';
+                        cell.appendChild(textarea);
+                    }
+                });
+            });
+
+            const saveButton = document.createElement('button');
+            saveButton.textContent = 'Save Schedule Changes';
+            saveButton.className = 'save-changes';
+            saveButton.onclick = () => {
+                rows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    cells.forEach((cell, cellIndex) => {
+                        if (cellIndex > 0) {
+                            const textarea = cell.querySelector('textarea');
+                            if (textarea) {
+                                cell.innerHTML = textarea.value.replace(/\n/g, '<br>');
+                            }
+                        }
+                    });
+                });
+                syllabusData['schedule'] = 'updated';
+                console.log('Schedule updated');
+                element.removeChild(saveButton);
+            };
+
+            element.appendChild(saveButton);
+        }
+
+        function editGradeDistribution(element) {
+            const gradeItems = element.querySelectorAll('.grade-item');
+            gradeItems.forEach(item => {
+                const percentage = item.querySelector('.percentage');
+                const description = item.querySelector('p');
+                
+                const currentPercentage = percentage.textContent.replace('%', '');
+                const currentDescription = description.textContent;
+
+                // Create percentage input
+                const percentageInput = document.createElement('input');
+                percentageInput.type = 'number';
+                percentageInput.value = currentPercentage;
+                percentageInput.min = '0';
+                percentageInput.max = '100';
+                percentageInput.style.width = '80px';
+                percentageInput.style.fontSize = '1.5rem';
+                percentageInput.style.textAlign = 'center';
+
+                // Create description input
+                const descriptionInput = document.createElement('input');
+                descriptionInput.type = 'text';
+                descriptionInput.value = currentDescription.replace(/[()]/g, '');
+                descriptionInput.style.width = '100%';
+
+                percentage.innerHTML = '';
+                percentage.appendChild(percentageInput);
+                percentage.appendChild(document.createTextNode('%'));
+
+                description.innerHTML = '(';
+                description.appendChild(descriptionInput);
+                description.appendChild(document.createTextNode(')'));
+            });
+
+            const saveButton = document.createElement('button');
+            saveButton.textContent = 'Save Grade Distribution';
+            saveButton.className = 'save-changes';
+            saveButton.onclick = () => {
+                gradeItems.forEach(item => {
+                    const percentageInput = item.querySelector('input[type="number"]');
+                    const descriptionInput = item.querySelector('input[type="text"]');
+                    const percentage = item.querySelector('.percentage');
+                    const description = item.querySelector('p');
+
+                    if (percentageInput && descriptionInput) {
+                        percentage.innerHTML = `<div class="percentage">${percentageInput.value}%</div>`;
+                        description.textContent = `(${descriptionInput.value})`;
+                    }
+                });
+                syllabusData['gradeDistribution'] = 'updated';
+                console.log('Grade distribution updated');
+                element.removeChild(saveButton);
+            };
+
+            element.appendChild(saveButton);
+        }
+
+        function editAssignmentPolicies(element) {
+            const content = element.innerHTML;
+            const textarea = document.createElement('textarea');
+            textarea.value = content.replace(/<[^>]*>/g, '').replace(/\n\s+/g, '\n');
+            textarea.style.width = '100%';
+            textarea.style.height = '200px';
+
+            element.innerHTML = '';
+            element.appendChild(textarea);
+
+            const saveButton = document.createElement('button');
+            saveButton.textContent = 'Save Assignment Policies';
+            saveButton.className = 'save-changes';
+            saveButton.onclick = () => {
+                const lines = textarea.value.split('\n').filter(line => line.trim());
+                let html = '<h3>Assignment Policies</h3><ul style="margin-left: 1.5rem; margin-top: 1rem;">';
+                
+                lines.forEach(line => {
+                    if (line.trim() && !line.includes('Assignment Policies')) {
+                        html += `<li>${line.trim()}</li>`;
+                    }
+                });
+                
+                html += '</ul>';
+                element.innerHTML = html;
+                syllabusData['assignmentPolicies'] = textarea.value;
+                console.log('Assignment policies updated');
+            };
+
+            element.appendChild(saveButton);
+            textarea.focus();
+        }
+
+        // Export functionality
+        function exportSyllabusData() {
+            const dataStr = JSON.stringify(syllabusData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = 'lan153_syllabus_data.json';
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+        }
+
+        // Auto-save functionality (stores in localStorage)
+        function autoSave() {
+            if (Object.keys(syllabusData).length > 0) {
+                localStorage.setItem('lan153_syllabus_changes', JSON.stringify(syllabusData));
+                console.log('Auto-saved syllabus changes');
+            }
+        }
+
+        // Load saved changes on page load
+        function loadSavedChanges() {
+            const saved = localStorage.getItem('lan153_syllabus_changes');
+            if (saved) {
+                const savedData = JSON.parse(saved);
+                Object.assign(syllabusData, savedData);
+                console.log('Loaded saved changes:', savedData);
+                
+                // Apply saved changes to the page
+                Object.keys(savedData).forEach(field => {
+                    const element = document.querySelector(`[data-field="${field}"] .content`);
+                    if (element && typeof savedData[field] === 'string') {
+                        element.textContent = savedData[field];
+                    }
+                });
+            }
+        }
+
+        // Enhanced navigation with keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 'e':
+                        e.preventDefault();
+                        toggleEditMode();
+                        break;
+                    case 'p':
+                        e.preventDefault();
+                        window.print();
+                        break;
+                    case 's':
+                        if (editMode) {
+                            e.preventDefault();
+                            exportSyllabusData();
+                        }
+                        break;
+                }
+            }
+        });
+
+        // Auto-save every 30 seconds
+        setInterval(autoSave, 30000);
+
+        // Load saved changes when page loads
+        window.addEventListener('load', loadSavedChanges);
+
+        // Add search functionality
+        function addSearchFunctionality() {
+            const searchContainer = document.createElement('div');
+            searchContainer.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: white;
+                padding: 10px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                z-index: 1000;
+                display: none;
+            `;
+
+            const searchInput = document.createElement('input');
+            searchInput.type = 'text';
+            searchInput.placeholder = 'Search syllabus...';
+            searchInput.style.cssText = `
+                width: 200px;
+                padding: 8px;
+                border: 2px solid #4a7c23;
+                border-radius: 4px;
+            `;
+
+            searchContainer.appendChild(searchInput);
+            document.body.appendChild(searchContainer);
+
+            // Toggle search with Ctrl+F
+            document.addEventListener('keydown', function(e) {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                    e.preventDefault();
+                    searchContainer.style.display = searchContainer.style.display === 'none' ? 'block' : 'none';
+                    if (searchContainer.style.display === 'block') {
+                        searchInput.focus();
+                    }
+                }
+            });
+
+            // Search functionality
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                const sections = document.querySelectorAll('.content-section');
+                
+                sections.forEach(section => {
+                    const text = section.textContent.toLowerCase();
+                    if (text.includes(searchTerm) || searchTerm === '') {
+                        section.style.display = 'block';
+                    } else {
+                        section.style.display = 'none';
+                    }
+                });
+            });
+        }
+
+        // Initialize search functionality
+        addSearchFunctionality();
+
+        console.log('LAN-153 Interactive Syllabus loaded successfully!');
+        console.log('Keyboard shortcuts:');
+        console.log('- Ctrl+E: Toggle edit mode');
+        console.log('- Ctrl+P: Print syllabus');
+        console.log('- Ctrl+S: Export data (in edit mode)');
+        console.log('- Ctrl+F: Search syllabus');
+        console.log('');
+        console.log('To download this page: Right-click → Save as → Web Page, Complete');
+    </script>
+</body>
+</html>SimpleField(element, field) {
+            const contentSpan = element.querySelector('.content');
+            if (!contentSpan) return;
+
+            const currentValue = contentSpan.textContent;
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = currentValue;
+            input.style.width = '100%';
+
+            contentSpan.innerHTML = '';
+            contentSpan.appendChild(input);
+
+            const saveButton = document.createElement('button');
+            saveButton.textContent = 'Save';
+            saveButton.className = 'save-changes';
+            saveButton.onclick = () => {
+                contentSpan.textContent = input.value;
+                syllabusData[field] = input.value;
+                console.log('Updated field:', field, 'with value:', input.value);
+            };
+
+            element.appendChild(saveButton);
+            input.focus();
+        }
+
+        function edit
