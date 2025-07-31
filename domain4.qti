@@ -487,7 +487,7 @@
           </respcondition>
         </resprocessing>
       </item>
-      <!-- MAQ 21 -->
+      <!-- MAQ 21 (corrected with separate <not> blocks) -->
       <item title="Question 21" ident="q21">
         <presentation>
           <material>
@@ -510,10 +510,10 @@
                 <varequal respident="response21">b</varequal>
               </and>
               <not>
-                <or>
-                  <varequal respident="response21">c</varequal>
-                  <varequal respident="response21">d</varequal>
-                </or>
+                <varequal respident="response21">c</varequal>
+              </not>
+              <not>
+                <varequal respident="response21">d</varequal>
               </not>
             </conditionvar>
             <setvar varname="SCORE" action="Set">2</setvar>
@@ -644,7 +644,6 @@
           </respcondition>
         </resprocessing>
       </item>
-
     </section>
   </assessment>
 </questestinterop>
