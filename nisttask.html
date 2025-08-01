@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NIST SP 800-171 Framework Analysis - FreshFlow Systems</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: white;
+            color: black;
+            line-height: 1.6;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 300px;
+            background: linear-gradient(135deg, #2d5016, #4a7c23);
+            color: white;
+            padding: 20px;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 3px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .sidebar h1 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            text-align: center;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            padding-bottom: 10px;
+        }
+
+        .sidebar .subtitle {
+            font-size: 0.9rem;
+            text-align: center;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .nav-item {
+            display: block;
+            padding: 15px 20px;
+            margin: 8px 0;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            text-align: left;
+            width: 100%;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateX(5px);
+        }
+
+        .nav-item.active {
+            background: rgba(255,255,255,0.25);
+            border-left: 4px solid white;
+        }
+
+        .nav-item .task-number {
+            font-weight: bold;
+            display: block;
+            font-size: 0.9rem;
+        }
+
+        .nav-item .task-title {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            margin-top: 2px;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 300px;
+            padding: 20px 40px;
+        }
+
+        .task-section {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .task-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .task-header {
+            background: linear-gradient(135deg, #4a7c23, #2d5016);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .task-header h2 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .task-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .instruction-card {
+            background: #f8f9fa;
+            border: 2px solid #4a7c23;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .instruction-card h3 {
+            color: #2d5016;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .instruction-card ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .instruction-card li {
+            margin-bottom: 8px;
+        }
+
+        .activity-area {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2d5016;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #4a7c23;
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-item:hover {
+            border-color: #4a7c23;
+            background: rgba(74, 124, 35, 0.05);
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+        }
+
+        .priority-matrix {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .priority-box {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .priority-high {
+            border-color: #dc3545;
+            background: rgba(220, 53, 69, 0.05);
+        }
+
+        .priority-medium {
+            border-color: #ffc107;
+            background: rgba(255, 193, 7, 0.05);
+        }
+
+        .priority-low {
+            border-color: #28a745;
+            background: rgba(40, 167, 69, 0.05);
+        }
+
+        .draggable-item {
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            padding: 8px 12px;
+            margin: 5px 0;
+            cursor: move;
+            transition: all 0.3s ease;
+        }
+
+        .draggable-item:hover {
+            border-color: #4a7c23;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #4a7c23, #2d5016);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-right: 15px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .reset-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .reset-btn:hover {
+            background: #5a6268;
+        }
+
+        .results-area {
+            background: #e8f5e8;
+            border: 2px solid #4a7c23;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .results-area.show {
+            display: block;
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                max-height: 0;
+                padding: 0 20px;
+            }
+            to {
+                opacity: 1;
+                max-height: 500px;
+                padding: 20px;
+            }
+        }
+
+        .results-area h4 {
+            color: #2d5016;
+            margin-bottom: 15px;
+        }
+
+        .asset-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .asset-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .asset-card h5 {
+            color: #2d5016;
+            margin-bottom: 10px;
+        }
+
+        .risk-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .risk-high {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .risk-medium {
+            background-color: #ffc107;
+            color: black;
+        }
+
+        .risk-low {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .framework-reference {
+            background: #f0f8f0;
+            border-left: 4px solid #4a7c23;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .framework-reference h4 {
+            color: #2d5016;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 250px;
+            }
+            
+            .main-content {
+                margin-left: 250px;
+                padding: 15px 20px;
+            }
+            
+            .priority-matrix {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h1>NIST SP 800-171</h1>
+        <p class="subtitle">FreshFlow Systems Analysis</p>
+        
+        <button class="nav-item active" onclick="showTask(1)" data-task="1">
+            <span class="task-number">Task 1</span>
+            <span class="task-title">Framework Overview & Asset Identification</span>
+        </button>
+        
+        <button class="nav-item" onclick="showTask(2)" data-task="2">
+            <span class="task-number">Task 2</span>
+            <span class="task-title">Control Family Mapping</span>
+        </button>
+        
+        <button class="nav-item" onclick="showTask(3)" data-task="3">
+            <span class="task-number">Task 3</span>
+            <span class="task-title">Risk Assessment & Prioritization</span>
+        </button>
+        
+        <button class="nav-item" onclick="showTask(4)" data-task="4">
+            <span class="task-number">Task 4</span>
+            <span class="task-title">CMMC Level Requirements</span>
+        </button>
+        
+        <button class="nav-item" onclick="showTask(5)" data-task="5">
+            <span class="task-number">Task 5</span>
+            <span class="task-title">Implementation Roadmap</span>
+        </button>
+        
+        <button class="nav-item" onclick="showTask(6)" data-task="6">
+            <span class="task-number">Task 6</span>
+            <span class="task-title">Compliance Gap Analysis</span>
+        </button>
+    </div>
+
+    <div class="main-content">
+        <!-- Task 1: Framework Overview & Asset Identification -->
+        <div id="task1" class="task-section active">
+            <div class="task-header">
+                <h2>Task 1: Framework Overview & Asset Identification</h2>
+                <p>Understand NIST SP 800-171 and identify FreshFlow Systems assets</p>
+            </div>
+
+            <div class="instruction-card">
+                <h3>📋 Instructions</h3>
+                <p>Using the NIST SP 800-171 framework reference and FreshFlow Systems profile, complete the following activities:</p>
+                <ul>
+                    <li>Review the 17 control families in the NIST framework</li>
+                    <li>Identify FreshFlow's critical assets from their organizational profile</li>
+                    <li>Categorize assets by type and risk level</li>
+                    <li>Understand the company's operational environment</li>
+                </ul>
+            </div>
+
+            <div class="framework-reference">
+                <h4>🔒 NIST SP 800-171 Framework Overview</h4>
+                <p>NIST SP 800-171 provides guidelines for protecting Controlled Unclassified Information (CUI) in nonfederal systems. It contains 17 control families with 110 total controls that organizations must implement to safeguard sensitive information.</p>
+            </div>
+
+            <div class="activity-area">
+                <h3>Activity 1A: Company Analysis</h3>
+                <div class="form-group">
+                    <label>Based on the FreshFlow Systems profile, describe their primary business operations:</label>
+                    <textarea id="business-ops" rows="4" placeholder="Describe FreshFlow's main business activities, facilities, and operations..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>How many total employees does FreshFlow Systems have?</label>
+                    <input type="number" id="employee-count" placeholder="Enter number of employees">
+                </div>
+
+                <div class="form-group">
+                    <label>List FreshFlow's three main facilities and their primary functions:</label>
+                    <textarea id="facilities" rows="6" placeholder="1. Facility name - Primary function&#10;2. Facility name - Primary function&#10;3. Facility name - Primary function"></textarea>
+                </div>
+            </div>
+
+            <div class="activity-area">
+                <h3>Activity 1B: Asset Identification</h3>
+                <p>Identify the critical assets that would need NIST SP 800-171 protection. Select all that apply:</p>
+                
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="asset-plc" value="Rockwell PLCs">
+                        <label for="asset-plc">Rockwell PLCs (12 units)</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="asset-hmi" value="HMI Terminals">
+                        <label for="asset-hmi">HMI Terminals (3 units)</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="asset-laptops" value="Dell Laptops">
+                        <label for="asset-laptops">Dell Laptops (20 units)</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="asset-servers" value="VMware Servers">
+                        <label for="asset-servers">VMware Server Cluster (5 units)</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="asset-workstations" value="HP Workstations">
+                        <label for="asset-workstations">HP Workstations (40 units)</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="asset-printers" value="Label Printers">
+                        <label for="asset-printers">Industrial Label Printers (4 units)</label>
+                    </div>
+                </div>
+            </div>
+
+            <button class="submit-btn" onclick="submitTask1()">Submit Task 1</button>
+            <button class="reset-btn" onclick="resetTask1()">Reset</button>
+
+            <div id="results1" class="results-area"></div>
+        </div>
+
+        <!-- Task 2: Control Family Mapping -->
+        <div id="task2" class="task-section">
+            <div class="task-header">
+                <h2>Task 2: Control Family Mapping</h2>
+                <p>Map NIST SP 800-171 control families to FreshFlow's operational needs</p>
+            </div>
+
+            <div class="instruction-card">
+                <h3>📋 Instructions</h3>
+                <p>Based on FreshFlow's operational environment and asset inventory, identify which NIST SP 800-171 control families are most critical:</p>
+                <ul>
+                    <li>Consider the company's mixed IT/OT environment</li>
+                    <li>Focus on controls that protect both traditional IT systems and industrial control systems</li>
+                    <li>Think about physical security needs across three facilities</li>
+                    <li>Consider the company's rapid growth (125% annually)</li>
+                </ul>
+            </div>
+
+            <div class="activity-area">
+                <h3>Activity 2A: Critical Control Families</h3>
+                <p>Select the top 8 most critical NIST SP 800-171 control families for FreshFlow Systems:</p>
+                
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="cf-ac" value="Access Control">
+                        <label for="cf-ac">Access Control (AC) - 22 controls</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="cf-at" value="Awareness Training">
+                        <label for="cf-at">Awareness and Training (AT) - 3 controls</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="cf-au" value="Audit Accountability">
+                        <label for="cf-au">Audit and Accountability (AU) - 9 controls</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="cf-ca" value="Assessment Authorization">
+                        <label for="cf-ca">Assessment, Authorization and Monitoring (CA) - 6 controls</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="cf-cm" value="Configuration Management">
+                        <label for="cf-cm">Configuration Management (CM) - 9 controls</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="cf-ia" value="Identification Authentication">
+                        <label for="cf-ia">Identification and Authentication (IA) - 12 controls</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="cf-ir" value="Incident Response">
+                        <label for="cf-ir">Incident Response (IR) - 6 controls</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="cf-ma" value="Maintenance">
+                        <label for="cf-ma">Maintenance (MA) - 6 controls</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="cf-mp" value="Media Protection">
+                        <label for="cf-mp">Media Protection (MP) - 8 controls</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="cf-pe" value="Physical Environmental">
+                        <label for="cf-pe">Physical and Environmental Protection (PE) - 6 controls</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="cf-pl" value="Planning">
+                        <label for="cf-pl">Planning (PL) - 4 controls</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="cf-ps" value="Personnel Security">
+                        <label for="cf-ps">Personnel Security (PS) - 7 controls</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="cf-ra" value="Risk Assessment">
+                        <label for="cf-ra">Risk Assessment (RA) - 5 controls</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="cf-sa" value="System Services Acquisition">
+                        <label for="cf-sa">System and Services Acquisition (SA) - 11 controls</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="cf-sc" value="System Communications Protection">
+                        <label for="cf-sc">System and Communications Protection (SC) - 23 controls</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="cf-si" value="System Information Integrity">
+                        <label for="cf-si">System and Information Integrity (SI) - 16 controls</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="activity-area">
+                <h3>Activity 2B: Justification</h3>
+                <div class="form-group">
+                    <label>Explain why you selected these control families as most critical for FreshFlow Systems:</label>
+                    <textarea id="control-justification" rows="6" placeholder="Provide reasoning for your selections based on FreshFlow's operational environment, assets, and risk factors..."></textarea>
+                </div>
+            </div>
+
+            <button class="submit-btn" onclick="submitTask2()">Submit Task 2</button>
+            <button class="reset-btn" onclick="resetTask2()">Reset</button>
+
+            <div id="results2" class="results-area"></div>
+        </div>
+
+        <!-- Task 3: Risk Assessment & Prioritization -->
+        <div id="task3" class="task-section">
+            <div class="task-header">
+                <h2>Task 3: Risk Assessment & Prioritization</h2>
+                <p>Assess risks and prioritize security controls for FreshFlow Systems</p>
+            </div>
+
+            <div class="instruction-card">
+                <h3>📋 Instructions</h3>
+                <p>Analyze FreshFlow's assets and operational environment to assess risks:</p>
+                <ul>
+                    <li>Consider both cybersecurity and operational risks</li>
+                    <li>Evaluate the impact of system failures on production</li>
+                    <li>Assess the likelihood of different threat scenarios</li>
+                    <li>Prioritize risks based on business impact</li>
+                </ul>
+            </div>
+
+            <div class="activity-area">
+                <h3>Activity 3A: Risk Prioritization Matrix</h3>
+                <p>Drag and drop the following risk scenarios into the appropriate priority categories:</p>
+                
+                <div class="priority-matrix">
+                    <div class="priority-box priority-high">
+                        <h4>HIGH PRIORITY</h4>
+                        <div id="high-priority" class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)">
+                            <!-- High priority risks will be dropped here -->
+                        </div>
+                    </div>
+                    <div class="priority-box priority-medium">
+                        <h4>MEDIUM PRIORITY</h4>
+                        <div id="medium-priority" class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)">
+                            <!-- Medium priority risks will be dropped here -->
+                        </div>
+                    </div>
+                    <div class="priority-box priority-low">
+                        <h4>LOW PRIORITY</h4>
+                        <div id="low-priority" class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)">
+                            <!-- Low priority risks will be dropped here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <h4>Risk Scenarios (Drag to appropriate priority level):</h4>
+                    <div id="risk-items">
+                        <div class="draggable-item" draggable="true" ondragstart="drag(event)" id="risk1">Unauthorized access to PLC systems halting production</div>
+                        <div class="draggable-item" draggable="true" ondragstart="drag(event)" id="risk2">Malware infection on office workstations</div>
+                        <div class="draggable-item" draggable="true" ondragstart="drag(event)" id="risk3">Theft of laptops containing customer data</div>
+                        <div class="draggable-item" draggable="true" ondragstart="drag(event)" id="risk4">Physical break-in to packaging facility</div>
+                        <div class="draggable-item" draggable="true" ondragstart="drag(event)" id="risk5">Phishing attack targeting executives</div>
+                        <div class="draggable-item" draggable="true" ondragstart="drag(event)" id="risk6">Server hardware failure affecting ERP system</div>
+                        <div class="draggable-item" draggable="true" ondragstart="drag(event)" id="risk7">Employee accidentally deleting critical files</div>
+                        <div class="draggable-item" draggable="true" ondragstart="drag(event)" id="risk8">Vendor remote access compromising network</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="activity-area">
+                <h3>Activity 3B: Risk Assessment Rationale</h3>
+                <div class="form-group">
+                    <label>Explain your risk prioritization decisions:</label>
+                    <textarea id="risk-rationale" rows="6" placeholder="Justify why you placed each risk in its priority category based on potential business impact and likelihood..."></textarea>
+                </div>
+            </div>
+
+            <button class="submit-btn" onclick="submitTask3()">Submit Task 3</button>
+            <button class="reset-btn" onclick="resetTask3()">Reset</button>
+
+            <div id="results3" class="results-area"></div>
+        </div>
+
+        <!-- Task 4: CMMC Level Requirements -->
+        <div id="task4" class="task-section">
+            <div class="task-header">
+                <h2>Task 4: CMMC Level Requirements</h2>
+                <p>Determine appropriate CMMC certification level for FreshFlow Systems</p>
+            </div>
+
+            <div class="instruction-card">
+                <h3>📋 Instructions</h3>
+                <p>Analyze FreshFlow's business requirements to determine the appropriate CMMC level:</p>
+                <ul>
+                    <li>Consider if they handle Federal Contract Information (FCI)</li>
+                    <li>Determine if they process Controlled Unclassified Information (CUI)</li>
+                    <li>Evaluate their position in the defense supply chain</li>
+                    <li>Assess the sensitivity of information they handle</li>
+                </ul>
+            </div>
+
+            <div class="framework-reference">
+                <h4>🎖️ CMMC Levels Overview</h4>
+                <ul>
+                    <li><strong>Level 1 (Foundational):</strong> 17 basic controls for Federal Contract Information (FCI)</li>
+                    <li><strong>Level 2 (Advanced):</strong> 110 NIST SP 800-171 controls for Controlled Unclassified Information (CUI)</li>
+                    <li><strong>Level 3 (Expert):</strong> 130 controls (NIST SP 800-171 + 800-172) for highly sensitive CUI</li>
+                </ul>
+            </div>
+
+            <div class="activity-area">
+                <h3>Activity 4B: Control Requirements Mapping</h3>
+                <p>Based on your recommended CMMC level, identify which specific NIST controls FreshFlow must implement:</p>
+                
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="cmmc-ac1" value="AC.1.001">
+                        <label for="cmmc-ac1">AC.1.001 - Limit system access to authorized users</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="cmmc-ac2" value="AC.1.002">
+                        <label for="cmmc-ac2">AC.1.002 - Limit system access to authorized functions</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="cmmc-cm1" value="CM.1.071">
+                        <label for="cmmc-cm1">CM.1.071 - Establish baseline configurations</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="cmmc-ia1" value="IA.1.076">
+                        <label for="cmmc-ia1">IA.1.076 - User identification and authentication</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="cmmc-ma1" value="MA.1.131">
+                        <label for="cmmc-ma1">MA.1.131 - System maintenance</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="cmmc-mp1" value="MP.1.118">
+                        <label for="cmmc-mp1">MP.1.118 - Media protection</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="cmmc-pe1" value="PE.1.131">
+                        <label for="cmmc-pe1">PE.1.131 - Physical access control</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="cmmc-sc1" value="SC.1.175">
+                        <label for="cmmc-sc1">SC.1.175 - Boundary protection</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="cmmc-si1" value="SI.1.210">
+                        <label for="cmmc-si1">SI.1.210 - Flaw remediation</label>
+                    </div>
+                </div>
+            </div>
+
+            <button class="submit-btn" onclick="submitTask4()">Submit Task 4</button>
+            <button class="reset-btn" onclick="resetTask4()">Reset</button>
+
+            <div id="results4" class="results-area"></div>
+        </div>
+
+        <!-- Task 5: Implementation Roadmap -->
+        <div id="task5" class="task-section">
+            <div class="task-header">
+                <h2>Task 5: Implementation Roadmap</h2>
+                <p>Create a phased implementation plan for NIST SP 800-171 controls</p>
+            </div>
+
+            <div class="instruction-card">
+                <h3>📋 Instructions</h3>
+                <p>Develop a realistic implementation timeline for FreshFlow Systems:</p>
+                <ul>
+                    <li>Consider the company's current security posture (82% compliance score)</li>
+                    <li>Account for their rapid growth and limited resources</li>
+                    <li>Prioritize controls that address the highest risks first</li>
+                    <li>Plan for both technical and administrative controls</li>
+                </ul>
+            </div>
+
+            <div class="activity-area">
+                <h3>Activity 5A: Implementation Phases</h3>
+                <p>Organize the following implementation activities into appropriate phases:</p>
+                
+                <div class="priority-matrix">
+                    <div class="priority-box">
+                        <h4>PHASE 1 (0-6 months)</h4>
+                        <div id="phase1" class="drop-zone" ondrop="dropPhase(event)" ondragover="allowDrop(event)">
+                            <!-- Phase 1 activities -->
+                        </div>
+                    </div>
+                    <div class="priority-box">
+                        <h4>PHASE 2 (6-12 months)</h4>
+                        <div id="phase2" class="drop-zone" ondrop="dropPhase(event)" ondragover="allowDrop(event)">
+                            <!-- Phase 2 activities -->
+                        </div>
+                    </div>
+                    <div class="priority-box">
+                        <h4>PHASE 3 (12-18 months)</h4>
+                        <div id="phase3" class="drop-zone" ondrop="dropPhase(event)" ondragover="allowDrop(event)">
+                            <!-- Phase 3 activities -->
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <h4>Implementation Activities (Drag to appropriate phase):</h4>
+                    <div id="phase-items">
+                        <div class="draggable-item" draggable="true" ondragstart="dragPhase(event)" id="impl1">Deploy multi-factor authentication</div>
+                        <div class="draggable-item" draggable="true" ondragstart="dragPhase(event)" id="impl2">Conduct security awareness training</div>
+                        <div class="draggable-item" draggable="true" ondragstart="dragPhase(event)" id="impl3">Implement network segmentation</div>
+                        <div class="draggable-item" draggable="true" ondragstart="dragPhase(event)" id="impl4">Establish incident response team</div>
+                        <div class="draggable-item" draggable="true" ondragstart="dragPhase(event)" id="impl5">Deploy endpoint protection</div>
+                        <div class="draggable-item" draggable="true" ondragstart="dragPhase(event)" id="impl6">Create system security plans</div>
+                        <div class="draggable-item" draggable="true" ondragstart="dragPhase(event)" id="impl7">Implement vulnerability scanning</div>
+                        <div class="draggable-item" draggable="true" ondragstart="dragPhase(event)" id="impl8">Establish configuration management</div>
+                        <div class="draggable-item" draggable="true" ondragstart="dragPhase(event)" id="impl9">Deploy SIEM solution</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="activity-area">
+                <h3>Activity 5B: Resource Planning</h3>
+                <div class="form-group">
+                    <label>Estimated budget required for full NIST SP 800-171 implementation:</label>
+                    <select id="budget-estimate">
+                        <option value="">Select...</option>
+                        <option value="under-100k">Under $100,000</option>
+                        <option value="100k-500k">$100,000 - $500,000</option>
+                        <option value="500k-1m">$500,000 - $1,000,000</option>
+                        <option value="over-1m">Over $1,000,000</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Key challenges FreshFlow will face during implementation:</label>
+                    <textarea id="implementation-challenges" rows="5" placeholder="Identify potential obstacles such as resource constraints, technical complexity, operational disruption, staff training needs, etc."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Success metrics for measuring implementation progress:</label>
+                    <textarea id="success-metrics" rows="4" placeholder="Define how FreshFlow should measure the success of their NIST implementation (compliance scores, incident reduction, audit results, etc.)"></textarea>
+                </div>
+            </div>
+
+            <button class="submit-btn" onclick="submitTask5()">Submit Task 5</button>
+            <button class="reset-btn" onclick="resetTask5()">Reset</button>
+
+            <div id="results5" class="results-area"></div>
+        </div>
+
+        <!-- Task 6: Compliance Gap Analysis -->
+        <div id="task6" class="task-section">
+            <div class="task-header">
+                <h2>Task 6: Compliance Gap Analysis</h2>
+                <p>Identify gaps between current state and NIST SP 800-171 requirements</p>
+            </div>
+
+            <div class="instruction-card">
+                <h3>📋 Instructions</h3>
+                <p>Based on FreshFlow's current security posture, identify compliance gaps:</p>
+                <ul>
+                    <li>Review their current 82% compliance score</li>
+                    <li>Analyze existing security controls and processes</li>
+                    <li>Identify missing or inadequate controls</li>
+                    <li>Prioritize gap remediation efforts</li>
+                </ul>
+            </div>
+
+            <div class="activity-area">
+                <h3>Activity 6A: Current State Assessment</h3>
+                <p>Based on FreshFlow's profile, assess their current implementation of key control areas:</p>
+                
+                <div class="form-group">
+                    <label>Access Control - Current Implementation Level:</label>
+                    <select id="gap-ac">
+                        <option value="">Select...</option>
+                        <option value="none">Not Implemented (0%)</option>
+                        <option value="basic">Basic Implementation (25%)</option>
+                        <option value="partial">Partial Implementation (50%)</option>
+                        <option value="mostly">Mostly Implemented (75%)</option>
+                        <option value="full">Fully Implemented (100%)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>System and Communications Protection - Current Level:</label>
+                    <select id="gap-sc">
+                        <option value="">Select...</option>
+                        <option value="none">Not Implemented (0%)</option>
+                        <option value="basic">Basic Implementation (25%)</option>
+                        <option value="partial">Partial Implementation (50%)</option>
+                        <option value="mostly">Mostly Implemented (75%)</option>
+                        <option value="full">Fully Implemented (100%)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Configuration Management - Current Level:</label>
+                    <select id="gap-cm">
+                        <option value="">Select...</option>
+                        <option value="none">Not Implemented (0%)</option>
+                        <option value="basic">Basic Implementation (25%)</option>
+                        <option value="partial">Partial Implementation (50%)</option>
+                        <option value="mostly">Mostly Implemented (75%)</option>
+                        <option value="full">Fully Implemented (100%)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Incident Response - Current Level:</label>
+                    <select id="gap-ir">
+                        <option value="">Select...</option>
+                        <option value="none">Not Implemented (0%)</option>
+                        <option value="basic">Basic Implementation (25%)</option>
+                        <option value="partial">Partial Implementation (50%)</option>
+                        <option value="mostly">Mostly Implemented (75%)</option>
+                        <option value="full">Fully Implemented (100%)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="activity-area">
+                <h3>Activity 6B: Gap Analysis Summary</h3>
+                <div class="form-group">
+                    <label>Top 5 priority gaps to address first:</label>
+                    <textarea id="priority-gaps" rows="6" placeholder="List the 5 most critical compliance gaps that FreshFlow should address first, explaining why each is a priority:&#10;1. Gap description - Why it's critical&#10;2. Gap description - Why it's critical&#10;etc."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Recommended next steps for FreshFlow's CISO (Dr. Nia Clarke):</label>
+                    <textarea id="next-steps" rows="6" placeholder="Provide specific, actionable recommendations for the CISO to begin addressing compliance gaps and improving their security posture..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>How should FreshFlow leverage their existing security team?</label>
+                    <textarea id="team-leverage" rows="4" placeholder="Based on their current team (CISO, Network Admin, OT Engineer, Compliance Officer), how should roles be assigned for NIST implementation?"></textarea>
+                </div>
+            </div>
+
+            <button class="submit-btn" onclick="submitTask6()">Submit Task 6</button>
+            <button class="reset-btn" onclick="resetTask6()">Reset</button>
+
+            <div id="results6" class="results-area"></div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentTask = 1;
+
+        // Navigation functions
+        function showTask(taskNumber) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.task-section');
+            sections.forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // Show selected section
+            document.getElementById(`task${taskNumber}`).classList.add('active');
+
+            // Update navigation buttons
+            const buttons = document.querySelectorAll('.nav-item');
+            buttons.forEach(button => {
+                button.classList.remove('active');
+            });
+            document.querySelector(`[data-task="${taskNumber}"]`).classList.add('active');
+
+            currentTask = taskNumber;
+        }
+
+        // Task 1 Functions
+        function submitTask1() {
+            const businessOps = document.getElementById('business-ops').value;
+            const employeeCount = document.getElementById('employee-count').value;
+            const facilities = document.getElementById('facilities').value;
+            
+            const selectedAssets = [];
+            const assetCheckboxes = document.querySelectorAll('#task1 input[type="checkbox"]:checked');
+            assetCheckboxes.forEach(checkbox => {
+                selectedAssets.push(checkbox.value);
+            });
+
+            const results = document.getElementById('results1');
+            let feedback = '<h4>Task 1 Results</h4>';
+            
+            // Validate responses
+            if (businessOps.length < 50) {
+                feedback += '<p style="color: #dc3545;">⚠️ Business operations description needs more detail.</p>';
+            } else {
+                feedback += '<p style="color: #28a745;">✅ Good business operations analysis.</p>';
+            }
+
+            if (employeeCount === '64') {
+                feedback += '<p style="color: #28a745;">✅ Correct employee count identified.</p>';
+            } else {
+                feedback += '<p style="color: #dc3545;">⚠️ Check the employee count in the profile.</p>';
+            }
+
+            if (selectedAssets.length >= 4) {
+                feedback += '<p style="color: #28a745;">✅ Good asset identification - selected ' + selectedAssets.length + ' critical assets.</p>';
+                feedback += '<p><strong>Selected Assets:</strong> ' + selectedAssets.join(', ') + '</p>';
+            } else {
+                feedback += '<p style="color: #dc3545;">⚠️ Consider selecting more critical assets that would need NIST protection.</p>';
+            }
+
+            results.innerHTML = feedback;
+            results.classList.add('show');
+        }
+
+        function resetTask1() {
+            document.getElementById('business-ops').value = '';
+            document.getElementById('employee-count').value = '';
+            document.getElementById('facilities').value = '';
+            
+            const checkboxes = document.querySelectorAll('#task1 input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            
+            document.getElementById('results1').classList.remove('show');
+        }
+
+        // Task 2 Functions
+        function submitTask2() {
+            const selectedFamilies = [];
+            const familyCheckboxes = document.querySelectorAll('#task2 input[type="checkbox"]:checked');
+            familyCheckboxes.forEach(checkbox => {
+                selectedFamilies.push(checkbox.value);
+            });
+
+            const justification = document.getElementById('control-justification').value;
+            const results = document.getElementById('results2');
+            let feedback = '<h4>Task 2 Results</h4>';
+
+            if (selectedFamilies.length === 8) {
+                feedback += '<p style="color: #28a745;">✅ Good selection - identified 8 critical control families.</p>';
+            } else if (selectedFamilies.length < 8) {
+                feedback += '<p style="color: #ffc107;">⚠️ Consider selecting more control families (aim for 8 most critical).</p>';
+            } else {
+                feedback += '<p style="color: #ffc107;">⚠️ Too many selected - focus on the 8 most critical.</p>';
+            }
+
+            // Check for key control families
+            const criticalFamilies = ['Access Control', 'Configuration Management', 'System Communications Protection', 'System Information Integrity', 'Physical Environmental'];
+            const selectedCritical = selectedFamilies.filter(family => criticalFamilies.includes(family));
+            
+            if (selectedCritical.length >= 3) {
+                feedback += '<p style="color: #28a745;">✅ Selected key control families for manufacturing environment.</p>';
+            } else {
+                feedback += '<p style="color: #dc3545;">⚠️ Consider including more controls critical for manufacturing/OT environments.</p>';
+            }
+
+            feedback += '<p><strong>Selected Control Families:</strong> ' + selectedFamilies.join(', ') + '</p>';
+
+            if (justification.length > 100) {
+                feedback += '<p style="color: #28a745;">✅ Good justification provided.</p>';
+            } else {
+                feedback += '<p style="color: #dc3545;">⚠️ Provide more detailed justification for your selections.</p>';
+            }
+
+            results.innerHTML = feedback;
+            results.classList.add('show');
+        }
+
+        function resetTask2() {
+            const checkboxes = document.querySelectorAll('#task2 input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            document.getElementById('control-justification').value = '';
+            document.getElementById('results2').classList.remove('show');
+        }
+
+        // Task 3 Drag and Drop Functions
+        function allowDrop(ev) {
+            ev.preventDefault();
+        }
+
+        function drag(ev) {
+            ev.dataTransfer.setData("text", ev.target.id);
+        }
+
+        function drop(ev) {
+            ev.preventDefault();
+            const data = ev.dataTransfer.getData("text");
+            const draggedElement = document.getElementById(data);
+            
+            // Find the drop zone (might be the target or its parent)
+            let dropZone = ev.target;
+            while (dropZone && !dropZone.classList.contains('drop-zone')) {
+                dropZone = dropZone.parentNode;
+            }
+            
+            if (dropZone) {
+                dropZone.appendChild(draggedElement);
+            }
+        }
+
+        function submitTask3() {
+            const highPriority = document.getElementById('high-priority').children;
+            const mediumPriority = document.getElementById('medium-priority').children;
+            const lowPriority = document.getElementById('low-priority').children;
+            const rationale = document.getElementById('risk-rationale').value;
+
+            const results = document.getElementById('results3');
+            let feedback = '<h4>Task 3 Results</h4>';
+
+            // Check if risks are categorized
+            const totalCategorized = highPriority.length + mediumPriority.length + lowPriority.length;
+            
+            if (totalCategorized >= 6) {
+                feedback += '<p style="color: #28a745;">✅ Good risk categorization - ' + totalCategorized + ' risks prioritized.</p>';
+            } else {
+                feedback += '<p style="color: #dc3545;">⚠️ Categorize more risks into priority levels.</p>';
+            }
+
+            // Check for critical risks in high priority
+            const highPriorityTexts = Array.from(highPriority).map(el => el.textContent);
+            if (highPriorityTexts.some(text => text.includes('PLC') || text.includes('production'))) {
+                feedback += '<p style="color: #28a745;">✅ Correctly identified production-critical risks as high priority.</p>';
+            }
+
+            if (rationale.length > 100) {
+                feedback += '<p style="color: #28a745;">✅ Good rationale provided for risk prioritization.</p>';
+            } else {
+                feedback += '<p style="color: #dc3545;">⚠️ Provide more detailed rationale for your risk prioritization decisions.</p>';
+            }
+
+            results.innerHTML = feedback;
+            results.classList.add('show');
+        }
+
+        function resetTask3() {
+            // Move all items back to the original container
+            const allItems = document.querySelectorAll('#task3 .draggable-item');
+            const riskItemsContainer = document.getElementById('risk-items');
+            
+            allItems.forEach(item => {
+                riskItemsContainer.appendChild(item);
+            });
+            
+            document.getElementById('risk-rationale').value = '';
+            document.getElementById('results3').classList.remove('show');
+        }
+
+        // Task 4 Functions
+        function submitTask4() {
+            const govtContracts = document.getElementById('govt-contracts').value;
+            const cmmcLevel = document.getElementById('cmmc-recommendation').value;
+            const justification = document.getElementById('cmmc-justification').value;
+            
+            const selectedControls = [];
+            const controlCheckboxes = document.querySelectorAll('#task4 input[type="checkbox"]:checked');
+            controlCheckboxes.forEach(checkbox => {
+                selectedControls.push(checkbox.value);
+            });
+
+            const results = document.getElementById('results4');
+            let feedback = '<h4>Task 4 Results</h4>';
+
+            // Evaluate CMMC level recommendation
+            if (cmmcLevel === 'level2') {
+                feedback += '<p style="color: #28a745;">✅ Level 2 is appropriate for most manufacturing companies handling CUI.</p>';
+            } else if (cmmcLevel === 'level1') {
+                feedback += '<p style="color: #ffc107;">⚠️ Level 1 may be insufficient for a growing manufacturing company.</p>';
+            } else if (cmmcLevel === 'level3') {
+                feedback += '<p style="color: #ffc107;">⚠️ Level 3 may be excessive unless handling highly sensitive defense contracts.</p>';
+            }
+
+            if (justification.length > 100) {
+                feedback += '<p style="color: #28a745;">✅ Good justification for CMMC level selection.</p>';
+            } else {
+                feedback += '<p style="color: #dc3545;">⚠️ Provide more detailed justification for your CMMC recommendation.</p>';
+            }
+
+            if (selectedControls.length >= 6) {
+                feedback += '<p style="color: #28a745;">✅ Good control selection - identified ' + selectedControls.length + ' key controls.</p>';
+            } else {
+                feedback += '<p style="color: #dc3545;">⚠️ Select more controls that align with your recommended CMMC level.</p>';
+            }
+
+            results.innerHTML = feedback;
+            results.classList.add('show');
+        }
+
+        function resetTask4() {
+            document.getElementById('govt-contracts').value = '';
+            document.getElementById('cmmc-recommendation').value = '';
+            document.getElementById('cmmc-justification').value = '';
+            
+            const checkboxes = document.querySelectorAll('#task4 input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            
+            document.getElementById('results4').classList.remove('show');
+        }
+
+        // Task 5 Drag and Drop Functions
+        function dragPhase(ev) {
+            ev.dataTransfer.setData("text", ev.target.id);
+        }
+
+        function dropPhase(ev) {
+            ev.preventDefault();
+            const data = ev.dataTransfer.getData("text");
+            const draggedElement = document.getElementById(data);
+            
+            let dropZone = ev.target;
+            while (dropZone && !dropZone.classList.contains('drop-zone')) {
+                dropZone = dropZone.parentNode;
+            }
+            
+            if (dropZone) {
+                dropZone.appendChild(draggedElement);
+            }
+        }
+
+        function submitTask5() {
+            const phase1 = document.getElementById('phase1').children;
+            const phase2 = document.getElementById('phase2').children;
+            const phase3 = document.getElementById('phase3').children;
+            const budget = document.getElementById('budget-estimate').value;
+            const challenges = document.getElementById('implementation-challenges').value;
+            const metrics = document.getElementById('success-metrics').value;
+
+            const results = document.getElementById('results5');
+            let feedback = '<h4>Task 5 Results</h4>';
+
+            const totalPhased = phase1.length + phase2.length + phase3.length;
+            if (totalPhased >= 6) {
+                feedback += '<p style="color: #28a745;">✅ Good implementation phasing - ' + totalPhased + ' activities organized.</p>';
+            } else {
+                feedback += '<p style="color: #dc3545;">⚠️ Organize more implementation activities into phases.</p>';
+            }
+
+            // Check for logical phase 1 priorities
+            const phase1Texts = Array.from(phase1).map(el => el.textContent);
+            if (phase1Texts.some(text => text.includes('authentication') || text.includes('training'))) {
+                feedback += '<p style="color: #28a745;">✅ Good prioritization - foundational controls in Phase 1.</p>';
+            }
+
+            if (budget) {
+                feedback += '<p style="color: #28a745;">✅ Budget estimation provided.</p>';
+            } else {
+                feedback += '<p style="color: #dc3545;">⚠️ Provide a budget estimate for implementation.</p>';
+            }
+
+            if (challenges.length > 50 && metrics.length > 50) {
+                feedback += '<p style="color: #28a745;">✅ Comprehensive planning with challenges and metrics identified.</p>';
+            } else {
+                feedback += '<p style="color: #dc3545;">⚠️ Provide more detail on implementation challenges and success metrics.</p>';
+            }
+
+            results.innerHTML = feedback;
+            results.classList.add('show');
+        }
+
+        function resetTask5() {
+            // Move all phase items back
+            const allItems = document.querySelectorAll('#task5 .draggable-item');
+            const phaseItemsContainer = document.getElementById('phase-items');
+            
+            allItems.forEach(item => {
+                phaseItemsContainer.appendChild(item);
+            });
+            
+            document.getElementById('budget-estimate').value = '';
+            document.getElementById('implementation-challenges').value = '';
+            document.getElementById('success-metrics').value = '';
+            document.getElementById('results5').classList.remove('show');
+        }
+
+        // Task 6 Functions
+        function submitTask6() {
+            const gapAC = document.getElementById('gap-ac').value;
+            const gapSC = document.getElementById('gap-sc').value;
+            const gapCM = document.getElementById('gap-cm').value;
+            const gapIR = document.getElementById('gap-ir').value;
+            const priorityGaps = document.getElementById('priority-gaps').value;
+            const nextSteps = document.getElementById('next-steps').value;
+            const teamLeverage = document.getElementById('team-leverage').value;
+
+            const results = document.getElementById('results6');
+            let feedback = '<h4>Task 6 Results</h4>';
+
+            // Check gap assessments
+            const gapValues = [gapAC, gapSC, gapCM, gapIR];
+            const completedAssessments = gapValues.filter(val => val !== '').length;
+            
+            if (completedAssessments === 4) {
+                feedback += '<p style="color: #28a745;">✅ Complete gap assessment across all control areas.</p>';
+            } else {
+                feedback += '<p style="color: #dc3545;">⚠️ Complete the gap assessment for all control areas.</p>';
+            }
+
+            // Check for realistic gap analysis (not all full implementation)
+            if (gapValues.includes('full') && (gapValues.includes('partial') || gapValues.includes('basic'))) {
+                feedback += '<p style="color: #28a745;">✅ Realistic assessment - mix of implementation levels.</p>';
+            } else if (gapValues.filter(val => val === 'full').length >= 3) {
+                feedback += '<p style="color: #ffc107;">⚠️ Consider that few organizations have full implementation initially.</p>';
+            }
+
+            if (priorityGaps.length > 200) {
+                feedback += '<p style="color: #28a745;">✅ Comprehensive priority gap analysis.</p>';
+            } else {
+                feedback += '<p style="color: #dc3545;">⚠️ Provide more detailed priority gap analysis.</p>';
+            }
+
+            if (nextSteps.length > 100 && teamLeverage.length > 50) {
+                feedback += '<p style="color: #28a745;">✅ Good strategic recommendations for implementation.</p>';
+            } else {
+                feedback += '<p style="color: #dc3545;">⚠️ Provide more detailed next steps and team utilization strategies.</p>';
+            }
+
+            results.innerHTML = feedback;
+            results.classList.add('show');
+        }
+
+        function resetTask6() {
+            document.getElementById('gap-ac').value = '';
+            document.getElementById('gap-sc').value = '';
+            document.getElementById('gap-cm').value = '';
+            document.getElementById('gap-ir').value = '';
+            document.getElementById('priority-gaps').value = '';
+            document.getElementById('next-steps').value = '';
+            document.getElementById('team-leverage').value = '';
+            document.getElementById('results6').classList.remove('show');
+        }
+
+        // Initialize drag and drop areas on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('NIST SP 800-171 FreshFlow Systems Activity Loaded');
+        });
+    </script>
+</body>
+</html>A: Business Context Analysis</h3>
+                
+                <div class="form-group">
+                    <label>Does FreshFlow Systems likely handle government contracts or sensitive information?</label>
+                    <select id="govt-contracts">
+                        <option value="">Select...</option>
+                        <option value="yes-fci">Yes - Federal Contract Information only</option>
+                        <option value="yes-cui">Yes - Controlled Unclassified Information</option>
+                        <option value="yes-sensitive">Yes - Highly sensitive defense information</option>
+                        <option value="no">No - Commercial only</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Based on FreshFlow's profile, what CMMC level would you recommend?</label>
+                    <select id="cmmc-recommendation">
+                        <option value="">Select...</option>
+                        <option value="level1">Level 1 - Basic Safeguarding (17 controls)</option>
+                        <option value="level2">Level 2 - CUI Protection (110 controls)</option>
+                        <option value="level3">Level 3 - Advanced Protection (130 controls)</option>
+                        <option value="none">Not applicable - No government work</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Justify your CMMC level recommendation:</label>
+                    <textarea id="cmmc-justification" rows="6" placeholder="Explain why this CMMC level is appropriate for FreshFlow Systems based on their business operations, risk profile, and information sensitivity..."></textarea>
+                </div>
+            </div>
+
+            <div class="activity-area">
+                <h3>Activity 4
