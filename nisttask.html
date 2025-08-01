@@ -107,19 +107,19 @@
         .task-header {
             background: linear-gradient(135deg, #4a7c23, #2d5016);
             color: white;
-            padding: 30px;
+            padding: 40px;
             border-radius: 12px;
-            margin-bottom: 30px;
+            margin-bottom: 35px;
             text-align: center;
         }
 
         .task-header h2 {
-            font-size: 2rem;
-            margin-bottom: 10px;
+            font-size: 2.2rem;
+            margin-bottom: 15px;
         }
 
         .task-header p {
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             opacity: 0.9;
         }
 
@@ -127,23 +127,23 @@
             background: #f8f9fa;
             border: 2px solid #4a7c23;
             border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 25px;
+            padding: 30px;
+            margin-bottom: 30px;
         }
 
         .instruction-card h3 {
             color: #2d5016;
-            margin-bottom: 15px;
-            font-size: 1.3rem;
+            margin-bottom: 18px;
+            font-size: 1.4rem;
         }
 
         .instruction-card ul {
             margin-left: 20px;
-            margin-bottom: 15px;
+            margin-bottom: 18px;
         }
 
         .instruction-card li {
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
 
         .activity-area {
@@ -1152,10 +1152,6 @@
 
         // Task 4 Functions
         function submitTask4() {
-            const govtContracts = document.getElementById('govt-contracts').value;
-            const cmmcLevel = document.getElementById('cmmc-recommendation').value;
-            const justification = document.getElementById('cmmc-justification').value;
-            
             const selectedControls = [];
             const controlCheckboxes = document.querySelectorAll('#task4 input[type="checkbox"]:checked');
             controlCheckboxes.forEach(checkbox => {
@@ -1165,25 +1161,24 @@
             const results = document.getElementById('results4');
             let feedback = '<h4>Task 4 Results</h4>';
 
-            // Evaluate CMMC level recommendation
-            if (cmmcLevel === 'level2') {
-                feedback += '<p style="color: #28a745;">✅ Level 2 is appropriate for most manufacturing companies handling CUI.</p>';
-            } else if (cmmcLevel === 'level1') {
-                feedback += '<p style="color: #ffc107;">⚠️ Level 1 may be insufficient for a growing manufacturing company.</p>';
-            } else if (cmmcLevel === 'level3') {
-                feedback += '<p style="color: #ffc107;">⚠️ Level 3 may be excessive unless handling highly sensitive defense contracts.</p>';
-            }
-
-            if (justification.length > 100) {
-                feedback += '<p style="color: #28a745;">✅ Good justification for CMMC level selection.</p>';
-            } else {
-                feedback += '<p style="color: #dc3545;">⚠️ Provide more detailed justification for your CMMC recommendation.</p>';
-            }
-
             if (selectedControls.length >= 6) {
                 feedback += '<p style="color: #28a745;">✅ Good control selection - identified ' + selectedControls.length + ' key controls.</p>';
+                feedback += '<p><strong>Selected Controls:</strong> ' + selectedControls.join(', ') + '</p>';
+            } else if (selectedControls.length >= 3) {
+                feedback += '<p style="color: #ffc107;">⚠️ Good start - consider selecting more controls for comprehensive coverage.</p>';
+                feedback += '<p><strong>Selected Controls:</strong> ' + selectedControls.join(', ') + '</p>';
             } else {
-                feedback += '<p style="color: #dc3545;">⚠️ Select more controls that align with your recommended CMMC level.</p>';
+                feedback += '<p style="color: #dc3545;">⚠️ Select more controls that would be essential for CMMC compliance.</p>';
+            }
+
+            // Check for foundational controls
+            const foundationalControls = ['AC.1.001', 'AC.1.002', 'IA.1.076', 'PE.1.131'];
+            const selectedFoundational = selectedControls.filter(control => foundationalControls.includes(control));
+            
+            if (selectedFoundational.length >= 2) {
+                feedback += '<p style="color: #28a745;">✅ Selected important foundational controls for CMMC Level 1.</p>';
+            } else {
+                feedback += '<p style="color: #ffc107;">⚠️ Consider including more foundational controls required for basic CMMC compliance.</p>';
             }
 
             results.innerHTML = feedback;
@@ -1191,10 +1186,6 @@
         }
 
         function resetTask4() {
-            document.getElementById('govt-contracts').value = '';
-            document.getElementById('cmmc-recommendation').value = '';
-            document.getElementById('cmmc-justification').value = '';
-            
             const checkboxes = document.querySelectorAll('#task4 input[type="checkbox"]');
             checkboxes.forEach(checkbox => {
                 checkbox.checked = false;
