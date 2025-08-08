@@ -63,14 +63,19 @@
             border-bottom: 1px solid #e0e0e0;
             cursor: pointer;
             transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            background: white;
+            border: none;
+            width: 100%;
+            text-align: left;
         }
 
         .nav-item:hover {
             background: #f0f8f0;
             border-left: 4px solid #2c5530;
+            transform: translateX(2px);
         }
 
         .nav-item.active {
@@ -78,6 +83,13 @@
             border-left: 4px solid #2c5530;
             font-weight: bold;
             color: #2c5530;
+        }
+
+        .nav-content {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            pointer-events: none;
         }
 
         .nav-number {
@@ -214,7 +226,7 @@
         .progress-fill {
             height: 100%;
             background: linear-gradient(135deg, #2c5530 0%, #1a3a1f 100%);
-            width: 0%;
+            width: 10%;
             transition: width 0.5s ease;
         }
 
@@ -241,26 +253,6 @@
             background: #d4edda;
             border-color: #28a745;
             color: #155724;
-        }
-
-        .btn {
-            background: linear-gradient(135deg, #2c5530 0%, #1a3a1f 100%);
-            color: white;
-            padding: 0.8rem 1.5rem;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            text-decoration: none;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
 
         .company-profile {
@@ -310,6 +302,9 @@
             border-radius: 3px;
             cursor: pointer;
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .checkbox.checked {
@@ -319,10 +314,42 @@
 
         .checkbox.checked::after {
             content: '✓';
-            display: block;
-            text-align: center;
-            line-height: 12px;
             font-size: 10px;
+        }
+
+        .navigation-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #2c5530 0%, #1a3a1f 100%);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
         }
 
         @media (max-width: 768px) {
@@ -352,55 +379,75 @@
         <div class="sidebar">
             <div class="nav-title">Project Tasks</div>
             
-            <div class="nav-item active" data-slide="overview">
-                <div class="nav-number">1</div>
-                <div>Organization Overview</div>
-            </div>
+            <button class="nav-item active" onclick="showSlide(0)">
+                <div class="nav-content">
+                    <div class="nav-number">1</div>
+                    <div>Organization Overview</div>
+                </div>
+            </button>
             
-            <div class="nav-item" data-slide="assets">
-                <div class="nav-number">2</div>
-                <div>Asset Identification</div>
-            </div>
+            <button class="nav-item" onclick="showSlide(1)">
+                <div class="nav-content">
+                    <div class="nav-number">2</div>
+                    <div>Asset Identification</div>
+                </div>
+            </button>
             
-            <div class="nav-item" data-slide="resources">
-                <div class="nav-number">3</div>
-                <div>Resource Analysis</div>
-            </div>
+            <button class="nav-item" onclick="showSlide(2)">
+                <div class="nav-content">
+                    <div class="nav-number">3</div>
+                    <div>Resource Analysis</div>
+                </div>
+            </button>
             
-            <div class="nav-item" data-slide="threats">
-                <div class="nav-number">4</div>
-                <div>Threat Landscape</div>
-            </div>
+            <button class="nav-item" onclick="showSlide(3)">
+                <div class="nav-content">
+                    <div class="nav-number">4</div>
+                    <div>Threat Landscape</div>
+                </div>
+            </button>
             
-            <div class="nav-item" data-slide="security-assets">
-                <div class="nav-number">5</div>
-                <div>Security Assets</div>
-            </div>
+            <button class="nav-item" onclick="showSlide(4)">
+                <div class="nav-content">
+                    <div class="nav-number">5</div>
+                    <div>Security Assets</div>
+                </div>
+            </button>
             
-            <div class="nav-item" data-slide="personnel">
-                <div class="nav-number">6</div>
-                <div>Personnel & Responsibilities</div>
-            </div>
+            <button class="nav-item" onclick="showSlide(5)">
+                <div class="nav-content">
+                    <div class="nav-number">6</div>
+                    <div>Personnel & Responsibilities</div>
+                </div>
+            </button>
             
-            <div class="nav-item" data-slide="access-control">
-                <div class="nav-number">7</div>
-                <div>Access Control</div>
-            </div>
+            <button class="nav-item" onclick="showSlide(6)">
+                <div class="nav-content">
+                    <div class="nav-number">7</div>
+                    <div>Access Control</div>
+                </div>
+            </button>
             
-            <div class="nav-item" data-slide="inventory">
-                <div class="nav-number">8</div>
-                <div>Asset Inventory</div>
-            </div>
+            <button class="nav-item" onclick="showSlide(7)">
+                <div class="nav-content">
+                    <div class="nav-number">8</div>
+                    <div>Asset Inventory</div>
+                </div>
+            </button>
             
-            <div class="nav-item" data-slide="incident-response">
-                <div class="nav-number">9</div>
-                <div>Incident Response Plan</div>
-            </div>
+            <button class="nav-item" onclick="showSlide(8)">
+                <div class="nav-content">
+                    <div class="nav-number">9</div>
+                    <div>Incident Response Plan</div>
+                </div>
+            </button>
             
-            <div class="nav-item" data-slide="recommendations">
-                <div class="nav-number">10</div>
-                <div>Recommendations</div>
-            </div>
+            <button class="nav-item" onclick="showSlide(9)">
+                <div class="nav-content">
+                    <div class="nav-number">10</div>
+                    <div>Recommendations</div>
+                </div>
+            </button>
         </div>
 
         <div class="main-content">
@@ -412,7 +459,7 @@
             </div>
 
             <!-- Slide 1: Organization Overview -->
-            <div class="slide active" id="overview">
+            <div class="slide active" id="slide-0">
                 <div class="slide-header">
                     <h2>🏢 Task 1: Organization Overview</h2>
                     <p>Analyze FreshFlow Systems' business profile and purpose</p>
@@ -489,7 +536,7 @@
             </div>
 
             <!-- Slide 2: Asset Identification -->
-            <div class="slide" id="assets">
+            <div class="slide" id="slide-1">
                 <div class="slide-header">
                     <h2>💾 Task 2: Asset Identification</h2>
                     <p>Catalog and classify FreshFlow Systems' critical assets</p>
@@ -555,7 +602,7 @@
             </div>
 
             <!-- Slide 3: Resource Analysis -->
-            <div class="slide" id="resources">
+            <div class="slide" id="slide-2">
                 <div class="slide-header">
                     <h2>⚡ Task 3: Resource Analysis</h2>
                     <p>Evaluate available cybersecurity resources and capabilities</p>
@@ -605,10 +652,6 @@
                         </div>
                     </div>
 
-                    <div class="alert alert-info">
-                        <strong>💡 Analysis Tip:</strong> Look for resource constraints that might limit security effectiveness. Consider both current capabilities and future needs as the business grows.
-                    </div>
-
                     <div class="checklist">
                         <div class="checklist-item">
                             <div class="checkbox" onclick="toggleCheck(this)"></div>
@@ -635,7 +678,7 @@
             </div>
 
             <!-- Slide 4: Threat Landscape -->
-            <div class="slide" id="threats">
+            <div class="slide" id="slide-3">
                 <div class="slide-header">
                     <h2>⚠️ Task 4: Threat Landscape Analysis</h2>
                     <p>Identify and assess cybersecurity threats facing FreshFlow Systems</p>
@@ -662,29 +705,6 @@
                         </ul>
                     </div>
 
-                    <div class="company-profile">
-                        <div class="profile-card">
-                            <div class="profile-icon">🎭</div>
-                            <h4>Threat Actors</h4>
-                            <p>Who might target this organization and why?</p>
-                        </div>
-                        <div class="profile-card">
-                            <div class="profile-icon">⚔️</div>
-                            <h4>Attack Vectors</h4>
-                            <p>How might attackers gain access?</p>
-                        </div>
-                        <div class="profile-card">
-                            <div class="profile-icon">💥</div>
-                            <h4>Impact Scenarios</h4>
-                            <p>What damage could successful attacks cause?</p>
-                        </div>
-                        <div class="profile-card">
-                            <div class="profile-icon">📊</div>
-                            <h4>Risk Assessment</h4>
-                            <p>Which threats pose the highest risk?</p>
-                        </div>
-                    </div>
-
                     <div class="example-box">
                         <strong>Threat Analysis Example:</strong><br>
                         Threat: Ransomware Attack<br>
@@ -692,10 +712,6 @@
                         Impact: Critical (business operations shutdown)<br>
                         Attack Vector: Phishing emails, unpatched systems<br>
                         Mitigation Priority: High
-                    </div>
-
-                    <div class="alert alert-warning">
-                        <strong>⚠️ Research Focus:</strong> Look up recent cybersecurity incidents in similar industries. What attack methods are trending? What vulnerabilities are commonly exploited?
                     </div>
 
                     <div class="checklist">
@@ -724,7 +740,7 @@
             </div>
 
             <!-- Slide 5: Security Assets -->
-            <div class="slide" id="security-assets">
+            <div class="slide" id="slide-4">
                 <div class="slide-header">
                     <h2>🛡️ Task 5: Security Assets & Technologies</h2>
                     <p>Document security technologies and protective measures</p>
@@ -733,11 +749,6 @@
                     <div class="task-box">
                         <div class="task-title">🎯 Your Mission</div>
                         <p>Identify and categorize all security assets, technologies, and protective measures that FreshFlow Systems has implemented or should implement.</p>
-                    </div>
-
-                    <div class="guidance-box">
-                        <div class="guidance-title">📋 Student Guidance</div>
-                        <p>Security assets are the tools, technologies, and measures used to protect other assets. Consider both technical solutions (firewalls, antivirus) and administrative measures (policies, training).</p>
                     </div>
 
                     <div class="requirements-list">
@@ -752,27 +763,368 @@
                         </ul>
                     </div>
 
-                    <div class="company-profile">
-                        <div class="profile-card">
-                            <div class="profile-icon">🌐</div>
-                            <h4>Network Protection</h4>
-                            <p>Perimeter and internal network security</p>
+                    <div class="checklist">
+                        <div class="checklist-item">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <span>Documented network security technologies</span>
                         </div>
-                        <div class="profile-card">
-                            <div class="profile-icon">💻</div>
-                            <h4>Endpoint Security</h4>
-                            <p>Device and workstation protection</p>
+                        <div class="checklist-item">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <span>Identified endpoint security solutions</span>
                         </div>
-                        <div class="profile-card">
-                            <div class="profile-icon">🔐</div>
-                            <h4>Data Protection</h4>
-                            <p>Encryption and data loss prevention</p>
+                        <div class="checklist-item">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <span>Analyzed data protection measures</span>
                         </div>
-                        <div class="profile-card">
-                            <div class="profile-icon">👁️</div>
-                            <h4>Monitoring</h4>
-                            <p>Security monitoring and incident detection</p>
+                        <div class="checklist-item">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <span>Evaluated monitoring capabilities</span>
                         </div>
                     </div>
+                </div>
+            </div>
 
-                    
+            <!-- Slide 6: Personnel -->
+            <div class="slide" id="slide-5">
+                <div class="slide-header">
+                    <h2>👥 Task 6: Personnel Assignments & Responsibilities</h2>
+                    <p>Define cybersecurity roles, responsibilities, and organizational structure</p>
+                </div>
+                <div class="slide-content">
+                    <div class="task-box">
+                        <div class="task-title">🎯 Your Mission</div>
+                        <p>Design the cybersecurity organizational structure for FreshFlow Systems, including key roles, responsibilities, and reporting relationships.</p>
+                    </div>
+
+                    <div class="requirements-list">
+                        <h4>Key Security Roles to Define:</h4>
+                        <ul>
+                            <li><strong>CISO:</strong> Overall security strategy and governance</li>
+                            <li><strong>Security Analyst:</strong> Monitoring, incident detection, threat analysis</li>
+                            <li><strong>IT Security Admin:</strong> System hardening, patch management</li>
+                            <li><strong>Incident Response Manager:</strong> Incident coordination and response</li>
+                            <li><strong>Compliance Officer:</strong> Regulatory compliance and auditing</li>
+                        </ul>
+                    </div>
+
+                    <div class="checklist">
+                        <div class="checklist-item">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <span>Defined executive-level security governance roles</span>
+                        </div>
+                        <div class="checklist-item">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <span>Specified dedicated security team positions</span>
+                        </div>
+                        <div class="checklist-item">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <span>Outlined IT operations security responsibilities</span>
+                        </div>
+                        <div class="checklist-item">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <span>Addressed general employee security duties</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 7: Access Control -->
+            <div class="slide" id="slide-6">
+                <div class="slide-header">
+                    <h2>🔐 Task 7: Access Control Countermeasures</h2>
+                    <p>Design comprehensive access control strategy and implementation</p>
+                </div>
+                <div class="slide-content">
+                    <div class="task-box">
+                        <div class="task-title">🎯 Your Mission</div>
+                        <p>Develop a comprehensive access control strategy for FreshFlow Systems, including authentication, authorization, and accounting (AAA) mechanisms.</p>
+                    </div>
+
+                    <div class="requirements-list">
+                        <h4>Access Control Components:</h4>
+                        <ul>
+                            <li><strong>Authentication:</strong> User identity verification (passwords, MFA, biometrics)</li>
+                            <li><strong>Authorization:</strong> Permission management and role-based access</li>
+                            <li><strong>Accounting:</strong> Logging and auditing of access activities</li>
+                            <li><strong>Physical Access:</strong> Building and facility access controls</li>
+                            <li><strong>Network Access:</strong> VPN, network segmentation, wireless security</li>
+                        </ul>
+                    </div>
+
+                    <div class="checklist">
+                        <div class="checklist-item">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <span>Designed multi-factor authentication strategy</span>
+                        </div>
+                        <div class="checklist-item">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <span>Implemented role-based access control model</span>
+                        </div>
+                        <div class="checklist-item">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <span>Established access logging and monitoring</span>
+                        </div>
+                        <div class="checklist-item">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <span>Addressed physical access controls</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 8: Asset Inventory -->
+            <div class="slide" id="slide-7">
+                <div class="slide-header">
+                    <h2>📊 Task 8: Comprehensive Asset Inventory</h2>
+                    <p>Create detailed inventory of all organizational assets</p>
+                </div>
+                <div class="slide-content">
+                    <div class="task-box">
+                        <div class="task-title">🎯 Your Mission</div>
+                        <p>Develop a comprehensive asset inventory system for FreshFlow Systems that tracks, categorizes, and manages all organizational assets.</p>
+                    </div>
+
+                    <div class="requirements-list">
+                        <h4>Inventory Categories:</h4>
+                        <ul>
+                            <li><strong>Hardware Assets:</strong> Servers, workstations, mobile devices, network equipment</li>
+                            <li><strong>Software Assets:</strong> Operating systems, applications, licenses</li>
+                            <li><strong>Data Assets:</strong> Databases, files, backups, archives</li>
+                            <li><strong>Cloud Assets:</strong> SaaS applications, cloud infrastructure</li>
+                            <li><strong>Third-party Assets:</strong> Vendor services, outsourced functions</li>
+                        </ul>
+                    </div>
+
+                    <div class="checklist">
+                        <div class="checklist-item">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <span>Created comprehensive hardware asset inventory</span>
+                        </div>
+                        <div class="checklist-item">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <span>Cataloged all software and licensing information</span>
+                        </div>
+                        <div class="checklist-item">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <span>Classified data assets by sensitivity</span>
+                        </div>
+                        <div class="checklist-item">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <span>Documented cloud services and dependencies</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 9: Incident Response -->
+            <div class="slide" id="slide-8">
+                <div class="slide-header">
+                    <h2>🚨 Task 9: Incident Response Plan</h2>
+                    <p>Develop comprehensive incident response capabilities and procedures</p>
+                </div>
+                <div class="slide-content">
+                    <div class="task-box">
+                        <div class="task-title">🎯 Your Mission</div>
+                        <p>Create a detailed incident response plan for FreshFlow Systems that covers detection, containment, eradication, recovery, and lessons learned.</p>
+                    </div>
+
+                    <div class="requirements-list">
+                        <h4>Incident Response Plan Components:</h4>
+                        <ul>
+                            <li><strong>Preparation:</strong> Team structure, tools, training, communication plans</li>
+                            <li><strong>Detection & Analysis:</strong> Monitoring, alert triage, incident classification</li>
+                            <li><strong>Containment:</strong> Short-term and long-term containment strategies</li>
+                            <li><strong>Eradication:</strong> Threat removal and vulnerability remediation</li>
+                            <li><strong>Recovery:</strong> System restoration and return to normal operations</li>
+                            <li><strong>Lessons Learned:</strong> Post-incident review and improvement</li>
+                        </ul>
+                    </div>
+
+                    <div class="checklist">
+                        <div class="checklist-item">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <span>Defined incident response team structure</span>
+                        </div>
+                        <div class="checklist-item">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <span>Created incident classification system</span>
+                        </div>
+                        <div class="checklist-item">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <span>Developed detection and analysis procedures</span>
+                        </div>
+                        <div class="checklist-item">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <span>Established containment and recovery protocols</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 10: Recommendations -->
+            <div class="slide" id="slide-9">
+                <div class="slide-header">
+                    <h2>💡 Task 10: Strategic Recommendations</h2>
+                    <p>Propose additional security improvements and future enhancements</p>
+                </div>
+                <div class="slide-content">
+                    <div class="task-box">
+                        <div class="task-title">🎯 Your Mission</div>
+                        <p>Based on your analysis of FreshFlow Systems, provide strategic recommendations for improving their cybersecurity posture and addressing identified gaps.</p>
+                    </div>
+
+                    <div class="requirements-list">
+                        <h4>Recommendation Categories:</h4>
+                        <ul>
+                            <li><strong>Immediate Improvements:</strong> Critical gaps that need urgent attention</li>
+                            <li><strong>Technology Enhancements:</strong> New tools and systems to implement</li>
+                            <li><strong>Process Improvements:</strong> Policy and procedure refinements</li>
+                            <li><strong>Training & Awareness:</strong> Human factor security enhancements</li>
+                            <li><strong>Compliance & Governance:</strong> Regulatory framework alignment</li>
+                            <li><strong>Future Planning:</strong> Long-term strategic security initiatives</li>
+                        </ul>
+                    </div>
+
+                    <div class="alert alert-success">
+                        <strong>🎓 Final Project Note:</strong> Your presentation should tell a complete story of FreshFlow Systems' cybersecurity journey - from current state through recommended future state.
+                    </div>
+
+                    <div class="checklist">
+                        <div class="checklist-item">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <span>Identified critical security gaps requiring immediate attention</span>
+                        </div>
+                        <div class="checklist-item">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <span>Proposed technology enhancements and improvements</span>
+                        </div>
+                        <div class="checklist-item">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <span>Recommended process and policy improvements</span>
+                        </div>
+                        <div class="checklist-item">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <span>Addressed training and awareness needs</span>
+                        </div>
+                        <div class="checklist-item">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <span>Created prioritized implementation roadmap</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="navigation-controls">
+                <button class="btn" onclick="previousSlide()" id="prevBtn">
+                    ← Previous Task
+                </button>
+                <span id="slideCounter">Task 1 of 10</span>
+                <button class="btn" onclick="nextSlide()" id="nextBtn">
+                    Next Task →
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const totalSlides = 10;
+
+        function showSlide(slideIndex) {
+            // Hide all slides
+            const slides = document.querySelectorAll('.slide');
+            slides.forEach(slide => slide.classList.remove('active'));
+            
+            // Remove active class from all nav items
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(nav => nav.classList.remove('active'));
+            
+            // Show selected slide
+            const targetSlide = document.getElementById(`slide-${slideIndex}`);
+            if (targetSlide) {
+                targetSlide.classList.add('active');
+                navItems[slideIndex].classList.add('active');
+                currentSlide = slideIndex;
+                updateProgress();
+                updateNavigationControls();
+            }
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                showSlide(currentSlide + 1);
+            }
+        }
+
+        function previousSlide() {
+            if (currentSlide > 0) {
+                showSlide(currentSlide - 1);
+            }
+        }
+
+        function updateProgress() {
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            document.getElementById('progress-fill').style.width = progress + '%';
+            document.getElementById('progress-text').textContent = Math.round(progress) + '%';
+        }
+
+        function updateNavigationControls() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const slideCounter = document.getElementById('slideCounter');
+            
+            prevBtn.disabled = currentSlide === 0;
+            nextBtn.disabled = currentSlide === totalSlides - 1;
+            slideCounter.textContent = `Task ${currentSlide + 1} of ${totalSlides}`;
+        }
+
+        function toggleCheck(checkbox) {
+            checkbox.classList.toggle('checked');
+            
+            // Update progress based on completed items
+            const allCheckboxes = document.querySelectorAll('.checkbox');
+            const checkedBoxes = document.querySelectorAll('.checkbox.checked');
+            const completionRate = (checkedBoxes.length / allCheckboxes.length) * 100;
+            
+            // Show completion feedback
+            if (completionRate === 100) {
+                showCompletionMessage();
+            }
+        }
+
+        function showCompletionMessage() {
+            const message = document.createElement('div');
+            message.className = 'alert alert-success';
+            message.style.position = 'fixed';
+            message.style.top = '20px';
+            message.style.right = '20px';
+            message.style.zIndex = '9999';
+            message.style.maxWidth = '300px';
+            message.innerHTML = '<strong>🎉 Congratulations!</strong><br>You have completed all project tasks!';
+            
+            document.body.appendChild(message);
+            
+            setTimeout(() => {
+                message.remove();
+            }, 5000);
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+                nextSlide();
+                event.preventDefault();
+            } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+                previousSlide();
+                event.preventDefault();
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateProgress();
+            updateNavigationControls();
+        });
+    </script>
+</body>
+</html>
