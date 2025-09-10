@@ -369,18 +369,18 @@
             margin-bottom: 15px;
         }
 
-        .editable-field {
-            background: #fff3cd;
-            border: 1px dashed #856404;
-            padding: 5px;
-            border-radius: 4px;
-            display: inline-block;
-            min-width: 100px;
+        .completion-summary {
+            background: linear-gradient(135deg, #e8f5e8, #d4f0d4);
+            border: 2px solid #4a7c23;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 30px;
+            text-align: center;
         }
 
-        .task-completed {
-            color: #28a745;
-            font-weight: bold;
+        .completion-summary h2 {
+            color: #2d5016;
+            margin-bottom: 15px;
         }
 
         @media (max-width: 768px) {
@@ -442,13 +442,6 @@
                 <a href="#">
                     Task 4: Create New Assets
                     <span class="task-status" id="task4-status">Pending</span>
-                </a>
-            </div>
-            
-            <div class="nav-item" onclick="showTask('task5')">
-                <a href="#">
-                    Task 5: Update Organization
-                    <span class="task-status" id="task5-status">Pending</span>
                 </a>
             </div>
         </div>
@@ -716,77 +709,19 @@
                         <strong>Outstanding!</strong> You've successfully added all three required security assets to the inventory. These assets will be crucial for achieving CMMC compliance.
                     </div>
                     <button class="btn btn-success" onclick="completeTask('task4')">Complete Task 4</button>
-                </div>
-            </div>
-
-            <!-- Task 5: Update Organization -->
-            <div id="task5" class="task-section">
-                <div class="task-header">
-                    <h2>Task 5: Update Organization Data for DoD Contract</h2>
-                    <p>Modify organizational information to reflect the new DoD contract award.</p>
-                </div>
-
-                <div class="task-objective">
-                    <h3>Objective</h3>
-                    <p>Update FreshFlow Systems' organizational profile to reflect the new DoD contract and associated changes.</p>
-                </div>
-
-                <div class="alert alert-info">
-                    <strong>Context:</strong> FreshFlow Systems has been awarded a $2.3M DoD contract for specialized food packaging solutions. This requires updates to compliance requirements, security clearance needs, and facility classifications.
-                </div>
-
-                <div class="company-info">
-                    <h3>Current Organization Profile</h3>
-                    <div class="form-group">
-                        <label>Primary Business:</label>
-                        <input type="text" id="business-type" value="Food packaging and automated logistics" onchange="trackOrgChanges()">
+                    
+                    <div class="completion-summary">
+                        <h2>🎉 Training Complete!</h2>
+                        <p>Congratulations! You have successfully completed all cybersecurity audit training tasks.</p>
+                        <p><strong>Skills Acquired:</strong></p>
+                        <ul style="text-align: left; margin-top: 15px;">
+                            <li>Asset discovery and inventory management</li>
+                            <li>Asset information updates and maintenance</li>
+                            <li>Decommissioned asset removal procedures</li>
+                            <li>New asset creation and categorization</li>
+                        </ul>
+                        <p style="margin-top: 20px;">You are now prepared to assist with CMMC 2.0 compliance assessments and asset inventory management.</p>
                     </div>
-                    <div class="form-group">
-                        <label>Contract Authority:</label>
-                        <input type="text" id="contract-authority" value="Commercial clients only" onchange="trackOrgChanges()">
-                    </div>
-                    <div class="form-group">
-                        <label>Compliance Requirements:</label>
-                        <input type="text" id="compliance-req" value="FDA food safety standards" onchange="trackOrgChanges()">
-                    </div>
-                    <div class="form-group">
-                        <label>Security Classification:</label>
-                        <select id="security-class" onchange="trackOrgChanges()">
-                            <option value="Standard">Standard Commercial</option>
-                            <option value="DoD">DoD Contractor</option>
-                            <option value="Classified">Classified Contractor</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>CMMC Level Required:</label>
-                        <select id="cmmc-level" onchange="trackOrgChanges()">
-                            <option value="None">Not Required</option>
-                            <option value="Level 1">CMMC Level 1</option>
-                            <option value="Level 2">CMMC Level 2</option>
-                            <option value="Level 3">CMMC Level 3</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div id="task5-guidance" class="alert alert-info">
-                    <strong>Required Updates:</strong>
-                    <ul>
-                        <li>Contract Authority should include "US Department of Defense"</li>
-                        <li>Compliance Requirements should include "CMMC 2.0 Level 2"</li>
-                        <li>Security Classification should be "DoD Contractor"</li>
-                        <li>CMMC Level Required should be "CMMC Level 2"</li>
-                    </ul>
-                </div>
-
-                <div id="task5-progress">
-                    <p>Required changes made: <span id="org-changes">0</span> / 4</p>
-                </div>
-
-                <div id="task5-complete" style="display: none;">
-                    <div class="alert alert-success">
-                        <strong>Organization Updated!</strong> FreshFlow Systems' profile now accurately reflects their new status as a DoD contractor with CMMC 2.0 Level 2 requirements.
-                    </div>
-                    <button class="btn btn-success" onclick="completeTask('task5')">Complete Task 5</button>
                 </div>
             </div>
         </div>
@@ -859,7 +794,6 @@
         let completedTasks = [];
         let assetsUpdated = 0;
         let assetsCreated = 0;
-        let orgChanges = 0;
         let currentEditAsset = '';
 
         // Initial asset data
@@ -916,20 +850,30 @@
                 // Update progress bar
                 updateProgressBar();
                 
-                // Show next task if available
+                // Show next task if available, but end at task4
                 const taskNumber = parseInt(taskId.replace('task', ''));
-                if (taskNumber < 5) {
+                if (taskNumber < 4) {
                     const nextTask = 'task' + (taskNumber + 1);
                     setTimeout(() => {
                         showTask(nextTask);
                     }, 1500);
+                } else if (taskNumber === 4) {
+                    // Show completion summary for final task
+                    setTimeout(() => {
+                        showCompletionMessage();
+                    }, 2000);
                 }
             }
         }
 
         function updateProgressBar() {
-            const progress = (completedTasks.length / 5) * 100;
+            const progress = (completedTasks.length / 4) * 100;
             document.getElementById('progress-fill').style.width = progress + '%';
+        }
+
+        function showCompletionMessage() {
+            // Additional completion message could be added here if needed
+            console.log('All training tasks completed successfully!');
         }
 
         // Task 1: Asset Lookup
@@ -1079,37 +1023,6 @@
             document.getElementById('assetForm').reset();
             closeModal();
         });
-
-        // Task 5: Update Organization
-        function trackOrgChanges() {
-            const businessType = document.getElementById('business-type').value;
-            const contractAuthority = document.getElementById('contract-authority').value;
-            const complianceReq = document.getElementById('compliance-req').value;
-            const securityClass = document.getElementById('security-class').value;
-            const cmmcLevel = document.getElementById('cmmc-level').value;
-            
-            let changes = 0;
-            
-            if (contractAuthority.includes('Department of Defense') || contractAuthority.includes('DoD')) {
-                changes++;
-            }
-            if (complianceReq.includes('CMMC')) {
-                changes++;
-            }
-            if (securityClass === 'DoD') {
-                changes++;
-            }
-            if (cmmcLevel === 'Level 2') {
-                changes++;
-            }
-            
-            orgChanges = changes;
-            document.getElementById('org-changes').textContent = orgChanges;
-            
-            if (orgChanges >= 4) {
-                document.getElementById('task5-complete').style.display = 'block';
-            }
-        }
 
         // Close modals when clicking outside
         window.onclick = function(event) {
