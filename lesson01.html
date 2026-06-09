@@ -304,6 +304,59 @@ header {
 .flip-back a.dive-link:hover { background: rgba(255,255,255,0.28); }
 
 /* =============================================
+   EXTERNAL RESOURCES GRID
+   ============================================= */
+.resources-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+}
+.resource-link-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--green);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.resource-link-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--green-mid);
+}
+.resource-title {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--green-dark);
+  margin-bottom: 8px;
+}
+.resource-desc {
+  font-size: 0.85rem;
+  color: var(--text-mid);
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+.btn-resource {
+  align-self: flex-start;
+  background: var(--green-pale);
+  color: var(--green-dark);
+  border: 1px solid var(--green-pale2);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  transition: background 0.2s;
+}
+.resource-link-card:hover .btn-resource {
+  background: var(--green-dark);
+  color: #fff;
+}
+
+/* =============================================
    TOPIC CONTENT SECTIONS
    ============================================= */
 .topic-section {
@@ -662,7 +715,7 @@ header {
    ============================================= */
 @media (max-width: 768px) {
   .hero h2 { font-size: 1.4rem; }
-  .card-grid-2, .card-grid-3, .topic-grid { grid-template-columns: 1fr; }
+  .card-grid-2, .card-grid-3, .topic-grid, .resources-grid { grid-template-columns: 1fr; }
   .drop-zones { grid-template-columns: 1fr; }
   .flip-grid { grid-template-columns: 1fr; }
   .header-inner { flex-wrap: wrap; }
@@ -672,9 +725,6 @@ header {
 </head>
 <body>
 
-<!-- ============================================================
-     HEADER
-     ============================================================ -->
 <header>
   <div class="header-inner">
     <div class="header-left">
@@ -692,9 +742,6 @@ header {
   </div>
 </header>
 
-<!-- ============================================================
-     HERO
-     ============================================================ -->
 <div class="hero">
   <div class="hero-inner">
     <div class="hero-eyebrow">Lesson 1 &mdash; General Security Concepts (12% of exam)</div>
@@ -710,12 +757,8 @@ header {
   </div>
 </div>
 
-<!-- ============================================================
-     PAGE BODY
-     ============================================================ -->
 <div class="page-body">
 
-  <!-- LEARNING OBJECTIVES -->
   <div class="section-gap">
     <div class="section-label">Learning Objectives</div>
     <div class="objectives-box">
@@ -731,7 +774,6 @@ header {
     </div>
   </div>
 
-  <!-- KEY TERMS -->
   <div class="section-gap">
     <div class="section-label">Key Terms</div>
     <div class="terms-grid">
@@ -786,7 +828,6 @@ header {
     </div>
   </div>
 
-  <!-- COURSE INTRODUCTION -->
   <div class="section-gap">
     <div class="section-label">Course Introduction</div>
     <div class="intro-card">
@@ -795,7 +836,6 @@ header {
     </div>
   </div>
 
-  <!-- TOPIC NAVIGATION (FLIP CARDS) -->
   <div class="section-gap">
     <div class="section-label">Topic Navigation — Click a Card to Explore</div>
     <div class="flip-grid">
@@ -863,9 +903,45 @@ header {
     </div>
   </div>
 
-  <!-- ============================================================
-       TOPIC 1: CIA TRIAD
-       ============================================================ -->
+  <div class="section-gap">
+    <div class="section-label">External Complementary Resources</div>
+    <div class="resources-grid">
+      
+      <div class="resource-link-card">
+        <div>
+          <div class="resource-title">CIA - Triad</div>
+          <div class="resource-desc">Explore an interactive dimensional view of Confidentiality, Integrity, and Availability.</div>
+        </div>
+        <a href="https://d2hie3dpn9wvbb.cloudfront.net/cube/cube.html" target="_blank" class="btn-resource">Launch Module →</a>
+      </div>
+
+      <div class="resource-link-card">
+        <div>
+          <div class="resource-title">Non-Repudiation</div>
+          <div class="resource-desc">Dive into digital signatures and the foundational pillars that guarantee data transit accountability.</div>
+        </div>
+        <a href="https://d2hie3dpn9wvbb.cloudfront.net/FivePillars/FivePillars.html" target="_blank" class="btn-resource">Launch Module →</a>
+      </div>
+
+      <div class="resource-link-card">
+        <div>
+          <div class="resource-title">Controls</div>
+          <div class="resource-desc">Review a structured operational lookup map covering control categories and types.</div>
+        </div>
+        <a href="https://d2hie3dpn9wvbb.cloudfront.net/controls/cybersecurity_controls.html" target="_blank" class="btn-resource">Launch Module →</a>
+      </div>
+
+      <div class="resource-link-card">
+        <div>
+          <div class="resource-title">Encryption</div>
+          <div class="resource-desc">Interact with data transformation environments to see mechanisms backing security models.</div>
+        </div>
+        <a href="https://d2hie3dpn9wvbb.cloudfront.net/encryption/encryption_jedit_6_1.html" target="_blank" class="btn-resource">Launch Module →</a>
+      </div>
+
+    </div>
+  </div>
+
   <div class="section-gap">
     <div class="section-label">Topic 1 Content</div>
     <div class="topic-section">
@@ -925,9 +1001,6 @@ header {
     </div>
   </div>
 
-  <!-- ============================================================
-       TOPIC 2: CONTROL CATEGORIES
-       ============================================================ -->
   <div class="section-gap">
     <div class="section-label">Topic 2 Content</div>
     <div class="topic-section">
@@ -1008,9 +1081,6 @@ header {
     </div>
   </div>
 
-  <!-- ============================================================
-       TOPIC 3: FUNCTIONAL TYPES
-       ============================================================ -->
   <div class="section-gap">
     <div class="section-label">Topic 3 Content</div>
     <div class="topic-section">
@@ -1094,9 +1164,6 @@ header {
     </div>
   </div>
 
-  <!-- ============================================================
-       ACTIVITY 1: DRAG AND DROP
-       ============================================================ -->
   <div class="section-gap">
     <div class="section-label">Interactive Activity 1</div>
     <div class="activity-box">
@@ -1112,7 +1179,6 @@ header {
           <strong>Instructions:</strong> Drag each scenario chip from the pool below into the correct control category drop zone. Submit your answers to receive instant feedback. Click a chip's × button to return it to the pool.
         </div>
 
-        <!-- Draggable Items Pool -->
         <div class="drag-pool" id="drag-pool">
           <div class="drag-item" draggable="true" data-answer="Technical" id="di1">Installing a Firewall</div>
           <div class="drag-item" draggable="true" data-answer="Physical" id="di2">Biometric Door Lock</div>
@@ -1124,7 +1190,6 @@ header {
           <div class="drag-item" draggable="true" data-answer="Operational" id="di8">Running Background Checks</div>
         </div>
 
-        <!-- Drop Zones -->
         <div class="drop-zones">
           <div class="drop-zone" id="zone-Technical" data-zone="Technical">
             <div class="drop-zone-label"><span class="drop-zone-dot dot-tech"></span> Technical</div>
@@ -1149,9 +1214,6 @@ header {
     </div>
   </div>
 
-  <!-- ============================================================
-       ACTIVITY 2: SCENARIO EXPLORER
-       ============================================================ -->
   <div class="section-gap">
     <div class="section-label">Interactive Activity 2</div>
     <div class="activity-box">
@@ -1174,7 +1236,6 @@ header {
           <button class="scenario-tab" onclick="showScenario(3,this)">Scenario 4: Insider Exfiltration</button>
         </div>
 
-        <!-- Scenario 0 -->
         <div class="scenario-display active" id="scenario-0">
           <div class="scenario-title">🔴 Scenario 1: The Unsecured Database</div>
           <div class="scenario-desc">A healthcare provider discovers that a cloud-hosted database containing 50,000 patient records — including names, SSNs, and medical histories — has been publicly accessible for six months due to a misconfigured S3 bucket. No encryption was applied to the data at rest.</div>
@@ -1192,7 +1253,6 @@ header {
           </div>
         </div>
 
-        <!-- Scenario 1 -->
         <div class="scenario-display" id="scenario-1">
           <div class="scenario-title">🟣 Scenario 2: The Altered Invoice</div>
           <div class="scenario-desc">An attacker intercepts electronic invoices between a manufacturer and its supplier, subtly altering bank routing numbers. Three wire transfers totaling $840,000 are sent to the attacker's account before the fraud is discovered. No digital signatures were used on the invoices.</div>
@@ -1210,7 +1270,6 @@ header {
           </div>
         </div>
 
-        <!-- Scenario 2 -->
         <div class="scenario-display" id="scenario-2">
           <div class="scenario-title">🟠 Scenario 3: DDoS on E-Commerce Platform</div>
           <div class="scenario-desc">A major retail company's e-commerce platform is taken offline for 9 hours during its peak holiday shopping period by a coordinated Distributed Denial of Service (DDoS) attack generating 2.4 Tbps of traffic. Customer data was not accessed or modified.</div>
@@ -1228,7 +1287,6 @@ header {
           </div>
         </div>
 
-        <!-- Scenario 3 -->
         <div class="scenario-display" id="scenario-3">
           <div class="scenario-title">🔵 Scenario 4: The Disgruntled Employee</div>
           <div class="scenario-desc">A database administrator with privileged access, upset about a denied promotion, spends two weeks downloading copies of the company's proprietary R&amp;D datasets and intellectual property to a personal USB drive before resigning. The data transfers were not logged and went undetected for three months.</div>
@@ -1250,9 +1308,6 @@ header {
     </div>
   </div>
 
-  <!-- ============================================================
-       QUIZ
-       ============================================================ -->
   <div class="section-gap">
     <div class="section-label">Lesson 1 Quiz — 5 Questions</div>
     <div class="activity-box">
@@ -1266,7 +1321,6 @@ header {
       <div class="activity-body">
         <div class="quiz-container" id="quiz-container">
 
-          <!-- Q1 -->
           <div class="quiz-q" id="q1">
             <div class="q-num">Question 1 of 5</div>
             <div class="q-text">A security analyst discovers that an attacker intercepted and modified a financial report while it was being transmitted between two departments. Which element of the CIA Triad was PRIMARILY violated?</div>
@@ -1279,7 +1333,6 @@ header {
             <div class="q-feedback" id="q1-feedback"></div>
           </div>
 
-          <!-- Q2 -->
           <div class="quiz-q" id="q2">
             <div class="q-num">Question 2 of 5</div>
             <div class="q-text">An organization's security policy requires that all employees complete annual cybersecurity awareness training and pass a proficiency test. Which type of security control BEST describes this requirement?</div>
@@ -1292,7 +1345,6 @@ header {
             <div class="q-feedback" id="q2-feedback"></div>
           </div>
 
-          <!-- Q3 -->
           <div class="quiz-q" id="q3">
             <div class="q-num">Question 3 of 5</div>
             <div class="q-text">A hospital's legacy medication dispensing system cannot support modern encryption protocols and therefore cannot have multi-factor authentication deployed. The security team implements enhanced real-time monitoring of all access to the system as an alternative measure. What type of control is this?</div>
@@ -1305,7 +1357,6 @@ header {
             <div class="q-feedback" id="q3-feedback"></div>
           </div>
 
-          <!-- Q4 -->
           <div class="quiz-q" id="q4">
             <div class="q-num">Question 4 of 5</div>
             <div class="q-text">Which cryptographic mechanism provides Non-Repudiation by allowing a recipient to verify that a message was sent by a specific individual and has not been altered in transit?</div>
@@ -1318,7 +1369,6 @@ header {
             <div class="q-feedback" id="q4-feedback"></div>
           </div>
 
-          <!-- Q5 -->
           <div class="quiz-q" id="q5">
             <div class="q-num">Question 5 of 5</div>
             <div class="q-text">A company installs visible security cameras at all entrance points to its data center. A guard is stationed at the main entrance 24/7. Which TWO functional control types does the security camera BEST represent? (Choose the answer that identifies both types.)</div>
@@ -1342,12 +1392,7 @@ header {
     </div>
   </div>
 
-</div><!-- end page-body -->
-
-<!-- ============================================================
-     FOOTER
-     ============================================================ -->
-<div class="page-footer">
+</div><div class="page-footer">
   <div class="footer-nav">
     <a href="index.html">← Course Home</a>
     <a href="lesson01-part01.html">Topic 1 Deep Dive</a>
@@ -1358,9 +1403,6 @@ header {
   CompTIA Security+ SY0-701 &nbsp;|&nbsp; Lesson 1: Security Fundamentals &nbsp;|&nbsp; Moraine Valley Community College
 </div>
 
-<!-- ============================================================
-     JAVASCRIPT
-     ============================================================ -->
 <script>
 /* ---- THEME ---- */
 function toggleTheme() {
