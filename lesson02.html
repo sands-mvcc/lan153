@@ -285,6 +285,66 @@ header {
 .flip-back a.dive-link:hover { background: rgba(255,255,255,0.28); }
 
 /* =============================================
+   EXTERNAL RESOURCES SYSTEM
+   ============================================= */
+.resources-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+  margin-top: 10px;
+}
+.resource-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--green);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+.resource-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--green-light);
+}
+.resource-card h4 {
+  font-size: 1rem;
+  color: var(--green-dark);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.resource-card p {
+  font-size: 0.85rem;
+  color: var(--text-mid);
+  line-height: 1.5;
+  margin-bottom: 16px;
+  flex-grow: 1;
+}
+.resource-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-soft);
+  color: var(--green-dark);
+  border: 1px solid var(--border-dark);
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  transition: background 0.2s, color 0.2s;
+}
+.resource-link:hover {
+  background: var(--green-dark);
+  color: #fff;
+  text-decoration: none;
+}
+
+/* =============================================
    TOPIC SECTIONS
    ============================================= */
 .topic-section {
@@ -624,7 +684,7 @@ header {
    ============================================= */
 @media (max-width: 768px) {
   .hero h2 { font-size: 1.4rem; }
-  .topic-grid, .topic-grid-3, .cert-fields { grid-template-columns: 1fr; }
+  .topic-grid, .topic-grid-3, .cert-fields, .resources-grid { grid-template-columns: 1fr; }
   .drop-zones-3 { grid-template-columns: 1fr; }
   .flip-grid { grid-template-columns: 1fr; }
 }
@@ -632,9 +692,6 @@ header {
 </head>
 <body>
 
-<!-- ============================================================
-     HEADER
-     ============================================================ -->
 <header>
   <div class="header-inner">
     <div class="header-left">
@@ -653,9 +710,6 @@ header {
   </div>
 </header>
 
-<!-- ============================================================
-     HERO
-     ============================================================ -->
 <div class="hero">
   <div class="hero-inner">
     <div class="hero-eyebrow">Lesson 2 &mdash; General Security Concepts (12% of exam)</div>
@@ -671,12 +725,8 @@ header {
   </div>
 </div>
 
-<!-- ============================================================
-     PAGE BODY
-     ============================================================ -->
 <div class="page-body">
 
-  <!-- LEARNING OBJECTIVES -->
   <div class="section-gap">
     <div class="section-label">Learning Objectives</div>
     <div class="objectives-box">
@@ -693,7 +743,61 @@ header {
     </div>
   </div>
 
-  <!-- KEY TERMS -->
+  <div class="section-gap">
+    <div class="section-label">Interactive Companion Laboratories</div>
+    <div class="resources-grid">
+      
+      <div class="resource-card">
+        <div>
+          <h4><span>🏛️</span> PKI &amp; Digital Certificates</h4>
+          <p>Explore certificate authorities, trust validation systems, and public key deployment architectures in this interactive simulation portal.</p>
+        </div>
+        <a href="https://d2hie3dpn9wvbb.cloudfront.net/pki/pki.html" target="_blank" class="resource-link">Open Laboratory →</a>
+      </div>
+
+      <div class="resource-card">
+        <div>
+          <h4><span>🔐</span> Symmetrical Encryption</h4>
+          <p>Analyze bulk-data cryptographic mechanisms, cipher modes, and the shared-secret distribution pipeline under active environments.</p>
+        </div>
+        <a href="https://d2hie3dpn9wvbb.cloudfront.net/EncryptData/EncryptData.html" target="_blank" class="resource-link">Open Laboratory →</a>
+      </div>
+
+      <div class="resource-card">
+        <div>
+          <h4><span>🔢</span> Cryptographic Hashing</h4>
+          <p>Examine fixed-length message digests, collision resistance properties, and mathematical integrity checks through real-time processing models.</p>
+        </div>
+        <a href="https://d2hie3dpn9wvbb.cloudfront.net/hashing/Hashing.html" target="_blank" class="resource-link">Open Laboratory →</a>
+      </div>
+
+      <div class="resource-card">
+        <div>
+          <h4><span>🔑</span> RSA Architecture</h4>
+          <p>Study the prime factorization foundations of asymmetric cryptography, public/private key-pair mechanics, and mathematical complexity profiles.</p>
+        </div>
+        <a href="https://d2hie3dpn9wvbb.cloudfront.net/RSA/RSA.html" target="_blank" class="resource-link">Open Laboratory →</a>
+      </div>
+
+      <div class="resource-card">
+        <div>
+          <h4><span>🐕</span> Kerberos Authentication</h4>
+          <p>Deconstruct ticket-granting structures, symmetric key distributions, and domain security interactions within corporate network parameters.</p>
+        </div>
+        <a href="https://d2hie3dpn9wvbb.cloudfront.net/kerberos/kerberos.html" target="_blank" class="resource-link">Open Laboratory →</a>
+      </div>
+
+      <div class="resource-card">
+        <div>
+          <h4><span>🛡️</span> Cybersecurity Design Principles</h4>
+          <p>Evaluate defensive strategies including defense-in-depth, least privilege, and secure architectural frameworks essential for modern network posture.</p>
+        </div>
+        <a href="https://d2hie3dpn9wvbb.cloudfront.net/design/cybersecuritydesignprinciples.html" target="_blank" class="resource-link">Open Laboratory →</a>
+      </div>
+
+    </div>
+  </div>
+
   <div class="section-gap">
     <div class="section-label">Key Terms</div>
     <div class="terms-grid">
@@ -732,7 +836,6 @@ header {
     </div>
   </div>
 
-  <!-- INTRO -->
   <div class="section-gap">
     <div class="section-label">Course Introduction</div>
     <div class="intro-card">
@@ -741,7 +844,6 @@ header {
     </div>
   </div>
 
-  <!-- FLIP CARDS -->
   <div class="section-gap">
     <div class="section-label">Topic Navigation — Click a Card to Explore</div>
     <div class="flip-grid">
@@ -809,9 +911,6 @@ header {
     </div>
   </div>
 
-  <!-- ============================================================
-       TOPIC 1 — ENCRYPTION & HASHING
-       ============================================================ -->
   <div class="section-gap">
     <div class="section-label">Topic 1 Content</div>
     <div class="topic-section">
@@ -825,7 +924,6 @@ header {
       <div class="topic-body">
         <p style="color:var(--text-mid);font-size:0.92rem;margin-bottom:18px;">Cryptography rests on two primary operations: <strong>encryption</strong> (a reversible transformation requiring a key) and <strong>hashing</strong> (a one-way transformation producing a fixed-length digest). Security+ tests both the theoretical properties of these operations and your ability to select the right tool for a given scenario.</p>
 
-        <!-- Comparison Table -->
         <table class="compare-table">
           <thead>
             <tr>
@@ -896,9 +994,6 @@ header {
     </div>
   </div>
 
-  <!-- ============================================================
-       TOPIC 2 — DIGITAL SIGNATURES & CERTIFICATES
-       ============================================================ -->
   <div class="section-gap">
     <div class="section-label">Topic 2 Content</div>
     <div class="topic-section">
@@ -978,9 +1073,6 @@ header {
     </div>
   </div>
 
-  <!-- ============================================================
-       TOPIC 3 — PKI LIFECYCLE
-       ============================================================ -->
   <div class="section-gap">
     <div class="section-label">Topic 3 Content</div>
     <div class="topic-section">
@@ -1039,7 +1131,6 @@ header {
           </div>
         </div>
 
-        <!-- Live TLS Cert Mockup -->
         <div style="margin-top:24px;">
           <h4 style="font-size:0.95rem;color:var(--green-dark);margin-bottom:10px;">Sample TLS Certificate — Annotated</h4>
           <div class="tls-cert-box">
@@ -1095,9 +1186,6 @@ header {
     </div>
   </div>
 
-  <!-- ============================================================
-       ACTIVITY 1 — CRYPTO CONCEPT SORT (DRAG & DROP)
-       ============================================================ -->
   <div class="section-gap">
     <div class="section-label">Interactive Activity 1</div>
     <div class="activity-box">
@@ -1146,9 +1234,6 @@ header {
     </div>
   </div>
 
-  <!-- ============================================================
-       ACTIVITY 2 — TLS CERTIFICATE ANALYZER
-       ============================================================ -->
   <div class="section-gap">
     <div class="section-label">Interactive Activity 2</div>
     <div class="activity-box">
@@ -1164,7 +1249,6 @@ header {
           <strong>Instructions:</strong> Examine the certificate fields from the annotated certificate in Topic 3. Answer each question below by selecting the best option. Submit each question individually to get immediate feedback.
         </div>
 
-        <!-- Certificate Reference Card -->
         <div class="cert-fields" style="margin-bottom:20px;">
           <div class="cert-field-card">
             <div class="cert-field-label">Subject CN</div>
@@ -1192,7 +1276,6 @@ header {
           </div>
         </div>
 
-        <!-- Cert Questions -->
         <div class="cert-question-set">
 
           <div class="cert-q" id="cq1">
@@ -1248,9 +1331,6 @@ header {
     </div>
   </div>
 
-  <!-- ============================================================
-       QUIZ — 5 QUESTIONS
-       ============================================================ -->
   <div class="section-gap">
     <div class="section-label">Lesson 2 Quiz — 5 Questions</div>
     <div class="activity-box">
@@ -1263,7 +1343,6 @@ header {
       </div>
       <div class="activity-body">
 
-        <!-- Q1 -->
         <div class="quiz-q" id="q1">
           <div class="q-num">Question 1 of 5</div>
           <div class="q-text">An organization needs to encrypt large volumes of backup data stored on tape drives. The encryption must be fast and the keys will be managed internally. Which type of encryption is MOST appropriate?</div>
@@ -1276,7 +1355,6 @@ header {
           <div class="q-feedback" id="q1-feedback"></div>
         </div>
 
-        <!-- Q2 -->
         <div class="quiz-q" id="q2">
           <div class="q-num">Question 2 of 5</div>
           <div class="q-text">A developer digitally signs a software release package before publishing it to users. Which of the following security properties does the digital signature DIRECTLY provide? (Select the BEST answer.)</div>
@@ -1289,7 +1367,6 @@ header {
           <div class="q-feedback" id="q2-feedback"></div>
         </div>
 
-        <!-- Q3 -->
         <div class="quiz-q" id="q3">
           <div class="q-num">Question 3 of 5</div>
           <div class="q-text">A security analyst discovers that a critical system's TLS certificate is using SHA-1 as its signature algorithm. Why is this a security concern?</div>
@@ -1302,7 +1379,6 @@ header {
           <div class="q-feedback" id="q3-feedback"></div>
         </div>
 
-        <!-- Q4 -->
         <div class="quiz-q" id="q4">
           <div class="q-num">Question 4 of 5</div>
           <div class="q-text">An employee submits a Certificate Signing Request (CSR) to the internal CA to obtain a certificate for a new internal application server. Which component of the key pair is included in the CSR?</div>
@@ -1315,7 +1391,6 @@ header {
           <div class="q-feedback" id="q4-feedback"></div>
         </div>
 
-        <!-- Q5 -->
         <div class="quiz-q" id="q5">
           <div class="q-num">Question 5 of 5</div>
           <div class="q-text">A penetration tester reviews an application's source code and discovers that sensitive internal routing information is protected only by Base64 encoding. Which statement BEST characterizes this finding?</div>
@@ -1337,12 +1412,7 @@ header {
     </div>
   </div>
 
-</div><!-- end page-body -->
-
-<!-- ============================================================
-     FOOTER
-     ============================================================ -->
-<div class="page-footer">
+</div><div class="page-footer">
   <div class="footer-nav">
     <a href="index.html">← Course Home</a>
     <a href="lesson01.html">← Lesson 1: Security Fundamentals</a>
@@ -1354,9 +1424,6 @@ header {
   CompTIA Security+ SY0-701 &nbsp;|&nbsp; Lesson 2: Cryptography &amp; PKI &nbsp;|&nbsp; Moraine Valley Community College
 </div>
 
-<!-- ============================================================
-     JAVASCRIPT
-     ============================================================ -->
 <script>
 /* ---- THEME ---- */
 function toggleTheme() {
