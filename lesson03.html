@@ -63,7 +63,7 @@
   --purple:      #ce93d8;
   --purple-pale: #1f0d2a;
   --amber:       #ffcc80;
-  --amber-pale:  #2a1a00;
+  --amber-pale:  --2a1a00;
   --threat-red:  #ef9a9a;
   --threat-bg:   #2a1010;
   --shadow-sm:   0 1px 4px rgba(0,0,0,0.30);
@@ -268,6 +268,59 @@ header {
   transition: background 0.2s; margin-top: 10px; align-self: flex-start;
 }
 .flip-back a.dive-link:hover { background: rgba(255,255,255,0.28); }
+
+/* =============================================
+   EXTERNAL LAB CARDS
+   ============================================= */
+.external-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+  margin-top: 14px;
+}
+.external-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--green);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s, box-shadow 0.2s;
+  text-decoration: none;
+}
+.external-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--green-mid);
+}
+.external-card h4 {
+  font-size: 0.92rem;
+  color: var(--green-dark);
+  margin-bottom: 6px;
+}
+.external-card p {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  margin-bottom: 12px;
+}
+.external-btn {
+  align-self: flex-start;
+  background: var(--green-pale);
+  color: var(--green-dark);
+  border: 1px solid var(--green-pale2);
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.external-card:hover .external-btn {
+  background: var(--green-dark);
+  color: #fff;
+}
 
 /* =============================================
    TOPIC SECTIONS
@@ -610,7 +663,7 @@ header {
    ============================================= */
 @media (max-width: 768px) {
   .hero h2 { font-size: 1.4rem; }
-  .topic-grid, .topic-grid-3, .malware-grid, .drop-zones-4 { grid-template-columns: 1fr; }
+  .topic-grid, .topic-grid-3, .malware-grid, .drop-zones-4, .external-grid { grid-template-columns: 1fr; }
   .flip-grid { grid-template-columns: 1fr; }
   .se-grid { grid-template-columns: 1fr 1fr; }
 }
@@ -621,9 +674,6 @@ header {
 </head>
 <body>
 
-<!-- ============================================================
-     HEADER
-     ============================================================ -->
 <header>
   <div class="header-inner">
     <div class="header-left">
@@ -642,9 +692,6 @@ header {
   </div>
 </header>
 
-<!-- ============================================================
-     HERO
-     ============================================================ -->
 <div class="hero">
   <div class="hero-inner">
     <div class="hero-eyebrow">Lesson 3 &mdash; Threats, Vulnerabilities &amp; Mitigations (22% of exam)</div>
@@ -660,12 +707,8 @@ header {
   </div>
 </div>
 
-<!-- ============================================================
-     PAGE BODY
-     ============================================================ -->
 <div class="page-body">
 
-  <!-- LEARNING OBJECTIVES -->
   <div class="section-gap">
     <div class="section-label">Learning Objectives</div>
     <div class="objectives-box">
@@ -682,7 +725,6 @@ header {
     </div>
   </div>
 
-  <!-- KEY TERMS -->
   <div class="section-gap">
     <div class="section-label">Key Terms</div>
     <div class="terms-grid">
@@ -721,7 +763,6 @@ header {
     </div>
   </div>
 
-  <!-- INTRO -->
   <div class="section-gap">
     <div class="section-label">Course Introduction</div>
     <div class="intro-card">
@@ -730,7 +771,6 @@ header {
     </div>
   </div>
 
-  <!-- FLIP CARDS -->
   <div class="section-gap">
     <div class="section-label">Topic Navigation — Click a Card to Explore</div>
     <div class="flip-grid">
@@ -798,9 +838,85 @@ header {
     </div>
   </div>
 
-  <!-- ============================================================
-       TOPIC 1 — THREAT ACTORS & MOTIVATIONS
-       ============================================================ -->
+  <div class="section-gap">
+    <div class="section-label">Complementary External Labs</div>
+    <div class="external-grid">
+
+      <div class="external-card">
+        <div>
+          <h4>Threat Actors</h4>
+          <p>Explore an interactive analysis of profiles, operational capabilities, and geopolitical agendas defining modern adversaries.</p>
+        </div>
+        <a href="https://d2hie3dpn9wvbb.cloudfront.net/ThreatActors/ThreatActors.html" target="_blank" class="external-btn">Launch Module →</a>
+      </div>
+
+      <div class="external-card">
+        <div>
+          <h4>Social Engineering Tactics</h4>
+          <p>Break down human manipulation mechanics, psychological levers, and exploitation scenarios used to bypass authorization systems.</p>
+        </div>
+        <a href="https://d2hie3dpn9wvbb.cloudfront.net/SocialEngineeringTactics/SocialEngineeringTactics.html" target="_blank" class="external-btn">Launch Module →</a>
+      </div>
+
+      <div class="external-card">
+        <div>
+          <h4>Types of Attacks</h4>
+          <p>Investigate a master matrix of infrastructure compromises, physical boundary test approaches, and logic failure attack methodologies.</p>
+        </div>
+        <a href="https://d2hie3dpn9wvbb.cloudfront.net/attacks/attacks.html" target="_blank" class="external-btn">Launch Module →</a>
+      </div>
+
+      <div class="external-card">
+        <div>
+          <h4>Social Engineering</h4>
+          <p>Examine simulated frontline case studies detailing defensive recognition rules against targeted deceptive messaging vectors.</p>
+        </div>
+        <a href="https://d2hie3dpn9wvbb.cloudfront.net/social_engineering/social_engineering.html" target="_blank" class="external-btn">Launch Module →</a>
+      </div>
+
+      <div class="external-card">
+        <div>
+          <h4>Cross-site Scripting</h4>
+          <p>Walk through structural sandbox tests showing script payload entry points and browser execution hazards on target domains.</p>
+        </div>
+        <a href="https://d2hie3dpn9wvbb.cloudfront.net/crosssitescripting/crosssitescripting.html" target="_blank" class="external-btn">Launch Module →</a>
+      </div>
+
+      <div class="external-card">
+        <div>
+          <h4>Ransomware</h4>
+          <p>Trace file system payload executions, encryption handshakes, and lateral staging tactics that dominate extortion operational flows.</p>
+        </div>
+        <a href="https://d2hie3dpn9wvbb.cloudfront.net/ransomware/RansomwareAttack.html" target="_blank" class="external-btn">Launch Module →</a>
+      </div>
+
+      <div class="external-card">
+        <div>
+          <h4>Spoofing</h4>
+          <p>Analyze validation anomalies across networking protocols, lookup systems, and identity header templates enabling origin deception.</p>
+        </div>
+        <a href="https://d2hie3dpn9wvbb.cloudfront.net/spoofing1/spoofing1.html" target="_blank" class="external-btn">Launch Module →</a>
+      </div>
+
+      <div class="external-card">
+        <div>
+          <h4>Heart-Bleed</h4>
+          <p>Deconstruct the famous protocol bounds failure that allowed covert process memory exfiltration through faulty response configurations.</p>
+        </div>
+        <a href="https://d2hie3dpn9wvbb.cloudfront.net/heartbleed/heartbleed.html" target="_blank" class="external-btn">Launch Module →</a>
+      </div>
+
+      <div class="external-card">
+        <div>
+          <h4>Stuxnet</h4>
+          <p>Examine the highly engineered, multi-layered air-gap breakthrough design that defined automated infrastructure sabotage milestones.</p>
+        </div>
+        <a href="https://d2hie3dpn9wvbb.cloudfront.net/stuxnet/stuxnet.html" target="_blank" class="external-btn">Launch Module →</a>
+      </div>
+
+    </div>
+  </div>
+
   <div class="section-gap">
     <div class="section-label">Topic 1 Content</div>
     <div class="topic-section">
@@ -882,9 +998,6 @@ header {
     </div>
   </div>
 
-  <!-- ============================================================
-       TOPIC 2 — ATTACK VECTORS & SOCIAL ENGINEERING
-       ============================================================ -->
   <div class="section-gap">
     <div class="section-label">Topic 2 Content</div>
     <div class="topic-section">
@@ -993,9 +1106,6 @@ header {
     </div>
   </div>
 
-  <!-- ============================================================
-       TOPIC 3 — MALWARE CATEGORIES
-       ============================================================ -->
   <div class="section-gap">
     <div class="section-label">Topic 3 Content</div>
     <div class="topic-section">
@@ -1087,9 +1197,6 @@ header {
     </div>
   </div>
 
-  <!-- ============================================================
-       TOPIC 4 — PASSWORD ATTACKS
-       ============================================================ -->
   <div class="section-gap">
     <div class="section-label">Topic 4 Content</div>
     <div class="topic-section">
@@ -1183,9 +1290,6 @@ header {
     </div>
   </div>
 
-  <!-- ============================================================
-       ACTIVITY 1 — THREAT ACTOR PROFILER (DRAG & DROP)
-       ============================================================ -->
   <div class="section-gap">
     <div class="section-label">Interactive Activity 1</div>
     <div class="activity-box">
@@ -1236,9 +1340,6 @@ header {
     </div>
   </div>
 
-  <!-- ============================================================
-       ACTIVITY 2 — ATTACK CHAIN SCENARIO ANALYZER
-       ============================================================ -->
   <div class="section-gap">
     <div class="section-label">Interactive Activity 2</div>
     <div class="activity-box">
@@ -1260,7 +1361,6 @@ header {
           <button class="scenario-tab" onclick="showScenario3(2,this)">Scenario C: Software Update Attack</button>
         </div>
 
-        <!-- Scenario A -->
         <div class="scenario-panel active" id="s3-0">
           <div class="scenario-desc-box">
             <div class="scenario-title">🏥 Scenario A: Midwest Regional Medical Center</div>
@@ -1307,7 +1407,6 @@ header {
           </div>
         </div>
 
-        <!-- Scenario B -->
         <div class="scenario-panel" id="s3-1">
           <div class="scenario-desc-box">
             <div class="scenario-title">🏢 Scenario B: Regional Bank — CEO Fraud</div>
@@ -1342,7 +1441,6 @@ header {
           </div>
         </div>
 
-        <!-- Scenario C -->
         <div class="scenario-panel" id="s3-2">
           <div class="scenario-desc-box">
             <div class="scenario-title">💻 Scenario C: The Trojanized Accounting Software Update</div>
@@ -1381,9 +1479,6 @@ header {
     </div>
   </div>
 
-  <!-- ============================================================
-       QUIZ — 5 QUESTIONS
-       ============================================================ -->
   <div class="section-gap">
     <div class="section-label">Lesson 3 Quiz — 5 Questions</div>
     <div class="activity-box">
@@ -1396,7 +1491,6 @@ header {
       </div>
       <div class="activity-body">
 
-        <!-- Q1 -->
         <div class="quiz-q" id="q1">
           <div class="q-num">Question 1 of 5</div>
           <div class="q-text">A threat intelligence report describes an adversary that maintained undetected access to a defense contractor's network for eleven months, exfiltrated classified design documents, and never deployed destructive malware or demanded payment. Which threat actor type BEST describes this adversary?</div>
@@ -1409,7 +1503,6 @@ header {
           <div class="q-feedback" id="q1-feedback"></div>
         </div>
 
-        <!-- Q2 -->
         <div class="quiz-q" id="q2">
           <div class="q-num">Question 2 of 5</div>
           <div class="q-text">An attacker sends a carefully researched email to the CFO of a publicly traded company, referencing an upcoming merger (found via SEC filings and LinkedIn) and asking her to review an "updated financial model" attachment. The attachment contains a macro that installs a RAT. What type of attack is this?</div>
@@ -1422,33 +1515,30 @@ header {
           <div class="q-feedback" id="q2-feedback"></div>
         </div>
 
-        <!-- Q3 -->
         <div class="quiz-q" id="q3">
           <div class="q-num">Question 3 of 5</div>
-          <div class="q-text">A security team detects that an attacker is attempting to log into 5,000 employee accounts using only the passwords "Summer2024!" and "Company123" — making only two attempts per account before moving to the next. Which password attack technique is this?</div>
+          <div class="q-text">A company installs visible security cameras at all entrance points to its data center. A guard is stationed at the main entrance 24/7. Which TWO functional control types does the security camera BEST represent? (Choose the answer that identifies both types.)</div>
           <div class="q-options">
-            <label class="q-option"><input type="radio" name="q3" value="A"> Brute Force — systematically trying all possible passwords</label>
-            <label class="q-option"><input type="radio" name="q3" value="B"> Credential Stuffing — using username/password pairs from a previous breach</label>
-            <label class="q-option"><input type="radio" name="q3" value="C"> Password Spraying — trying a few common passwords across many accounts to evade lockout</label>
-            <label class="q-option"><input type="radio" name="q3" value="D"> Rainbow Table — using pre-computed hashes to crack passwords offline</label>
+            <label class="q-option"><input type="radio" name="q3" value="A"> Preventive and Corrective</label>
+            <label class="q-option"><input type="radio" name="q3" value="B"> Deterrent and Detective</label>
+            <label class="q-option"><input type="radio" name="q3" value="C"> Directive and Compensating</label>
+            <label class="q-option"><input type="radio" name="q3" value="D"> Operational and Managerial</label>
           </div>
           <div class="q-feedback" id="q3-feedback"></div>
         </div>
 
-        <!-- Q4 -->
         <div class="quiz-q" id="q4">
           <div class="q-num">Question 4 of 5</div>
-          <div class="q-text">A forensic investigator determines that malware found on a compromised system had been present for six months but was dormant until the terminated employee's Active Directory account was removed, at which point it deleted the company's backup catalog. Which malware category BEST describes this behavior?</div>
+          <div class="q-text">A hospital's legacy medication dispensing system cannot support modern encryption protocols and therefore cannot have multi-factor authentication deployed. The security team implements enhanced real-time monitoring of all access to the system as an alternative measure. What type of control is this?</div>
           <div class="q-options">
-            <label class="q-option"><input type="radio" name="q4" value="A"> Ransomware — it encrypted the backup catalog</label>
-            <label class="q-option"><input type="radio" name="q4" value="B"> Logic Bomb — it executed a destructive payload when a predefined condition was met</label>
-            <label class="q-option"><input type="radio" name="q4" value="C"> Rootkit — it concealed itself from the OS for six months</label>
-            <label class="q-option"><input type="radio" name="q4" value="D"> Worm — it propagated across the network before triggering</label>
+            <label class="q-option"><input type="radio" name="q4" value="A"> Preventive</label>
+            <label class="q-option"><input type="radio" name="q4" value="B"> Corrective</label>
+            <label class="q-option"><input type="radio" name="q4" value="C"> Compensating</label>
+            <label class="q-option"><input type="radio" name="q4" value="D"> Deterrent</label>
           </div>
           <div class="q-feedback" id="q4-feedback"></div>
         </div>
 
-        <!-- Q5 -->
         <div class="quiz-q" id="q5">
           <div class="q-num">Question 5 of 5</div>
           <div class="q-text">A penetration tester is hired to test physical security. She walks behind an employee through a badge-controlled door, nods and smiles, and the employee holds the door open without asking for her badge. Then she plugs a USB drive labeled "Payroll_Q4_Bonuses.xlsx" into an unattended workstation. Which TWO social engineering techniques are demonstrated? (Choose the answer that names both.)</div>
@@ -1470,12 +1560,7 @@ header {
     </div>
   </div>
 
-</div><!-- end page-body -->
-
-<!-- ============================================================
-     FOOTER
-     ============================================================ -->
-<div class="page-footer">
+</div><div class="page-footer">
   <div class="footer-nav">
     <a href="index.html">← Course Home</a>
     <a href="lesson02.html">← Lesson 2: Cryptography &amp; PKI</a>
@@ -1487,9 +1572,6 @@ header {
   CompTIA Security+ SY0-701 &nbsp;|&nbsp; Lesson 3: Threat Actors &amp; Attack Surface &nbsp;|&nbsp; Moraine Valley Community College
 </div>
 
-<!-- ============================================================
-     JAVASCRIPT
-     ============================================================ -->
 <script>
 /* ---- THEME ---- */
 function toggleTheme() {
