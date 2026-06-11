@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 8 — Security Operations & Monitoring</title>
+<style>
+:root {
+  --bg:#ffffff; --bg2:#f4f7f4; --bg3:#eaf2ea; --surface:#ffffff; --surface2:#f0f5f0;
+  --border:#d0dcd0; --text:#111111; --text2:#444444; --text3:#667766;
+  --green:#2e7d32; --green-l:#4caf50; --green-bg:#e8f5e9; --green-d:#1b5e20;
+  --amber:#e65100; --amber-bg:#fff8e1; --red:#c62828; --red-bg:#ffebee;
+  --blue:#1565c0; --blue-bg:#e3f2fd;
+  --shadow:0 2px 8px rgba(0,0,0,.08); --shadow-md:0 4px 20px rgba(0,0,0,.12);
+  --r:8px; --r-lg:14px;
+}
+[data-theme="dark"]{
+  --bg:#0c110c; --bg2:#121812; --bg3:#172017; --surface:#161e16; --surface2:#1e281e;
+  --border:#2a3a2a; --text:#eef4ee; --text2:#a8c4a8; --text3:#6a8a6a;
+  --green:#4caf50; --green-l:#66bb6a; --green-bg:#162416; --green-d:#388e3c;
+  --amber-bg:#231c08; --red-bg:#240e0e; --blue-bg:#0d1f3c;
+  --shadow:0 2px 8px rgba(0,0,0,.4); --shadow-md:0 4px 20px rgba(0,0,0,.55);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;transition:background .25s,color .25s}
+
+/* HEADER */
+header{background:var(--green-d);color:#fff;padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:66px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.25)}
+.hdr-left{display:flex;flex-direction:column;gap:1px}
+.hdr-eye{font-size:.68rem;text-transform:uppercase;letter-spacing:.12em;opacity:.7}
+.hdr-title{font-size:1.05rem;font-weight:700}
+.hdr-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.badge{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);padding:3px 10px;border-radius:20px;font-size:.7rem;font-weight:700;letter-spacing:.04em;white-space:nowrap}
+.theme-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:7px 14px;border-radius:20px;cursor:pointer;font-size:.8rem;font-weight:700;transition:background .2s;white-space:nowrap}
+.theme-btn:hover{background:rgba(255,255,255,.28)}
+
+/* TAB NAV */
+nav.tnav{background:var(--surface);border-bottom:2px solid var(--border);display:flex;gap:0;overflow-x:auto;scrollbar-width:none;position:sticky;top:66px;z-index:90;box-shadow:var(--shadow)}
+nav.tnav::-webkit-scrollbar{display:none}
+.tbtn{background:none;border:none;border-bottom:3px solid transparent;margin-bottom:-2px;padding:13px 18px;cursor:pointer;font-size:.82rem;font-weight:700;color:var(--text3);white-space:nowrap;transition:color .2s,border-color .2s}
+.tbtn:hover{color:var(--green)}
+.tbtn.active{color:var(--green);border-bottom-color:var(--green)}
+
+/* MAIN */
+main{max-width:1080px;margin:0 auto;padding:28px 20px 64px}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* TYPOGRAPHY */
+h1{font-size:1.75rem;font-weight:800;margin-bottom:6px}
+h2{font-size:1.25rem;font-weight:700;margin-bottom:10px}
+h3{font-size:1rem;font-weight:700;margin-bottom:6px}
+p{color:var(--text2);margin-bottom:10px}
+.eyebrow{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:5px}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px 24px;box-shadow:var(--shadow)}
+.card+.card{margin-top:16px}
+.g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+hr.div{border:none;border-top:1px solid var(--border);margin:20px 0}
+
+/* PILLS / TAGS */
+.pill{display:inline-block;background:var(--green-bg);color:var(--green);border:1px solid var(--green);padding:2px 10px;border-radius:20px;font-size:.72rem;font-weight:700}
+.pill.amber{background:var(--amber-bg);color:var(--amber);border-color:var(--amber)}
+.pill.red{background:var(--red-bg);color:var(--red);border-color:var(--red)}
+.pill.blue{background:var(--blue-bg);color:var(--blue);border-color:var(--blue)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 20px;border-radius:var(--r);border:none;cursor:pointer;font-weight:700;font-size:.85rem;transition:background .18s,transform .1s;line-height:1}
+.btn:active{transform:scale(.97)}
+.btn-green{background:var(--green);color:#fff}
+.btn-green:hover{background:var(--green-d)}
+.btn-outline{background:transparent;border:2px solid var(--green);color:var(--green)}
+.btn-outline:hover{background:var(--green-bg)}
+.btn-red{background:var(--red);color:#fff}
+.btn-red:hover{background:#b71c1c}
+.btn-amber{background:var(--amber);color:#fff}
+.btn-amber:hover{background:#bf360c}
+.btn-sm{padding:5px 12px;font-size:.78rem}
+
+/* HERO BANNER */
+.hero{background:linear-gradient(135deg,var(--green-d),var(--green));color:#fff;border-radius:var(--r-lg);padding:30px 32px;margin-bottom:22px}
+.hero h1{color:#fff}
+.hero p{color:rgba(255,255,255,.87);margin-bottom:0}
+
+/* OBJECTIVE LIST */
+.obj-list{list-style:none;margin-top:10px}
+.obj-list li{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);color:var(--text2);font-size:.88rem}
+.obj-list li:last-child{border-bottom:none}
+.obj-n{flex-shrink:0;width:24px;height:24px;background:var(--green-bg);color:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800}
+
+/* SCENARIO BOX */
+.scenario{background:var(--bg2);border:2px dashed var(--green);border-radius:var(--r-lg);padding:20px 24px;margin-top:16px}
+.scenario .slabel{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--green);margin-bottom:8px}
+
+/* TERMS GRID */
+.term-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;margin-top:12px}
+.term-card{background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:var(--r);padding:10px 14px}
+.term-card .tn{font-weight:800;font-size:.83rem;color:var(--green)}
+.term-card .td{font-size:.76rem;color:var(--text3);margin-top:2px}
+
+/* TIMELINE */
+.timeline{position:relative;padding-left:40px}
+.timeline::before{content:'';position:absolute;left:13px;top:8px;bottom:8px;width:3px;background:linear-gradient(to bottom,var(--green),var(--green-l));border-radius:3px}
+.tl-item{position:relative;margin-bottom:22px}
+.tl-dot{position:absolute;left:-32px;top:5px;width:18px;height:18px;border-radius:50%;background:var(--green);border:3px solid var(--bg);box-shadow:0 0 0 2px var(--green)}
+.tl-time{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--green);margin-bottom:3px}
+.tl-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:13px 17px;box-shadow:var(--shadow)}
+.tl-tag{font-size:.68rem;background:var(--green-bg);color:var(--green);padding:2px 8px;border-radius:10px;font-weight:700;margin-right:5px;display:inline-block;margin-bottom:5px}
+.tl-tag.amber{background:var(--amber-bg);color:var(--amber)}
+.tl-tag.red{background:var(--red-bg);color:var(--red)}
+
+/* CONCEPT CARDS */
+.concept-card{background:var(--surface);border:1px solid var(--border);border-top:4px solid var(--green);border-radius:var(--r-lg);padding:20px;box-shadow:var(--shadow)}
+.ci{font-size:1.8rem;margin-bottom:8px}
+.analogy{background:var(--bg2);border-left:3px solid var(--green);border-radius:0 var(--r) var(--r) 0;padding:8px 12px;margin-top:10px;font-size:.8rem;color:var(--text3)}
+.analogy strong{color:var(--green);display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
+
+/* ===== COMPONENT A: BASELINE DRIFT ===== */
+.drift-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+.config-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.config-panel-header{padding:10px 16px;font-weight:700;font-size:.85rem;border-bottom:1px solid var(--border)}
+.config-panel-header.secure{background:var(--green-bg);color:var(--green)}
+.config-panel-header.drifted{background:var(--red-bg);color:var(--red)}
+.config-row{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;font-size:.85rem}
+.config-row:last-child{border-bottom:none}
+.config-row:hover{background:var(--bg2)}
+.config-row.clickable:hover{background:var(--amber-bg)}
+.config-row.found{background:var(--green-bg)!important;color:var(--green)}
+.config-row.missed{background:var(--red-bg)!important}
+.cv{font-weight:700;font-size:.82rem}
+.cv.ok{color:var(--green)}
+.cv.bad{color:var(--red)}
+.drift-score{margin-top:14px;padding:12px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);font-size:.85rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+#driftResult{margin-top:12px;padding:12px 16px;border-radius:var(--r);font-size:.85rem;display:none}
+
+/* ===== COMPONENT B: ASSET HUNTER ===== */
+.asset-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:14px}
+.asset-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--r);padding:14px 16px;transition:border-color .2s}
+.asset-card.tagged{border-color:var(--green);background:var(--green-bg)}
+.asset-card.flagged{border-color:var(--red);background:var(--red-bg)}
+.asset-icon{font-size:1.6rem;margin-bottom:6px}
+.asset-name{font-weight:700;font-size:.88rem}
+.asset-meta{font-size:.76rem;color:var(--text3);margin:3px 0 8px}
+.asset-btns{display:flex;gap:6px}
+#assetReport{margin-top:16px;padding:16px 20px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);display:none}
+.report-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:.85rem}
+.report-row:last-child{border-bottom:none}
+
+/* ===== COMPONENT C: LOG SIMULATOR ===== */
+.log-config{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:14px}
+.thresh-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.thresh-label{font-size:.82rem;font-weight:700;flex-shrink:0}
+.thresh-input{width:70px;padding:6px 10px;border:2px solid var(--border);border-radius:var(--r);background:var(--surface);color:var(--text);font-size:.88rem;font-weight:700}
+.thresh-input:focus{outline:none;border-color:var(--green)}
+.thresh-unit{font-size:.78rem;color:var(--text3)}
+.log-window{background:#0c1a0c;border:1px solid #2a3a2a;border-radius:var(--r);height:220px;overflow-y:auto;padding:12px 14px;font-family:'Courier New',monospace;font-size:.78rem;margin-bottom:12px}
+[data-theme="light"] .log-window{background:#0f1f0f}
+.log-line{padding:2px 0;color:#7ec87e}
+.log-line.warn{color:#ffca28}
+.log-line.alert{color:#ff5252;font-weight:700}
+.log-line.info{color:#64b5f6}
+#alertBanner{display:none;background:var(--red-bg);border:2px solid var(--red);border-radius:var(--r);padding:12px 16px;color:var(--red);font-weight:700;font-size:.9rem;margin-bottom:10px}
+#alertBanner.show{display:block}
+
+/* ===== COMPONENT D: SANDBOX ENGINE ===== */
+.sandbox-layout{display:grid;grid-template-columns:1fr 2fr;gap:18px;margin-top:14px}
+.file-tray{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:14px}
+.file-item{background:var(--surface);border:2px solid var(--border);border-radius:var(--r);padding:10px 13px;margin-bottom:10px;cursor:grab;transition:border-color .2s,box-shadow .2s;user-select:none}
+.file-item:hover{border-color:var(--green);box-shadow:var(--shadow)}
+.file-item.dragging{opacity:.5;cursor:grabbing}
+.file-item.placed{opacity:.4;pointer-events:none}
+.file-name{font-weight:700;font-size:.85rem}
+.file-meta{font-size:.74rem;color:var(--text3);margin-top:2px}
+.drop-zones{display:grid;grid-template-columns:1fr;gap:10px}
+.drop-zone{background:var(--surface2);border:2px dashed var(--border);border-radius:var(--r);padding:14px;min-height:90px;transition:border-color .2s,background .2s}
+.drop-zone.dragover{border-color:var(--green);background:var(--green-bg)}
+.dz-label{font-weight:700;font-size:.82rem;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.dz-label.run{color:var(--blue)}
+.dz-label.scan{color:var(--amber)}
+.dz-label.sandbox{color:var(--green)}
+.dz-items{display:flex;flex-direction:column;gap:6px}
+.placed-file{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:6px 10px;font-size:.8rem;display:flex;align-items:center;gap:8px}
+.placed-file .pfname{font-weight:700}
+.fb-badge{font-size:.7rem;padding:2px 8px;border-radius:10px;font-weight:700;white-space:nowrap}
+.fb-good{background:var(--green-bg);color:var(--green)}
+.fb-ok{background:var(--amber-bg);color:var(--amber)}
+.fb-bad{background:var(--red-bg);color:var(--red)}
+#sandboxFeedback{margin-top:12px;font-size:.83rem;display:none}
+
+/* ===== QUIZ ===== */
+.quiz-meta{font-size:.8rem;color:var(--text3)}
+.quiz-meta strong{color:var(--green)}
+.q-block{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px 24px;margin-bottom:14px}
+.q-block.correct-q{border-color:var(--green);border-left:4px solid var(--green)}
+.q-block.wrong-q{border-color:var(--red);border-left:4px solid var(--red)}
+.q-num{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:6px}
+.q-stag{display:inline-block;background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber);padding:1px 8px;border-radius:10px;font-size:.66rem;font-weight:700;margin-left:8px}
+.q-mctag{display:inline-block;background:var(--green-bg);color:var(--green);border:1px solid var(--green);padding:1px 8px;border-radius:10px;font-size:.66rem;font-weight:700;margin-left:8px}
+.q-text{font-weight:700;margin:6px 0 12px;color:var(--text);line-height:1.5;font-size:.93rem}
+.q-opts{display:flex;flex-direction:column;gap:8px}
+.q-opt{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border:2px solid var(--border);border-radius:var(--r);cursor:pointer;font-size:.86rem;transition:border-color .15s,background .15s}
+.q-opt:hover{border-color:var(--green);background:var(--green-bg)}
+.q-opt input[type=radio]{flex-shrink:0;accent-color:var(--green);margin-top:3px}
+.q-opt.opt-c{background:var(--green-bg)!important;border-color:var(--green)!important}
+.q-opt.opt-w{background:var(--red-bg)!important;border-color:var(--red)!important}
+[data-theme="dark"] .q-opt.opt-c{background:#162416!important}
+.q-fb{margin-top:10px;padding:10px 14px;border-radius:var(--r);font-size:.8rem;display:none}
+.q-fb.show{display:block}
+.q-fb.fbc{background:var(--green-bg);color:var(--green-d);border-left:3px solid var(--green)}
+.q-fb.fbw{background:var(--red-bg);color:var(--red);border-left:3px solid var(--red)}
+[data-theme="dark"] .q-fb.fbc{color:#81c784}
+[data-theme="dark"] .q-fb.fbw{color:#ef9a9a}
+.submit-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:20px}
+.score-result{font-size:1.35rem;font-weight:800;color:var(--green);display:none}
+.score-result.show{display:block}
+.reset-btn{background:transparent;color:var(--text3);border:1px solid var(--border);padding:9px 18px;border-radius:var(--r);cursor:pointer;font-weight:600;font-size:.83rem;transition:all .2s;display:none}
+.reset-btn.show{display:inline-block}
+.reset-btn:hover{border-color:var(--green);color:var(--green)}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:10px 24px;border-radius:30px;font-weight:700;font-size:.88rem;box-shadow:var(--shadow-md);z-index:999;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+.toast.bad{background:var(--red)}
+
+@media(max-width:640px){
+  header{padding:0 12px}
+  .hdr-title{font-size:.9rem}
+  main{padding:14px 12px 48px}
+  .drift-grid{grid-template-columns:1fr}
+  .sandbox-layout{grid-template-columns:1fr}
+  h1{font-size:1.4rem}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hdr-left">
+    <span class="hdr-eye">CompTIA Security+ SY0-701 · Lesson 8 of 12</span>
+    <span class="hdr-title">Security Operations &amp; Monitoring</span>
+  </div>
+  <div class="hdr-right">
+    <span class="badge">4-Hour Lesson</span>
+    <button class="theme-btn" id="themeToggle">☀️ Light Mode</button>
+  </div>
+</header>
+
+<nav class="tnav" role="tablist">
+  <button class="tbtn active" data-tab="overview">📋 Overview</button>
+  <button class="tbtn" data-tab="timeline">⏱️ Timeline</button>
+  <button class="tbtn" data-tab="concepts">🧠 Core Concepts</button>
+  <button class="tbtn" data-tab="drift">🔍 Baseline Drift</button>
+  <button class="tbtn" data-tab="assets">📡 Asset Hunter</button>
+  <button class="tbtn" data-tab="logs">📜 Log Simulator</button>
+  <button class="tbtn" data-tab="sandbox">📦 Sandbox Engine</button>
+  <button class="tbtn" data-tab="quiz">📝 Exam Prep</button>
+</nav>
+
+<main>
+
+<!-- ======================================================= TAB 1: OVERVIEW -->
+<section class="tab-panel active" id="tab-overview">
+  <div class="hero">
+    <div class="eyebrow" style="color:rgba(255,255,255,.7)">Security Operations · Domain 4.0</div>
+    <h1>If You Can't See It, You Can't Secure It</h1>
+    <p>Attackers live in environments that lack visibility. This lesson builds the SecOps mindset: baselining normal behavior, cataloging every asset, and turning log noise into actionable alerts — before an unknown device becomes a breach.</p>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="eyebrow">Learning Objectives</div>
+      <ul class="obj-list">
+        <li><span class="obj-n">1</span><span>Define system baselines and explain how drift detection identifies anomalies</span></li>
+        <li><span class="obj-n">2</span><span>Build and maintain an asset inventory using discovery techniques and CMDB principles</span></li>
+        <li><span class="obj-n">3</span><span>Distinguish log types (event, system, security, application) and configure SIEM alert thresholds</span></li>
+        <li><span class="obj-n">4</span><span>Explain the role of sandboxing in safe malware analysis and unknown-file detonation</span></li>
+        <li><span class="obj-n">5</span><span>Apply continuous monitoring principles to detect rogue devices and policy violations</span></li>
+        <li><span class="obj-n">6</span><span>Map SecOps controls to CompTIA Security+ SY0-701 exam objectives</span></li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="eyebrow">Security+ Exam Alignment</div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px">
+        <div><span class="pill">Obj 4.3</span> <span style="font-size:.82rem;color:var(--text3);margin-left:6px">Asset &amp; Change Management</span></div>
+        <div><span class="pill">Obj 4.4</span> <span style="font-size:.82rem;color:var(--text3);margin-left:6px">Log Monitoring &amp; SIEM</span></div>
+        <div><span class="pill">Obj 4.5</span> <span style="font-size:.82rem;color:var(--text3);margin-left:6px">Endpoint Detection &amp; Response</span></div>
+        <div><span class="pill">Obj 4.6</span> <span style="font-size:.82rem;color:var(--text3);margin-left:6px">Sandboxing &amp; Malware Analysis</span></div>
+        <div><span class="pill blue">Obj 2.4</span> <span style="font-size:.82rem;color:var(--text3);margin-left:6px">Threat Intelligence &amp; Indicators of Compromise</span></div>
+      </div>
+      <hr class="div" style="margin:10px 0">
+      <div class="eyebrow">Prerequisite Knowledge</div>
+      <p style="font-size:.82rem;margin:0">Lessons 1–7 (Networking, Cryptography, IAM). Basic familiarity with Windows Event Viewer and Linux syslog recommended but not required.</p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <div class="eyebrow">Key Terms — 8 Core Concepts</div>
+    <div class="term-grid">
+      <div class="term-card"><div class="tn">Baseline</div><div class="td">A documented snapshot of a system's normal, secure configuration state</div></div>
+      <div class="term-card"><div class="tn">Drift</div><div class="td">Any deviation from the established baseline — authorized or otherwise</div></div>
+      <div class="term-card"><div class="tn">Asset Inventory</div><div class="td">A comprehensive register of all hardware, software, and data assets on the network</div></div>
+      <div class="term-card"><div class="tn">CMDB</div><div class="td">Configuration Management Database — authoritative source of asset truth</div></div>
+      <div class="term-card"><div class="tn">SIEM</div><div class="td">Security Information &amp; Event Management — aggregates logs and fires alerts</div></div>
+      <div class="term-card"><div class="tn">IoC</div><div class="td">Indicator of Compromise — forensic evidence that an intrusion has occurred</div></div>
+      <div class="term-card"><div class="tn">Sandbox</div><div class="td">Isolated execution environment for safely detonating suspicious files</div></div>
+      <div class="term-card"><div class="tn">Rogue Device</div><div class="td">An unauthorized device connected to the network — internal or external origin</div></div>
+    </div>
+  </div>
+
+  <div class="scenario">
+    <div class="slabel">🔌 Opening Scenario — The New Laptop on the Network</div>
+    <p style="font-size:.9rem;color:var(--text2)">At 2:47 AM on a Tuesday, a DHCP lease is assigned to a device no one in IT recognizes. The MAC address doesn't match any entry in the asset inventory. Within 12 minutes, the device queries the Active Directory LDAP server, attempts three failed SMB connections to the file server, and downloads 847MB of data before going offline. By 9 AM, no one in IT knows this happened — because no alert was configured.</p>
+    <p style="font-size:.9rem;color:var(--text2);margin-bottom:0"><strong style="color:var(--text)">Discussion questions:</strong> What monitoring controls would have detected this? What should have triggered an alert? What does an attacker gain by operating at 2:47 AM specifically?</p>
+  </div>
+</section>
+
+<!-- ======================================================= TAB 2: TIMELINE -->
+<section class="tab-panel" id="tab-timeline">
+  <div style="margin-bottom:20px">
+    <div class="eyebrow">4-Hour Lesson Flow</div>
+    <h2>Lesson Timeline &amp; Activity Schedule</h2>
+    <p>Structured as alternating instruction and hands-on lab activities to build both conceptual understanding and applied SecOps skills.</p>
+  </div>
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-time">0:00 – 0:20</div>
+      <div class="tl-card">
+        <span class="tl-tag">Hook</span><span class="tl-tag">Discussion</span>
+        <h3>Opening — The 2:47 AM Incident</h3>
+        <p style="font-size:.84rem;margin-bottom:0">Present the rogue laptop scenario. Students discuss in pairs: what data could an attacker exfiltrate in 12 minutes? What controls were missing? Capture answers. Frame the lesson question: <em>How do defenders build visibility before attackers exploit the blind spots?</em></p>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-time">0:20 – 0:55</div>
+      <div class="tl-card">
+        <span class="tl-tag">Direct Instruction</span>
+        <h3>Module 1 — Baselines &amp; Configuration Drift</h3>
+        <p style="font-size:.84rem;margin-bottom:0">What constitutes a secure baseline (OS, services, ports, accounts). SCM tools: CIS Benchmarks, STIG, Group Policy. Drift detection mechanisms: file integrity monitoring (FIM), configuration auditing. Authorized vs. unauthorized drift. Students categorize 10 example changes as "authorized drift," "unauthorized drift," or "expected behavior."</p>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-time">0:55 – 1:25</div>
+      <div class="tl-card">
+        <span class="tl-tag">Direct Instruction</span><span class="tl-tag">Demo</span>
+        <h3>Module 2 — Asset Inventory &amp; Discovery</h3>
+        <p style="font-size:.84rem;margin-bottom:0">Why "you can't protect what you don't know you have." Active vs. passive discovery (Nmap, Nessus, DHCP logs). CMDB and Configuration Items (CIs). Rogue device detection via NAC and 802.1X. Live Nmap demo on lab subnet. The Library Catalog analogy: every book (asset) has a record; unregistered books are theft risk.</p>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-time">1:25 – 1:45</div>
+      <div class="tl-card">
+        <span class="tl-tag amber">Break</span>
+        <h3>Break + Reflection</h3>
+        <p style="font-size:.84rem;margin-bottom:0">Students identify one network-connected device they own that may not appear in an institutional asset inventory (smart TV, personal phone, IoT). Share with the group on return: what risk does each represent?</p>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-time">1:45 – 2:20</div>
+      <div class="tl-card">
+        <span class="tl-tag">Direct Instruction</span>
+        <h3>Module 3 — Logging, Monitoring &amp; SIEM</h3>
+        <p style="font-size:.84rem;margin-bottom:0">Log taxonomy: system, security, application, audit. Windows Event IDs (4624, 4625, 4648, 4720). Syslog severity levels. SIEM architecture: collection, normalization, correlation, alerting. Alert threshold design — balancing false positive fatigue vs. missed detection. Use case: brute-force detection rule (5 failures in 60 seconds). Introduction to SOAR for automated response.</p>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-time">2:20 – 2:50</div>
+      <div class="tl-card">
+        <span class="tl-tag">Interactive Lab</span>
+        <h3>Labs — Baseline Drift Detective + Asset Hunter + Log Simulator</h3>
+        <p style="font-size:.84rem;margin-bottom:0">Students work through the three interactive components on this page. Instructor circulates. Class reconvenes to debrief: which drifted configs were hardest to spot? Which assets were most suspicious? Did everyone's thresholds catch the brute-force?</p>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-time">2:50 – 3:25</div>
+      <div class="tl-card">
+        <span class="tl-tag">Direct Instruction</span>
+        <h3>Module 4 — Sandboxing &amp; Malware Analysis</h3>
+        <p style="font-size:.84rem;margin-bottom:0">What is sandboxing and why it matters. Types: OS-level (containers), VM-based (Cuckoo), cloud (VirusTotal). Safe detonation workflow: submission → behavioral analysis → IoC extraction → verdict. When NOT to sandbox (known-good signed binaries). Static vs. dynamic analysis. Introduction to threat intelligence feeds and STIX/TAXII.</p>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-time">3:25 – 3:45</div>
+      <div class="tl-card">
+        <span class="tl-tag">Interactive Lab</span>
+        <h3>Lab — Sandbox Decision Engine</h3>
+        <p style="font-size:.84rem;margin-bottom:0">Students classify and route three files through the sandbox engine widget. Debrief: which decisions were hardest? What metadata (signature, origin, behavior) most influenced the decision?</p>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-time">3:45 – 4:00</div>
+      <div class="tl-card">
+        <span class="tl-tag red">Assessment</span><span class="tl-tag">Wrap-Up</span>
+        <h3>Exam Prep Quiz + Lesson Close</h3>
+        <p style="font-size:.84rem;margin-bottom:0">12-question Security+ practice quiz. Class reviews missed items. Return to the 2:47 AM scenario — students now list every control that should have fired an alert. Preview Lesson 9: Incident Response &amp; Digital Forensics.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================= TAB 3: CONCEPTS -->
+<section class="tab-panel" id="tab-concepts">
+  <div style="margin-bottom:20px">
+    <div class="eyebrow">Reference Material</div>
+    <h2>Core SecOps Concepts &amp; Exam Mappings</h2>
+  </div>
+  <div class="g2" style="gap:18px">
+    <div class="concept-card">
+      <div class="ci">📐</div>
+      <div class="eyebrow">Obj 4.3 — Configuration Mgmt</div>
+      <h3>System Baselines &amp; Drift Detection</h3>
+      <p style="font-size:.84rem">A baseline documents every measurable aspect of a secure system: open ports, running services, installed software, local user accounts, registry keys, and file hashes. Once established, any deviation — planned or unplanned — is drift.</p>
+      <ul style="font-size:.82rem;color:var(--text2);padding-left:16px;line-height:2">
+        <li><strong>CIS Benchmarks</strong> — Community-consensus hardening guidelines by OS/platform</li>
+        <li><strong>STIG</strong> — DoD-mandated Security Technical Implementation Guides</li>
+        <li><strong>FIM</strong> — File Integrity Monitoring alerts on unauthorized file changes</li>
+        <li><strong>Authorized Drift</strong> — Documented, approved change (e.g., patch deployment)</li>
+        <li><strong>Unauthorized Drift</strong> — Unexplained deviation — potential compromise indicator</li>
+      </ul>
+      <div class="analogy"><strong>Real-World Analogy</strong>A newly renovated hotel room has a "standard setup" photo. Housekeeping compares the room to the photo each morning. Any difference — missing towels, moved furniture — triggers an investigation.</div>
+    </div>
+    <div class="concept-card">
+      <div class="ci">📚</div>
+      <div class="eyebrow">Obj 4.3 — Asset Management</div>
+      <h3>Asset Inventory &amp; Discovery</h3>
+      <p style="font-size:.84rem">You cannot protect what you don't know exists. Every connected device is an attack surface. Asset inventory combines automated discovery with a maintained Configuration Management Database (CMDB).</p>
+      <ul style="font-size:.82rem;color:var(--text2);padding-left:16px;line-height:2">
+        <li><strong>Active Discovery</strong> — Nmap, Nessus scans that probe the network</li>
+        <li><strong>Passive Discovery</strong> — DHCP lease analysis, traffic monitoring</li>
+        <li><strong>CMDB</strong> — Authoritative register of all Configuration Items (CIs)</li>
+        <li><strong>NAC</strong> — Network Access Control enforces policy for unknown devices</li>
+        <li><strong>802.1X</strong> — Port-based authentication prevents rogue device connectivity</li>
+      </ul>
+      <div class="analogy"><strong>Library Catalog Analogy</strong>Every book in a library has a catalog record. An uncataloged book cannot be found, cannot be checked out, and may be stolen without anyone knowing. The CMDB is your catalog — every uncatalogued asset is a hidden liability.</div>
+    </div>
+    <div class="concept-card">
+      <div class="ci">📊</div>
+      <div class="eyebrow">Obj 4.4 — Logging &amp; Monitoring</div>
+      <h3>Log Management &amp; SIEM Architecture</h3>
+      <p style="font-size:.84rem">Logs are the security camera footage of your infrastructure. A SIEM aggregates logs from across the environment, normalizes formats, correlates events across systems, and fires alerts when patterns exceed thresholds.</p>
+      <table style="width:100%;font-size:.78rem;border-collapse:collapse;margin-bottom:10px">
+        <tr style="border-bottom:1px solid var(--border)"><th style="text-align:left;padding:5px;color:var(--text3)">Event ID</th><th style="text-align:left;padding:5px;color:var(--green)">Meaning</th></tr>
+        <tr style="border-bottom:1px solid var(--border)"><td style="padding:5px">4624</td><td style="padding:5px;color:var(--text2)">Successful logon</td></tr>
+        <tr style="border-bottom:1px solid var(--border)"><td style="padding:5px">4625</td><td style="padding:5px;color:var(--text2)">Failed logon attempt</td></tr>
+        <tr style="border-bottom:1px solid var(--border)"><td style="padding:5px">4648</td><td style="padding:5px;color:var(--text2)">Logon with explicit credentials</td></tr>
+        <tr><td style="padding:5px">4720</td><td style="padding:5px;color:var(--text2)">User account was created</td></tr>
+      </table>
+      <div class="analogy"><strong>Real-World Analogy</strong>A casino surveillance system doesn't record everything with equal priority — it has motion sensors, face recognition triggers, and a security team that only responds when the system flags anomalies. SIEM is your casino surveillance for the network.</div>
+    </div>
+    <div class="concept-card">
+      <div class="ci">📦</div>
+      <div class="eyebrow">Obj 4.6 — Malware Analysis</div>
+      <h3>Sandboxing &amp; Safe File Detonation</h3>
+      <p style="font-size:.84rem">A sandbox is an isolated execution environment where suspicious files can run freely and reveal their behavior without risk to production systems. Sandboxing bridges the gap between static signature detection and behavioral analysis.</p>
+      <ul style="font-size:.82rem;color:var(--text2);padding-left:16px;line-height:2">
+        <li><strong>Static Analysis</strong> — Examine file without executing (strings, hash, PE header)</li>
+        <li><strong>Dynamic Analysis</strong> — Execute in isolation; observe network calls, registry changes</li>
+        <li><strong>VM-based</strong> — Cuckoo Sandbox, Any.run — full OS isolation</li>
+        <li><strong>Cloud-based</strong> — VirusTotal, Hybrid Analysis — community intelligence</li>
+        <li><strong>Anti-Sandbox</strong> — Malware that detects VM environments and stays dormant</li>
+      </ul>
+      <div class="analogy"><strong>Bomb Disposal Analogy</strong>A suspicious package isn't opened in a crowd — it's taken to a blast-proof containment room. Analysts observe the detonation safely, then extract forensic evidence. A sandbox is the blast-proof room for suspicious files.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================= TAB 4: DRIFT DETECTIVE -->
+<section class="tab-panel" id="tab-drift">
+  <div style="margin-bottom:16px">
+    <div class="eyebrow">Component A — Baseline Drift Detective</div>
+    <h2>Spot the Configuration Violations</h2>
+    <p>The right panel shows a web server that has drifted from its secure baseline. Click each row in the <strong>Drifted Server</strong> panel that violates the baseline. Find all <span id="driftTotal">5</span> violations to complete the exercise.</p>
+  </div>
+  <div class="drift-grid">
+    <div class="config-panel">
+      <div class="config-panel-header secure">✅ Secure Baseline — Production Web Server</div>
+      <div class="config-row"><span>SSH Port</span><span class="cv ok">22 (disabled externally)</span></div>
+      <div class="config-row"><span>HTTP Port 80</span><span class="cv ok">Redirect to HTTPS only</span></div>
+      <div class="config-row"><span>HTTPS Port 443</span><span class="cv ok">Open — TLS 1.3</span></div>
+      <div class="config-row"><span>Telnet (23)</span><span class="cv ok">Disabled</span></div>
+      <div class="config-row"><span>FTP (21)</span><span class="cv ok">Disabled</span></div>
+      <div class="config-row"><span>Local Admin Account</span><span class="cv ok">Disabled</span></div>
+      <div class="config-row"><span>Guest Account</span><span class="cv ok">Disabled</span></div>
+      <div class="config-row"><span>Antivirus Service</span><span class="cv ok">Running — definitions current</span></div>
+      <div class="config-row"><span>Windows Firewall</span><span class="cv ok">Enabled (all profiles)</span></div>
+      <div class="config-row"><span>Last Patch Date</span><span class="cv ok">Within 30 days</span></div>
+    </div>
+    <div class="config-panel">
+      <div class="config-panel-header drifted">⚠️ Current State — Drifted Server (Click Violations)</div>
+      <div class="config-row clickable" id="dr-ssh" onclick="clickDrift('dr-ssh',false)"><span>SSH Port</span><span class="cv ok">22 (disabled externally)</span></div>
+      <div class="config-row clickable" id="dr-http" onclick="clickDrift('dr-http',true)"><span>HTTP Port 80</span><span class="cv bad">Open — serving content directly</span></div>
+      <div class="config-row clickable" id="dr-https" onclick="clickDrift('dr-https',false)"><span>HTTPS Port 443</span><span class="cv ok">Open — TLS 1.3</span></div>
+      <div class="config-row clickable" id="dr-telnet" onclick="clickDrift('dr-telnet',true)"><span>Telnet (23)</span><span class="cv bad">Open — active listener</span></div>
+      <div class="config-row clickable" id="dr-ftp" onclick="clickDrift('dr-ftp',false)"><span>FTP (21)</span><span class="cv ok">Disabled</span></div>
+      <div class="config-row clickable" id="dr-admin" onclick="clickDrift('dr-admin',true)"><span>Local Admin Account</span><span class="cv bad">Enabled — no password set</span></div>
+      <div class="config-row clickable" id="dr-guest" onclick="clickDrift('dr-guest',false)"><span>Guest Account</span><span class="cv ok">Disabled</span></div>
+      <div class="config-row clickable" id="dr-av" onclick="clickDrift('dr-av',true)"><span>Antivirus Service</span><span class="cv bad">Stopped — definitions 47 days old</span></div>
+      <div class="config-row clickable" id="dr-fw" onclick="clickDrift('dr-fw',false)"><span>Windows Firewall</span><span class="cv ok">Enabled</span></div>
+      <div class="config-row clickable" id="dr-patch" onclick="clickDrift('dr-patch',true)"><span>Last Patch Date</span><span class="cv bad">127 days ago</span></div>
+    </div>
+  </div>
+  <div class="drift-score">
+    <div><strong id="driftFound">0</strong> of <strong id="driftTotalDisplay">5</strong> violations found &nbsp;·&nbsp; <span id="driftWrong" style="color:var(--red)">0 false clicks</span></div>
+    <button class="btn btn-outline btn-sm" onclick="resetDrift()">↺ Reset</button>
+  </div>
+  <div id="driftResult"></div>
+</section>
+
+<!-- ======================================================= TAB 5: ASSET HUNTER -->
+<section class="tab-panel" id="tab-assets">
+  <div style="margin-bottom:16px">
+    <div class="eyebrow">Component B — The Asset Hunter</div>
+    <h2>Identify Known &amp; Rogue Devices</h2>
+    <p>You are the network administrator. Review each discovered device and either <strong>Tag</strong> it as a known authorized asset or <strong>Flag</strong> it as suspicious/rogue. Complete all devices to generate the incident report.</p>
+  </div>
+  <div class="asset-grid" id="assetGrid"></div>
+  <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+    <button class="btn btn-green" onclick="generateReport()">Generate Inventory Report →</button>
+    <button class="btn btn-outline" onclick="resetAssets()">↺ Reset</button>
+  </div>
+  <div id="assetReport"></div>
+</section>
+
+<!-- ======================================================= TAB 6: LOG SIMULATOR -->
+<section class="tab-panel" id="tab-logs">
+  <div style="margin-bottom:16px">
+    <div class="eyebrow">Component C — Log-to-Alert Simulator</div>
+    <h2>Configure Thresholds &amp; Catch the Attack</h2>
+    <p>Set your SIEM alert thresholds below, then run the brute-force simulation. Did your rules catch the attack — or did the attacker slip through?</p>
+  </div>
+  <div class="log-config">
+    <h3 style="margin-bottom:12px">⚙️ SIEM Alert Threshold Configuration</h3>
+    <div class="thresh-row">
+      <span class="thresh-label">🔴 Failed Login Alert: more than</span>
+      <input class="thresh-input" type="number" id="failThresh" value="5" min="1" max="50">
+      <span class="thresh-unit">failed logins within</span>
+      <input class="thresh-input" type="number" id="failWindow" value="60" min="10" max="300">
+      <span class="thresh-unit">seconds</span>
+    </div>
+    <div class="thresh-row">
+      <span class="thresh-label">🟡 Port Scan Alert: more than</span>
+      <input class="thresh-input" type="number" id="portThresh" value="10" min="1" max="100">
+      <span class="thresh-unit">unique ports scanned in</span>
+      <input class="thresh-input" type="number" id="portWindow" value="30" min="5" max="120">
+      <span class="thresh-unit">seconds</span>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:6px">
+      <button class="btn btn-green" onclick="runSimulation()">▶ Run Brute-Force Scenario</button>
+      <button class="btn btn-outline" onclick="clearLogs()">🗑 Clear Logs</button>
+    </div>
+  </div>
+  <div id="alertBanner">🚨 SIEM ALERT FIRED: Threshold exceeded — possible brute-force attack in progress!</div>
+  <div class="log-window" id="logWindow"><span style="color:#4caf50">// Log stream ready. Configure thresholds and run the simulation.</span></div>
+  <div id="simSummary" style="display:none;margin-top:12px;padding:14px 18px;border-radius:var(--r);font-size:.85rem"></div>
+</section>
+
+<!-- ======================================================= TAB 7: SANDBOX ENGINE -->
+<section class="tab-panel" id="tab-sandbox">
+  <div style="margin-bottom:16px">
+    <div class="eyebrow">Component D — Sandbox Decision Engine</div>
+    <h2>Route Each File to the Correct Action</h2>
+    <p>Drag each file from the tray to the appropriate action zone: <strong>Run Normally</strong>, <strong>Scan First</strong>, or <strong>Sandbox</strong>. Consider the file's origin, signature status, and behavior indicators.</p>
+  </div>
+  <div class="sandbox-layout">
+    <div>
+      <div class="eyebrow" style="margin-bottom:8px">File Tray — Pending Review</div>
+      <div class="file-tray" id="fileTray"></div>
+    </div>
+    <div>
+      <div class="eyebrow" style="margin-bottom:8px">Action Zones — Drag Files Here</div>
+      <div class="drop-zones">
+        <div class="drop-zone" id="dz-run" ondragover="dzOver(event,'dz-run')" ondragleave="dzLeave('dz-run')" ondrop="dzDrop(event,'run')">
+          <div class="dz-label run">▶ Run Normally <span style="font-size:.72rem;font-weight:400;color:var(--text3)">(Low risk — known trusted file)</span></div>
+          <div class="dz-items" id="dz-run-items"></div>
+        </div>
+        <div class="drop-zone" id="dz-scan" ondragover="dzOver(event,'dz-scan')" ondragleave="dzLeave('dz-scan')" ondrop="dzDrop(event,'scan')">
+          <div class="dz-label scan">🔍 Scan First <span style="font-size:.72rem;font-weight:400;color:var(--text3)">(Moderate uncertainty — AV scan before execution)</span></div>
+          <div class="dz-items" id="dz-scan-items"></div>
+        </div>
+        <div class="drop-zone" id="dz-sandbox" ondragover="dzOver(event,'dz-sandbox')" ondragleave="dzLeave('dz-sandbox')" ondrop="dzDrop(event,'sandbox')">
+          <div class="dz-label sandbox">📦 Sandbox <span style="font-size:.72rem;font-weight:400;color:var(--text3)">(High risk — isolated detonation required)</span></div>
+          <div class="dz-items" id="dz-sandbox-items"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="sandboxFeedback"></div>
+  <div style="margin-top:14px;display:flex;gap:10px">
+    <button class="btn btn-outline" onclick="resetSandbox()">↺ Reset</button>
+  </div>
+</section>
+
+<!-- ======================================================= TAB 8: QUIZ -->
+<section class="tab-panel" id="tab-quiz">
+  <div class="card" style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+    <div style="font-size:2rem">📝</div>
+    <div>
+      <h2 style="margin-bottom:4px">Security+ Exam Prep Assessment</h2>
+      <div class="quiz-meta"><strong>12 Questions</strong> · 10 Multiple Choice + 2 Scenario · <strong>Lesson 8: SecOps &amp; Monitoring</strong> · SY0-701</div>
+    </div>
+  </div>
+  <div id="quizContainer"></div>
+  <div class="submit-bar">
+    <div>
+      <div class="score-result" id="quizScore"></div>
+      <div style="font-size:.8rem;color:var(--text3);margin-top:4px" id="quizHint">Answer all questions, then submit to see your results and explanations.</div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center">
+      <button class="reset-btn" id="resetQuizBtn" onclick="resetQuiz()">↺ Retake</button>
+      <button class="btn btn-green" id="submitQuizBtn" onclick="submitQuiz()">Submit Quiz →</button>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================ THEME
+const themeBtn = document.getElementById('themeToggle');
+let dark = false;
+themeBtn.addEventListener('click', () => {
+  dark = !dark;
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  themeBtn.textContent = dark ? '🌙 Dark Mode' : '☀️ Light Mode';
+});
+
+// ============================================================ TABS
+document.querySelectorAll('.tbtn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tbtn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    const panel = document.getElementById('tab-' + btn.dataset.tab);
+    if (panel) panel.classList.add('active');
+  });
+});
+
+// ============================================================ TOAST
+function toast(msg, bad) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (bad ? ' bad' : '');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => { t.className = 'toast'; }, 2000);
+}
+
+// ============================================================ COMPONENT A: DRIFT
+const driftViolations = ['dr-http','dr-telnet','dr-admin','dr-av','dr-patch'];
+let driftFound = 0, driftWrong = 0;
+const driftClicked = new Set();
+
+function clickDrift(id, isViolation) {
+  if (driftClicked.has(id)) return;
+  driftClicked.add(id);
+  const el = document.getElementById(id);
+  if (isViolation) {
+    el.classList.add('found');
+    el.onclick = null;
+    driftFound++;
+    toast('✓ Violation identified!', false);
+  } else {
+    el.classList.add('missed');
+    setTimeout(() => { el.classList.remove('missed'); driftClicked.delete(id); }, 800);
+    driftWrong++;
+    toast('✗ Not a violation — this matches baseline', true);
+  }
+  document.getElementById('driftFound').textContent = driftFound;
+  document.getElementById('driftWrong').textContent = driftWrong + ' false clicks';
+  if (driftFound === driftViolations.length) {
+    const res = document.getElementById('driftResult');
+    res.style.display = 'block';
+    res.style.cssText = 'display:block;background:var(--green-bg);border:1px solid var(--green);border-radius:var(--r);padding:12px 16px;color:var(--green);font-size:.86rem;margin-top:12px';
+    res.innerHTML = '<strong>✅ All 5 violations found!</strong> You identified: HTTP serving without HTTPS redirect, Telnet port open, Local admin account enabled with no password, Antivirus stopped with outdated definitions, and a 127-day patch gap. Each represents a distinct attack vector. In a real environment, a SIEM FIM rule should have alerted on every one of these changes the moment they occurred.';
+    toast('🎉 All violations found!', false);
+  }
+}
+
+function resetDrift() {
+  driftFound = 0; driftWrong = 0;
+  driftClicked.clear();
+  driftViolations.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.classList.remove('found','missed'); el.onclick = () => clickDrift(id, true); }
+  });
+  ['dr-ssh','dr-https','dr-ftp','dr-guest','dr-fw'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.classList.remove('found','missed'); }
+  });
+  document.getElementById('driftFound').textContent = '0';
+  document.getElementById('driftWrong').textContent = '0 false clicks';
+  document.getElementById('driftResult').style.display = 'none';
+}
+
+// ============================================================ COMPONENT B: ASSETS
+const assetData = [
+  { id:'a1', icon:'💻', name:'DESKTOP-HR-042', ip:'192.168.1.15', mac:'A4:C3:F0:1B:2E:44', type:'Windows 11 Workstation', dept:'Human Resources', known:true },
+  { id:'a2', icon:'🖨️', name:'PRINTER-MFP-01', ip:'192.168.1.22', mac:'B8:27:EB:3C:11:7F', type:'Network Printer', dept:'Finance Floor', known:true },
+  { id:'a3', icon:'📱', name:'Unknown-Android', ip:'192.168.1.87', mac:'DC:A6:32:7F:99:01', type:'Android Device', dept:'DHCP — unregistered', known:false },
+  { id:'a4', icon:'🖥️', name:'SRV-WEB-PROD', ip:'192.168.2.10', mac:'00:50:56:A4:72:B1', type:'Ubuntu 22 LTS Server', dept:'IT Infrastructure', known:true },
+  { id:'a5', icon:'📡', name:'Unknown-Device-X', ip:'192.168.1.201', mac:'52:54:00:12:35:AA', type:'Unknown — VM signature', dept:'DHCP — unregistered', known:false },
+  { id:'a6', icon:'💻', name:'LAPTOP-SEC-007', ip:'192.168.1.33', mac:'C8:9C:1D:05:B4:2F', type:'MacOS Security Workstation', dept:'Security Team', known:true },
+  { id:'a7', icon:'📷', name:'IPCAM-LOBBY-1', ip:'192.168.3.11', mac:'74:AC:B9:1E:3D:88', type:'IP Camera — Hikvision', dept:'Physical Security', known:true },
+  { id:'a8', icon:'🔌', name:'RaspberryPi-???', ip:'192.168.1.199', mac:'B8:27:EB:AA:11:CC', type:'Linux ARM device', dept:'DHCP — unregistered', known:false },
+];
+
+const assetState = {};
+
+function buildAssets() {
+  const grid = document.getElementById('assetGrid');
+  grid.innerHTML = '';
+  assetData.forEach(a => {
+    assetState[a.id] = assetState[a.id] || 'none';
+    const state = assetState[a.id];
+    const card = document.createElement('div');
+    card.className = 'asset-card' + (state === 'tagged' ? ' tagged' : state === 'flagged' ? ' flagged' : '');
+    card.id = 'acard-' + a.id;
+    card.innerHTML = `
+      <div class="asset-icon">${a.icon}</div>
+      <div class="asset-name">${a.name}</div>
+      <div class="asset-meta">IP: ${a.ip}<br>MAC: ${a.mac}<br>Type: ${a.type}<br>Dept: ${a.dept}</div>
+      <div class="asset-btns">
+        <button class="btn btn-green btn-sm" onclick="tagAsset('${a.id}',true)" ${state !== 'none' ? 'disabled' : ''}>✓ Tag</button>
+        <button class="btn btn-red btn-sm" onclick="tagAsset('${a.id}',false)" ${state !== 'none' ? 'disabled' : ''}>⚑ Flag</button>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+function tagAsset(id, tag) {
+  const a = assetData.find(x => x.id === id);
+  if (!a) return;
+  assetState[id] = tag ? 'tagged' : 'flagged';
+  const correct = (tag && a.known) || (!tag && !a.known);
+  toast(correct ? '✓ Correct classification!' : '✗ Incorrect — reconsider this device', !correct);
+  buildAssets();
+}
+
+function resetAssets() {
+  assetData.forEach(a => { assetState[a.id] = 'none'; });
+  buildAssets();
+  document.getElementById('assetReport').style.display = 'none';
+}
+
+function generateReport() {
+  const untagged = assetData.filter(a => assetState[a.id] === 'none');
+  if (untagged.length > 0) { toast('Complete all ' + untagged.length + ' remaining device(s) first', true); return; }
+  let correct = 0, incorrect = 0;
+  const rows = assetData.map(a => {
+    const state = assetState[a.id];
+    const isCorrect = (state === 'tagged' && a.known) || (state === 'flagged' && !a.known);
+    if (isCorrect) correct++; else incorrect++;
+    return `<div class="report-row">
+      <span>${a.icon} ${a.name}</span>
+      <span>${state === 'flagged' ? '⚑ Flagged' : '✓ Tagged'}</span>
+      <span style="color:${isCorrect ? 'var(--green)' : 'var(--red)'}">${isCorrect ? '✓ Correct' : '✗ Incorrect'}</span>
+    </div>`;
+  }).join('');
+  const pct = Math.round((correct / assetData.length) * 100);
+  const rep = document.getElementById('assetReport');
+  rep.style.display = 'block';
+  rep.innerHTML = `<div class="eyebrow" style="margin-bottom:10px">Network Asset Inventory Report</div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:14px">
+      <div style="font-size:1.2rem;font-weight:800;color:var(--green)">${correct}/${assetData.length} Correct</div>
+      <div style="font-size:1.2rem;font-weight:800;color:var(--text3)">${pct}% Accuracy</div>
+      <div><span class="pill red">${assetData.filter(a => !a.known).length} Rogue Devices</span></div>
+    </div>
+    ${rows}
+    <div style="margin-top:12px;font-size:.82rem;color:var(--text3)">In a live environment, flagged devices should trigger immediate isolation via NAC policy and a security incident ticket. The three rogue devices (Unknown-Android, Unknown-Device-X, RaspberryPi-???) represent uncontrolled network access points and potential data exfiltration vectors.</div>`;
+}
+
+buildAssets();
+
+// ============================================================ COMPONENT C: LOG SIMULATOR
+let simRunning = false;
+
+const scenarioEvents = [
+  { delay:200,  type:'info',  msg:'[2:47:03] DHCP: Lease assigned 192.168.1.201 to MAC 52:54:00:12:35:AA (unknown device)' },
+  { delay:800,  type:'info',  msg:'[2:47:05] NET: LDAP query from 192.168.1.201 to DC01 (anonymous bind attempt)' },
+  { delay:1400, type:'warn',  msg:'[2:47:08] AUTH: Failed login admin@CORP from 192.168.1.201 — Event ID 4625' },
+  { delay:1800, type:'warn',  msg:'[2:47:09] AUTH: Failed login admin@CORP from 192.168.1.201 — Event ID 4625' },
+  { delay:2100, type:'warn',  msg:'[2:47:10] AUTH: Failed login admin@CORP from 192.168.1.201 — Event ID 4625' },
+  { delay:2400, type:'warn',  msg:'[2:47:11] AUTH: Failed login admin@CORP from 192.168.1.201 — Event ID 4625' },
+  { delay:2700, type:'warn',  msg:'[2:47:12] AUTH: Failed login admin@CORP from 192.168.1.201 — Event ID 4625' },
+  { delay:3000, type:'warn',  msg:'[2:47:13] AUTH: Failed login admin@CORP from 192.168.1.201 — Event ID 4625' },
+  { delay:3200, type:'warn',  msg:'[2:47:13] AUTH: Failed login admin@CORP from 192.168.1.201 — Event ID 4625' },
+  { delay:3400, type:'warn',  msg:'[2:47:14] AUTH: Failed login administrator@CORP from 192.168.1.201 — Event ID 4625' },
+  { delay:3700, type:'alert', msg:'[2:47:14] >>> 8 failed logins in 11 seconds from 192.168.1.201 <<<' },
+  { delay:4200, type:'info',  msg:'[2:47:19] NET: SMB connection attempt 192.168.1.201 → FILESERVER01:445 — Access Denied' },
+  { delay:4600, type:'info',  msg:'[2:47:21] NET: SMB connection attempt 192.168.1.201 → FILESERVER01:445 — Access Denied' },
+  { delay:5000, type:'info',  msg:'[2:47:22] NET: HTTP GET 192.168.1.201 → 185.220.101.x:80 (Tor exit node)' },
+  { delay:5500, type:'warn',  msg:'[2:47:28] NET: DNS query for known C2 domain c2malware-callback.net from 192.168.1.201' },
+  { delay:6000, type:'alert', msg:'[2:47:31] >>> DATA: 847MB outbound transfer from 192.168.1.201 to external IP <<<' },
+  { delay:6800, type:'info',  msg:'[2:47:38] DHCP: Lease released for 192.168.1.201 — device went offline' },
+  { delay:7400, type:'alert', msg:'[SCENARIO END] Attack complete. Did your thresholds fire in time?' },
+];
+
+function addLogLine(msg, type) {
+  const win = document.getElementById('logWindow');
+  const line = document.createElement('div');
+  line.className = 'log-line ' + (type || '');
+  line.textContent = msg;
+  win.appendChild(line);
+  win.scrollTop = win.scrollHeight;
+}
+
+function clearLogs() {
+  const win = document.getElementById('logWindow');
+  win.innerHTML = '<span style="color:#4caf50">// Log stream cleared. Ready.</span>';
+  document.getElementById('alertBanner').classList.remove('show');
+  document.getElementById('alertBanner').textContent = '';
+  const sum = document.getElementById('simSummary');
+  if (sum) sum.style.display = 'none';
+  simRunning = false;
+}
+
+function runSimulation() {
+  if (simRunning) return;
+  simRunning = true;
+  clearLogs();
+  const failThresh = parseInt(document.getElementById('failThresh').value) || 5;
+  const failWindow = parseInt(document.getElementById('failWindow').value) || 60;
+  let alertFired = false;
+  let failCount = 0;
+  const failTimes = [];
+
+  addLogLine('[SIEM] Simulation started — threshold: alert if >' + failThresh + ' failed logins in ' + failWindow + 's', 'info');
+
+  scenarioEvents.forEach(ev => {
+    setTimeout(() => {
+      addLogLine(ev.msg, ev.type);
+      if (ev.type === 'warn' && ev.msg.includes('Failed login')) {
+        failCount++;
+        const now = Date.now();
+        failTimes.push(now);
+        const windowStart = now - (failWindow * 1000);
+        const recentFails = failTimes.filter(t => t >= windowStart).length;
+        if (!alertFired && recentFails > failThresh) {
+          alertFired = true;
+          const banner = document.getElementById('alertBanner');
+          banner.className = 'show';
+          banner.textContent = '🚨 SIEM ALERT FIRED: ' + recentFails + ' failed logins in window from 192.168.1.201 — Brute-force detected! (Your threshold: >' + failThresh + ' in ' + failWindow + 's)';
+          addLogLine('[SIEM ALERT] Threshold exceeded — auto-response triggered', 'alert');
+        }
+      }
+    }, ev.delay);
+  });
+
+  setTimeout(() => {
+    const sum = document.getElementById('simSummary');
+    sum.style.display = 'block';
+    if (alertFired) {
+      sum.style.cssText = 'display:block;background:var(--green-bg);border:1px solid var(--green);border-radius:var(--r);padding:14px 18px;font-size:.85rem;margin-top:12px;color:var(--green)';
+      sum.innerHTML = '<strong>✅ Your threshold caught the attack!</strong> Your rule fired before the data exfiltration completed. In a real environment, SOAR automation could have isolated 192.168.1.201 via NAC after the alert, stopping the 847MB transfer. Strong threshold design balances sensitivity (catching attacks) with specificity (avoiding false positive fatigue).';
+    } else {
+      sum.style.cssText = 'display:block;background:var(--red-bg);border:1px solid var(--red);border-radius:var(--r);padding:14px 18px;font-size:.85rem;margin-top:12px;color:var(--red)';
+      sum.innerHTML = '<strong>⚠ Your threshold was too high — the attack succeeded undetected.</strong> The brute-force attempt generated 8 failed logins in 11 seconds, but your threshold required more than ' + document.getElementById('failThresh').value + ' failures. Lower your threshold or tighten the time window to catch rapid credential attacks. However: be aware that very low thresholds (e.g., >2 in 60s) generate high false positives — alert fatigue is itself a security risk.';
+    }
+    simRunning = false;
+  }, 8500);
+}
+
+// ============================================================ COMPONENT D: SANDBOX
+const fileItems = [
+  {
+    id:'f1', name:'notepad.exe', icon:'📄',
+    meta:'Microsoft signed · C:\\Windows\\System32 · SHA256 verified · v10.0.22621',
+    correct:'run',
+    feedback: { run:'✅ Correct. This is a Microsoft-signed system binary with a verified hash. Running it normally is appropriate. Sandboxing known-good signed system files wastes resources and adds no security value.', scan:'⚠ Overly cautious. This is a verified Microsoft system file — AV scanning adds no value for known-good signed binaries with verified hashes.', sandbox:'⚠ Excessive. Sandboxing known Microsoft system binaries is resource-intensive with zero benefit. Focus sandbox capacity on genuinely unknown files.' }
+  },
+  {
+    id:'f2', name:'invoice_Q4.js', icon:'📧',
+    meta:'Email attachment · Origin: external sender · Unsigned · JavaScript · Macros detected',
+    correct:'sandbox',
+    feedback: { run:'🚨 Critical Error! Running an unknown, unsigned JavaScript file from an external email is extremely dangerous. JavaScript can execute system commands, download payloads, and establish persistence. This should go to sandbox first.', scan:'⚠ Insufficient. AV scanning may miss novel malware or obfuscated JavaScript. An unknown, unsigned script from external email warrants full sandbox detonation to observe runtime behavior.', sandbox:'✅ Correct. Unsigned JavaScript from an external email is high-risk. Sandbox detonation will reveal: network calls to C2 servers, file system modifications, registry persistence attempts, and process spawning — all invisible to static AV scanning.' }
+  },
+  {
+    id:'f3', name:'ransomware_sample.bin', icon:'☠️',
+    meta:'VirusTotal: 61/72 detections · Matches WannaCry signature · IoC confirmed',
+    correct:'sandbox',
+    feedback: { run:'🚨 CRITICAL INCIDENT. This file has 61/72 VirusTotal detections and confirmed ransomware IoCs. Executing on a live system would trigger encryption, lateral movement, and data exfiltration. Never run confirmed malware on production systems.', scan:'⚠ Incomplete. With 61/72 detections, AV will flag this immediately — but you\'ve already wasted time. For confirmed malware samples, sandbox analysis extracts C2 infrastructure, encryption keys, and propagation methods for threat intel.', sandbox:'✅ Correct. Confirmed malware samples are analyzed in sandbox to: extract C2 server addresses, identify propagation methods, reverse-engineer encryption routines, and build detection signatures for SIEM. This file should go to an isolated sandbox immediately.' }
+  },
+];
+
+let placed = {};
+
+function buildSandbox() {
+  placed = {};
+  const tray = document.getElementById('fileTray');
+  tray.innerHTML = '';
+  fileItems.forEach(f => {
+    const el = document.createElement('div');
+    el.className = 'file-item';
+    el.id = 'fi-' + f.id;
+    el.draggable = true;
+    el.dataset.fid = f.id;
+    el.innerHTML = `<div class="file-name">${f.icon} ${f.name}</div><div class="file-meta">${f.meta}</div>`;
+    el.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('text/plain', f.id);
+      el.classList.add('dragging');
+    });
+    el.addEventListener('dragend', () => el.classList.remove('dragging'));
+    tray.appendChild(el);
+  });
+  ['run','scan','sandbox'].forEach(zone => {
+    document.getElementById('dz-' + zone + '-items').innerHTML = '';
+  });
+  document.getElementById('sandboxFeedback').style.display = 'none';
+}
+
+function dzOver(e, zoneId) { e.preventDefault(); document.getElementById(zoneId).classList.add('dragover'); }
+function dzLeave(zoneId) { document.getElementById(zoneId).classList.remove('dragover'); }
+
+function dzDrop(e, zone) {
+  e.preventDefault();
+  const zoneId = 'dz-' + zone;
+  document.getElementById(zoneId).classList.remove('dragover');
+  const fid = e.dataTransfer.getData('text/plain');
+  if (!fid || placed[fid]) return;
+  const f = fileItems.find(x => x.id === fid);
+  if (!f) return;
+  placed[fid] = zone;
+
+  const orig = document.getElementById('fi-' + fid);
+  if (orig) orig.classList.add('placed');
+
+  const isCorrect = f.correct === zone;
+  const fb = f.feedback[zone];
+  const badgeClass = isCorrect ? 'fb-good' : (zone === 'scan' ? 'fb-ok' : 'fb-bad');
+  const badgeLabel = isCorrect ? '✓ Best Choice' : '⚠ Review';
+
+  const placed_el = document.createElement('div');
+  placed_el.className = 'placed-file';
+  placed_el.innerHTML = `<span class="pfname">${f.icon} ${f.name}</span><span class="fb-badge ${badgeClass}">${badgeLabel}</span>`;
+  document.getElementById(zoneId + '-items').appendChild(placed_el);
+
+  toast(isCorrect ? '✓ Good decision!' : '⚠ Reconsider — see feedback below', !isCorrect);
+
+  if (Object.keys(placed).length === fileItems.length) {
+    const fbEl = document.getElementById('sandboxFeedback');
+    fbEl.style.display = 'block';
+    fbEl.innerHTML = '<div class="eyebrow" style="margin-bottom:10px">Decision Analysis</div>' +
+      fileItems.map(f2 => {
+        const zone2 = placed[f2.id];
+        const isC = f2.correct === zone2;
+        return `<div style="background:var(--surface);border:1px solid ${isC ? 'var(--green)' : 'var(--red)'};border-left:4px solid ${isC ? 'var(--green)' : 'var(--red)'};border-radius:var(--r);padding:10px 14px;margin-bottom:8px;font-size:.82rem">
+          <strong>${f2.icon} ${f2.name}</strong> — You chose: <strong>${zone2.charAt(0).toUpperCase() + zone2.slice(1)}</strong><br>
+          <span style="color:var(--text2);margin-top:4px;display:block">${f2.feedback[zone2]}</span>
+        </div>`;
+      }).join('');
+  }
+}
+
+function resetSandbox() { buildSandbox(); }
+buildSandbox();
+
+// ============================================================ QUIZ
+const quizData = [
+  { id:'q1', type:'mc', text:'A security analyst notices that a web server is now accepting connections on port 23 in addition to its configured ports 80 and 443. The server has not been patched or updated recently. What term BEST describes this condition?',
+    opts:['Privilege escalation','Configuration drift','Lateral movement','Port forwarding'], ans:1,
+    exp:'Configuration drift describes any deviation from an established secure baseline — authorized or unauthorized. An unexpected open Telnet port (23) is a classic drift indicator that may signal unauthorized modification or a misconfiguration requiring investigation.' },
+  { id:'q2', type:'mc', text:'Which tool is used during ACTIVE network asset discovery to identify hosts, open ports, and services by probing the network directly?',
+    opts:['DHCP lease log review','Nmap / network scanner','SIEM log aggregation','Wireshark packet capture'], ans:1,
+    exp:'Nmap (and similar active scanners like Nessus) directly probe network hosts to enumerate open ports, running services, and OS fingerprints. This is active discovery — as opposed to passive methods like DHCP log analysis, which observe existing traffic without generating new probe traffic.' },
+  { id:'q3', type:'mc', text:'An organization deploys a system that collects logs from firewalls, servers, and endpoints, correlates events across sources, and generates alerts when specific thresholds are exceeded. What technology is this?',
+    opts:['IDS/IPS','EDR solution','SIEM','Network Access Control (NAC)'], ans:2,
+    exp:'SIEM (Security Information and Event Management) systems aggregate logs from diverse sources, normalize formats, correlate related events across systems, and trigger alerts based on configured rules and thresholds. This is the core architecture described.' },
+  { id:'q4', type:'mc', text:'A Windows security log shows repeated Event ID 4625 entries from a single source IP within a 30-second window. What type of attack does this most likely indicate?',
+    opts:['SQL injection','Brute-force credential attack','ARP poisoning','Directory traversal'], ans:1,
+    exp:'Windows Event ID 4625 records failed logon attempts. Multiple 4625 events from a single source in a short time window is the classic signature of a brute-force or credential stuffing attack — an automated tool attempting password combinations at speed.' },
+  { id:'q5', type:'mc', text:'What is the PRIMARY purpose of a Configuration Management Database (CMDB)?',
+    opts:['Store encrypted user credentials','Provide an authoritative inventory of all IT assets and their relationships','Monitor network traffic for anomalies','Archive security incident reports'], ans:1,
+    exp:'A CMDB serves as the single authoritative source of truth for all IT assets (Configuration Items or CIs) and their interdependencies. It is foundational to asset management, change control, incident response, and security operations.' },
+  { id:'q6', type:'mc', text:'An analyst wants to examine a suspicious executable received via email without risking the production environment. The file may attempt network connections and registry modifications. What is the BEST approach?',
+    opts:['Open it on an air-gapped workstation','Submit to an AV scanner only','Execute in a sandbox environment','Forward to vendor for analysis'], ans:2,
+    exp:'A sandbox environment provides isolated execution with behavioral monitoring — capturing network calls, registry changes, file system modifications, and process spawning. This reveals malware behavior invisible to static AV scanning, without risk to production systems. Air-gapped workstations are insufficient as they lack behavioral monitoring capabilities.' },
+  { id:'q7', type:'mc', text:'Which of the following represents a PASSIVE asset discovery technique?',
+    opts:['Running Nmap against all subnets','Analyzing DHCP lease logs and ARP tables','Deploying Nessus scans weekly','Sending ICMP ping sweeps across the network'], ans:1,
+    exp:'Passive discovery analyzes existing network traffic and logs without generating new probe traffic. DHCP lease logs and ARP table analysis reveal connected devices without actively probing them — making passive discovery stealthier and less disruptive.' },
+  { id:'q8', type:'mc', text:'A malware sample uses a technique that detects virtual machine environment artifacts (VM registry keys, hypervisor processes) and remains dormant to avoid analysis. What capability does this describe?',
+    opts:['Polymorphic code','Anti-sandbox evasion','Rootkit persistence','Code injection'], ans:1,
+    exp:'Anti-sandbox (or VM-aware) evasion is a technique where malware detects it is running in a virtualized or sandboxed environment and deliberately suppresses its malicious behavior to avoid analysis. Analysts counter this with physical sandbox hardware, delayed detonation, and environment obfuscation.' },
+  { id:'q9', type:'mc', text:'File Integrity Monitoring (FIM) is most effective at detecting which type of security event?',
+    opts:['DDoS attacks against the network perimeter','Unauthorized changes to critical system files and configurations','Phishing emails reaching end users','Rogue wireless access points'], ans:1,
+    exp:'FIM monitors cryptographic hashes of critical system files and configurations, alerting when any file is modified, added, or deleted unexpectedly. This directly supports baseline enforcement and can detect malware implants, unauthorized configuration changes, and insider threat activities.' },
+  { id:'q10', type:'mc', text:'An organization implements 802.1X port-based authentication on all network switches. What primary security goal does this achieve?',
+    opts:['Encrypts all traffic between endpoints','Prevents rogue or unauthenticated devices from connecting to the network','Monitors bandwidth utilization per port','Enables VPN access for remote users'], ans:1,
+    exp:'802.1X is a port-based Network Access Control (NAC) standard that requires devices to authenticate before being granted network access. Unauthenticated devices are isolated to a quarantine VLAN or denied access entirely — directly preventing rogue device connectivity.' },
+  { id:'q11', type:'scenario', text:'SCENARIO: A security analyst reviews the morning SIEM dashboard and notices 23 Event ID 4625 (failed logon) entries targeting the account "svc_backup" from IP 10.0.5.87 between 03:15 and 03:16 AM — 23 failures in 60 seconds. "svc_backup" is a service account that should never have interactive logon attempts. The analyst also sees that at 03:17 AM, Event ID 4624 (successful logon) was recorded for the same account from the same IP. Which combination of actions BEST addresses this incident?',
+    opts:[
+      'Document the event in the change log and monitor for recurrence next week',
+      'Immediately disable the svc_backup account, isolate 10.0.5.87 from the network, initiate incident response, and audit all actions performed by svc_backup since 03:17 AM',
+      'Reset the svc_backup password and send an awareness email to all users',
+      'Increase the failed login threshold to 50 to reduce false positive alerts'
+    ], ans:1,
+    exp:'This scenario shows a successful brute-force of a service account. The correct immediate response is: (1) Disable the compromised account to stop active misuse, (2) Isolate the attacking source IP, (3) Formally initiate incident response to scope the breach, and (4) Forensically audit all post-compromise activity. Option A ignores an active breach; Option C is insufficient (doesn\'t address the already-compromised session); Option D degrades security posture.' },
+  { id:'q12', type:'scenario', text:'SCENARIO: You are designing the asset management and monitoring strategy for a hospital network with 1,200 devices including workstations, servers, medical IoT devices, and personal staff smartphones. Leadership wants both compliance with HIPAA and real-time visibility into unauthorized devices. Which combination of controls BEST addresses both requirements simultaneously?',
+    opts:[
+      'Deploy antivirus on all Windows workstations and review logs monthly',
+      'Implement a CMDB for all authorized assets, deploy 802.1X NAC to isolate unauthenticated devices, configure SIEM alerting on new DHCP leases not matching known MACs, and perform quarterly asset discovery scans',
+      'Require all staff to register personal devices via a web portal on first connection',
+      'Deploy a next-generation firewall at the perimeter to block unauthorized traffic'
+    ], ans:1,
+    exp:'The best answer layers complementary controls: CMDB provides the asset baseline (what\'s authorized), 802.1X enforces authentication at network access (prevents rogue connection), SIEM alerting on unknown DHCP leases provides real-time detection (even if 802.1X is bypassed), and quarterly discovery scans catch drift. This satisfies HIPAA\'s access control and audit requirements while providing real-time operational visibility. The other options address only partial aspects of the requirement.' },
+];
+
+let quizSubmitted = false;
+
+function buildQuiz() {
+  const c = document.getElementById('quizContainer');
+  c.innerHTML = '';
+  quizData.forEach((q, i) => {
+    const isS = q.type === 'scenario';
+    c.insertAdjacentHTML('beforeend', `
+      <div class="q-block" id="qb-${q.id}">
+        <div class="q-num">Question ${i+1} of ${quizData.length}<span class="${isS ? 'q-stag' : 'q-mctag'}">${isS ? 'Scenario' : 'Multiple Choice'}</span></div>
+        <div class="q-text">${q.text}</div>
+        <div class="q-opts">
+          ${q.opts.map((o,j) => `<label class="q-opt" id="opt-${q.id}-${j}"><input type="radio" name="${q.id}" value="${j}" ${quizSubmitted?'disabled':''}><span>${o}</span></label>`).join('')}
+        </div>
+        <div class="q-fb" id="fb-${q.id}"></div>
+      </div>`);
+  });
+}
+
+function submitQuiz() {
+  if (quizSubmitted) return;
+  let score = 0, allAnswered = true;
+  quizData.forEach(q => {
+    const sel = document.querySelector(`input[name="${q.id}"]:checked`);
+    if (!sel) { allAnswered = false; return; }
+    const chosen = parseInt(sel.value);
+    document.querySelectorAll(`input[name="${q.id}"]`).forEach(i => i.disabled = true);
+    q.opts.forEach((_,j) => {
+      const el = document.getElementById('opt-' + q.id + '-' + j);
+      if (j === q.ans) el.classList.add('opt-c');
+      else if (j === chosen && j !== q.ans) el.classList.add('opt-w');
+    });
+    const fb = document.getElementById('fb-' + q.id);
+    const block = document.getElementById('qb-' + q.id);
+    if (chosen === q.ans) {
+      score++;
+      block.classList.add('correct-q');
+      fb.className = 'q-fb fbc show';
+      fb.innerHTML = '<strong>✓ Correct!</strong> ' + q.exp;
+    } else {
+      block.classList.add('wrong-q');
+      fb.className = 'q-fb fbw show';
+      fb.innerHTML = '<strong>✗ Incorrect.</strong> Best answer: <strong>' + q.opts[q.ans] + '</strong><br>' + q.exp;
+    }
+  });
+  if (!allAnswered) { toast('Answer all questions before submitting', true); return; }
+  quizSubmitted = true;
+  const pct = Math.round(score / quizData.length * 100);
+  const grade = pct >= 90 ? '🏆 Excellent' : pct >= 80 ? '✅ Proficient' : pct >= 70 ? '📘 Review Recommended' : '⚠ Needs Study';
+  const sc = document.getElementById('quizScore');
+  sc.className = 'score-result show';
+  sc.innerHTML = score + ' / ' + quizData.length + ' &nbsp;·&nbsp; ' + pct + '% &nbsp;·&nbsp; ' + grade;
+  document.getElementById('quizHint').textContent = 'Review the explanations above for any missed questions before your Security+ exam.';
+  document.getElementById('submitQuizBtn').style.display = 'none';
+  document.getElementById('resetQuizBtn').classList.add('show');
+}
+
+function resetQuiz() {
+  quizSubmitted = false;
+  document.getElementById('quizScore').className = 'score-result';
+  document.getElementById('quizHint').textContent = 'Answer all questions, then submit to see your results and explanations.';
+  document.getElementById('submitQuizBtn').style.display = '';
+  document.getElementById('resetQuizBtn').classList.remove('show');
+  buildQuiz();
+}
+
+buildQuiz();
+</script>
+</body>
+</html>
