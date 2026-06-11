@@ -1,0 +1,1459 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 7 — Securing Access: Identity, Authentication & Privilege Management</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg2: #f4f6f4;
+    --bg3: #e8f0e8;
+    --surface: #ffffff;
+    --surface2: #f0f4f0;
+    --border: #d0dcd0;
+    --text: #111111;
+    --text2: #444444;
+    --text3: #666666;
+    --green: #2e7d32;
+    --green-light: #4caf50;
+    --green-bg: #e8f5e9;
+    --green-dark: #1b5e20;
+    --accent: #2e7d32;
+    --red: #c62828;
+    --red-bg: #ffebee;
+    --shadow: 0 2px 8px rgba(0,0,0,.08);
+    --shadow-md: 0 4px 20px rgba(0,0,0,.12);
+    --radius: 8px;
+    --radius-lg: 14px;
+  }
+  [data-theme="dark"] {
+    --bg: #0e1210;
+    --bg2: #151a14;
+    --bg3: #1c2419;
+    --surface: #1a211a;
+    --surface2: #212b21;
+    --border: #2e3d2e;
+    --text: #f0f4f0;
+    --text2: #b8ccb8;
+    --text3: #7a977a;
+    --green: #4caf50;
+    --green-light: #66bb6a;
+    --green-bg: #1a2e1a;
+    --green-dark: #388e3c;
+    --red: #ef5350;
+    --red-bg: #2c1010;
+    --shadow: 0 2px 8px rgba(0,0,0,.4);
+    --shadow-md: 0 4px 20px rgba(0,0,0,.5);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    transition: background .25s, color .25s;
+  }
+  /* ===== HEADER ===== */
+  header {
+    background: var(--green-dark);
+    color: #fff;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,.25);
+  }
+  .header-left { display: flex; flex-direction: column; gap: 1px; }
+  .header-eyebrow { font-size: .7rem; text-transform: uppercase; letter-spacing: .12em; opacity: .7; }
+  .header-title { font-size: 1.05rem; font-weight: 700; }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .badge { background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.25); padding: 3px 10px; border-radius: 20px; font-size: .72rem; font-weight: 600; letter-spacing: .04em; }
+  .theme-btn {
+    background: rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.3);
+    color: #fff;
+    padding: 7px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: .82rem;
+    font-weight: 600;
+    transition: background .2s;
+    white-space: nowrap;
+  }
+  .theme-btn:hover { background: rgba(255,255,255,.28); }
+  /* ===== NAV TABS ===== */
+  nav.tab-nav {
+    background: var(--surface);
+    border-bottom: 2px solid var(--border);
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    position: sticky;
+    top: 64px;
+    z-index: 90;
+    box-shadow: var(--shadow);
+  }
+  nav.tab-nav::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    padding: 14px 20px;
+    cursor: pointer;
+    font-size: .85rem;
+    font-weight: 600;
+    color: var(--text3);
+    white-space: nowrap;
+    transition: color .2s, border-color .2s;
+  }
+  .tab-btn:hover { color: var(--green); }
+  .tab-btn.active { color: var(--green); border-bottom-color: var(--green); }
+  /* ===== MAIN ===== */
+  main { max-width: 1080px; margin: 0 auto; padding: 28px 20px 60px; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+  /* ===== SHARED COMPONENTS ===== */
+  h1 { font-size: 1.8rem; font-weight: 800; color: var(--text); margin-bottom: 6px; }
+  h2 { font-size: 1.3rem; font-weight: 700; color: var(--text); margin-bottom: 12px; }
+  h3 { font-size: 1.05rem; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+  p { color: var(--text2); margin-bottom: 10px; }
+  .section-label {
+    font-size: .72rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .1em; color: var(--green); margin-bottom: 6px;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px 24px;
+    box-shadow: var(--shadow);
+  }
+  .card + .card { margin-top: 16px; }
+  .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+  .pill {
+    display: inline-block;
+    background: var(--green-bg);
+    color: var(--green);
+    border: 1px solid var(--green);
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: .75rem;
+    font-weight: 700;
+  }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+  /* ===== TAB 1: OVERVIEW ===== */
+  .hero-banner {
+    background: linear-gradient(135deg, var(--green-dark) 0%, var(--green) 100%);
+    color: #fff;
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    margin-bottom: 24px;
+  }
+  .hero-banner h1 { color: #fff; }
+  .hero-banner p { color: rgba(255,255,255,.85); }
+  .obj-list { list-style: none; margin-top: 12px; }
+  .obj-list li {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 8px 0; border-bottom: 1px solid var(--border); color: var(--text2);
+  }
+  .obj-list li:last-child { border-bottom: none; }
+  .obj-num {
+    flex-shrink: 0; width: 24px; height: 24px;
+    background: var(--green-bg); color: var(--green);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: .72rem; font-weight: 800;
+  }
+  .term-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin-top: 12px; }
+  .term-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--green);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+  }
+  .term-card .term { font-weight: 800; font-size: .85rem; color: var(--green); }
+  .term-card .def { font-size: .78rem; color: var(--text3); margin-top: 2px; }
+  .scenario-box {
+    background: var(--bg2);
+    border: 2px dashed var(--green);
+    border-radius: var(--radius-lg);
+    padding: 20px 24px;
+    margin-top: 16px;
+  }
+  .scenario-box .label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--green); margin-bottom: 8px; }
+  .jml-phases { display: flex; gap: 0; margin-top: 14px; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); }
+  .jml-phase { flex: 1; padding: 12px; text-align: center; font-size: .82rem; }
+  .jml-phase:nth-child(1) { background: #e8f5e9; color: #1b5e20; }
+  .jml-phase:nth-child(2) { background: #fff8e1; color: #e65100; }
+  .jml-phase:nth-child(3) { background: #fce4ec; color: #880e4f; }
+  [data-theme="dark"] .jml-phase:nth-child(1) { background: #1a3520; color: #81c784; }
+  [data-theme="dark"] .jml-phase:nth-child(2) { background: #2d2210; color: #ffb74d; }
+  [data-theme="dark"] .jml-phase:nth-child(3) { background: #2d1020; color: #f48fb1; }
+  .jml-phase strong { display: block; font-size: .95rem; margin-bottom: 3px; }
+  /* ===== TAB 2: TIMELINE ===== */
+  .timeline { position: relative; padding-left: 40px; }
+  .timeline::before {
+    content: ''; position: absolute; left: 14px; top: 8px; bottom: 8px;
+    width: 3px; background: linear-gradient(to bottom, var(--green), var(--green-light));
+    border-radius: 3px;
+  }
+  .tl-item { position: relative; margin-bottom: 24px; }
+  .tl-dot {
+    position: absolute; left: -33px; top: 4px;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--green); border: 3px solid var(--bg);
+    box-shadow: 0 0 0 2px var(--green);
+  }
+  .tl-time {
+    font-size: .72rem; font-weight: 800; text-transform: uppercase;
+    letter-spacing: .08em; color: var(--green); margin-bottom: 3px;
+  }
+  .tl-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    box-shadow: var(--shadow);
+  }
+  .tl-card h3 { margin-bottom: 4px; }
+  .tl-card p { font-size: .85rem; margin-bottom: 0; }
+  .tl-tag { font-size: .72rem; background: var(--green-bg); color: var(--green); padding: 2px 8px; border-radius: 10px; font-weight: 700; margin-right: 6px; display: inline-block; margin-bottom: 6px; }
+  /* ===== TAB 3: CONCEPTS ===== */
+  .concept-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; }
+  .concept-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: 4px solid var(--green);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    box-shadow: var(--shadow);
+  }
+  .concept-icon { font-size: 1.8rem; margin-bottom: 8px; }
+  .analogy-box {
+    background: var(--bg2);
+    border-left: 3px solid var(--green);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 8px 12px;
+    margin-top: 10px;
+    font-size: .82rem;
+    color: var(--text3);
+  }
+  .analogy-box strong { color: var(--green); display: block; font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 2px; }
+  /* ===== TAB 4: MATCHING GAME ===== */
+  #game-container { margin-top: 4px; }
+  .game-scorebar {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 10px 18px; margin-bottom: 18px;
+  }
+  .score-display { font-size: 1.2rem; font-weight: 800; color: var(--green); }
+  .game-btn {
+    background: var(--green); color: #fff; border: none; padding: 8px 18px;
+    border-radius: var(--radius); cursor: pointer; font-weight: 700; font-size: .85rem;
+    transition: background .2s, transform .1s;
+  }
+  .game-btn:hover { background: var(--green-dark); }
+  .game-btn:active { transform: scale(.97); }
+  .match-area {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  .match-col-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text3); margin-bottom: 8px; }
+  .match-item {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    cursor: pointer;
+    font-size: .85rem;
+    margin-bottom: 8px;
+    transition: border-color .2s, background .2s, transform .1s;
+    user-select: none;
+    position: relative;
+  }
+  .match-item:hover { border-color: var(--green); background: var(--green-bg); }
+  .match-item.selected { border-color: var(--green); background: var(--green-bg); box-shadow: 0 0 0 2px var(--green); }
+  .match-item.correct { border-color: #388e3c; background: #e8f5e9; color: #1b5e20; pointer-events: none; }
+  .match-item.wrong { border-color: var(--red); background: var(--red-bg); animation: shake .3s; }
+  .match-item.dimmed { opacity: .35; pointer-events: none; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+  .match-term { font-weight: 800; color: var(--green); }
+  .feedback-toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--green); color: #fff; padding: 10px 24px;
+    border-radius: 30px; font-weight: 700; font-size: .9rem;
+    box-shadow: var(--shadow-md); z-index: 999; opacity: 0;
+    transition: opacity .3s;
+    pointer-events: none;
+  }
+  .feedback-toast.show { opacity: 1; }
+  .feedback-toast.wrong-toast { background: var(--red); }
+  /* ===== TAB 5: LIFECYCLE SIM ===== */
+  .sim-controls {
+    display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;
+  }
+  .sim-btn {
+    padding: 10px 20px; border: 2px solid var(--green); border-radius: var(--radius);
+    background: transparent; color: var(--green); font-weight: 700; cursor: pointer;
+    font-size: .85rem; transition: all .2s;
+  }
+  .sim-btn:hover, .sim-btn.active { background: var(--green); color: #fff; }
+  .sim-btn:disabled { opacity: .35; cursor: not-allowed; }
+  .sim-stage {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    box-shadow: var(--shadow);
+    min-height: 300px;
+  }
+  .stage-header {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+    padding-bottom: 14px; border-bottom: 1px solid var(--border);
+  }
+  .stage-icon { font-size: 2rem; }
+  .stage-title { font-size: 1.15rem; font-weight: 800; }
+  .stage-subtitle { font-size: .82rem; color: var(--text3); }
+  .user-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 14px;
+    position: relative;
+  }
+  .avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--green-bg); border: 2px solid var(--green);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; flex-shrink: 0;
+  }
+  .user-info { flex: 1; }
+  .user-name { font-weight: 700; font-size: .9rem; }
+  .user-role { font-size: .78rem; color: var(--text3); }
+  .user-perms {
+    display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px;
+  }
+  .perm-tag {
+    font-size: .68rem; padding: 1px 7px; border-radius: 10px;
+    background: var(--green-bg); color: var(--green); border: 1px solid var(--green); font-weight: 600;
+  }
+  .perm-tag.warn { background: #fff8e1; color: #e65100; border-color: #ff9800; }
+  [data-theme="dark"] .perm-tag.warn { background: #2d2210; color: #ffb74d; border-color: #ff9800; }
+  .perm-tag.danger { background: var(--red-bg); color: var(--red); border-color: var(--red); }
+  .user-status {
+    font-size: .72rem; font-weight: 700; padding: 3px 10px;
+    border-radius: 20px; flex-shrink: 0;
+  }
+  .status-active { background: var(--green-bg); color: var(--green); }
+  .status-mover { background: #fff8e1; color: #e65100; }
+  .status-offboard { background: var(--red-bg); color: var(--red); }
+  [data-theme="dark"] .status-mover { background: #2d2210; color: #ffb74d; }
+  .action-panel {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-top: 14px;
+  }
+  .action-panel h3 { margin-bottom: 10px; }
+  .checklist-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 7px 0; border-bottom: 1px solid var(--border);
+    font-size: .85rem;
+  }
+  .checklist-item:last-child { border-bottom: none; }
+  .check-btn {
+    width: 22px; height: 22px; border-radius: 4px;
+    border: 2px solid var(--green); background: transparent;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    font-size: .8rem; color: var(--green); transition: all .2s; flex-shrink: 0;
+  }
+  .check-btn:hover { background: var(--green); color: #fff; }
+  .check-btn.checked { background: var(--green); color: #fff; }
+  .check-btn.checked + span { text-decoration: line-through; color: var(--text3); }
+  .role-select-wrap { margin-top: 10px; }
+  .role-select-wrap label { font-size: .82rem; font-weight: 700; display: block; margin-bottom: 6px; }
+  .role-select {
+    width: 100%; padding: 8px 12px; border: 2px solid var(--border);
+    border-radius: var(--radius); background: var(--surface); color: var(--text);
+    font-size: .85rem; cursor: pointer;
+  }
+  .role-select:focus { outline: none; border-color: var(--green); }
+  .sim-log {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    margin-top: 14px;
+    font-size: .78rem;
+    color: var(--text3);
+    max-height: 100px;
+    overflow-y: auto;
+  }
+  .log-entry { padding: 2px 0; }
+  .log-entry::before { content: '▶ '; color: var(--green); }
+  /* ===== TAB 6: QUIZ ===== */
+  .quiz-intro {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px 24px;
+    margin-bottom: 20px;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .quiz-meta { font-size: .82rem; color: var(--text3); }
+  .quiz-meta strong { color: var(--green); }
+  .q-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px 24px;
+    margin-bottom: 14px;
+    transition: border-color .2s;
+  }
+  .q-block.correct-q { border-color: var(--green); border-left: 4px solid var(--green); }
+  .q-block.wrong-q { border-color: var(--red); border-left: 4px solid var(--red); }
+  .q-num { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text3); margin-bottom: 6px; }
+  .q-type-tag { display: inline-block; background: var(--green-bg); color: var(--green); border: 1px solid var(--green); padding: 1px 8px; border-radius: 10px; font-size: .68rem; font-weight: 700; margin-left: 8px; }
+  .q-type-tag.scenario { background: #fff8e1; color: #e65100; border-color: #ff9800; }
+  [data-theme="dark"] .q-type-tag.scenario { background: #2d2210; color: #ffb74d; border-color: #ff9800; }
+  .q-text { font-weight: 700; margin: 6px 0 12px; color: var(--text); line-height: 1.5; }
+  .q-options { display: flex; flex-direction: column; gap: 8px; }
+  .q-opt {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 14px;
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: .88rem;
+    transition: border-color .15s, background .15s;
+  }
+  .q-opt:hover { border-color: var(--green); background: var(--green-bg); }
+  .q-opt input[type=radio] { flex-shrink: 0; accent-color: var(--green); margin-top: 3px; }
+  .q-opt.opt-correct { background: #e8f5e9; border-color: #388e3c; }
+  .q-opt.opt-wrong { background: var(--red-bg); border-color: var(--red); }
+  [data-theme="dark"] .q-opt.opt-correct { background: #1a3520; border-color: #388e3c; }
+  .q-feedback {
+    margin-top: 10px;
+    padding: 10px 14px;
+    border-radius: var(--radius);
+    font-size: .82rem;
+    display: none;
+  }
+  .q-feedback.show { display: block; }
+  .q-feedback.fb-correct { background: var(--green-bg); color: var(--green-dark); border-left: 3px solid var(--green); }
+  .q-feedback.fb-wrong { background: var(--red-bg); color: var(--red); border-left: 3px solid var(--red); }
+  [data-theme="dark"] .q-feedback.fb-correct { color: #81c784; }
+  [data-theme="dark"] .q-feedback.fb-wrong { color: #ef9a9a; }
+  .submit-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px 24px;
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+    margin-top: 20px;
+  }
+  .submit-quiz-btn {
+    background: var(--green); color: #fff; border: none;
+    padding: 12px 32px; border-radius: var(--radius); cursor: pointer;
+    font-weight: 800; font-size: 1rem; transition: background .2s, transform .1s;
+    box-shadow: var(--shadow);
+  }
+  .submit-quiz-btn:hover { background: var(--green-dark); }
+  .submit-quiz-btn:active { transform: scale(.97); }
+  .score-result {
+    font-size: 1.4rem; font-weight: 800;
+    color: var(--green); display: none;
+  }
+  .score-result.show { display: block; }
+  .reset-btn {
+    background: transparent; color: var(--text3);
+    border: 1px solid var(--border); padding: 10px 20px;
+    border-radius: var(--radius); cursor: pointer; font-weight: 600;
+    font-size: .85rem; transition: all .2s; display: none;
+  }
+  .reset-btn.show { display: inline-block; }
+  .reset-btn:hover { border-color: var(--green); color: var(--green); }
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg2); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--green); }
+  @media (max-width: 600px) {
+    header { padding: 0 14px; }
+    .header-title { font-size: .9rem; }
+    main { padding: 16px 12px 48px; }
+    .match-area { grid-template-columns: 1fr; }
+    h1 { font-size: 1.4rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <span class="header-eyebrow">CompTIA Security+ SY0-701 · Lesson 7 of 12</span>
+    <span class="header-title">Securing Access: Identity, Authentication &amp; Privilege Management</span>
+  </div>
+  <div class="header-right">
+    <span class="badge">4-Hour Lesson</span>
+    <button class="theme-btn" id="themeToggle" aria-label="Toggle theme">☀️ Light Mode</button>
+  </div>
+</header>
+
+<nav class="tab-nav" role="tablist">
+  <button class="tab-btn active" data-tab="overview" role="tab">📋 Overview</button>
+  <button class="tab-btn" data-tab="timeline" role="tab">⏱️ Timeline</button>
+  <button class="tab-btn" data-tab="concepts" role="tab">🧠 Core Concepts</button>
+  <button class="tab-btn" data-tab="matching" role="tab">🎯 Matching Game</button>
+  <button class="tab-btn" data-tab="simulator" role="tab">🔄 Lifecycle Sim</button>
+  <button class="tab-btn" data-tab="quiz" role="tab">📝 Exam Prep Quiz</button>
+</nav>
+
+<main>
+
+<!-- ============================================================ TAB 1: OVERVIEW -->
+<section class="tab-panel active" id="tab-overview">
+  <div class="hero-banner">
+    <div class="section-label" style="color:rgba(255,255,255,.7)">Learning Objectives</div>
+    <h1>Identity is the New Perimeter</h1>
+    <p>In the post-perimeter era, controlling who can access what — and when — is the cornerstone of modern security architecture. This lesson maps directly to CompTIA Security+ Domain 4.0: Identity and Access Management.</p>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="section-label">By the End of This Lesson, You Will Be Able To:</div>
+      <ul class="obj-list">
+        <li><span class="obj-num">1</span><span>Define and differentiate the AAA security framework components</span></li>
+        <li><span class="obj-num">2</span><span>Compare authentication factors and explain why MFA is essential</span></li>
+        <li><span class="obj-num">3</span><span>Contrast SSO with federated identity and identify use cases for each</span></li>
+        <li><span class="obj-num">4</span><span>Apply Least Privilege and RBAC principles to real-world access scenarios</span></li>
+        <li><span class="obj-num">5</span><span>Execute the Joiner-Mover-Leaver lifecycle framework to prevent orphaned accounts and privilege creep</span></li>
+        <li><span class="obj-num">6</span><span>Explain the role of PAM in protecting high-value administrative credentials</span></li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="section-label">Security+ Exam Alignment</div>
+      <div style="margin-bottom:12px;">
+        <span class="pill">Objective 4.1</span> <span style="font-size:.82rem;color:var(--text3);margin-left:6px;">AAA Framework &amp; Authentication Concepts</span>
+      </div>
+      <div style="margin-bottom:12px;">
+        <span class="pill">Objective 4.2</span> <span style="font-size:.82rem;color:var(--text3);margin-left:6px;">MFA Factors and Token-Based Auth</span>
+      </div>
+      <div style="margin-bottom:12px;">
+        <span class="pill">Objective 4.3</span> <span style="font-size:.82rem;color:var(--text3);margin-left:6px;">Identity Federation and SSO</span>
+      </div>
+      <div style="margin-bottom:12px;">
+        <span class="pill">Objective 4.4</span> <span style="font-size:.82rem;color:var(--text3);margin-left:6px;">Least Privilege and RBAC</span>
+      </div>
+      <div>
+        <span class="pill">Objective 4.5</span> <span style="font-size:.82rem;color:var(--text3);margin-left:6px;">Privileged Access Management</span>
+      </div>
+      <hr class="divider" style="margin:14px 0;">
+      <div class="section-label">Prerequisite Knowledge</div>
+      <p style="font-size:.82rem;margin:0;">Lessons 1–6 (Network Security Fundamentals). Basic understanding of Active Directory, user accounts, and network protocols recommended.</p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <div class="section-label">Key Terms — 6 Must-Know Concepts</div>
+    <div class="term-grid">
+      <div class="term-card"><div class="term">AAA</div><div class="def">Authentication, Authorization, Accounting — the three pillars of access control</div></div>
+      <div class="term-card"><div class="term">MFA</div><div class="def">Multi-Factor Authentication — two or more distinct factor categories required</div></div>
+      <div class="term-card"><div class="term">SSO</div><div class="def">Single Sign-On — one credential unlocks multiple systems within a trust boundary</div></div>
+      <div class="term-card"><div class="term">RBAC</div><div class="def">Role-Based Access Control — permissions assigned to roles, not individuals</div></div>
+      <div class="term-card"><div class="term">PAM</div><div class="def">Privileged Access Management — vaulting and auditing elevated administrative credentials</div></div>
+      <div class="term-card"><div class="term">Deprovisioning</div><div class="def">Systematic revocation of all access rights when a user exits or transfers</div></div>
+    </div>
+  </div>
+
+  <div class="scenario-box">
+    <div class="label">🧩 Opening Scenario — The Joiner-Mover-Leaver Problem</div>
+    <p style="font-size:.9rem;color:var(--text2);">A hospital network administrator notices that Dr. Chen — who transferred from Oncology to the Emergency Department six months ago — still has full access to the oncology patient database, chemo medication orders, and the departmental budget system. Last week, she was assigned ED access on top of her existing rights. Meanwhile, a former IT contractor who left the organization in January still has an active VPN account.<br><br><strong style="color:var(--text);">Discussion prompt:</strong> What security principles were violated? What could go wrong? What controls should have prevented this?</p>
+    <div class="jml-phases">
+      <div class="jml-phase"><strong>🟢 Joiner</strong>New hire provisioned with role-appropriate access</div>
+      <div class="jml-phase"><strong>🟡 Mover</strong>Transfer creates accumulated permission sprawl</div>
+      <div class="jml-phase"><strong>🔴 Leaver</strong>Departure without deprovisioning = orphaned account</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ TAB 2: TIMELINE -->
+<section class="tab-panel" id="tab-timeline">
+  <div style="margin-bottom:20px;">
+    <div class="section-label">4-Hour Lesson Plan</div>
+    <h2>Lesson Timeline &amp; Activity Flow</h2>
+    <p>This lesson is structured for a 4-hour block with alternating direct instruction and application activities to maintain engagement and reinforce retention.</p>
+  </div>
+
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-time">0:00 – 0:20</div>
+      <div class="tl-card">
+        <span class="tl-tag">Hook</span><span class="tl-tag">Discussion</span>
+        <h3>Opening Scenario — The Dr. Chen Problem</h3>
+        <p>Present the Joiner-Mover-Leaver scenario. Small-group discussion on what went wrong. Capture answers on the board. Introduce the lesson's central question: <em>Who should have access to what, and for how long?</em></p>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-time">0:20 – 0:50</div>
+      <div class="tl-card">
+        <span class="tl-tag">Direct Instruction</span>
+        <h3>Module 1 — The AAA Framework</h3>
+        <p>Authentication (proving identity), Authorization (granting rights), Accounting (logging activity). Walk through RADIUS and TACACS+ as real-world AAA implementations. Hotel key card analogy. Formative check: students identify A, AA, or AAA in 3 example scenarios.</p>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-time">0:50 – 1:20</div>
+      <div class="tl-card">
+        <span class="tl-tag">Direct Instruction</span><span class="tl-tag">Demo</span>
+        <h3>Module 2 — Authentication Factors &amp; MFA</h3>
+        <p>The five factor types (Something you know/have/are/do/somewhere you are). Attack resistance by factor. Live demo: Google Authenticator TOTP. Show how SIM-swapping defeats SMS-based MFA. Students evaluate factor combinations for a banking app vs. a physical server room.</p>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-time">1:20 – 1:40</div>
+      <div class="tl-card">
+        <span class="tl-tag">Break</span>
+        <h3>Break + Reflection Prompt</h3>
+        <p>Students write down one system they use daily that would benefit from stronger authentication. Share with a partner upon return.</p>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-time">1:40 – 2:10</div>
+      <div class="tl-card">
+        <span class="tl-tag">Direct Instruction</span>
+        <h3>Module 3 — SSO, Federation &amp; Identity Providers</h3>
+        <p>SSO within a trust boundary (Active Directory) vs. federation across organizational boundaries (SAML, OAuth, OIDC). IdP vs. SP roles. Real-world example: "Login with Google." Airport passport control analogy for federation. When federation is appropriate vs. when it creates risk.</p>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-time">2:10 – 2:40</div>
+      <div class="tl-card">
+        <span class="tl-tag">Direct Instruction</span><span class="tl-tag">Activity</span>
+        <h3>Module 4 — Least Privilege, RBAC &amp; Privilege Creep</h3>
+        <p>Principle of Least Privilege vs. Need-to-Know. RBAC vs. ABAC vs. MAC. Demonstrating privilege creep over a 3-year employee lifecycle. Students map job functions to RBAC roles for a sample hospital organizational chart. Discussion: how often should access reviews occur?</p>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-time">2:40 – 3:10</div>
+      <div class="tl-card">
+        <span class="tl-tag">Interactive Lab</span>
+        <h3>Lab — Identity Lifecycle Simulator</h3>
+        <p>Students work through the Joiner-Mover-Leaver phases in the interactive simulator on this page. Instructor circulates; class reconvenes to debrief the "sprawl" condition and deprovisioning checklist results.</p>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-time">3:10 – 3:35</div>
+      <div class="tl-card">
+        <span class="tl-tag">Direct Instruction</span>
+        <h3>Module 5 — Privileged Access Management (PAM)</h3>
+        <p>Why privileged accounts are the crown jewels. PAM architecture: vaulting, just-in-time access, session recording, and credential rotation. Differentiating PAM from standard MFA. CyberArk/BeyondTrust as enterprise examples. The admin account attack surface: Pass-the-Hash, credential stuffing targeting service accounts.</p>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-time">3:35 – 4:00</div>
+      <div class="tl-card">
+        <span class="tl-tag">Assessment</span><span class="tl-tag">Wrap-Up</span>
+        <h3>Exam Prep Quiz + Lesson Close</h3>
+        <p>10-question Security+ practice quiz (this page). Review missed items as a class. Revisit Dr. Chen's scenario — students now diagnose using lesson vocabulary. Preview: Lesson 8 covers Network Access Control (NAC) and Zero Trust Architecture.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ TAB 3: CONCEPTS -->
+<section class="tab-panel" id="tab-concepts">
+  <div style="margin-bottom:20px;">
+    <div class="section-label">Reference Material</div>
+    <h2>Core IAM Concepts &amp; Security+ Mappings</h2>
+    <p>Use these cards as a study reference. Each concept includes the Security+ exam framing, a real-world analogy, and the key distinctions examiners love to test.</p>
+  </div>
+
+  <div class="concept-grid">
+    <div class="concept-card">
+      <div class="concept-icon">🔑</div>
+      <div class="section-label">Objective 4.1</div>
+      <h3>AAA Framework</h3>
+      <p style="font-size:.85rem;">The three-pillar model underpinning every enterprise access system.</p>
+      <ul style="font-size:.82rem;color:var(--text2);padding-left:16px;line-height:2;">
+        <li><strong>Authentication</strong> — Prove who you are (credentials, biometrics)</li>
+        <li><strong>Authorization</strong> — Determine what you're allowed to do</li>
+        <li><strong>Accounting</strong> — Record what you actually did (logs, audit trails)</li>
+      </ul>
+      <div class="analogy-box"><strong>Real-World Analogy</strong>Hotel check-in: showing your ID (Authentication) → getting a room-specific key card (Authorization) → the hotel recording your entry/exit times (Accounting)</div>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-icon">🔐</div>
+      <div class="section-label">Objective 4.2</div>
+      <h3>Authentication Factors &amp; MFA</h3>
+      <p style="font-size:.85rem;">MFA requires two or more factor <em>categories</em> — not just two passwords.</p>
+      <ul style="font-size:.82rem;color:var(--text2);padding-left:16px;line-height:2;">
+        <li><strong>Type 1</strong> — Something you <em>know</em> (password, PIN, passphrase)</li>
+        <li><strong>Type 2</strong> — Something you <em>have</em> (TOTP token, smart card, FIDO2 key)</li>
+        <li><strong>Type 3</strong> — Something you <em>are</em> (fingerprint, iris scan, voice)</li>
+        <li><strong>Type 4</strong> — Something you <em>do</em> (gait, keystroke dynamics)</li>
+        <li><strong>Type 5</strong> — Somewhere you <em>are</em> (geolocation, network context)</li>
+      </ul>
+      <div class="analogy-box"><strong>Exam Trap</strong>A password + a PIN = same factor type (both Type 1). This is NOT MFA. MFA requires different categories.</div>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-icon">🌐</div>
+      <div class="section-label">Objective 4.3</div>
+      <h3>SSO vs. Identity Federation</h3>
+      <p style="font-size:.85rem;">Both reduce password fatigue — but they operate at different trust boundaries.</p>
+      <table style="width:100%;font-size:.78rem;border-collapse:collapse;">
+        <tr style="border-bottom:1px solid var(--border);">
+          <th style="text-align:left;padding:5px;color:var(--text3);">Feature</th>
+          <th style="text-align:left;padding:5px;color:var(--green);">SSO</th>
+          <th style="text-align:left;padding:5px;color:#e65100;">Federation</th>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:5px;color:var(--text3);">Scope</td>
+          <td style="padding:5px;">Single org/domain</td>
+          <td style="padding:5px;">Cross-org / cloud</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:5px;color:var(--text3);">Protocol</td>
+          <td style="padding:5px;">Kerberos, LDAP</td>
+          <td style="padding:5px;">SAML, OAuth, OIDC</td>
+        </tr>
+        <tr>
+          <td style="padding:5px;color:var(--text3);">Risk</td>
+          <td style="padding:5px;">Single point of failure</td>
+          <td style="padding:5px;">Trust chain attack</td>
+        </tr>
+      </table>
+      <div class="analogy-box"><strong>Real-World Analogy</strong>SSO = an office master key for all doors in your building. Federation = TSA PreCheck trusted across all participating airlines (different organizations).</div>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-icon">🛡️</div>
+      <div class="section-label">Objective 4.4</div>
+      <h3>Least Privilege &amp; RBAC</h3>
+      <p style="font-size:.85rem;">Limit the blast radius of any account compromise to only what that user legitimately needs.</p>
+      <ul style="font-size:.82rem;color:var(--text2);padding-left:16px;line-height:2;">
+        <li><strong>Least Privilege</strong> — Minimum permissions to perform the job function</li>
+        <li><strong>Need-to-Know</strong> — Access only to information relevant to current duties</li>
+        <li><strong>RBAC</strong> — Assign permissions to roles; assign users to roles</li>
+        <li><strong>Privilege Creep</strong> — Accumulated rights over time without periodic review</li>
+        <li><strong>Access Review</strong> — Periodic audit to recertify or revoke permissions</li>
+      </ul>
+      <div class="analogy-box"><strong>Real-World Analogy</strong>A hospital clerk needs access to billing records — not surgical scheduling or medication dispensing. RBAC ensures the "Billing Clerk" role can't order opioids.</div>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-icon">👑</div>
+      <div class="section-label">Objective 4.5</div>
+      <h3>Privileged Access Management (PAM)</h3>
+      <p style="font-size:.85rem;">Admin and service accounts represent the highest-value targets in any environment. PAM treats them accordingly.</p>
+      <ul style="font-size:.82rem;color:var(--text2);padding-left:16px;line-height:2;">
+        <li><strong>Credential Vaulting</strong> — Store privileged passwords in an encrypted vault</li>
+        <li><strong>Just-in-Time Access</strong> — Elevate only when needed; auto-expire afterward</li>
+        <li><strong>Session Recording</strong> — Full video/keylog of privileged sessions</li>
+        <li><strong>Credential Rotation</strong> — Auto-rotate passwords after each use</li>
+      </ul>
+      <div class="analogy-box"><strong>Real-World Analogy</strong>A bank vault key that only activates for a 15-minute window, requires two people to use, and automatically video-records every second it's in the lock.</div>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-icon">🔚</div>
+      <div class="section-label">Lifecycle Management</div>
+      <h3>Joiner-Mover-Leaver &amp; Deprovisioning</h3>
+      <p style="font-size:.85rem;">Identity governance must follow employees through every lifecycle phase.</p>
+      <ul style="font-size:.82rem;color:var(--text2);padding-left:16px;line-height:2;">
+        <li><strong>Joiner</strong> — Provision with role-appropriate rights only; use IdP onboarding workflow</li>
+        <li><strong>Mover</strong> — Remove old role's access <em>before or simultaneously</em> with adding new role</li>
+        <li><strong>Leaver</strong> — Immediately disable account; revoke tokens; archive data; audit log</li>
+        <li><strong>Orphaned Account</strong> — Active account with no legitimate owner; a standing attack surface</li>
+      </ul>
+      <div class="analogy-box"><strong>Exam Tip</strong>CompTIA frequently tests the order of operations for offboarding. Disabling the account comes before deletion; account review before disabling is best practice.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ TAB 4: MATCHING GAME -->
+<section class="tab-panel" id="tab-matching">
+  <div style="margin-bottom:16px;">
+    <div class="section-label">Component A — Interactive Activity</div>
+    <h2>Key Term Matching Challenge</h2>
+    <p>Click a term on the left, then click its matching definition on the right. Match all 6 to complete the challenge. Your score updates in real time.</p>
+  </div>
+
+  <div class="game-scorebar">
+    <div>
+      <span style="font-size:.82rem;color:var(--text3);margin-right:8px;">Score</span>
+      <span class="score-display" id="matchScore">0 / 6</span>
+    </div>
+    <button class="game-btn" onclick="resetMatch()">↺ Reset</button>
+  </div>
+
+  <div class="match-area" id="matchArea">
+    <div>
+      <div class="match-col-label">Terms</div>
+      <div id="termCol"></div>
+    </div>
+    <div>
+      <div class="match-col-label">Definitions &amp; Analogies</div>
+      <div id="defCol"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ TAB 5: LIFECYCLE SIM -->
+<section class="tab-panel" id="tab-simulator">
+  <div style="margin-bottom:16px;">
+    <div class="section-label">Component B — Identity Lifecycle Simulator</div>
+    <h2>Joiner → Mover → Leaver</h2>
+    <p>Step through the three phases of the user identity lifecycle. Make the right access control decisions at each stage to prevent privilege creep and orphaned accounts.</p>
+  </div>
+
+  <div class="sim-controls">
+    <button class="sim-btn active" id="btnJoiner" onclick="showPhase('joiner')">🟢 Phase 1: Joiner</button>
+    <button class="sim-btn" id="btnMover" onclick="showPhase('mover')">🟡 Phase 2: Mover</button>
+    <button class="sim-btn" id="btnLeaver" onclick="showPhase('leaver')">🔴 Phase 3: Leaver</button>
+  </div>
+
+  <div class="sim-stage" id="simStage">
+    <!-- Dynamically rendered -->
+  </div>
+
+  <div class="sim-log" id="simLog">
+    <div class="log-entry" id="logPlaceholder">Activity log will appear here as you complete actions…</div>
+  </div>
+</section>
+
+<!-- ============================================================ TAB 6: QUIZ -->
+<section class="tab-panel" id="tab-quiz">
+  <div class="quiz-intro">
+    <div style="font-size:2rem;">📝</div>
+    <div>
+      <h2 style="margin-bottom:4px;">Security+ Exam Prep Assessment</h2>
+      <div class="quiz-meta">
+        <strong>10 Questions</strong> · 8 Multiple Choice + 2 Scenario-Based ·
+        <strong>Lesson 7: IAM</strong> · CompTIA SY0-701 Alignment
+      </div>
+    </div>
+  </div>
+
+  <div id="quizContainer"></div>
+
+  <div class="submit-bar">
+    <div>
+      <div class="score-result" id="quizScore"></div>
+      <div style="font-size:.82rem;color:var(--text3);margin-top:4px;" id="quizHint">Answer all questions, then submit to see your results.</div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <button class="reset-btn" id="resetQuizBtn" onclick="resetQuiz()">↺ Retake Quiz</button>
+      <button class="submit-quiz-btn" id="submitQuizBtn" onclick="submitQuiz()">Submit Quiz →</button>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- Toast feedback element -->
+<div class="feedback-toast" id="feedbackToast"></div>
+
+<script>
+// ============================================================
+// THEME TOGGLE
+// ============================================================
+const themeBtn = document.getElementById('themeToggle');
+let isDark = false;
+themeBtn.addEventListener('click', () => {
+  isDark = !isDark;
+  document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+  themeBtn.textContent = isDark ? '🌙 Dark Mode' : '☀️ Light Mode';
+});
+
+// ============================================================
+// TAB NAVIGATION
+// ============================================================
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ============================================================
+// MATCHING GAME
+// ============================================================
+const matchData = [
+  { id: 'aaa',   term: 'AAA Framework',    def: 'The three-pillar model: prove identity, grant rights, and record all activity. Implemented via RADIUS or TACACS+.' },
+  { id: 'mfa',   term: 'MFA',              def: 'Requires credentials from two or more distinct factor categories — e.g., a password (Type 1) + a hardware token (Type 2).' },
+  { id: 'sso',   term: 'SSO',              def: 'One credential unlocks multiple systems within a single organizational trust boundary, like an Active Directory domain.' },
+  { id: 'rbac',  term: 'RBAC',             def: 'Permissions are tied to job roles, not individuals. When a user changes jobs, role reassignment automatically adjusts access.' },
+  { id: 'pam',   term: 'PAM',              def: 'Vaults, controls, and audits elevated administrative accounts through just-in-time access and full session recording.' },
+  { id: 'deprov',term: 'Deprovisioning',   def: 'The systematic revocation of all access rights, tokens, and accounts when a user exits or transfers. Prevents orphaned accounts.' },
+];
+
+let selectedTerm = null;
+let matchCount = 0;
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function buildMatch() {
+  selectedTerm = null;
+  matchCount = 0;
+  document.getElementById('matchScore').textContent = '0 / 6';
+
+  const shuffledTerms = shuffle([...matchData]);
+  const shuffledDefs = shuffle([...matchData]);
+
+  const termCol = document.getElementById('termCol');
+  const defCol = document.getElementById('defCol');
+  termCol.innerHTML = '';
+  defCol.innerHTML = '';
+
+  shuffledTerms.forEach(item => {
+    const el = document.createElement('div');
+    el.className = 'match-item';
+    el.dataset.id = item.id;
+    el.dataset.side = 'term';
+    el.innerHTML = '<span class="match-term">' + item.term + '</span>';
+    el.addEventListener('click', () => handleMatchClick(el));
+    termCol.appendChild(el);
+  });
+
+  shuffledDefs.forEach(item => {
+    const el = document.createElement('div');
+    el.className = 'match-item';
+    el.dataset.id = item.id;
+    el.dataset.side = 'def';
+    el.innerHTML = item.def;
+    el.addEventListener('click', () => handleMatchClick(el));
+    defCol.appendChild(el);
+  });
+}
+
+function handleMatchClick(el) {
+  if (el.classList.contains('correct') || el.classList.contains('dimmed')) return;
+
+  if (!selectedTerm) {
+    if (el.dataset.side !== 'term') return;
+    document.querySelectorAll('#termCol .match-item').forEach(t => t.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedTerm = el;
+    return;
+  }
+
+  if (el.dataset.side === 'term') {
+    document.querySelectorAll('#termCol .match-item').forEach(t => t.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedTerm = el;
+    return;
+  }
+
+  // Try to match
+  if (selectedTerm.dataset.id === el.dataset.id) {
+    selectedTerm.classList.remove('selected');
+    selectedTerm.classList.add('correct');
+    el.classList.add('correct');
+    matchCount++;
+    document.getElementById('matchScore').textContent = matchCount + ' / 6';
+    showToast('✓ Correct!', false);
+    if (matchCount === 6) {
+      setTimeout(() => showToast('🎉 Perfect score! All 6 matched!', false), 600);
+    }
+  } else {
+    const wrongEl = el;
+    const wrongTerm = selectedTerm;
+    wrongEl.classList.add('wrong');
+    wrongTerm.classList.add('wrong');
+    showToast('✗ Try again', true);
+    setTimeout(() => {
+      wrongEl.classList.remove('wrong');
+      wrongTerm.classList.remove('wrong', 'selected');
+    }, 700);
+  }
+  selectedTerm = null;
+}
+
+function resetMatch() { buildMatch(); }
+
+function showToast(msg, isWrong) {
+  const toast = document.getElementById('feedbackToast');
+  toast.textContent = msg;
+  toast.className = 'feedback-toast show' + (isWrong ? ' wrong-toast' : '');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => { toast.className = 'feedback-toast'; }, 1800);
+}
+
+buildMatch();
+
+// ============================================================
+// LIFECYCLE SIMULATOR
+// ============================================================
+const simState = {
+  phase: 'joiner',
+  roleAssigned: false,
+  roleValue: '',
+  privilegeEnforced: false,
+  checklistDone: [],
+  logs: []
+};
+
+const checklistItems = [
+  { id: 'c1', text: 'Disable Active Directory account' },
+  { id: 'c2', text: 'Revoke all OAuth tokens and sessions' },
+  { id: 'c3', text: 'Remove from all security groups' },
+  { id: 'c4', text: 'Revoke VPN and remote access certificates' },
+  { id: 'c5', text: 'Transfer or archive file system ownership' },
+  { id: 'c6', text: 'Notify IT and HR; document completion timestamp' },
+];
+
+function addLog(msg) {
+  simState.logs.push(msg);
+  const logEl = document.getElementById('simLog');
+  if (logEl) {
+    logEl.innerHTML = simState.logs.map(l => '<div class="log-entry">' + l + '</div>').join('');
+    logEl.scrollTop = logEl.scrollHeight;
+    const placeholder = document.getElementById('logPlaceholder');
+    if (placeholder) placeholder.remove();
+  }
+}
+
+function showPhase(phase) {
+  simState.phase = phase;
+  ['joiner','mover','leaver'].forEach(p => {
+    const btn = document.getElementById('btn' + p.charAt(0).toUpperCase() + p.slice(1));
+    if (btn) btn.classList.toggle('active', p === phase);
+  });
+  renderSim();
+}
+
+function renderSim() {
+  const stage = document.getElementById('simStage');
+  if (!stage) return;
+
+  if (simState.phase === 'joiner') {
+    stage.innerHTML = `
+      <div class="stage-header">
+        <div class="stage-icon">🟢</div>
+        <div>
+          <div class="stage-title">Phase 1: Joiner — New Employee Provisioning</div>
+          <div class="stage-subtitle">Marcus Webb just joined as a Financial Analyst. Set up his identity correctly.</div>
+        </div>
+      </div>
+      <div class="user-card">
+        <div class="avatar">👤</div>
+        <div class="user-info">
+          <div class="user-name">Marcus Webb</div>
+          <div class="user-role">Financial Analyst — Finance Department</div>
+          <div class="user-perms" id="joinerPerms">
+            <span class="perm-tag" style="background:var(--bg2);color:var(--text3);border-color:var(--border);">No access assigned yet</span>
+          </div>
+        </div>
+        <span class="user-status" style="background:var(--bg2);color:var(--text3);">Pending</span>
+      </div>
+      <div class="action-panel">
+        <h3>Step 1 — Assign RBAC Role</h3>
+        <p style="font-size:.82rem;color:var(--text3);margin-bottom:10px;">Select the correct role for Marcus. Apply Least Privilege — give him only what his job requires.</p>
+        <div class="role-select-wrap">
+          <label for="roleSelect">Assign Role:</label>
+          <select class="role-select" id="roleSelect">
+            <option value="">— Select a role —</option>
+            <option value="wrong1">IT Systems Administrator</option>
+            <option value="correct">Financial Analyst (Read: Finance Reports, Write: Expense Reports)</option>
+            <option value="wrong2">HR Manager (Access: All Personnel Records)</option>
+            <option value="wrong3">Domain Administrator (Full AD Control)</option>
+          </select>
+        </div>
+        <button class="game-btn" style="margin-top:12px;" onclick="assignRole()">Provision Identity →</button>
+      </div>
+      ${simState.roleAssigned ? `
+      <div style="margin-top:14px;padding:12px 16px;background:var(--green-bg);border:1px solid var(--green);border-radius:var(--radius);font-size:.85rem;color:var(--green);">
+        ✓ Identity provisioned. IdP token issued. Marcus has Finance Analyst access only. Ready for Phase 2 →
+      </div>` : ''}
+    `;
+  } else if (simState.phase === 'mover') {
+    stage.innerHTML = `
+      <div class="stage-header">
+        <div class="stage-icon">🟡</div>
+        <div>
+          <div class="stage-title">Phase 2: Mover — Department Transfer</div>
+          <div class="stage-subtitle">6 months later: Marcus transfers to the Operations team. He needs new access — but watch what happens.</div>
+        </div>
+      </div>
+      <div class="user-card" id="moverCard">
+        <div class="avatar">👤</div>
+        <div class="user-info">
+          <div class="user-name">Marcus Webb</div>
+          <div class="user-role">Now: Operations Analyst (transferred from Finance)</div>
+          <div class="user-perms" id="moverPerms">
+            <span class="perm-tag">Finance Reports (Read)</span>
+            <span class="perm-tag">Expense Reports (Write)</span>
+            <span class="perm-tag warn" id="opsTag" style="display:none;">Operations Dashboard (New)</span>
+            <span class="perm-tag danger" id="sprawlTag" style="display:none;">⚠ PRIVILEGE CREEP DETECTED</span>
+          </div>
+        </div>
+        <span class="user-status status-mover" id="moverStatus">Transferring…</span>
+      </div>
+      <div class="action-panel">
+        <h3>Operations requires new access. What do you do?</h3>
+        <p style="font-size:.82rem;color:var(--text3);margin-bottom:12px;">The new manager just approved Operations Dashboard access. The old Finance access was never formally reviewed.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="sim-btn" onclick="addOpsAccess()">Add Operations Access Only</button>
+          <button class="sim-btn" onclick="enforceLeastPriv()">Enforce Least Privilege (Remove Finance + Add Ops)</button>
+        </div>
+        <div id="moverFeedback" style="margin-top:12px;font-size:.85rem;display:none;"></div>
+      </div>
+    `;
+  } else if (simState.phase === 'leaver') {
+    stage.innerHTML = `
+      <div class="stage-header">
+        <div class="stage-icon">🔴</div>
+        <div>
+          <div class="stage-title">Phase 3: Leaver — Employee Offboarding</div>
+          <div class="stage-subtitle">Marcus has resigned. Complete the deprovisioning checklist to close all access vectors.</div>
+        </div>
+      </div>
+      <div class="user-card">
+        <div class="avatar">👤</div>
+        <div class="user-info">
+          <div class="user-name">Marcus Webb — RESIGNED</div>
+          <div class="user-role">Last day: today. Do not allow access to persist.</div>
+          <div class="user-perms">
+            <span class="perm-tag danger">Active AD Account</span>
+            <span class="perm-tag danger">Active OAuth Token</span>
+            <span class="perm-tag danger">VPN Certificate Valid</span>
+          </div>
+        </div>
+        <span class="user-status status-offboard">⚠ Active</span>
+      </div>
+      <div class="action-panel">
+        <h3>Deprovisioning Checklist</h3>
+        <p style="font-size:.82rem;color:var(--text3);margin-bottom:12px;">Complete every item. An incomplete offboarding creates orphaned accounts — a standing attack surface. Each unchecked item represents a potential breach vector.</p>
+        <div id="checklist">
+          ${checklistItems.map(item => `
+            <div class="checklist-item" id="ci-${item.id}">
+              <button class="check-btn${simState.checklistDone.includes(item.id) ? ' checked' : ''}"
+                      onclick="toggleCheck('${item.id}')"
+                      aria-label="Complete: ${item.text}">
+                ${simState.checklistDone.includes(item.id) ? '✓' : ''}
+              </button>
+              <span>${item.text}</span>
+            </div>`).join('')}
+        </div>
+        <div id="leaverResult" style="margin-top:12px;"></div>
+      </div>
+    `;
+    updateLeaverResult();
+  }
+}
+
+function assignRole() {
+  const sel = document.getElementById('roleSelect');
+  if (!sel || !sel.value) { showToast('Select a role first', true); return; }
+  if (sel.value !== 'correct') {
+    showToast('✗ Incorrect — this violates Least Privilege!', true);
+    addLog('WARNING: Attempted to assign ' + sel.options[sel.selectedIndex].text + ' to Marcus — violates Least Privilege!');
+    return;
+  }
+  simState.roleAssigned = true;
+  simState.roleValue = sel.options[sel.selectedIndex].text;
+  addLog('Marcus Webb provisioned with Financial Analyst role. IdP token issued. SSO profile created.');
+  showToast('✓ Correctly provisioned with Least Privilege role!', false);
+  renderSim();
+}
+
+function addOpsAccess() {
+  const opsTag = document.getElementById('opsTag');
+  const sprawlTag = document.getElementById('sprawlTag');
+  const feedback = document.getElementById('moverFeedback');
+  const status = document.getElementById('moverStatus');
+  if (opsTag) opsTag.style.display = 'inline-block';
+  if (sprawlTag) sprawlTag.style.display = 'inline-block';
+  if (status) { status.textContent = '⚠ Privilege Creep'; status.className = 'user-status status-offboard'; }
+  if (feedback) {
+    feedback.style.display = 'block';
+    feedback.style.cssText += 'background:var(--red-bg);border-left:3px solid var(--red);padding:10px 14px;border-radius:var(--radius);color:var(--red);display:block;';
+    feedback.innerHTML = '<strong>⚠ Privilege Creep Created!</strong> Marcus now has both Finance AND Operations access. His Finance permissions were never revoked. This violates Least Privilege and constitutes a compliance risk. An access review would flag this as privilege sprawl.';
+  }
+  addLog('RISK: Marcus has accumulated Finance + Operations access. Privilege creep detected. Least Privilege violated.');
+  showToast('⚠ Privilege creep created — revisit this!', true);
+}
+
+function enforceLeastPriv() {
+  const opsTag = document.getElementById('opsTag');
+  const sprawlTag = document.getElementById('sprawlTag');
+  const feedback = document.getElementById('moverFeedback');
+  const status = document.getElementById('moverStatus');
+  const perms = document.getElementById('moverPerms');
+  if (perms) perms.innerHTML = '<span class="perm-tag">Operations Dashboard (New)</span>';
+  if (status) { status.textContent = '✓ Clean Access'; status.className = 'user-status status-active'; }
+  if (feedback) {
+    feedback.style.display = 'block';
+    feedback.style.cssText += 'background:var(--green-bg);border-left:3px solid var(--green);padding:10px 14px;border-radius:var(--radius);color:var(--green);display:block;';
+    feedback.innerHTML = '<strong>✓ Least Privilege Enforced!</strong> Finance access removed simultaneously with Operations access grant. Marcus has exactly what his new role requires — no more, no less. This is the correct IAM pattern for a Mover event.';
+  }
+  addLog('CORRECT: Marcus Webb Mover event — Finance access revoked, Operations Dashboard access granted. Least Privilege maintained.');
+  showToast('✓ Least Privilege enforced — excellent!', false);
+}
+
+function toggleCheck(id) {
+  const idx = simState.checklistDone.indexOf(id);
+  const btn = document.querySelector('#ci-' + id + ' .check-btn');
+  const span = document.querySelector('#ci-' + id + ' span');
+  if (idx === -1) {
+    simState.checklistDone.push(id);
+    if (btn) { btn.classList.add('checked'); btn.textContent = '✓'; }
+    if (span) span.style.cssText = 'text-decoration:line-through;color:var(--text3);';
+    const item = checklistItems.find(i => i.id === id);
+    addLog('Offboarding: ' + (item ? item.text : id) + ' — completed.');
+  } else {
+    simState.checklistDone.splice(idx, 1);
+    if (btn) { btn.classList.remove('checked'); btn.textContent = ''; }
+    if (span) span.style.cssText = '';
+  }
+  updateLeaverResult();
+}
+
+function updateLeaverResult() {
+  const resultEl = document.getElementById('leaverResult');
+  if (!resultEl) return;
+  const done = simState.checklistDone.length;
+  const total = checklistItems.length;
+  if (done === total) {
+    resultEl.innerHTML = '<div style="background:var(--green-bg);border:1px solid var(--green);border-radius:var(--radius);padding:10px 14px;color:var(--green);font-size:.85rem;"><strong>✓ Deprovisioning Complete!</strong> All access vectors closed. No orphaned accounts. Marcus Webb\'s digital identity has been fully offboarded. Audit trail preserved. You\'ve successfully completed the full Joiner-Mover-Leaver lifecycle!</div>';
+    addLog('SUCCESS: Marcus Webb deprovisioning complete. ' + total + '/' + total + ' checklist items resolved. No orphaned accounts remain.');
+    showToast('🎉 Full lifecycle complete!', false);
+  } else if (done > 0) {
+    resultEl.innerHTML = '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px;color:var(--text3);font-size:.85rem;">' + done + ' of ' + total + ' items complete. ' + (total - done) + ' active access vector(s) remain — each is a potential breach point.</div>';
+  } else {
+    resultEl.innerHTML = '';
+  }
+}
+
+// Initialize sim
+renderSim();
+
+// ============================================================
+// QUIZ
+// ============================================================
+const quizData = [
+  {
+    id: 'q1', type: 'mc',
+    text: 'A user proves their identity with a password, then has their access rights checked against an ACL, and their activities are recorded in a log file. Which security model does this describe?',
+    options: ['Zero Trust Architecture', 'AAA Framework', 'Role-Based Access Control', 'Mandatory Access Control'],
+    answer: 1,
+    explanation: 'The AAA (Authentication, Authorization, Accounting) framework describes exactly this sequence: proving identity (Authentication), checking access rights (Authorization), and logging activity (Accounting).'
+  },
+  {
+    id: 'q2', type: 'mc',
+    text: 'Which of the following represents a correct MFA implementation?',
+    options: [
+      'A password and a PIN',
+      'A fingerprint scan and a retina scan',
+      'A smart card and a PIN',
+      'A passphrase and a security question'
+    ],
+    answer: 2,
+    explanation: 'A smart card (Type 2: Something you have) combined with a PIN (Type 1: Something you know) uses two different factor categories, making it true MFA. The other options combine factors from the same category.'
+  },
+  {
+    id: 'q3', type: 'mc',
+    text: 'An organization wants employees to log into their workstation once and automatically gain access to email, HR systems, and the ticketing platform without re-entering credentials. What technology best fits this need?',
+    options: ['Federation with SAML', 'Single Sign-On (SSO)', 'Multi-Factor Authentication', 'Privileged Access Management'],
+    answer: 1,
+    explanation: 'SSO allows a user to authenticate once to a directory service (e.g., Active Directory) and gain access to multiple integrated systems within the same trust domain without re-authenticating. Federation extends this across organizational boundaries.'
+  },
+  {
+    id: 'q4', type: 'mc',
+    text: 'Which access control model assigns permissions to defined job functions rather than to individual users?',
+    options: ['Mandatory Access Control (MAC)', 'Discretionary Access Control (DAC)', 'Role-Based Access Control (RBAC)', 'Attribute-Based Access Control (ABAC)'],
+    answer: 2,
+    explanation: 'RBAC assigns permissions to roles (e.g., "Nurse," "Billing Clerk," "IT Admin"), then assigns users to roles. When a user\'s job changes, role reassignment automatically adjusts their permissions.'
+  },
+  {
+    id: 'q5', type: 'mc',
+    text: 'A security audit reveals that a developer who moved to the QA team 18 months ago still has production database write access in addition to QA system access. What vulnerability does this represent?',
+    options: ['Privilege escalation', 'Privilege creep', 'Account enumeration', 'Lateral movement'],
+    answer: 1,
+    explanation: 'Privilege creep (also called permission accumulation or privilege sprawl) occurs when a user gradually accumulates access rights over time without periodic review and revocation of unneeded permissions from previous roles.'
+  },
+  {
+    id: 'q6', type: 'mc',
+    text: 'Which PAM capability automatically changes an administrative account password immediately after each use, ensuring credentials cannot be reused?',
+    options: ['Just-in-Time Access', 'Session Recording', 'Credential Rotation', 'Federated Identity'],
+    answer: 2,
+    explanation: 'Credential rotation (automated password rotation) changes privileged account passwords after each use or on a schedule, preventing credential reuse attacks such as Pass-the-Hash or replay attacks.'
+  },
+  {
+    id: 'q7', type: 'mc',
+    text: 'What is an "orphaned account" in identity management?',
+    options: [
+      'An account with elevated privileges granted for a temporary project',
+      'An active account that belongs to a user who has left the organization',
+      'A service account created for application-to-application authentication',
+      'An account locked due to failed login attempts'
+    ],
+    answer: 1,
+    explanation: 'An orphaned (or stale) account is an active account with no current legitimate owner — typically from a departed employee or contractor. Orphaned accounts are a primary attack surface for insider threat and external attackers who discover valid credentials.'
+  },
+  {
+    id: 'q8', type: 'mc',
+    text: 'SAML, OAuth 2.0, and OpenID Connect (OIDC) are protocols most commonly associated with which identity management concept?',
+    options: [
+      'Single Sign-On within an Active Directory domain',
+      'Identity federation across organizational trust boundaries',
+      'Privileged Access Management vaulting',
+      'Multi-factor authentication token generation'
+    ],
+    answer: 1,
+    explanation: 'SAML, OAuth 2.0, and OIDC are federation protocols used to establish identity trust across organizational boundaries — for example, allowing a university student to log into a third-party research tool using their campus credentials.'
+  },
+  {
+    id: 'q9', type: 'scenario',
+    text: 'SCENARIO: A hospital is onboarding a third-party medical billing contractor who needs temporary, limited access to the billing module for 90 days. The contractor will work remotely. Which combination of controls BEST addresses this situation from a Security+ IAM perspective?',
+    options: [
+      'Create a standard domain account, add to the Billing group, and set an account expiration date',
+      'Issue a contractor-specific account with time-limited access, require MFA, enforce Least Privilege to billing module only, and audit all sessions',
+      'Add the contractor to the Finance department SSO group for seamless access',
+      'Provide the contractor with a shared service account credentials already used by the billing team'
+    ],
+    answer: 1,
+    explanation: 'The best answer addresses all contractor risk dimensions: a dedicated account (not shared) prevents accountability loss; time-limited access enforces deprovisioning; MFA addresses remote access risk; Least Privilege limits blast radius; and session auditing provides accounting. Option A is incomplete; Option C violates Least Privilege (SSO group likely has broader access); Option D destroys individual accountability.'
+  },
+  {
+    id: 'q10', type: 'scenario',
+    text: 'SCENARIO: Your organization\'s CISO asks you to design the access control approach for a new class of users: database administrators (DBAs) who need root-level access to production databases for maintenance tasks, but this access should not be persistent. Which solution BEST fits this requirement?',
+    options: [
+      'Add DBAs to the "Admins" Active Directory group with full-time access',
+      'Implement PAM with just-in-time (JIT) access provisioning, credential vaulting, and session recording for all DBA connections',
+      'Configure SSO so DBAs can access all systems with a single credential',
+      'Issue DBAs personal root credentials and require them to document usage in a spreadsheet'
+    ],
+    answer: 1,
+    explanation: 'PAM with just-in-time access is the correct answer: JIT ensures privileged access exists only when actively needed (not persistent), credential vaulting prevents credential theft, and session recording provides accounting. This directly addresses the "should not be persistent" requirement. Full-time group membership (A) violates the requirement. SSO (C) addresses authentication convenience, not privileged access governance. A spreadsheet (D) is an unenforceable honor system.'
+  }
+];
+
+let quizSubmitted = false;
+
+function buildQuiz() {
+  const container = document.getElementById('quizContainer');
+  container.innerHTML = '';
+  quizData.forEach((q, i) => {
+    const isScenario = q.type === 'scenario';
+    const html = `
+      <div class="q-block" id="qblock-${q.id}">
+        <div class="q-num">Question ${i + 1} of ${quizData.length}
+          <span class="q-type-tag${isScenario ? ' scenario' : ''}">${isScenario ? 'Scenario' : 'Multiple Choice'}</span>
+        </div>
+        <div class="q-text">${q.text}</div>
+        <div class="q-options" role="radiogroup">
+          ${q.options.map((opt, j) => `
+            <label class="q-opt" id="opt-${q.id}-${j}">
+              <input type="radio" name="${q.id}" value="${j}" ${quizSubmitted ? 'disabled' : ''}>
+              <span>${opt}</span>
+            </label>`).join('')}
+        </div>
+        <div class="q-feedback" id="feedback-${q.id}"></div>
+      </div>`;
+    container.insertAdjacentHTML('beforeend', html);
+  });
+}
+
+function submitQuiz() {
+  if (quizSubmitted) return;
+  let score = 0;
+  let allAnswered = true;
+
+  quizData.forEach(q => {
+    const selected = document.querySelector(`input[name="${q.id}"]:checked`);
+    if (!selected) { allAnswered = false; return; }
+
+    const block = document.getElementById('qblock-' + q.id);
+    const feedback = document.getElementById('feedback-' + q.id);
+    const chosenIdx = parseInt(selected.value);
+
+    // Disable all options
+    document.querySelectorAll(`input[name="${q.id}"]`).forEach(inp => inp.disabled = true);
+
+    // Highlight options
+    q.options.forEach((_, j) => {
+      const optEl = document.getElementById('opt-' + q.id + '-' + j);
+      if (j === q.answer) optEl.classList.add('opt-correct');
+      else if (j === chosenIdx && j !== q.answer) optEl.classList.add('opt-wrong');
+    });
+
+    if (chosenIdx === q.answer) {
+      score++;
+      block.classList.add('correct-q');
+      feedback.className = 'q-feedback fb-correct show';
+      feedback.innerHTML = '<strong>✓ Correct!</strong> ' + q.explanation;
+    } else {
+      block.classList.add('wrong-q');
+      feedback.className = 'q-feedback fb-wrong show';
+      feedback.innerHTML = '<strong>✗ Incorrect.</strong> The correct answer is: <strong>' + q.options[q.answer] + '</strong>. ' + q.explanation;
+    }
+  });
+
+  if (!allAnswered) {
+    showToast('Answer all questions before submitting', true);
+    return;
+  }
+
+  quizSubmitted = true;
+  const pct = Math.round((score / quizData.length) * 100);
+  const grade = pct >= 90 ? '🏆 Excellent' : pct >= 80 ? '✅ Proficient' : pct >= 70 ? '📘 Review Recommended' : '⚠ Needs Study';
+
+  const scoreEl = document.getElementById('quizScore');
+  scoreEl.className = 'score-result show';
+  scoreEl.innerHTML = score + ' / ' + quizData.length + ' &nbsp;·&nbsp; ' + pct + '% &nbsp;·&nbsp; ' + grade;
+
+  document.getElementById('quizHint').textContent = 'Review explanations above for any missed questions. Focus on highlighted items before your exam.';
+  document.getElementById('submitQuizBtn').style.display = 'none';
+  document.getElementById('resetQuizBtn').classList.add('show');
+}
+
+function resetQuiz() {
+  quizSubmitted = false;
+  document.getElementById('quizScore').className = 'score-result';
+  document.getElementById('quizHint').textContent = 'Answer all questions, then submit to see your results.';
+  document.getElementById('submitQuizBtn').style.display = '';
+  document.getElementById('resetQuizBtn').classList.remove('show');
+  buildQuiz();
+  window.scrollTo({ top: document.getElementById('tab-quiz').offsetTop - 120, behavior: 'smooth' });
+}
+
+buildQuiz();
+</script>
+</body>
+</html>
