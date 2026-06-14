@@ -28,12 +28,14 @@
     --tag-gov: #6a1b9a;
     --tag-gen: #e65100;
     --tag-exam: #00695c;
+    --tag-lab: #0277bd;
     --tag-exam-bg: #e0f2f1;
     --tag-threat-bg: #fdecea;
     --tag-arch-bg: #e3f0fd;
     --tag-ops-bg: #e8f5e9;
     --tag-gov-bg: #f3e5f5;
     --tag-gen-bg: #fff3e0;
+    --tag-lab-bg: #e1f0fa;
   }
   [data-theme="dark"] {
     --bg: #0f1117;
@@ -58,12 +60,14 @@
     --tag-gov: #ce93d8;
     --tag-gen: #ffcc80;
     --tag-exam: #80cbc4;
+    --tag-lab: #4fc3f7;
     --tag-exam-bg: #0d2520;
     --tag-threat-bg: #2a1010;
     --tag-arch-bg: #0d1f35;
     --tag-ops-bg: #0d2010;
     --tag-gov-bg: #1f0d2a;
     --tag-gen-bg: #2a1a00;
+    --tag-lab-bg: #0a1f30;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -244,6 +248,7 @@
   .card.domain-gov     .card-accent-bar { background: var(--tag-gov); }
   .card.domain-gen     .card-accent-bar { background: var(--tag-gen); }
   .card.domain-exam    .card-accent-bar { background: var(--tag-exam); }
+  .card.domain-lab     .card-accent-bar { background: var(--tag-lab); }
   .card.domain-special .card-accent-bar { background: linear-gradient(90deg, var(--accent), #ff9a00); }
 
   .card-body {
@@ -283,6 +288,7 @@
   .tag-ops     { color: var(--tag-ops);    background: var(--tag-ops-bg); }
   .tag-gov     { color: var(--tag-gov);    background: var(--tag-gov-bg); }
   .tag-exam    { color: var(--tag-exam);   background: var(--tag-exam-bg); }
+  .tag-lab     { color: var(--tag-lab);    background: var(--tag-lab-bg); }
   .tag-special { color: var(--accent);     background: var(--accent-light); }
 
   .card-title {
@@ -331,6 +337,18 @@
     border: 2px solid var(--accent);
   }
   .card.special-card .card-title { color: var(--accent); }
+
+  /* LAB CARD */
+  .lab-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 20px;
+    margin-bottom: 12px;
+  }
+  .card.lab-card {
+    border: 2px solid var(--tag-lab);
+  }
+  .card.lab-card .card-title { color: var(--tag-lab); }
 
   /* PROGRESS BAR (decorative) */
   .progress-strip {
@@ -614,7 +632,7 @@
 
   </div>
 
-  <!-- SPECIAL CARDS -->
+  <!-- EXAM RESOURCES -->
   <div class="section-label">🎯 Exam Resources</div>
   <div class="special-grid">
 
@@ -646,6 +664,28 @@
       </div>
       <div class="card-footer">
         <span class="card-terms"><strong>Covers:</strong> All 5 Domains · Timed · Scored · Reviewed</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- LAB ACTIVITIES -->
+  <div class="section-label" style="margin-top: 28px;">🔬 Lab Activities</div>
+  <div class="lab-grid">
+
+    <a class="card lab-card domain-lab" href="labs.html">
+      <div class="card-accent-bar"></div>
+      <div class="card-body">
+        <div class="card-header-row">
+          <span class="lesson-num">Hands-On</span>
+          <span class="domain-tag tag-lab">Lab Activity</span>
+        </div>
+        <div class="card-title">🖥️ Hands-on Lab Exercises</div>
+        <div class="card-desc">Apply the concepts from this lesson in a hands-on lab designed to strengthen your practical skills. Launch the activity to analyze a scenario, complete guided tasks, and demonstrate what you learned in a realistic cybersecurity context.</div>
+      </div>
+      <div class="card-footer">
+        <span class="card-terms"><strong>Covers:</strong> Scenario Analysis · Guided Tasks · Applied Skills</span>
         <span class="card-arrow">→</span>
       </div>
     </a>
