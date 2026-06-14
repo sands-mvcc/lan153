@@ -219,7 +219,7 @@ header {
 .flip-grid {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px;
 }
-.flip-wrapper { perspective: 1000px; height: 240px; cursor: pointer; }
+.flip-wrapper { perspective: 1000px; height: 260px; cursor: pointer; }
 .flip-inner {
   position: relative; width: 100%; height: 100%;
   transition: transform 0.6s cubic-bezier(0.4,0.2,0.2,1);
@@ -241,14 +241,27 @@ header {
 .flip-hint { font-size: 0.7rem; color: var(--text-muted); }
 .flip-back h3  { font-size: 0.95rem; font-weight: 700; margin-bottom: 8px; opacity: 0.9; }
 .flip-back p   { font-size: 0.82rem; opacity: 0.85; line-height: 1.55; flex: 1; }
+
+/* ── Flip-back link row: View + Download ── */
+.flip-back-links {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px;
+}
 .flip-back a.dive-link {
   display: inline-block; background: rgba(255,255,255,0.15);
   border: 1px solid rgba(255,255,255,0.3);
   color: #fff; font-size: 0.78rem; font-weight: 700;
   padding: 6px 14px; border-radius: 20px; text-decoration: none;
-  transition: background 0.2s; margin-top: 10px; align-self: flex-start;
+  transition: background 0.2s; align-self: flex-start;
 }
 .flip-back a.dive-link:hover { background: rgba(255,255,255,0.28); }
+.flip-back a.dive-download {
+  display: inline-block; background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.22);
+  color: #fff; font-size: 0.75rem; font-weight: 600;
+  padding: 6px 12px; border-radius: 20px; text-decoration: none;
+  transition: background 0.2s; align-self: flex-start;
+}
+.flip-back a.dive-download:hover { background: rgba(255,255,255,0.22); text-decoration: none; }
 
 /* ============================================================
    TOPIC SECTIONS
@@ -698,7 +711,10 @@ header {
               <h3>OS, App &amp; Mobile</h3>
               <p>OS vulnerabilities include kernel flaws, privilege escalation, and unpatched services. Application flaws include buffer overflows, race conditions, and insecure defaults. Mobile adds sideloading risks, insecure storage, and over-privileged apps. CVSS guides prioritization.</p>
             </div>
-            <a class="dive-link" href="lesson04-part01.html">Deep Dive →</a>
+            <div class="flip-back-links">
+              <a class="dive-link" href="lesson04-part01.png" target="_blank" rel="noopener">View Graphic &#8594;</a>
+              <a class="dive-download" href="lesson04-part01.png" download="lesson04-part01.png">&#8675; Download PNG</a>
+            </div>
           </div>
         </div>
       </div>
@@ -718,7 +734,10 @@ header {
               <h3>Cloud &amp; Web</h3>
               <p>Cloud breaches are dominated by misconfiguration (open S3 buckets, public snapshots, over-privileged IAM roles). Web application flaws include the OWASP Top 10: SQL injection, broken authentication, XSS, SSRF, and insecure deserialization. Each has distinct testing and mitigation patterns.</p>
             </div>
-            <a class="dive-link" href="lesson04-part02.html">Deep Dive →</a>
+            <div class="flip-back-links">
+              <a class="dive-link" href="lesson04-part02.png" target="_blank" rel="noopener">View Graphic &#8594;</a>
+              <a class="dive-download" href="lesson04-part02.png" download="lesson04-part02.png">&#8675; Download PNG</a>
+            </div>
           </div>
         </div>
       </div>
@@ -738,7 +757,10 @@ header {
               <h3>Mitigation Strategies</h3>
               <p>No single mitigation closes all vulnerabilities. Effective defense layers patching (eliminate known flaws), hardening (reduce attack surface), segmentation (contain breaches), isolation (quarantine risk), and access control (limit blast radius) — each addressing different attack paths.</p>
             </div>
-            <a class="dive-link" href="lesson04-part03.html">Deep Dive →</a>
+            <div class="flip-back-links">
+              <a class="dive-link" href="lesson04-part03.png" target="_blank" rel="noopener">View Graphic &#8594;</a>
+              <a class="dive-download" href="lesson04-part03.png" download="lesson04-part03.png">&#8675; Download PNG</a>
+            </div>
           </div>
         </div>
       </div>
@@ -1387,10 +1409,10 @@ header {
   <div class="footer-nav">
     <a href="index.html">← Course Home</a>
     <a href="lesson03.html">← Lesson 3: Threat Actors</a>
-    <a href="lesson04-part01.html">Topic 1 Deep Dive</a>
-    <a href="lesson04-part02.html">Topic 2 Deep Dive</a>
-    <a href="lesson04-part03.html">Topic 3 Deep Dive</a>
-    <a href="lesson05.html">Next: Secure Architecture →</a>
+    <a href="lesson04-part01.png" target="_blank" rel="noopener">Topic 1 Graphic</a>
+    <a href="lesson04-part02.png" target="_blank" rel="noopener">Topic 2 Graphic</a>
+    <a href="lesson04-part03.png" target="_blank" rel="noopener">Topic 3 Graphic</a>
+    <a href="lesson05.html">Next: Secure Architecture &rarr;</a>
   </div>
   CompTIA Security+ SY0-701 &nbsp;|&nbsp; Lesson 4: Vulnerabilities &amp; Mitigation &nbsp;|&nbsp; Moraine Valley Community College
 </div>
@@ -1493,15 +1515,12 @@ function resetAct4() {
 let currentTriage = -1;
 
 function showTriage(idx, el) {
-  // hide all detail panels
   for (let i = 0; i < 4; i++) {
     document.getElementById('triage-detail-' + i).classList.remove('visible');
   }
-  // deselect all cards
   document.querySelectorAll('.triage-vuln').forEach(c => c.classList.remove('selected'));
 
   if (currentTriage === idx) {
-    // clicking same card toggles off
     currentTriage = -1;
     return;
   }
