@@ -221,7 +221,7 @@ header {
 .flip-grid {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px;
 }
-.flip-wrapper { perspective: 1000px; height: 240px; cursor: pointer; }
+.flip-wrapper { perspective: 1000px; height: 260px; cursor: pointer; }
 .flip-inner {
   position: relative; width: 100%; height: 100%;
   transition: transform 0.6s cubic-bezier(0.4,0.2,0.2,1);
@@ -243,14 +243,27 @@ header {
 .flip-hint { font-size: 0.7rem; color: var(--text-muted); }
 .flip-back h3  { font-size: 0.95rem; font-weight: 700; margin-bottom: 8px; opacity: 0.9; }
 .flip-back p   { font-size: 0.82rem; opacity: 0.85; line-height: 1.55; flex: 1; }
+
+/* ── Flip-back link row: View + Download ── */
+.flip-back-links {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px;
+}
 .flip-back a.dive-link {
   display: inline-block; background: rgba(255,255,255,0.15);
   border: 1px solid rgba(255,255,255,0.3);
   color: #fff; font-size: 0.78rem; font-weight: 700;
   padding: 6px 14px; border-radius: 20px; text-decoration: none;
-  transition: background 0.2s; margin-top: 10px; align-self: flex-start;
+  transition: background 0.2s; align-self: flex-start;
 }
-.flip-back a.dive-link:hover { background: rgba(255,255,255,0.28); }
+.flip-back a.dive-link:hover { background: rgba(255,255,255,0.28); text-decoration: none; }
+.flip-back a.dive-download {
+  display: inline-block; background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.22);
+  color: #fff; font-size: 0.75rem; font-weight: 600;
+  padding: 6px 12px; border-radius: 20px; text-decoration: none;
+  transition: background 0.2s; align-self: flex-start;
+}
+.flip-back a.dive-download:hover { background: rgba(255,255,255,0.22); text-decoration: none; }
 
 /* ============================================================
    TOPIC SECTIONS
@@ -695,7 +708,10 @@ header {
               <h3>Firewalls &amp; IDS/IPS</h3>
               <p>Firewalls enforce access control at the network boundary. NGFWs add application awareness and deep packet inspection. IDS alerts on threats; IPS blocks them inline. Detection methods: signature (known threats) vs. anomaly (behavioral deviation). False positives are the key operational challenge for IPS.</p>
             </div>
-            <a class="dive-link" href="lesson06-part01.html">Deep Dive →</a>
+            <div class="flip-back-links">
+              <a class="dive-link" href="lesson06-part01.png" target="_blank" rel="noopener">View Graphic &#8594;</a>
+              <a class="dive-download" href="lesson06-part01.png" download="lesson06-part01.png">&#8675; Download PNG</a>
+            </div>
           </div>
         </div>
       </div>
@@ -715,7 +731,10 @@ header {
               <h3>DNS Filtering, NAC &amp; DLP</h3>
               <p>DNS filtering blocks malicious domains at the query level — no decryption needed. NAC verifies device compliance (patch level, AV status) before granting access. DLP monitors data in use, in motion, and at rest — preventing unauthorized exfiltration of classified or regulated data.</p>
             </div>
-            <a class="dive-link" href="lesson06-part02.html">Deep Dive →</a>
+            <div class="flip-back-links">
+              <a class="dive-link" href="lesson06-part02.png" target="_blank" rel="noopener">View Graphic &#8594;</a>
+              <a class="dive-download" href="lesson06-part02.png" download="lesson06-part02.png">&#8675; Download PNG</a>
+            </div>
           </div>
         </div>
       </div>
@@ -735,7 +754,10 @@ header {
               <h3>Endpoint Security &amp; Defense in Depth</h3>
               <p>EDR moves beyond antivirus — behavioral monitoring, threat hunting, and containment at the device level. Application whitelisting prevents execution of unauthorized code. Defense in depth sequences controls from perimeter to endpoint so an attacker must defeat every layer. Analogize: concentric security rings around the data.</p>
             </div>
-            <a class="dive-link" href="lesson06-part03.html">Deep Dive →</a>
+            <div class="flip-back-links">
+              <a class="dive-link" href="lesson06-part03.png" target="_blank" rel="noopener">View Graphic &#8594;</a>
+              <a class="dive-download" href="lesson06-part03.png" download="lesson06-part03.png">&#8675; Download PNG</a>
+            </div>
           </div>
         </div>
       </div>
@@ -1226,7 +1248,7 @@ header {
                 <label class="net-opt"><input type="radio" name="nqa1" value="D"> Full-disk encryption on the file server</label>
               </div>
               <div class="net-fb" id="nq-a1-fb"></div>
-              <div style="margin-top:10px;"><button class="btn-primary" onclick="checkNet('nq-a1','B','nqa1','✅ Correct! The investigation identified that the malware made a DNS query to a known C2 domain to retrieve the encryption key. DNS filtering would have blocked this query — the malware would not receive the encryption key and could not complete the encryption process. Many ransomware families require C2 contact for the key exchange; disrupting this communication is a critical defensive step. DNS filtering is highly effective against ransomware because it requires no signatures for the malware itself — blocking the C2 domain is sufficient.','❌ Correct answer: B — DNS Filtering. The scenario specifically states the malware made a DNS query to a known C2 domain. Blocking that DNS resolution would deny the malware the encryption key it needs. An IPS might detect the malware traffic but would need specific signatures. A host firewall limits ports/IPs but doesn't inspect DNS queries for threat intelligence. FDE protects data if the disk is stolen but does nothing against active malware with OS-level access.')">Submit</button></div>
+              <div style="margin-top:10px;"><button class="btn-primary" onclick="checkNet('nq-a1','B','nqa1','✅ Correct! The investigation identified that the malware made a DNS query to a known C2 domain to retrieve the encryption key. DNS filtering would have blocked this query — the malware would not receive the encryption key and could not complete the encryption process. Many ransomware families require C2 contact for the key exchange; disrupting this communication is a critical defensive step. DNS filtering is highly effective against ransomware because it requires no signatures for the malware itself — blocking the C2 domain is sufficient.','❌ Correct answer: B — DNS Filtering. The scenario specifically states the malware made a DNS query to a known C2 domain. Blocking that DNS resolution would deny the malware the encryption key it needs. An IPS might detect the malware traffic but would need specific signatures. A host firewall limits ports/IPs but doesn\'t inspect DNS queries for threat intelligence. FDE protects data if the disk is stolen but does nothing against active malware with OS-level access.')">Submit</button></div>
             </div>
 
             <div class="net-q" id="nq-a2">
@@ -1404,10 +1426,10 @@ header {
   <div class="footer-nav">
     <a href="index.html">← Course Home</a>
     <a href="lesson05.html">← Lesson 5: Secure Architecture</a>
-    <a href="lesson06-part01.html">Topic 1 Deep Dive</a>
-    <a href="lesson06-part02.html">Topic 2 Deep Dive</a>
-    <a href="lesson06-part03.html">Topic 3 Deep Dive</a>
-    <a href="lesson07.html">Next: Identity &amp; Access Management →</a>
+    <a href="lesson06-part01.png" target="_blank" rel="noopener">Topic 1 Graphic</a>
+    <a href="lesson06-part02.png" target="_blank" rel="noopener">Topic 2 Graphic</a>
+    <a href="lesson06-part03.png" target="_blank" rel="noopener">Topic 3 Graphic</a>
+    <a href="lesson07.html">Next: Identity &amp; Access Management &rarr;</a>
   </div>
   CompTIA Security+ SY0-701 &nbsp;|&nbsp; Lesson 6: Network &amp; Infrastructure Security &nbsp;|&nbsp; Moraine Valley Community College
 </div>
