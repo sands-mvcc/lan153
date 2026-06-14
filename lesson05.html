@@ -227,7 +227,7 @@ header {
 .flip-grid {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px;
 }
-.flip-wrapper { perspective: 1000px; height: 240px; cursor: pointer; }
+.flip-wrapper { perspective: 1000px; height: 260px; cursor: pointer; }
 .flip-inner {
   position: relative; width: 100%; height: 100%;
   transition: transform 0.6s cubic-bezier(0.4,0.2,0.2,1);
@@ -249,14 +249,27 @@ header {
 .flip-hint { font-size: 0.7rem; color: var(--text-muted); }
 .flip-back h3  { font-size: 0.95rem; font-weight: 700; margin-bottom: 8px; opacity: 0.9; }
 .flip-back p   { font-size: 0.82rem; opacity: 0.85; line-height: 1.55; flex: 1; }
+
+/* ── Flip-back link row: View + Download ── */
+.flip-back-links {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px;
+}
 .flip-back a.dive-link {
   display: inline-block; background: rgba(255,255,255,0.15);
   border: 1px solid rgba(255,255,255,0.3);
   color: #fff; font-size: 0.78rem; font-weight: 700;
   padding: 6px 14px; border-radius: 20px; text-decoration: none;
-  transition: background 0.2s; margin-top: 10px; align-self: flex-start;
+  transition: background 0.2s; align-self: flex-start;
 }
-.flip-back a.dive-link:hover { background: rgba(255,255,255,0.28); }
+.flip-back a.dive-link:hover { background: rgba(255,255,255,0.28); text-decoration: none; }
+.flip-back a.dive-download {
+  display: inline-block; background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.22);
+  color: #fff; font-size: 0.75rem; font-weight: 600;
+  padding: 6px 12px; border-radius: 20px; text-decoration: none;
+  transition: background 0.2s; align-self: flex-start;
+}
+.flip-back a.dive-download:hover { background: rgba(255,255,255,0.22); text-decoration: none; }
 
 /* ============================================================
    TOPIC SECTIONS
@@ -723,7 +736,10 @@ header {
               <h3>On-Premises, Cloud &amp; Virtualization</h3>
               <p>On-premises relies on physical perimeter controls + network segmentation. Cloud requires the Shared Responsibility Model: customer owns configuration. Virtualization introduces hypervisor attack surface and VM escape risk. Containers share the host kernel — isolation is lighter than VMs.</p>
             </div>
-            <a class="dive-link" href="lesson05-part01.html">Deep Dive →</a>
+            <div class="flip-back-links">
+              <a class="dive-link" href="lesson05-part01.png" target="_blank" rel="noopener">View Graphic &#8594;</a>
+              <a class="dive-download" href="lesson05-part01.png" download="lesson05-part01.png">&#8675; Download PNG</a>
+            </div>
           </div>
         </div>
       </div>
@@ -743,7 +759,10 @@ header {
               <h3>IoT, ICS &amp; IaC</h3>
               <p>IoT devices have weak security, long lifecycles, and no patch cadence — segment and monitor. ICS prioritizes Availability over CIA; Stuxnet proved physical damage is achievable through cyber means. IaC enforces consistent, version-controlled, auditable infrastructure configuration — eliminating "snowflake" servers.</p>
             </div>
-            <a class="dive-link" href="lesson05-part02.html">Deep Dive →</a>
+            <div class="flip-back-links">
+              <a class="dive-link" href="lesson05-part02.png" target="_blank" rel="noopener">View Graphic &#8594;</a>
+              <a class="dive-download" href="lesson05-part02.png" download="lesson05-part02.png">&#8675; Download PNG</a>
+            </div>
           </div>
         </div>
       </div>
@@ -763,7 +782,10 @@ header {
               <h3>Data Classification &amp; Resilience</h3>
               <p>Data classification determines what protection an asset needs. HA and resilience ensure it stays accessible — achieved through redundant power, failover clustering, geo-distributed backups, load balancing, and documented RTO/RPO targets. The architecture must survive component failures without human intervention.</p>
             </div>
-            <a class="dive-link" href="lesson05-part03.html">Deep Dive →</a>
+            <div class="flip-back-links">
+              <a class="dive-link" href="lesson05-part03.png" target="_blank" rel="noopener">View Graphic &#8594;</a>
+              <a class="dive-download" href="lesson05-part03.png" download="lesson05-part03.png">&#8675; Download PNG</a>
+            </div>
           </div>
         </div>
       </div>
@@ -1411,10 +1433,10 @@ header {
   <div class="footer-nav">
     <a href="index.html">← Course Home</a>
     <a href="lesson04.html">← Lesson 4: Vulnerabilities &amp; Mitigation</a>
-    <a href="lesson05-part01.html">Topic 1 Deep Dive</a>
-    <a href="lesson05-part02.html">Topic 2 Deep Dive</a>
-    <a href="lesson05-part03.html">Topic 3 Deep Dive</a>
-    <a href="lesson06.html">Next: Network &amp; Infrastructure Security →</a>
+    <a href="lesson05-part01.png" target="_blank" rel="noopener">Topic 1 Graphic</a>
+    <a href="lesson05-part02.png" target="_blank" rel="noopener">Topic 2 Graphic</a>
+    <a href="lesson05-part03.png" target="_blank" rel="noopener">Topic 3 Graphic</a>
+    <a href="lesson06.html">Next: Network &amp; Infrastructure Security &rarr;</a>
   </div>
   CompTIA Security+ SY0-701 &nbsp;|&nbsp; Lesson 5: Secure Architecture &nbsp;|&nbsp; Moraine Valley Community College
 </div>
