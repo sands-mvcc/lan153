@@ -245,6 +245,17 @@ header {
   transition: background 0.2s; margin-top: 10px; align-self: flex-start;
 }
 .flip-back a.dive-link:hover { background: rgba(255,255,255,0.28); }
+.flip-card-actions {
+  display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; align-self: flex-start;
+}
+.flip-card-actions a {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
+  color: #fff; font-size: 0.75rem; font-weight: 700;
+  padding: 5px 12px; border-radius: 20px; text-decoration: none;
+  transition: background 0.2s; cursor: pointer;
+}
+.flip-card-actions a:hover { background: rgba(255,255,255,0.28); text-decoration: none; }
 
 /* ============================================================
    TOPIC SECTIONS
@@ -708,7 +719,11 @@ header {
               <h3>AAA &amp; Authentication</h3>
               <p>AAA: prove who you are (Authentication), determine what you can do (Authorization), log what you did (Accounting). MFA requires credentials from two distinct factor categories. Password + PIN = NOT MFA. Password + TOTP token = MFA.</p>
             </div>
-            <a class="dive-link" href="lesson07-part01.html">Deep Dive →</a>
+            <img src="lesson07-part01.png" alt="AAA & Authentication Factors preview" style="width:100%;border-radius:6px;margin-top:10px;border:1px solid rgba(255,255,255,0.2);">
+            <div class="flip-card-actions">
+              <a href="lesson07-part01.png" target="_blank">&#128065; Open</a>
+              <a href="lesson07-part01.png" download="lesson07-part01.png">&#8595; Download</a>
+            </div>
           </div>
         </div>
       </div>
@@ -728,7 +743,11 @@ header {
               <h3>SSO, Federation &amp; Access Control</h3>
               <p>SSO = single org (Kerberos/LDAP). Federation = cross-org (SAML, OAuth 2.0, OIDC). DAC, MAC, RBAC, ABAC each assign permissions differently — RBAC aligns to job roles and is most exam-tested. Least privilege limits blast radius of any compromise.</p>
             </div>
-            <a class="dive-link" href="lesson07-part02.html">Deep Dive →</a>
+            <img src="lesson07-part02.png" alt="SSO, Federation & Access Control Models preview" style="width:100%;border-radius:6px;margin-top:10px;border:1px solid rgba(255,255,255,0.2);">
+            <div class="flip-card-actions">
+              <a href="lesson07-part02.png" target="_blank">&#128065; Open</a>
+              <a href="lesson07-part02.png" download="lesson07-part02.png">&#8595; Download</a>
+            </div>
           </div>
         </div>
       </div>
@@ -748,7 +767,11 @@ header {
               <h3>Lifecycle &amp; PAM</h3>
               <p>The Joiner-Mover-Leaver lifecycle must revoke old access during moves and all access on departure. Orphaned accounts are standing attack surfaces. PAM vaults admin credentials, enforces JIT access, records sessions, and rotates passwords automatically after each use.</p>
             </div>
-            <a class="dive-link" href="lesson07-part03.html">Deep Dive →</a>
+            <img src="lesson07-part03.png" alt="Identity Lifecycle & PAM preview" style="width:100%;border-radius:6px;margin-top:10px;border:1px solid rgba(255,255,255,0.2);">
+            <div class="flip-card-actions">
+              <a href="lesson07-part03.png" target="_blank">&#128065; Open</a>
+              <a href="lesson07-part03.png" download="lesson07-part03.png">&#8595; Download</a>
+            </div>
           </div>
         </div>
       </div>
