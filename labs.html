@@ -39,6 +39,11 @@
     --flip-back-border: #2e3a5a;
     --launch-btn: #0277bd;
     --launch-btn-hover: #01579b;
+    --tag-instructor: #7b1fa2;
+    --tag-instructor-bg: #f3e5f5;
+    --instructor-border: #7b1fa2;
+    --instructor-banner-bg: #4a148c;
+    --instructor-banner-text: #ffffff;
   }
   [data-theme="dark"] {
     --bg: #0f1117;
@@ -74,6 +79,11 @@
     --flip-back-border: #1e2440;
     --launch-btn: #0288d1;
     --launch-btn-hover: #039be5;
+    --tag-instructor: #ce93d8;
+    --tag-instructor-bg: #1f0d2a;
+    --instructor-border: #9c27b0;
+    --instructor-banner-bg: #12003d;
+    --instructor-banner-text: #e1bee7;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -340,6 +350,57 @@
     transform: translateY(-1px);
   }
   .launch-btn-icon { font-size: 1rem; }
+
+  /* ── INSTRUCTOR CARD ── */
+  .instructor-section {
+    margin-top: 36px;
+  }
+  .instructor-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+  }
+  .instructor-card {
+    background: var(--surface);
+    border: 2px solid var(--instructor-border);
+    border-radius: 14px;
+    overflow: hidden;
+    text-decoration: none;
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+  }
+  .instructor-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-hover);
+    background: var(--card-hover);
+  }
+  .instructor-banner {
+    background: var(--instructor-banner-bg);
+    color: var(--instructor-banner-text);
+    font-size: 0.70rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 6px 16px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .instructor-banner-dot {
+    width: 7px; height: 7px;
+    background: #ce93d8;
+    border-radius: 50%;
+    flex-shrink: 0;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.5; transform: scale(1.4); }
+  }
+  .tag-instructor { color: var(--tag-instructor); background: var(--tag-instructor-bg); }
 
   /* ── FOOTER ── */
   footer {
@@ -843,6 +904,33 @@
     </div>
 
   </div>
+
+  <!-- INSTRUCTOR TOOL -->
+  <div class="instructor-section">
+    <div class="section-label">🔒 Instructor Resources</div>
+    <div class="instructor-grid">
+      <a class="instructor-card" href="activitybuilder.html">
+        <div class="instructor-banner">
+          <span class="instructor-banner-dot"></span>
+          Instructor Use Only
+        </div>
+        <div class="card-accent-bar" style="background: var(--instructor-border);"></div>
+        <div class="card-body">
+          <div class="card-header-row">
+            <span class="lesson-num">Tool</span>
+            <span class="domain-tag tag-instructor">Instructor</span>
+          </div>
+          <div class="card-title">🛠️ Lab Activity Builder</div>
+          <div class="card-desc">Create, customize, and export interactive lab activities aligned to Security+ SY0-701 learning objectives. Build scenario-based exercises, guided task sequences, and assessment prompts for any course lesson.</div>
+        </div>
+        <div class="card-footer">
+          <span class="card-terms"><strong>Access:</strong> Instructor Use Only</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+    </div>
+  </div>
+
 </main>
 
 <footer>
