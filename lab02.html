@@ -1,30 +1,644 @@
-You are an advanced, adaptive educational engine specializing in creating high-fidelity interactive training environments. Your goal is to act as a **Encryption (symmetrical/Asymmetrical) and Hashing Simulator** tailored for a course titled **"Encryption and Hashing "**, designed for **Cybersecurity Technical Staff**.
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberAI Intrusion Detection Simulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+            color: #000000;
+        }
 
-### 1. CORE ROLE & ENVIRONMENT MODE
-* **Role Configuration:** You operate strictly as an interactive text-based educational sandbox engine. 
-* **Interface Rule:** Never break character, explain your AI backend mechanics, or provide the entire solution upfront unless explicitly commanded by system-level keys.
-* **Complexity Level:** Guided / Introductory (Provides hints, gentle difficulty ramp)
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
 
-### 2. PRIMARY INSTRUCTIONAL OBJECTIVE
-The core competency the student must demonstrate is:
-> Demonstrate the use of symmetric and asymmetric encryption, identifying the correct algorithm for a given security scenario.
-Generate a MD5 cryptographic hash using a hashing calculator.  
+        /* Custom Scrollbar for Logs */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+            border-left: 1px solid #000;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #22c55e; 
+            border: 1px solid #000;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #16a34a; 
+        }
 
+        /* UI Panel Styling */
+        .panel {
+            background: #ffffff;
+            border: 2px solid #000000;
+            box-shadow: 4px 4px 0px #000000;
+            transition: all 0.2s ease-in-out;
+        }
 
+        .btn {
+            background: #ffffff;
+            border: 2px solid #000000;
+            color: #000000;
+            font-weight: bold;
+            box-shadow: 2px 2px 0px #000000;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background: #22c55e;
+            color: #ffffff;
+        }
+        .btn:active {
+            box-shadow: 0px 0px 0px #000000;
+            transform: translate(2px, 2px);
+        }
+        
+        .btn-active {
+            background: #000000;
+            color: #22c55e;
+        }
 
-### 3. TECHNICAL SCENARIO ARCHITECTURE & INITIATION
-Initialize a realistic scenario using the following environment, protocols, and infrastructural constraints:
-Require the participant to configure symmetrical/asmmetrical encryption and hashing. 
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #22c55e;
+            border: 2px solid #000;
+            cursor: pointer;
+            margin-top: -8px;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: #000;
+            border-radius: 2px;
+        }
 
-### 4. SIMULATION WORKFLOW & INTERACTION LOGIC
-1.  **Initialization:** Present a realistic technical brief or system alert notification indicating the system's baseline status or structural failure state.
-2.  **Turn-by-Turn Execution:** Await user technical commands, diagnostic checks, configuration adjustments, or mitigation selections. 
-3.  **State Management:** Maintain an implicit state matrix tracking network topology modifications, compromised assets, system patches, and error logs based on user actions. Respond dynamically with systemic consequences for incorrect inputs.
-4.  **Formatting Outputs:** Present logs, terminal outputs, packets, or configuration files within strict raw markdown code blocks.
+        #log-container {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body class="h-screen w-screen overflow-hidden flex flex-col">
 
-### 5. FEEDBACK, EVALUATION & GRADING STRATEGY
-Evaluate performance and guide the user dynamically via the following framework:
-Evaluate technical decisions and deployment. 
+    <!-- Header -->
+    <header class="border-b-2 border-black p-4 flex justify-between items-center bg-white z-10 relative">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-black rounded-sm flex items-center justify-center">
+                <span class="text-green-500 font-bold mono text-xl">&lt;&gt;</span>
+            </div>
+            <h1 class="text-2xl font-extrabold tracking-tight">CyberAI <span class="text-green-600">Defense Simulator</span></h1>
+        </div>
+        <div class="text-sm font-semibold mono flex gap-6">
+            <div>SYSTEM STATUS: <span id="sys-status" class="text-green-600 font-bold">ONLINE</span></div>
+            <div>AI MODEL: <span class="text-black font-bold">ResNet-Cyber v4.1</span></div>
+        </div>
+    </header>
 
----
-**STIMULUS INITIALIZATION COMMAND:** Begin the exercise by presenting the operational ecosystem's initial state, immediate technical logs, and the first prompt asking the learner for their initial deployment or investigative action.
+    <!-- Main Content -->
+    <div class="flex flex-1 overflow-hidden">
+        
+        <!-- Left Panel: Controls -->
+        <aside class="w-80 border-r-2 border-black p-5 flex flex-col gap-6 bg-white overflow-y-auto z-10 relative">
+            
+            <div class="panel p-4">
+                <h2 class="text-lg font-bold mb-4 border-b-2 border-black pb-2">Simulation Controls</h2>
+                <div class="flex gap-2">
+                    <button id="btn-toggle" class="btn flex-1 py-2 text-sm">PAUSE</button>
+                    <button id="btn-reset" class="btn flex-1 py-2 text-sm">RESET</button>
+                </div>
+            </div>
+
+            <div class="panel p-4">
+                <h2 class="text-lg font-bold mb-4 border-b-2 border-black pb-2 text-green-700">AI Parameters</h2>
+                
+                <div class="mb-5">
+                    <label class="flex justify-between text-sm font-semibold mb-2">
+                        Detection Sensitivity
+                        <span id="val-sensitivity" class="mono text-green-600">75%</span>
+                    </label>
+                    <input type="range" id="slider-sensitivity" min="0" max="100" value="75">
+                    <p class="text-xs text-gray-600 mt-1">Higher sensitivity catches more threats but increases false positives.</p>
+                </div>
+
+                <div>
+                    <label class="flex justify-between text-sm font-semibold mb-2">
+                        Learning Rate (Adaptation)
+                        <span id="val-learning" class="mono text-green-600">0.05</span>
+                    </label>
+                    <input type="range" id="slider-learning" min="1" max="10" value="5">
+                    <p class="text-xs text-gray-600 mt-1">Controls how quickly the AI adapts to new attack signatures.</p>
+                </div>
+            </div>
+
+            <div class="panel p-4">
+                <h2 class="text-lg font-bold mb-4 border-b-2 border-black pb-2">Network Environment</h2>
+                
+                <div class="mb-5">
+                    <label class="flex justify-between text-sm font-semibold mb-2">
+                        Traffic Volume
+                        <span id="val-traffic" class="mono text-green-600">Medium</span>
+                    </label>
+                    <input type="range" id="slider-traffic" min="1" max="10" value="5">
+                </div>
+
+                <div>
+                    <label class="flex justify-between text-sm font-semibold mb-2">
+                        Threat Intensity
+                        <span id="val-threats" class="mono text-green-600">20%</span>
+                    </label>
+                    <input type="range" id="slider-threats" min="0" max="100" value="20">
+                </div>
+            </div>
+
+        </aside>
+
+        <!-- Center: Visualization Canvas -->
+        <main class="flex-1 relative bg-gray-50 flex items-center justify-center overflow-hidden">
+            <!-- Background Grid Pattern -->
+            <div class="absolute inset-0 opacity-20 pointer-events-none" 
+                 style="background-image: radial-gradient(#22c55e 1px, transparent 1px); background-size: 30px 30px;">
+            </div>
+            
+            <canvas id="networkCanvas" class="absolute inset-0 w-full h-full"></canvas>
+            
+            <!-- Canvas Overlay UI -->
+            <div class="absolute top-4 left-4 bg-white border-2 border-black p-2 text-xs font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                <span class="inline-block w-3 h-3 bg-green-500 rounded-full mr-1 align-middle border border-black"></span> Normal Traffic<br>
+                <span class="inline-block w-3 h-3 bg-black rounded-full mr-1 align-middle border border-black mt-1"></span> Malicious Threat<br>
+                <span class="inline-block w-3 h-3 bg-white border-2 border-green-500 rounded-full mr-1 align-middle mt-1"></span> False Positive
+            </div>
+        </main>
+
+        <!-- Right Panel: Logs & Stats -->
+        <aside class="w-80 border-l-2 border-black flex flex-col bg-white z-10 relative">
+            
+            <!-- Stats -->
+            <div class="p-5 border-b-2 border-black bg-white">
+                <h2 class="text-lg font-bold mb-4 border-b-2 border-black pb-2 text-green-700">Real-time Metrics</h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-gray-100 border-2 border-black p-2 text-center">
+                        <div class="text-xs font-bold">Packets Scanned</div>
+                        <div id="stat-scanned" class="mono text-xl font-bold">0</div>
+                    </div>
+                    <div class="bg-green-100 border-2 border-black p-2 text-center">
+                        <div class="text-xs font-bold">Threats Blocked</div>
+                        <div id="stat-blocked" class="mono text-xl font-bold text-green-700">0</div>
+                    </div>
+                    <div class="bg-red-100 border-2 border-black p-2 text-center">
+                        <div class="text-xs font-bold text-red-700">Breaches</div>
+                        <div id="stat-breaches" class="mono text-xl font-bold text-red-700">0</div>
+                    </div>
+                    <div class="bg-gray-100 border-2 border-black p-2 text-center relative overflow-hidden">
+                        <div class="text-xs font-bold text-gray-700">False Positives</div>
+                        <div id="stat-fp" class="mono text-xl font-bold text-gray-700">0</div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <div class="flex justify-between text-xs font-bold mb-1">
+                        <span>AI Accuracy Score</span>
+                        <span id="stat-accuracy" class="mono text-green-600">100%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 h-2 border border-black">
+                        <div id="bar-accuracy" class="bg-green-500 h-full w-full transition-all duration-300"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Terminal Logs -->
+            <div class="flex-1 flex flex-col overflow-hidden bg-black text-green-500 p-2 mono text-xs">
+                <div class="font-bold border-b border-green-800 pb-1 mb-2 text-green-400">>> AI DECISION LOG</div>
+                <div id="log-container" class="flex-1 overflow-y-auto break-words pr-2">
+                    <!-- Logs will appear here -->
+                    <div class="text-gray-400">System initialized. Listening for traffic...</div>
+                </div>
+            </div>
+
+        </aside>
+
+    </div>
+
+    <script>
+        // --- State Management ---
+        const State = {
+            isRunning: true,
+            sensitivity: 0.75, // 0.0 to 1.0
+            learningRate: 0.05,
+            trafficVolume: 5, // 1 to 10
+            threatRatio: 0.2, // 0.0 to 1.0
+            
+            stats: {
+                scanned: 0,
+                blocked: 0,
+                breaches: 0,
+                falsePositives: 0
+            }
+        };
+
+        // --- DOM Elements ---
+        const canvas = document.getElementById('networkCanvas');
+        const ctx = canvas.getContext('2d');
+        const logContainer = document.getElementById('log-container');
+
+        // UI Inputs
+        const sliderSensitivity = document.getElementById('slider-sensitivity');
+        const sliderLearning = document.getElementById('slider-learning');
+        const sliderTraffic = document.getElementById('slider-traffic');
+        const sliderThreats = document.getElementById('slider-threats');
+        
+        // UI Values
+        const valSensitivity = document.getElementById('val-sensitivity');
+        const valLearning = document.getElementById('val-learning');
+        const valTraffic = document.getElementById('val-traffic');
+        const valThreats = document.getElementById('val-threats');
+
+        // Buttons
+        const btnToggle = document.getElementById('btn-toggle');
+        const btnReset = document.getElementById('btn-reset');
+
+        // Stats Display
+        const statScanned = document.getElementById('stat-scanned');
+        const statBlocked = document.getElementById('stat-blocked');
+        const statBreaches = document.getElementById('stat-breaches');
+        const statFP = document.getElementById('stat-fp');
+        const statAccuracy = document.getElementById('stat-accuracy');
+        const barAccuracy = document.getElementById('bar-accuracy');
+
+        // --- Event Listeners ---
+        sliderSensitivity.addEventListener('input', (e) => {
+            State.sensitivity = e.target.value / 100;
+            valSensitivity.textContent = `${e.target.value}%`;
+        });
+
+        sliderLearning.addEventListener('input', (e) => {
+            State.learningRate = e.target.value / 100;
+            valLearning.textContent = State.learningRate.toFixed(2);
+        });
+
+        sliderTraffic.addEventListener('input', (e) => {
+            State.trafficVolume = parseInt(e.target.value);
+            const labels = ["Low", "Med-Low", "Medium", "Med-High", "High"];
+            valTraffic.textContent = labels[Math.floor(State.trafficVolume/2.1)] || "Max";
+        });
+
+        sliderThreats.addEventListener('input', (e) => {
+            State.threatRatio = e.target.value / 100;
+            valThreats.textContent = `${e.target.value}%`;
+        });
+
+        btnToggle.addEventListener('click', () => {
+            State.isRunning = !State.isRunning;
+            btnToggle.textContent = State.isRunning ? "PAUSE" : "RESUME";
+            btnToggle.classList.toggle('btn-active');
+            if (State.isRunning) {
+                lastTime = performance.now();
+                requestAnimationFrame(gameLoop);
+                logSystem('Simulation resumed.');
+            } else {
+                logSystem('Simulation paused.');
+            }
+        });
+
+        btnReset.addEventListener('click', () => {
+            State.stats = { scanned: 0, blocked: 0, breaches: 0, falsePositives: 0 };
+            packets = [];
+            animations = [];
+            updateStatsUI();
+            logContainer.innerHTML = '<div class="text-gray-400">System reset. Listening for traffic...</div>';
+            logSystem('Simulation reset to baseline.');
+        });
+
+        // --- Visualization Engine ---
+        
+        // Define Network Topology
+        const nodes = [
+            { id: 'ext1', x: 0.1, y: 0.2, type: 'external', label: 'Internet A' },
+            { id: 'ext2', x: 0.1, y: 0.8, type: 'external', label: 'Internet B' },
+            { id: 'fw1',  x: 0.35, y: 0.5, type: 'firewall', label: 'AI Firewall' },
+            { id: 'sw1',  x: 0.6, y: 0.5, type: 'switch', label: 'Core Switch' },
+            { id: 'srv1', x: 0.85, y: 0.2, type: 'server', label: 'Web Server' },
+            { id: 'srv2', x: 0.85, y: 0.5, type: 'server', label: 'App Server' },
+            { id: 'srv3', x: 0.85, y: 0.8, type: 'server', label: 'Database' }
+        ];
+
+        const edges = [
+            ['ext1', 'fw1'],
+            ['ext2', 'fw1'],
+            ['fw1', 'sw1'],
+            ['sw1', 'srv1'],
+            ['sw1', 'srv2'],
+            ['sw1', 'srv3']
+        ];
+
+        let packets = [];
+        let animations = []; // For flashes and effects
+
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function getNodePixelCoords(node) {
+            return {
+                x: node.x * canvas.width,
+                y: node.y * canvas.height
+            };
+        }
+
+        function drawNetwork() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw edges
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 2;
+            edges.forEach(edge => {
+                const n1 = nodes.find(n => n.id === edge[0]);
+                const n2 = nodes.find(n => n.id === edge[1]);
+                const p1 = getNodePixelCoords(n1);
+                const p2 = getNodePixelCoords(n2);
+                
+                ctx.beginPath();
+                ctx.moveTo(p1.x, p1.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.stroke();
+            });
+
+            // Draw nodes
+            nodes.forEach(node => {
+                const p = getNodePixelCoords(node);
+                
+                // Shadow
+                ctx.fillStyle = '#000000';
+                ctx.fillRect(p.x - 20 + 4, p.y - 20 + 4, 40, 40);
+
+                // Base
+                ctx.fillStyle = '#ffffff';
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = 2;
+                
+                if (node.type === 'firewall') {
+                    ctx.fillStyle = '#22c55e'; // Green firewall
+                } else if (node.type === 'external') {
+                    ctx.fillStyle = '#f3f4f6'; // Gray external
+                }
+                
+                ctx.fillRect(p.x - 20, p.y - 20, 40, 40);
+                ctx.strokeRect(p.x - 20, p.y - 20, 40, 40);
+
+                // Iconography (Simple shapes)
+                ctx.fillStyle = '#000';
+                if (node.type === 'server') {
+                    ctx.fillRect(p.x - 10, p.y - 12, 20, 4);
+                    ctx.fillRect(p.x - 10, p.y - 2, 20, 4);
+                    ctx.fillRect(p.x - 10, p.y + 8, 20, 4);
+                } else if (node.type === 'firewall') {
+                    ctx.fillRect(p.x - 10, p.y - 10, 8, 8);
+                    ctx.fillRect(p.x + 2, p.y - 10, 8, 8);
+                    ctx.fillRect(p.x - 10, p.y + 2, 8, 8);
+                    ctx.fillRect(p.x + 2, p.y + 2, 8, 8);
+                }
+
+                // Label
+                ctx.fillStyle = '#000000';
+                ctx.font = 'bold 12px Inter';
+                ctx.textAlign = 'center';
+                
+                // Add a white background to text for readability
+                const textWidth = ctx.measureText(node.label).width;
+                ctx.fillStyle = 'rgba(255,255,255,0.8)';
+                ctx.fillRect(p.x - textWidth/2 - 4, p.y + 26 - 10, textWidth + 8, 14);
+                
+                ctx.fillStyle = '#000000';
+                ctx.fillText(node.label, p.x, p.y + 30);
+            });
+
+            // Draw Packets
+            packets.forEach(pkt => {
+                const p1 = getNodePixelCoords(pkt.source);
+                const p2 = getNodePixelCoords(pkt.target);
+                
+                const currX = p1.x + (p2.x - p1.x) * pkt.progress;
+                const currY = p1.y + (p2.y - p1.y) * pkt.progress;
+
+                ctx.beginPath();
+                ctx.arc(currX, currY, 6, 0, Math.PI * 2);
+                
+                if (pkt.status === 'blocked') {
+                    // Exploding animation frame conceptually
+                    ctx.fillStyle = '#000';
+                } else if (pkt.isMalicious) {
+                    ctx.fillStyle = '#000'; // Black for malicious
+                } else {
+                    ctx.fillStyle = '#22c55e'; // Green for normal
+                }
+                
+                ctx.fill();
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = '#000';
+                ctx.stroke();
+
+                // Highlight False Positive
+                if (pkt.isFalsePositive) {
+                    ctx.beginPath();
+                    ctx.arc(currX, currY, 10, 0, Math.PI * 2);
+                    ctx.strokeStyle = '#22c55e';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+            });
+
+            // Draw Animations (Flashes)
+            animations = animations.filter(anim => anim.life > 0);
+            animations.forEach(anim => {
+                anim.life -= 1;
+                ctx.beginPath();
+                ctx.arc(anim.x, anim.y, 20 + (20 - anim.life), 0, Math.PI * 2);
+                ctx.strokeStyle = anim.color + Math.floor((anim.life/20)*255).toString(16).padStart(2,'0'); // Fading
+                ctx.lineWidth = 4;
+                ctx.stroke();
+            });
+        }
+
+        // --- Core Simulation Logic ---
+
+        function spawnPacket() {
+            const externalNodes = nodes.filter(n => n.type === 'external');
+            const source = externalNodes[Math.floor(Math.random() * externalNodes.length)];
+            const target = nodes.find(n => n.id === 'fw1'); // Initially go to firewall
+            
+            const isMalicious = Math.random() < State.threatRatio;
+            
+            packets.push({
+                source: source,
+                target: target,
+                progress: 0,
+                speed: 0.005 + (Math.random() * 0.005),
+                isMalicious: isMalicious,
+                status: 'transit',
+                stealth: isMalicious ? Math.random() : 0, // How hard it is to detect
+                id: Math.random().toString(36).substr(2, 5).toUpperCase()
+            });
+        }
+
+        function evaluatePacketAtFirewall(pkt) {
+            State.stats.scanned++;
+            
+            // AI Detection Logic
+            // Base chance to detect malicious depends on sensitivity vs stealth
+            let detectMaliciousProbability = State.sensitivity * (1 - (pkt.stealth * 0.5));
+            // Cap at 99%
+            detectMaliciousProbability = Math.min(0.99, detectMaliciousProbability);
+
+            // Chance to falsely flag normal traffic depends heavily on sensitivity
+            let falsePositiveProbability = Math.pow(State.sensitivity, 2) * 0.15; // Up to 15% FP at 100% sensitivity
+
+            let isDetected = false;
+
+            if (pkt.isMalicious) {
+                isDetected = Math.random() < detectMaliciousProbability;
+                if (isDetected) {
+                    State.stats.blocked++;
+                    logEvent('THREAT BLOCKED', `Signature ${pkt.id} matched anomaly DB.`, 'text-green-400');
+                    addFlash(pkt.target, '#22c55e'); // Green flash for block
+                    return 'blocked';
+                } else {
+                    State.stats.breaches++;
+                    logEvent('BREACH DETECTED', `Threat ${pkt.id} evaded detection (Stealth: ${(pkt.stealth*100).toFixed(0)}%).`, 'text-red-500 font-bold');
+                    return 'passed';
+                }
+            } else {
+                isDetected = Math.random() < falsePositiveProbability;
+                if (isDetected) {
+                    State.stats.falsePositives++;
+                    pkt.isFalsePositive = true;
+                    logEvent('FALSE POSITIVE', `Normal traffic ${pkt.id} incorrectly quarantined.`, 'text-yellow-400');
+                    addFlash(pkt.target, '#eab308'); // Yellow flash
+                    return 'blocked';
+                } else {
+                    return 'passed';
+                }
+            }
+        }
+
+        function addFlash(node, color) {
+            const p = getNodePixelCoords(node);
+            animations.push({ x: p.x, y: p.y, color: color, life: 20 });
+        }
+
+        function logEvent(type, message, colorClass = 'text-green-500') {
+            const el = document.createElement('div');
+            el.className = 'mb-1';
+            const time = new Date().toISOString().split('T')[1].substring(0,8);
+            el.innerHTML = `<span class="text-gray-500">[${time}]</span> <span class="${colorClass}">[${type}]</span> ${message}`;
+            logContainer.appendChild(el);
+            
+            // Keep log short
+            if (logContainer.children.length > 50) {
+                logContainer.removeChild(logContainer.firstChild);
+            }
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function logSystem(message) {
+            logEvent('SYS', message, 'text-white');
+        }
+
+        function updateStatsUI() {
+            statScanned.textContent = State.stats.scanned;
+            statBlocked.textContent = State.stats.blocked;
+            statBreaches.textContent = State.stats.breaches;
+            statFP.textContent = State.stats.falsePositives;
+
+            const totalErrors = State.stats.breaches + State.stats.falsePositives;
+            const accuracy = State.stats.scanned === 0 ? 100 : Math.max(0, 100 - ((totalErrors / State.stats.scanned) * 100));
+            
+            statAccuracy.textContent = `${accuracy.toFixed(1)}%`;
+            barAccuracy.style.width = `${accuracy}%`;
+            
+            if (accuracy > 90) barAccuracy.className = "bg-green-500 h-full transition-all duration-300";
+            else if (accuracy > 70) barAccuracy.className = "bg-yellow-500 h-full transition-all duration-300";
+            else barAccuracy.className = "bg-red-500 h-full transition-all duration-300";
+        }
+
+        // --- Main Loop ---
+        let lastTime = 0;
+        let spawnTimer = 0;
+
+        function gameLoop(time) {
+            if (!State.isRunning) return;
+
+            const dt = time - lastTime;
+            lastTime = time;
+
+            // Spawn logic
+            // higher volume = lower threshold
+            const spawnThreshold = 1000 / State.trafficVolume; 
+            spawnTimer += dt;
+            if (spawnTimer > spawnThreshold) {
+                spawnTimer = 0;
+                spawnPacket();
+            }
+
+            // Update Packets
+            for (let i = packets.length - 1; i >= 0; i--) {
+                let pkt = packets[i];
+                pkt.progress += pkt.speed * (dt / 16); // normalize to roughly 60fps
+
+                if (pkt.progress >= 1.0) {
+                    if (pkt.target.id === 'fw1') {
+                        // At Firewall
+                        const outcome = evaluatePacketAtFirewall(pkt);
+                        if (outcome === 'blocked') {
+                            packets.splice(i, 1);
+                        } else {
+                            // Forward to internal network
+                            pkt.source = pkt.target;
+                            pkt.target = nodes.find(n => n.id === 'sw1');
+                            pkt.progress = 0;
+                        }
+                        updateStatsUI();
+                    } 
+                    else if (pkt.target.id === 'sw1') {
+                        // At Switch, forward to a random server
+                        const servers = nodes.filter(n => n.type === 'server');
+                        pkt.source = pkt.target;
+                        pkt.target = servers[Math.floor(Math.random() * servers.length)];
+                        pkt.progress = 0;
+                    }
+                    else if (pkt.target.type === 'server') {
+                        // Reached end goal
+                        if (pkt.isMalicious) {
+                            addFlash(pkt.target, '#ef4444'); // Red flash for server hit
+                        }
+                        packets.splice(i, 1);
+                    }
+                }
+            }
+
+            drawNetwork();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Initialize
+        lastTime = performance.now();
+        requestAnimationFrame(gameLoop);
+
+    </script>
+</body>
+</html>
