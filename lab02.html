@@ -3,641 +3,586 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CyberAI Intrusion Detection Simulator</title>
+    <title>Cryptography & Systems Simulator | Jr. Cybersecurity Tech</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brandGreen: '#10b981',
+                        brandGreenDark: '#059669',
+                        brandBlack: '#111827',
+                        terminalBg: '#0a0a0a',
+                        terminalText: '#4ade80'
+                    },
+                    fontFamily: {
+                        mono: ['"Fira Code"', '"Courier New"', 'monospace'],
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;800&display=swap');
+        body { background-color: #ffffff; color: #111827; }
+        .terminal-scroll::-webkit-scrollbar { width: 8px; }
+        .terminal-scroll::-webkit-scrollbar-track { background: #111827; }
+        .terminal-scroll::-webkit-scrollbar-thumb { background: #10b981; border-radius: 4px; }
+        .tab-active { border-left: 4px solid #10b981; background-color: #f3f4f6; color: #111827; font-weight: 600; }
+        .tab-inactive { border-left: 4px solid transparent; color: #6b7280; }
+        .tab-inactive:hover { background-color: #f9fafb; color: #111827; }
         
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #ffffff;
-            color: #000000;
-        }
-
-        .mono {
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        /* Custom Scrollbar for Logs */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1; 
-            border-left: 1px solid #000;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #22c55e; 
-            border: 1px solid #000;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #16a34a; 
-        }
-
-        /* UI Panel Styling */
-        .panel {
-            background: #ffffff;
-            border: 2px solid #000000;
-            box-shadow: 4px 4px 0px #000000;
-            transition: all 0.2s ease-in-out;
-        }
-
-        .btn {
-            background: #ffffff;
-            border: 2px solid #000000;
-            color: #000000;
-            font-weight: bold;
-            box-shadow: 2px 2px 0px #000000;
-            cursor: pointer;
-        }
-        .btn:hover {
-            background: #22c55e;
-            color: #ffffff;
-        }
-        .btn:active {
-            box-shadow: 0px 0px 0px #000000;
-            transform: translate(2px, 2px);
-        }
+        .typewriter { overflow: hidden; white-space: pre-wrap; word-wrap: break-word; }
         
-        .btn-active {
-            background: #000000;
-            color: #22c55e;
-        }
-
-        input[type=range] {
-            -webkit-appearance: none;
-            width: 100%;
-            background: transparent;
-        }
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 20px;
-            width: 20px;
-            border-radius: 50%;
-            background: #22c55e;
-            border: 2px solid #000;
-            cursor: pointer;
-            margin-top: -8px;
-        }
-        input[type=range]::-webkit-slider-runnable-track {
-            width: 100%;
-            height: 6px;
-            cursor: pointer;
-            background: #000;
-            border-radius: 2px;
-        }
-
-        #log-container {
-            scroll-behavior: smooth;
-        }
+        input, textarea, select { border: 1px solid #d1d5db; border-radius: 0.375rem; padding: 0.5rem; width: 100%; outline: none; }
+        input:focus, textarea:focus, select:focus { border-color: #10b981; box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2); }
+        
+        .btn { background-color: #111827; color: white; padding: 0.5rem 1rem; border-radius: 0.375rem; font-weight: 500; cursor: pointer; transition: background-color 0.2s; }
+        .btn:hover { background-color: #10b981; }
+        .btn:disabled { background-color: #9ca3af; cursor: not-allowed; }
+        
+        .btn-green { background-color: #10b981; color: white; }
+        .btn-green:hover { background-color: #059669; }
     </style>
 </head>
-<body class="h-screen w-screen overflow-hidden flex flex-col">
+<body class="flex flex-col h-screen overflow-hidden font-sans">
 
     <!-- Header -->
-    <header class="border-b-2 border-black p-4 flex justify-between items-center bg-white z-10 relative">
+    <header class="bg-white border-b-2 border-brandGreen p-4 flex justify-between items-center shadow-sm z-10">
         <div class="flex items-center gap-3">
-            <div class="w-8 h-8 bg-black rounded-sm flex items-center justify-center">
-                <span class="text-green-500 font-bold mono text-xl">&lt;&gt;</span>
+            <div class="w-10 h-10 bg-brandBlack rounded flex items-center justify-center text-brandGreen font-bold text-xl">
+                CS
             </div>
-            <h1 class="text-2xl font-extrabold tracking-tight">CyberAI <span class="text-green-600">Defense Simulator</span></h1>
+            <div>
+                <h1 class="text-xl font-bold text-brandBlack leading-tight">Cybersecurity Operations Sandbox</h1>
+                <p class="text-xs text-brandGreen font-semibold uppercase tracking-wider">Module: Symmetrical, Asymmetrical & Hashing</p>
+            </div>
         </div>
-        <div class="text-sm font-semibold mono flex gap-6">
-            <div>SYSTEM STATUS: <span id="sys-status" class="text-green-600 font-bold">ONLINE</span></div>
-            <div>AI MODEL: <span class="text-black font-bold">ResNet-Cyber v4.1</span></div>
+        <div class="flex items-center gap-4">
+            <div class="text-sm font-mono bg-gray-100 px-3 py-1 rounded text-brandBlack border border-gray-200">
+                Score: <span id="scoreDisplay" class="font-bold text-brandGreenDark">0</span> / 500
+            </div>
+            <div class="text-sm font-mono bg-gray-100 px-3 py-1 rounded text-brandBlack border border-gray-200">
+                Status: <span class="text-brandGreen font-bold animate-pulse">ONLINE</span>
+            </div>
         </div>
     </header>
 
     <!-- Main Content -->
     <div class="flex flex-1 overflow-hidden">
         
-        <!-- Left Panel: Controls -->
-        <aside class="w-80 border-r-2 border-black p-5 flex flex-col gap-6 bg-white overflow-y-auto z-10 relative">
-            
-            <div class="panel p-4">
-                <h2 class="text-lg font-bold mb-4 border-b-2 border-black pb-2">Simulation Controls</h2>
-                <div class="flex gap-2">
-                    <button id="btn-toggle" class="btn flex-1 py-2 text-sm">PAUSE</button>
-                    <button id="btn-reset" class="btn flex-1 py-2 text-sm">RESET</button>
-                </div>
-            </div>
+        <!-- Sidebar Navigation -->
+        <nav class="w-64 bg-white border-r border-gray-200 flex flex-col py-4 shadow-sm z-0">
+            <div class="px-4 pb-2 mb-2 border-b border-gray-100 text-xs font-bold text-gray-400 uppercase tracking-wider">Missions</div>
+            <button onclick="switchTab('stage1')" id="tab-stage1" class="tab-active text-left px-4 py-3 text-sm transition-all flex items-center justify-between">
+                <span>1. Symmetrical Enc.</span>
+                <span id="badge-stage1" class="hidden text-brandGreen">✔</span>
+            </button>
+            <button onclick="switchTab('stage2')" id="tab-stage2" class="tab-inactive text-left px-4 py-3 text-sm transition-all flex items-center justify-between">
+                <span>2. Asymmetrical Enc.</span>
+                <span id="badge-stage2" class="hidden text-brandGreen">✔</span>
+            </button>
+            <button onclick="switchTab('stage3')" id="tab-stage3" class="tab-inactive text-left px-4 py-3 text-sm transition-all flex items-center justify-between">
+                <span>3. Hash & Integrity</span>
+                <span id="badge-stage3" class="hidden text-brandGreen">✔</span>
+            </button>
+            <button onclick="switchTab('stage4')" id="tab-stage4" class="tab-inactive text-left px-4 py-3 text-sm transition-all flex items-center justify-between">
+                <span>4. Digital Sigs & PKI</span>
+                <span id="badge-stage4" class="hidden text-brandGreen">✔</span>
+            </button>
+            <button onclick="switchTab('stage5')" id="tab-stage5" class="tab-inactive text-left px-4 py-3 text-sm transition-all flex items-center justify-between">
+                <span>5. Obfuscation Check</span>
+                <span id="badge-stage5" class="hidden text-brandGreen">✔</span>
+            </button>
+        </nav>
 
-            <div class="panel p-4">
-                <h2 class="text-lg font-bold mb-4 border-b-2 border-black pb-2 text-green-700">AI Parameters</h2>
+        <!-- Interactive Sandbox -->
+        <main class="flex-1 flex flex-col bg-gray-50 overflow-y-auto">
+            
+            <!-- Dynamic Panels -->
+            <div class="p-6 max-w-4xl mx-auto w-full flex-1">
                 
-                <div class="mb-5">
-                    <label class="flex justify-between text-sm font-semibold mb-2">
-                        Detection Sensitivity
-                        <span id="val-sensitivity" class="mono text-green-600">75%</span>
-                    </label>
-                    <input type="range" id="slider-sensitivity" min="0" max="100" value="75">
-                    <p class="text-xs text-gray-600 mt-1">Higher sensitivity catches more threats but increases false positives.</p>
+                <!-- Stage 1: Symmetrical -->
+                <div id="panel-stage1" class="block space-y-6">
+                    <div class="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
+                        <h2 class="text-lg font-bold mb-2">Mission 1: Establish Symmetrical Link</h2>
+                        <p class="text-sm text-gray-600 mb-4"><strong>Objective:</strong> Server Alpha requires configuration. Generate a single shared secret key, select the correct symmetric algorithm, and encrypt the activation payload. Symmetrical encryption uses the <em>same</em> key for both encryption and decryption.</p>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-gray-50 p-4 rounded border border-gray-200">
+                                <label class="block text-sm font-bold mb-1">1. Generate Shared Key</label>
+                                <button onclick="generateSymmetricKey()" class="btn btn-green w-full mb-2">Generate AES-256 Key</button>
+                                <input type="text" id="symKeyDisplay" readonly placeholder="No key generated..." class="font-mono text-sm bg-gray-100 text-brandGreenDark font-bold">
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded border border-gray-200">
+                                <label class="block text-sm font-bold mb-1">2. Configuration</label>
+                                <label class="text-xs text-gray-500">Algorithm</label>
+                                <select id="symAlgoSelect" class="mb-2">
+                                    <option value="none">-- Select Algorithm --</option>
+                                    <option value="aes">AES (Advanced Encryption Standard)</option>
+                                    <option value="rsa">RSA (Rivest-Shamir-Adleman)</option>
+                                </select>
+                                <label class="text-xs text-gray-500">Active Key (Paste Here)</label>
+                                <input type="text" id="symKeyInput" placeholder="Paste generated key here..." class="font-mono text-sm">
+                            </div>
+                        </div>
+
+                        <div class="mt-4 grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-bold mb-1">3. Payload Data</label>
+                                <textarea id="symPlaintext" rows="3" placeholder="Enter text to encrypt... e.g., INIT_SERVER_ALPHA"></textarea>
+                                <button onclick="executeSymmetric('encrypt')" class="btn w-full mt-2">Encrypt Payload</button>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold mb-1">4. Ciphertext Output</label>
+                                <textarea id="symCiphertext" rows="3" readonly class="bg-gray-100 font-mono text-sm" placeholder="Encrypted data will appear here..."></textarea>
+                                <button onclick="executeSymmetric('decrypt')" class="btn w-full mt-2 bg-gray-600 hover:bg-gray-700">Test Decryption</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div>
-                    <label class="flex justify-between text-sm font-semibold mb-2">
-                        Learning Rate (Adaptation)
-                        <span id="val-learning" class="mono text-green-600">0.05</span>
-                    </label>
-                    <input type="range" id="slider-learning" min="1" max="10" value="5">
-                    <p class="text-xs text-gray-600 mt-1">Controls how quickly the AI adapts to new attack signatures.</p>
+                <!-- Stage 2: Asymmetrical -->
+                <div id="panel-stage2" class="hidden space-y-6">
+                    <div class="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
+                        <h2 class="text-lg font-bold mb-2">Mission 2: Asymmetrical Key Exchange</h2>
+                        <p class="text-sm text-gray-600 mb-4"><strong>Objective:</strong> An external contractor needs to send us a secure credential. We cannot share a symmetric key beforehand. Use Asymmetric encryption (Public Key Infrastructure). Generate a key pair, publish your Public key, and decrypt the incoming message with your Private key.</p>
+                        
+                        <div class="bg-gray-50 p-4 rounded border border-gray-200 mb-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="block text-sm font-bold">1. Key Pair Generation (RSA)</label>
+                                <button onclick="generateAsymmetricKeys()" class="btn btn-green text-sm py-1">Generate RSA Pair</button>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="text-xs text-brandGreenDark font-bold">Public Key (Share openly)</label>
+                                    <textarea id="asymPubKey" readonly rows="2" class="font-mono text-xs bg-gray-100"></textarea>
+                                </div>
+                                <div>
+                                    <label class="text-xs text-red-600 font-bold">Private Key (Keep secret!)</label>
+                                    <textarea id="asymPrivKey" readonly rows="2" class="font-mono text-xs bg-gray-100"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="p-4 border border-blue-200 bg-blue-50 rounded">
+                                <h3 class="text-sm font-bold text-blue-800 mb-2">Contractor's View (Sender)</h3>
+                                <label class="text-xs">Recipient's Public Key</label>
+                                <input type="text" id="contractorPubKey" placeholder="Paste your Public Key here..." class="font-mono text-xs mb-2">
+                                <label class="text-xs">Secret Message</label>
+                                <input type="text" id="contractorMessage" value="SYS_ADMIN_CREDS: contractor/P@ssw0rd1" class="font-mono text-xs mb-2 text-gray-500" readonly>
+                                <button onclick="contractorEncrypt()" class="btn w-full bg-blue-800 hover:bg-blue-700 text-sm">Encrypt with Public Key</button>
+                            </div>
+                            <div class="p-4 border border-brandGreen bg-green-50 rounded">
+                                <h3 class="text-sm font-bold text-brandGreenDark mb-2">Your View (Receiver)</h3>
+                                <label class="text-xs">Received Ciphertext</label>
+                                <textarea id="myCiphertext" readonly rows="2" class="font-mono text-xs bg-gray-100 mb-2"></textarea>
+                                <label class="text-xs">Your Private Key</label>
+                                <input type="text" id="myPrivKeyInput" placeholder="Paste your Private Key here to decrypt..." class="font-mono text-xs mb-2">
+                                <button onclick="myDecrypt()" class="btn-green w-full text-sm">Decrypt with Private Key</button>
+                                <input type="text" id="myDecryptedMsg" readonly class="mt-2 font-mono text-sm bg-white border-green-300 font-bold text-green-800" placeholder="Decrypted message will appear here">
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <div class="panel p-4">
-                <h2 class="text-lg font-bold mb-4 border-b-2 border-black pb-2">Network Environment</h2>
-                
-                <div class="mb-5">
-                    <label class="flex justify-between text-sm font-semibold mb-2">
-                        Traffic Volume
-                        <span id="val-traffic" class="mono text-green-600">Medium</span>
-                    </label>
-                    <input type="range" id="slider-traffic" min="1" max="10" value="5">
+                <!-- Stage 3: Hashing -->
+                <div id="panel-stage3" class="hidden space-y-6">
+                    <div class="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
+                        <h2 class="text-lg font-bold mb-2">Mission 3: Integrity via Hashing</h2>
+                        <p class="text-sm text-gray-600 mb-4"><strong>Objective:</strong> A system patch (`patch_v2.bin`) has been downloaded. We must verify its integrity using a Cryptographic Hash Function (SHA-256). Notice the <em>Avalanche Effect</em>: even changing one character completely alters the resulting hash.</p>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-bold mb-1">Patch File Data (Simulated)</label>
+                                <textarea id="hashInput" rows="5" class="font-mono text-sm" oninput="liveHash()">function applyPatch() { system.update(2.0); return true; }</textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold mb-1">Generated SHA-256 Hash</label>
+                                <div id="hashOutput" class="p-4 bg-gray-100 rounded border border-gray-300 font-mono text-sm break-all text-brandBlack min-h-[80px] flex items-center justify-center">
+                                    Awaiting input...
+                                </div>
+                                <div class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-800">
+                                    <strong>Task:</strong> Try changing a single semicolon or letter in the code block. Observe the hash output. Submit the hash of the original text to pass.
+                                </div>
+                                <button onclick="verifyHashMission()" class="btn btn-green w-full mt-3">Verify System Integrity</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div>
-                    <label class="flex justify-between text-sm font-semibold mb-2">
-                        Threat Intensity
-                        <span id="val-threats" class="mono text-green-600">20%</span>
-                    </label>
-                    <input type="range" id="slider-threats" min="0" max="100" value="20">
+                <!-- Stage 4: PKI & Signatures -->
+                <div id="panel-stage4" class="hidden space-y-6">
+                    <div class="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
+                        <h2 class="text-lg font-bold mb-2">Mission 4: PKI & Digital Signatures</h2>
+                        <p class="text-sm text-gray-600 mb-4"><strong>Objective:</strong> Server Beta sent a configuration file. We need to verify Non-Repudiation and Authentication using Digital Signatures. A signature is created by <em>encrypting the hash</em> of a document with the sender's <strong>Private Key</strong>. We verify it using their <strong>Public Key</strong> from their X.509 Certificate.</p>
+                        
+                        <div class="flex gap-4 mb-4">
+                            <!-- X.509 Cert -->
+                            <div class="w-1/2 p-4 bg-gray-50 border border-gray-200 rounded font-mono text-xs">
+                                <h3 class="font-bold text-center border-b pb-2 mb-2">X.509 Certificate</h3>
+                                <p><span class="text-gray-500">Issuer (CA):</span> GlobalSign Trust</p>
+                                <p><span class="text-gray-500">Subject:</span> Server Beta</p>
+                                <p><span class="text-gray-500">Valid Until:</span> 2027-12-31</p>
+                                <p class="mt-2 text-brandGreenDark font-bold">Public Key:</p>
+                                <p class="break-all bg-white p-1 border">PUB_KEY_BETA_99A1</p>
+                            </div>
+                            <!-- Document & Signature -->
+                            <div class="w-1/2 p-4 bg-blue-50 border border-blue-200 rounded">
+                                <h3 class="font-bold text-sm text-blue-800 mb-2">Received Package</h3>
+                                <label class="text-xs text-gray-600">Document Contents:</label>
+                                <textarea id="sigDoc" readonly rows="2" class="w-full text-xs font-mono mb-2">FIREWALL_RULE: BLOCK PORT 22</textarea>
+                                <label class="text-xs text-gray-600">Attached Signature (Encrypted Hash):</label>
+                                <input type="text" id="sigAttached" value="SIG[PRIV_BETA_ENC_HASH(FIREWALL...)]" readonly class="w-full text-xs font-mono bg-gray-200 mb-2">
+                            </div>
+                        </div>
+
+                        <div class="p-4 border-2 border-dashed border-gray-300 rounded bg-white">
+                            <h3 class="font-bold text-sm mb-3">Verification Process</h3>
+                            <div class="flex items-end gap-2">
+                                <div class="flex-1">
+                                    <label class="text-xs text-gray-500">Sender's Public Key (From Cert)</label>
+                                    <input type="text" id="sigPubKeyVerify" placeholder="Paste Server Beta's Public Key..." class="font-mono text-sm">
+                                </div>
+                                <button onclick="verifySignature()" class="btn btn-green h-[42px]">Verify Signature</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-        </aside>
+                <!-- Stage 5: Obfuscation -->
+                <div id="panel-stage5" class="hidden space-y-6">
+                    <div class="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
+                        <h2 class="text-lg font-bold mb-2">Mission 5: Obfuscation vs. Encryption</h2>
+                        <p class="text-sm text-gray-600 mb-4"><strong>Objective:</strong> A junior analyst flagged a suspicious payload thinking it is highly encrypted. Evaluate the payload. Remember: Obfuscation (like Base64 encoding) obscures data but requires no cryptographic key to reverse. Encryption requires a key.</p>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="p-4 bg-gray-50 border border-gray-200 rounded">
+                                <h3 class="font-bold text-sm mb-2 text-red-700">Suspicious Payload (Found in logs)</h3>
+                                <textarea id="obfInput" rows="3" class="font-mono text-sm break-all" readonly>U1lTVEVNX0NPTVBST01JU0VEOiBCYWNrZG9vciBvcGVuIG9uIHBvcnQgNDQ0NA==</textarea>
+                                <div class="mt-2 flex gap-2">
+                                    <button onclick="attemptDecode('base64')" class="btn flex-1 text-sm bg-gray-800">Decode Base64</button>
+                                    <button onclick="attemptDecode('aes')" class="btn flex-1 text-sm bg-gray-800">Decrypt AES</button>
+                                </div>
+                            </div>
+                            <div class="p-4 border-l-4 border-brandGreen bg-white shadow-sm">
+                                <h3 class="font-bold text-sm mb-2">Analysis Results</h3>
+                                <textarea id="obfOutput" rows="3" readonly class="font-mono text-sm bg-gray-100" placeholder="Results will appear here..."></textarea>
+                                <div id="obfConclusion" class="mt-3 hidden">
+                                    <button onclick="completeSimulation()" class="btn btn-green w-full animate-bounce">Conclude Investigation & Generate Report</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-        <!-- Center: Visualization Canvas -->
-        <main class="flex-1 relative bg-gray-50 flex items-center justify-center overflow-hidden">
-            <!-- Background Grid Pattern -->
-            <div class="absolute inset-0 opacity-20 pointer-events-none" 
-                 style="background-image: radial-gradient(#22c55e 1px, transparent 1px); background-size: 30px 30px;">
-            </div>
-            
-            <canvas id="networkCanvas" class="absolute inset-0 w-full h-full"></canvas>
-            
-            <!-- Canvas Overlay UI -->
-            <div class="absolute top-4 left-4 bg-white border-2 border-black p-2 text-xs font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-                <span class="inline-block w-3 h-3 bg-green-500 rounded-full mr-1 align-middle border border-black"></span> Normal Traffic<br>
-                <span class="inline-block w-3 h-3 bg-black rounded-full mr-1 align-middle border border-black mt-1"></span> Malicious Threat<br>
-                <span class="inline-block w-3 h-3 bg-white border-2 border-green-500 rounded-full mr-1 align-middle mt-1"></span> False Positive
             </div>
         </main>
 
-        <!-- Right Panel: Logs & Stats -->
-        <aside class="w-80 border-l-2 border-black flex flex-col bg-white z-10 relative">
-            
-            <!-- Stats -->
-            <div class="p-5 border-b-2 border-black bg-white">
-                <h2 class="text-lg font-bold mb-4 border-b-2 border-black pb-2 text-green-700">Real-time Metrics</h2>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-gray-100 border-2 border-black p-2 text-center">
-                        <div class="text-xs font-bold">Packets Scanned</div>
-                        <div id="stat-scanned" class="mono text-xl font-bold">0</div>
-                    </div>
-                    <div class="bg-green-100 border-2 border-black p-2 text-center">
-                        <div class="text-xs font-bold">Threats Blocked</div>
-                        <div id="stat-blocked" class="mono text-xl font-bold text-green-700">0</div>
-                    </div>
-                    <div class="bg-red-100 border-2 border-black p-2 text-center">
-                        <div class="text-xs font-bold text-red-700">Breaches</div>
-                        <div id="stat-breaches" class="mono text-xl font-bold text-red-700">0</div>
-                    </div>
-                    <div class="bg-gray-100 border-2 border-black p-2 text-center relative overflow-hidden">
-                        <div class="text-xs font-bold text-gray-700">False Positives</div>
-                        <div id="stat-fp" class="mono text-xl font-bold text-gray-700">0</div>
-                    </div>
-                </div>
-                
-                <div class="mt-4">
-                    <div class="flex justify-between text-xs font-bold mb-1">
-                        <span>AI Accuracy Score</span>
-                        <span id="stat-accuracy" class="mono text-green-600">100%</span>
-                    </div>
-                    <div class="w-full bg-gray-200 h-2 border border-black">
-                        <div id="bar-accuracy" class="bg-green-500 h-full w-full transition-all duration-300"></div>
-                    </div>
-                </div>
+        <!-- Right Terminal Sidebar -->
+        <aside class="w-96 bg-terminalBg flex flex-col shadow-xl z-20">
+            <div class="bg-brandBlack p-2 border-b border-gray-800 flex justify-between items-center text-xs text-gray-400 font-mono">
+                <span>> TERMINAL_LOG :: SYS_ADMIN</span>
+                <span class="flex gap-1">
+                    <div class="w-2 h-2 rounded-full bg-red-500"></div>
+                    <div class="w-2 h-2 rounded-full bg-yellow-500"></div>
+                    <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                </span>
             </div>
-
-            <!-- Terminal Logs -->
-            <div class="flex-1 flex flex-col overflow-hidden bg-black text-green-500 p-2 mono text-xs">
-                <div class="font-bold border-b border-green-800 pb-1 mb-2 text-green-400">>> AI DECISION LOG</div>
-                <div id="log-container" class="flex-1 overflow-y-auto break-words pr-2">
-                    <!-- Logs will appear here -->
-                    <div class="text-gray-400">System initialized. Listening for traffic...</div>
-                </div>
+            <div id="terminalBody" class="flex-1 p-4 font-mono text-sm text-terminalText overflow-y-auto terminal-scroll leading-relaxed whitespace-pre-wrap">
+                <!-- Logs injected here -->
             </div>
-
         </aside>
-
     </div>
 
     <script>
-        // --- State Management ---
-        const State = {
-            isRunning: true,
-            sensitivity: 0.75, // 0.0 to 1.0
-            learningRate: 0.05,
-            trafficVolume: 5, // 1 to 10
-            threatRatio: 0.2, // 0.0 to 1.0
-            
-            stats: {
-                scanned: 0,
-                blocked: 0,
-                breaches: 0,
-                falsePositives: 0
+        // State Management
+        let state = {
+            score: 0,
+            stagesCompleted: {
+                stage1: false,
+                stage2: false,
+                stage3: false,
+                stage4: false,
+                stage5: false
+            },
+            data: {
+                symKey: null,
+                asymPubKey: null,
+                asymPrivKey: null,
+                targetHash: "3f3a8b417b7381e5927598db4c5b1b4df2ea428615c0e643c7cbcc3f698b671a" // Hash of unmodified text
             }
         };
 
-        // --- DOM Elements ---
-        const canvas = document.getElementById('networkCanvas');
-        const ctx = canvas.getContext('2d');
-        const logContainer = document.getElementById('log-container');
+        // DOM Elements
+        const terminal = document.getElementById('terminalBody');
+        const scoreDisplay = document.getElementById('scoreDisplay');
 
-        // UI Inputs
-        const sliderSensitivity = document.getElementById('slider-sensitivity');
-        const sliderLearning = document.getElementById('slider-learning');
-        const sliderTraffic = document.getElementById('slider-traffic');
-        const sliderThreats = document.getElementById('slider-threats');
-        
-        // UI Values
-        const valSensitivity = document.getElementById('val-sensitivity');
-        const valLearning = document.getElementById('val-learning');
-        const valTraffic = document.getElementById('val-traffic');
-        const valThreats = document.getElementById('val-threats');
+        // Initialization
+        window.onload = () => {
+            liveHash(); // Init hash value
+            logToTerminal("System initialization complete.", "sys");
+            logToTerminal("--------------------------------------------------", "sys");
+            logToTerminal("ALERT: Multiple security policies require validation.", "warn");
+            logToTerminal("INITIATING CYBERSECURITY TECHNICIAN SANDBOX...", "info");
+            logToTerminal("\n[SCENARIO BRIEFING]", "sys");
+            logToTerminal("Welcome, Tech. We are spinning up new infrastructure. You must validate our encryption protocols, verify file integrity, and analyze a suspicious payload.", "info");
+            logToTerminal("Awaiting initial action on Mission 1 (Symmetrical).", "info");
+        };
 
-        // Buttons
-        const btnToggle = document.getElementById('btn-toggle');
-        const btnReset = document.getElementById('btn-reset');
+        // Terminal Logging Function
+        function logToTerminal(message, type = "info") {
+            const entry = document.createElement('div');
+            entry.className = "mb-2 typewriter";
+            
+            let prefix = "> ";
+            let colorClass = "text-terminalText"; // default green
+            
+            if (type === "error") {
+                prefix = "[ERROR] ";
+                colorClass = "text-red-400 font-bold";
+            } else if (type === "warn") {
+                prefix = "[WARNING] ";
+                colorClass = "text-yellow-400";
+            } else if (type === "sys") {
+                prefix = "[SYSTEM] ";
+                colorClass = "text-gray-400";
+            } else if (type === "success") {
+                prefix = "[SUCCESS] ";
+                colorClass = "text-brandGreen font-bold bg-green-900 bg-opacity-20 inline-block px-1 rounded";
+            }
 
-        // Stats Display
-        const statScanned = document.getElementById('stat-scanned');
-        const statBlocked = document.getElementById('stat-blocked');
-        const statBreaches = document.getElementById('stat-breaches');
-        const statFP = document.getElementById('stat-fp');
-        const statAccuracy = document.getElementById('stat-accuracy');
-        const barAccuracy = document.getElementById('bar-accuracy');
+            entry.innerHTML = `<span class="${colorClass}">${prefix}${message}</span>`;
+            terminal.appendChild(entry);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
 
-        // --- Event Listeners ---
-        sliderSensitivity.addEventListener('input', (e) => {
-            State.sensitivity = e.target.value / 100;
-            valSensitivity.textContent = `${e.target.value}%`;
-        });
+        function updateScore(points) {
+            state.score += points;
+            scoreDisplay.innerText = state.score;
+            scoreDisplay.classList.add('animate-ping');
+            setTimeout(() => scoreDisplay.classList.remove('animate-ping'), 300);
+        }
 
-        sliderLearning.addEventListener('input', (e) => {
-            State.learningRate = e.target.value / 100;
-            valLearning.textContent = State.learningRate.toFixed(2);
-        });
+        function completeStage(stageId, points) {
+            if (!state.stagesCompleted[stageId]) {
+                state.stagesCompleted[stageId] = true;
+                updateScore(points);
+                document.getElementById(`badge-${stageId}`).classList.remove('hidden');
+                logToTerminal(`Mission ${stageId.replace('stage','')} objectives achieved. Protocol verified.`, "success");
+            }
+        }
 
-        sliderTraffic.addEventListener('input', (e) => {
-            State.trafficVolume = parseInt(e.target.value);
-            const labels = ["Low", "Med-Low", "Medium", "Med-High", "High"];
-            valTraffic.textContent = labels[Math.floor(State.trafficVolume/2.1)] || "Max";
-        });
+        // Tab Switching Logic
+        function switchTab(stageId) {
+            // Hide all panels
+            ['stage1', 'stage2', 'stage3', 'stage4', 'stage5'].forEach(id => {
+                document.getElementById(`panel-${id}`).classList.add('hidden');
+                document.getElementById(`tab-${id}`).className = "tab-inactive text-left px-4 py-3 text-sm transition-all flex items-center justify-between";
+            });
+            
+            // Show active panel
+            document.getElementById(`panel-${stageId}`).classList.remove('hidden');
+            document.getElementById(`tab-${stageId}`).className = "tab-active text-left px-4 py-3 text-sm transition-all flex items-center justify-between";
+            
+            logToTerminal(`Switched view to Mission ${stageId.replace('stage','')}.`, "sys");
+        }
 
-        sliderThreats.addEventListener('input', (e) => {
-            State.threatRatio = e.target.value / 100;
-            valThreats.textContent = `${e.target.value}%`;
-        });
+        // --- STAGE 1 LOGIC: Symmetrical ---
+        function generateSymmetricKey() {
+            // Mock AES key generation (hex string)
+            const key = Array.from(crypto.getRandomValues(new Uint8Array(16))).map(b => b.toString(16).padStart(2, '0')).join('');
+            state.data.symKey = `AES-KEY-${key.toUpperCase()}`;
+            document.getElementById('symKeyDisplay').value = state.data.symKey;
+            logToTerminal("Symmetric AES-256 key generated successfully.", "info");
+        }
 
-        btnToggle.addEventListener('click', () => {
-            State.isRunning = !State.isRunning;
-            btnToggle.textContent = State.isRunning ? "PAUSE" : "RESUME";
-            btnToggle.classList.toggle('btn-active');
-            if (State.isRunning) {
-                lastTime = performance.now();
-                requestAnimationFrame(gameLoop);
-                logSystem('Simulation resumed.');
+        function executeSymmetric(action) {
+            const algo = document.getElementById('symAlgoSelect').value;
+            const inputKey = document.getElementById('symKeyInput').value.trim();
+            const text = action === 'encrypt' ? document.getElementById('symPlaintext').value : document.getElementById('symCiphertext').value;
+
+            if (algo !== 'aes') {
+                logToTerminal("Algorithm error! RSA is Asymmetrical. This connection requires Symmetrical encryption (AES).", "error");
+                return;
+            }
+            if (!inputKey || inputKey !== state.data.symKey) {
+                logToTerminal("Key error! Provided symmetric key is invalid or missing.", "error");
+                return;
+            }
+            if (!text) {
+                logToTerminal("Missing payload data.", "warn");
+                return;
+            }
+
+            if (action === 'encrypt') {
+                // Mock encryption: Base64 encoding + wrapper to simulate ciphertext visually
+                const cipher = `ENC[SYM|${btoa(text)}]`;
+                document.getElementById('symCiphertext').value = cipher;
+                logToTerminal("Payload successfully encrypted using symmetric key.", "info");
             } else {
-                logSystem('Simulation paused.');
+                // Mock decryption
+                if (text.startsWith("ENC[SYM|")) {
+                    try {
+                        const raw = text.replace("ENC[SYM|", "").replace("]", "");
+                        const plain = atob(raw);
+                        logToTerminal(`Payload decrypted successfully. Contents: "${plain}"`, "success");
+                        completeStage('stage1', 100);
+                    } catch (e) {
+                        logToTerminal("Decryption failed. Ciphertext corrupted.", "error");
+                    }
+                } else {
+                    logToTerminal("Invalid ciphertext format.", "error");
+                }
             }
-        });
-
-        btnReset.addEventListener('click', () => {
-            State.stats = { scanned: 0, blocked: 0, breaches: 0, falsePositives: 0 };
-            packets = [];
-            animations = [];
-            updateStatsUI();
-            logContainer.innerHTML = '<div class="text-gray-400">System reset. Listening for traffic...</div>';
-            logSystem('Simulation reset to baseline.');
-        });
-
-        // --- Visualization Engine ---
-        
-        // Define Network Topology
-        const nodes = [
-            { id: 'ext1', x: 0.1, y: 0.2, type: 'external', label: 'Internet A' },
-            { id: 'ext2', x: 0.1, y: 0.8, type: 'external', label: 'Internet B' },
-            { id: 'fw1',  x: 0.35, y: 0.5, type: 'firewall', label: 'AI Firewall' },
-            { id: 'sw1',  x: 0.6, y: 0.5, type: 'switch', label: 'Core Switch' },
-            { id: 'srv1', x: 0.85, y: 0.2, type: 'server', label: 'Web Server' },
-            { id: 'srv2', x: 0.85, y: 0.5, type: 'server', label: 'App Server' },
-            { id: 'srv3', x: 0.85, y: 0.8, type: 'server', label: 'Database' }
-        ];
-
-        const edges = [
-            ['ext1', 'fw1'],
-            ['ext2', 'fw1'],
-            ['fw1', 'sw1'],
-            ['sw1', 'srv1'],
-            ['sw1', 'srv2'],
-            ['sw1', 'srv3']
-        ];
-
-        let packets = [];
-        let animations = []; // For flashes and effects
-
-        function resizeCanvas() {
-            canvas.width = canvas.parentElement.clientWidth;
-            canvas.height = canvas.parentElement.clientHeight;
-        }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-
-        function getNodePixelCoords(node) {
-            return {
-                x: node.x * canvas.width,
-                y: node.y * canvas.height
-            };
         }
 
-        function drawNetwork() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Draw edges
-            ctx.strokeStyle = '#000000';
-            ctx.lineWidth = 2;
-            edges.forEach(edge => {
-                const n1 = nodes.find(n => n.id === edge[0]);
-                const n2 = nodes.find(n => n.id === edge[1]);
-                const p1 = getNodePixelCoords(n1);
-                const p2 = getNodePixelCoords(n2);
-                
-                ctx.beginPath();
-                ctx.moveTo(p1.x, p1.y);
-                ctx.lineTo(p2.x, p2.y);
-                ctx.stroke();
-            });
-
-            // Draw nodes
-            nodes.forEach(node => {
-                const p = getNodePixelCoords(node);
-                
-                // Shadow
-                ctx.fillStyle = '#000000';
-                ctx.fillRect(p.x - 20 + 4, p.y - 20 + 4, 40, 40);
-
-                // Base
-                ctx.fillStyle = '#ffffff';
-                ctx.strokeStyle = '#000000';
-                ctx.lineWidth = 2;
-                
-                if (node.type === 'firewall') {
-                    ctx.fillStyle = '#22c55e'; // Green firewall
-                } else if (node.type === 'external') {
-                    ctx.fillStyle = '#f3f4f6'; // Gray external
-                }
-                
-                ctx.fillRect(p.x - 20, p.y - 20, 40, 40);
-                ctx.strokeRect(p.x - 20, p.y - 20, 40, 40);
-
-                // Iconography (Simple shapes)
-                ctx.fillStyle = '#000';
-                if (node.type === 'server') {
-                    ctx.fillRect(p.x - 10, p.y - 12, 20, 4);
-                    ctx.fillRect(p.x - 10, p.y - 2, 20, 4);
-                    ctx.fillRect(p.x - 10, p.y + 8, 20, 4);
-                } else if (node.type === 'firewall') {
-                    ctx.fillRect(p.x - 10, p.y - 10, 8, 8);
-                    ctx.fillRect(p.x + 2, p.y - 10, 8, 8);
-                    ctx.fillRect(p.x - 10, p.y + 2, 8, 8);
-                    ctx.fillRect(p.x + 2, p.y + 2, 8, 8);
-                }
-
-                // Label
-                ctx.fillStyle = '#000000';
-                ctx.font = 'bold 12px Inter';
-                ctx.textAlign = 'center';
-                
-                // Add a white background to text for readability
-                const textWidth = ctx.measureText(node.label).width;
-                ctx.fillStyle = 'rgba(255,255,255,0.8)';
-                ctx.fillRect(p.x - textWidth/2 - 4, p.y + 26 - 10, textWidth + 8, 14);
-                
-                ctx.fillStyle = '#000000';
-                ctx.fillText(node.label, p.x, p.y + 30);
-            });
-
-            // Draw Packets
-            packets.forEach(pkt => {
-                const p1 = getNodePixelCoords(pkt.source);
-                const p2 = getNodePixelCoords(pkt.target);
-                
-                const currX = p1.x + (p2.x - p1.x) * pkt.progress;
-                const currY = p1.y + (p2.y - p1.y) * pkt.progress;
-
-                ctx.beginPath();
-                ctx.arc(currX, currY, 6, 0, Math.PI * 2);
-                
-                if (pkt.status === 'blocked') {
-                    // Exploding animation frame conceptually
-                    ctx.fillStyle = '#000';
-                } else if (pkt.isMalicious) {
-                    ctx.fillStyle = '#000'; // Black for malicious
-                } else {
-                    ctx.fillStyle = '#22c55e'; // Green for normal
-                }
-                
-                ctx.fill();
-                ctx.lineWidth = 1;
-                ctx.strokeStyle = '#000';
-                ctx.stroke();
-
-                // Highlight False Positive
-                if (pkt.isFalsePositive) {
-                    ctx.beginPath();
-                    ctx.arc(currX, currY, 10, 0, Math.PI * 2);
-                    ctx.strokeStyle = '#22c55e';
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-                }
-            });
-
-            // Draw Animations (Flashes)
-            animations = animations.filter(anim => anim.life > 0);
-            animations.forEach(anim => {
-                anim.life -= 1;
-                ctx.beginPath();
-                ctx.arc(anim.x, anim.y, 20 + (20 - anim.life), 0, Math.PI * 2);
-                ctx.strokeStyle = anim.color + Math.floor((anim.life/20)*255).toString(16).padStart(2,'0'); // Fading
-                ctx.lineWidth = 4;
-                ctx.stroke();
-            });
-        }
-
-        // --- Core Simulation Logic ---
-
-        function spawnPacket() {
-            const externalNodes = nodes.filter(n => n.type === 'external');
-            const source = externalNodes[Math.floor(Math.random() * externalNodes.length)];
-            const target = nodes.find(n => n.id === 'fw1'); // Initially go to firewall
+        // --- STAGE 2 LOGIC: Asymmetrical ---
+        function generateAsymmetricKeys() {
+            const randHex = () => Array.from(crypto.getRandomValues(new Uint8Array(4))).map(b => b.toString(16).padStart(2, '0')).join('');
+            state.data.asymPubKey = `PUB-RSA-${randHex().toUpperCase()}`;
+            state.data.asymPrivKey = `PRIV-RSA-${randHex().toUpperCase()}-SECRET`;
             
-            const isMalicious = Math.random() < State.threatRatio;
-            
-            packets.push({
-                source: source,
-                target: target,
-                progress: 0,
-                speed: 0.005 + (Math.random() * 0.005),
-                isMalicious: isMalicious,
-                status: 'transit',
-                stealth: isMalicious ? Math.random() : 0, // How hard it is to detect
-                id: Math.random().toString(36).substr(2, 5).toUpperCase()
-            });
+            document.getElementById('asymPubKey').value = state.data.asymPubKey;
+            document.getElementById('asymPrivKey').value = state.data.asymPrivKey;
+            logToTerminal("RSA Key Pair generated. Public Key can be distributed. Private Key must remain secure.", "info");
         }
 
-        function evaluatePacketAtFirewall(pkt) {
-            State.stats.scanned++;
+        function contractorEncrypt() {
+            const pubKey = document.getElementById('contractorPubKey').value.trim();
+            const msg = document.getElementById('contractorMessage').value;
+
+            if (!state.data.asymPubKey) {
+                logToTerminal("Generate key pair first.", "warn");
+                return;
+            }
+            if (pubKey !== state.data.asymPubKey) {
+                logToTerminal("Contractor failed to encrypt: Incorrect Public Key provided.", "error");
+                return;
+            }
+
+            const cipher = `ENC[ASYM|PUB|${btoa(msg)}]`;
+            document.getElementById('myCiphertext').value = cipher;
+            logToTerminal("Contractor successfully encrypted message using your Public Key.", "info");
+            logToTerminal("Package received over network.", "sys");
+        }
+
+        function myDecrypt() {
+            const privKey = document.getElementById('myPrivKeyInput').value.trim();
+            const cipher = document.getElementById('myCiphertext').value;
+
+            if (!cipher) {
+                logToTerminal("No ciphertext received yet.", "warn");
+                return;
+            }
+            if (privKey !== state.data.asymPrivKey) {
+                logToTerminal("Decryption failed! The wrong Private Key was used.", "error");
+                return;
+            }
+
+            try {
+                const raw = cipher.replace("ENC[ASYM|PUB|", "").replace("]", "");
+                const plain = atob(raw);
+                document.getElementById('myDecryptedMsg').value = plain;
+                logToTerminal("Asymmetric decryption successful using Private Key. Credentials secured.", "success");
+                completeStage('stage2', 100);
+            } catch(e) {
+                logToTerminal("Decryption failed. Ciphertext corrupted.", "error");
+            }
+        }
+
+        // --- STAGE 3 LOGIC: Hashing ---
+        // Simple hash mock that behaves deterministically like a real hash
+        function mockSHA256(string) {
+            let hash = 0;
+            for (let i = 0; i < string.length; i++) {
+                let char = string.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash; // Convert to 32bit integer
+            }
+            // Obfuscate to look like SHA-256 (64 hex chars)
+            let strHash = Math.abs(hash).toString(16).padStart(8, '0');
+            // Duplicate/manipulate to make it 64 chars for visual realism
+            let fullHash = "";
+            for(let i=0; i<8; i++) {
+                fullHash += strHash.split('').reverse().join('');
+                strHash = (parseInt(strHash, 16) * 13).toString(16).padStart(8, '0').substring(0,8);
+            }
+            return fullHash;
+        }
+
+        function liveHash() {
+            const text = document.getElementById('hashInput').value;
+            const h = mockSHA256(text);
+            document.getElementById('hashOutput').innerText = h;
+        }
+
+        function verifyHashMission() {
+            const currentHash = document.getElementById('hashOutput').innerText;
+            const originalTextHash = mockSHA256("function applyPatch() { system.update(2.0); return true; }");
             
-            // AI Detection Logic
-            // Base chance to detect malicious depends on sensitivity vs stealth
-            let detectMaliciousProbability = State.sensitivity * (1 - (pkt.stealth * 0.5));
-            // Cap at 99%
-            detectMaliciousProbability = Math.min(0.99, detectMaliciousProbability);
-
-            // Chance to falsely flag normal traffic depends heavily on sensitivity
-            let falsePositiveProbability = Math.pow(State.sensitivity, 2) * 0.15; // Up to 15% FP at 100% sensitivity
-
-            let isDetected = false;
-
-            if (pkt.isMalicious) {
-                isDetected = Math.random() < detectMaliciousProbability;
-                if (isDetected) {
-                    State.stats.blocked++;
-                    logEvent('THREAT BLOCKED', `Signature ${pkt.id} matched anomaly DB.`, 'text-green-400');
-                    addFlash(pkt.target, '#22c55e'); // Green flash for block
-                    return 'blocked';
-                } else {
-                    State.stats.breaches++;
-                    logEvent('BREACH DETECTED', `Threat ${pkt.id} evaded detection (Stealth: ${(pkt.stealth*100).toFixed(0)}%).`, 'text-red-500 font-bold');
-                    return 'passed';
-                }
+            logToTerminal(`Comparing current hash against vendor manifest...`, "sys");
+            
+            if (currentHash === originalTextHash) {
+                logToTerminal("Hash Match! Integrity verified. File has not been tampered with.", "success");
+                completeStage('stage3', 100);
             } else {
-                isDetected = Math.random() < falsePositiveProbability;
-                if (isDetected) {
-                    State.stats.falsePositives++;
-                    pkt.isFalsePositive = true;
-                    logEvent('FALSE POSITIVE', `Normal traffic ${pkt.id} incorrectly quarantined.`, 'text-yellow-400');
-                    addFlash(pkt.target, '#eab308'); // Yellow flash
-                    return 'blocked';
-                } else {
-                    return 'passed';
+                logToTerminal("HASH MISMATCH! The file has been altered. The avalanche effect shows a completely different hash output.", "error");
+            }
+        }
+
+        // --- STAGE 4 LOGIC: PKI & Signatures ---
+        function verifySignature() {
+            const pubKeyInput = document.getElementById('sigPubKeyVerify').value.trim();
+            
+            if (pubKeyInput === "PUB_KEY_BETA_99A1") {
+                logToTerminal("Public key match found in X.509 Certificate.", "sys");
+                logToTerminal("Decrypting signature using Sender's Public Key...", "info");
+                setTimeout(() => {
+                    logToTerminal("Hash recovered from signature matches document hash! Authentication and Non-repudiation verified.", "success");
+                    completeStage('stage4', 100);
+                }, 800);
+            } else {
+                logToTerminal("Signature Verification Failed! Provided Public Key does not match the X.509 Certificate for Server Beta.", "error");
+            }
+        }
+
+        // --- STAGE 5 LOGIC: Obfuscation ---
+        function attemptDecode(type) {
+            const input = document.getElementById('obfInput').value;
+            const output = document.getElementById('obfOutput');
+            
+            if (type === 'aes') {
+                logToTerminal("Attempting AES decryption... FAILED. No key provided and format is not recognized as AES ciphertext.", "error");
+                output.value = "ERR: Requires decryption key.";
+            } else if (type === 'base64') {
+                logToTerminal("Attempting Base64 decode...", "sys");
+                try {
+                    const decoded = atob(input);
+                    output.value = decoded;
+                    logToTerminal(`Decoded successfully WITHOUT a key. Contents: "${decoded}"`, "warn");
+                    logToTerminal("Analysis: This is OBFUSCATION, not encryption. Obfuscation relies on encoding schemas, not cryptographic keys. It provides NO confidentiality.", "success");
+                    document.getElementById('obfConclusion').classList.remove('hidden');
+                    completeStage('stage5', 100);
+                } catch(e) {
+                    logToTerminal("Base64 decode failed.", "error");
                 }
             }
         }
 
-        function addFlash(node, color) {
-            const p = getNodePixelCoords(node);
-            animations.push({ x: p.x, y: p.y, color: color, life: 20 });
-        }
-
-        function logEvent(type, message, colorClass = 'text-green-500') {
-            const el = document.createElement('div');
-            el.className = 'mb-1';
-            const time = new Date().toISOString().split('T')[1].substring(0,8);
-            el.innerHTML = `<span class="text-gray-500">[${time}]</span> <span class="${colorClass}">[${type}]</span> ${message}`;
-            logContainer.appendChild(el);
-            
-            // Keep log short
-            if (logContainer.children.length > 50) {
-                logContainer.removeChild(logContainer.firstChild);
+        function completeSimulation() {
+            if(Object.values(state.stagesCompleted).every(v => v === true)) {
+                logToTerminal("==================================================", "sys");
+                logToTerminal("ALL MODULES COMPLETE. FINAL SCORE: 500/500", "success");
+                logToTerminal("Cybersecurity Technician competencies verified.", "sys");
+                logToTerminal("Session terminating... goodbye.", "sys");
+                alert("Congratulations! You have completed the Symmetrical, Asymmetrical, and Hashing simulation lab.");
+            } else {
+                logToTerminal("Cannot conclude. Incomplete modules remain.", "warn");
             }
-            logContainer.scrollTop = logContainer.scrollHeight;
         }
-
-        function logSystem(message) {
-            logEvent('SYS', message, 'text-white');
-        }
-
-        function updateStatsUI() {
-            statScanned.textContent = State.stats.scanned;
-            statBlocked.textContent = State.stats.blocked;
-            statBreaches.textContent = State.stats.breaches;
-            statFP.textContent = State.stats.falsePositives;
-
-            const totalErrors = State.stats.breaches + State.stats.falsePositives;
-            const accuracy = State.stats.scanned === 0 ? 100 : Math.max(0, 100 - ((totalErrors / State.stats.scanned) * 100));
-            
-            statAccuracy.textContent = `${accuracy.toFixed(1)}%`;
-            barAccuracy.style.width = `${accuracy}%`;
-            
-            if (accuracy > 90) barAccuracy.className = "bg-green-500 h-full transition-all duration-300";
-            else if (accuracy > 70) barAccuracy.className = "bg-yellow-500 h-full transition-all duration-300";
-            else barAccuracy.className = "bg-red-500 h-full transition-all duration-300";
-        }
-
-        // --- Main Loop ---
-        let lastTime = 0;
-        let spawnTimer = 0;
-
-        function gameLoop(time) {
-            if (!State.isRunning) return;
-
-            const dt = time - lastTime;
-            lastTime = time;
-
-            // Spawn logic
-            // higher volume = lower threshold
-            const spawnThreshold = 1000 / State.trafficVolume; 
-            spawnTimer += dt;
-            if (spawnTimer > spawnThreshold) {
-                spawnTimer = 0;
-                spawnPacket();
-            }
-
-            // Update Packets
-            for (let i = packets.length - 1; i >= 0; i--) {
-                let pkt = packets[i];
-                pkt.progress += pkt.speed * (dt / 16); // normalize to roughly 60fps
-
-                if (pkt.progress >= 1.0) {
-                    if (pkt.target.id === 'fw1') {
-                        // At Firewall
-                        const outcome = evaluatePacketAtFirewall(pkt);
-                        if (outcome === 'blocked') {
-                            packets.splice(i, 1);
-                        } else {
-                            // Forward to internal network
-                            pkt.source = pkt.target;
-                            pkt.target = nodes.find(n => n.id === 'sw1');
-                            pkt.progress = 0;
-                        }
-                        updateStatsUI();
-                    } 
-                    else if (pkt.target.id === 'sw1') {
-                        // At Switch, forward to a random server
-                        const servers = nodes.filter(n => n.type === 'server');
-                        pkt.source = pkt.target;
-                        pkt.target = servers[Math.floor(Math.random() * servers.length)];
-                        pkt.progress = 0;
-                    }
-                    else if (pkt.target.type === 'server') {
-                        // Reached end goal
-                        if (pkt.isMalicious) {
-                            addFlash(pkt.target, '#ef4444'); // Red flash for server hit
-                        }
-                        packets.splice(i, 1);
-                    }
-                }
-            }
-
-            drawNetwork();
-            requestAnimationFrame(gameLoop);
-        }
-
-        // Initialize
-        lastTime = performance.now();
-        requestAnimationFrame(gameLoop);
 
     </script>
 </body>
