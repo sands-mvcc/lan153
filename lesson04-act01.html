@@ -1,0 +1,1745 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VulnLab — Vulnerability Analysis Simulator</title>
+<style>
+  :root {
+    --bg: #f5f6f8;
+    --surface: #ffffff;
+    --surface2: #f0f2f5;
+    --border: #d1d5db;
+    --text: #111827;
+    --text2: #6b7280;
+    --accent: #1e3a5f;
+    --accent-light: #2563eb;
+    --accent-glow: rgba(37,99,235,0.12);
+    --danger: #dc2626;
+    --danger-light: #fef2f2;
+    --warn: #d97706;
+    --warn-light: #fffbeb;
+    --success: #16a34a;
+    --success-light: #f0fdf4;
+    --info: #0284c7;
+    --info-light: #e0f2fe;
+    --code-bg: #1e293b;
+    --code-text: #e2e8f0;
+    --mono: 'Courier New', Courier, monospace;
+    --radius: 8px;
+    --shadow: 0 1px 4px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.06);
+  }
+  [data-theme="dark"] {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #21262d;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text2: #8b949e;
+    --accent: #58a6ff;
+    --accent-light: #79c0ff;
+    --accent-glow: rgba(88,166,255,0.12);
+    --danger: #f85149;
+    --danger-light: #1a0a0a;
+    --warn: #e3b341;
+    --warn-light: #1a1200;
+    --success: #3fb950;
+    --success-light: #071a0a;
+    --info: #58a6ff;
+    --info-light: #051826;
+    --code-bg: #010409;
+    --code-text: #c9d1d9;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .logo-badge {
+    background: var(--accent-light);
+    color: #fff;
+    font-weight: 800;
+    font-size: 13px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    letter-spacing: 0.04em;
+  }
+  .header-title { font-weight: 600; font-size: 15px; color: var(--text); }
+  .header-sub { font-size: 12px; color: var(--text2); margin-top: 1px; }
+  .score-pill {
+    display: flex; align-items: center; gap: 16px;
+  }
+  .score-display {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .score-display span { color: var(--accent-light); }
+  .theme-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    color: var(--text);
+    transition: all 0.2s;
+  }
+  .theme-btn:hover { background: var(--border); }
+
+  /* LAYOUT */
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px 60px; }
+
+  /* PROGRESS BAR */
+  .progress-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .pb-label { font-size: 12px; color: var(--text2); font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; margin-right: 4px; }
+  .pb-step {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--text2);
+    padding: 4px 10px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .pb-step.active { background: var(--accent-glow); border-color: var(--accent-light); color: var(--accent-light); font-weight: 600; }
+  .pb-step.done { background: var(--success-light); border-color: var(--success); color: var(--success); }
+  .pb-step .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+
+  /* MODULE CARD */
+  .module-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 20px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .module-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 20px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+    border-bottom: 1px solid transparent;
+  }
+  .module-header:hover { background: var(--surface2); }
+  .module-header.expanded { border-bottom-color: var(--border); }
+  .severity-tag {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 3px;
+  }
+  .sev-critical { background: #7c0a02; color: #ffa7a0; }
+  .sev-high { background: #7c2a00; color: #ffb870; }
+  .sev-medium { background: #5c4200; color: #ffd970; }
+  .sev-info { background: #002b5c; color: #7ec8ff; }
+  .module-num { font-size: 20px; font-weight: 800; color: var(--text2); min-width: 28px; }
+  .module-meta { flex: 1; }
+  .module-name { font-weight: 700; font-size: 16px; }
+  .module-desc { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .module-toggle { color: var(--text2); font-size: 18px; transition: transform 0.2s; }
+  .module-toggle.open { transform: rotate(180deg); }
+  .module-status { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .status-badge {
+    font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 600;
+  }
+  .status-badge.pending { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
+  .status-badge.complete { background: var(--success-light); color: var(--success); border: 1px solid var(--success); }
+
+  /* MODULE BODY */
+  .module-body { display: none; padding: 20px; }
+  .module-body.open { display: block; }
+
+  /* TABS */
+  .tabs { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 1px solid var(--border); }
+  .tab-btn {
+    padding: 7px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    border: none;
+    background: none;
+    color: var(--text2);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.15s;
+  }
+  .tab-btn.active { color: var(--accent-light); border-bottom-color: var(--accent-light); font-weight: 700; }
+  .tab-btn:hover:not(.active) { color: var(--text); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* CODE BLOCK */
+  .code-block {
+    background: var(--code-bg);
+    color: var(--code-text);
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.65;
+    border-radius: var(--radius);
+    padding: 16px;
+    overflow-x: auto;
+    position: relative;
+    margin: 10px 0;
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    background: rgba(255,255,255,0.04);
+    border-radius: var(--radius) var(--radius) 0 0;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: #6b7280;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    margin: -16px -16px 12px;
+  }
+  .code-lang { color: #4b96ff; font-weight: 600; }
+  .kw { color: #ff7ab2; }
+  .fn { color: #67cdff; }
+  .str { color: #fc9; }
+  .cm { color: #6b7280; font-style: italic; }
+  .num { color: #d9a; }
+  .danger-line { background: rgba(220,38,38,0.18); display: block; margin: 0 -16px; padding: 0 16px; }
+  .fix-line { background: rgba(22,163,74,0.18); display: block; margin: 0 -16px; padding: 0 16px; }
+
+  /* ALERT BOXES */
+  .alert {
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    font-size: 13.5px;
+    margin: 10px 0;
+    display: flex;
+    gap: 10px;
+  }
+  .alert-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .alert-content strong { display: block; font-weight: 700; margin-bottom: 2px; }
+  .alert-danger { background: var(--danger-light); border: 1px solid var(--danger); color: var(--danger); }
+  .alert-warn { background: var(--warn-light); border: 1px solid var(--warn); color: var(--warn); }
+  .alert-success { background: var(--success-light); border: 1px solid var(--success); color: var(--success); }
+  .alert-info { background: var(--info-light); border: 1px solid var(--info); color: var(--info); }
+
+  /* GRID */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  /* SIMULATOR PANELS */
+  .sim-panel {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-top: 12px;
+  }
+  .sim-panel h4 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text2); margin-bottom: 12px; }
+
+  /* TERMINAL */
+  .terminal {
+    background: #010409;
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: #c9d1d9;
+    min-height: 120px;
+    max-height: 220px;
+    overflow-y: auto;
+    margin: 8px 0;
+    border: 1px solid #30363d;
+  }
+  .term-prompt { color: #3fb950; }
+  .term-out { color: #c9d1d9; }
+  .term-err { color: #f85149; }
+  .term-warn { color: #e3b341; }
+  .term-line { display: block; }
+
+  /* BUTTONS */
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 14px; border-radius: var(--radius);
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    border: 1px solid transparent; transition: all 0.15s;
+  }
+  .btn-primary { background: var(--accent-light); color: #fff; border-color: var(--accent-light); }
+  .btn-primary:hover { filter: brightness(1.1); }
+  .btn-danger { background: var(--danger); color: #fff; border-color: var(--danger); }
+  .btn-danger:hover { filter: brightness(1.1); }
+  .btn-success { background: var(--success); color: #fff; border-color: var(--success); }
+  .btn-ghost { background: transparent; border-color: var(--border); color: var(--text); }
+  .btn-ghost:hover { background: var(--surface2); }
+  .btn-sm { padding: 4px 10px; font-size: 12px; }
+  .btn-group { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+
+  /* FORM ELEMENTS */
+  select, input[type="text"], input[type="number"] {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: var(--radius);
+    padding: 7px 10px;
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  select:focus, input:focus { border-color: var(--accent-light); }
+
+  /* CHECKLIST */
+  .checklist { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .checklist li {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 12px; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); font-size: 13.5px; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .checklist li:hover { border-color: var(--accent-light); }
+  .checklist li.checked { background: var(--success-light); border-color: var(--success); }
+  .checklist li.wrong { background: var(--danger-light); border-color: var(--danger); }
+  .checklist-icon { font-size: 16px; flex-shrink: 0; }
+
+  /* QUIZ */
+  .quiz-option {
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-size: 14px;
+  }
+  .quiz-option:hover { border-color: var(--accent-light); background: var(--accent-glow); }
+  .quiz-option.correct { background: var(--success-light); border-color: var(--success); color: var(--success); font-weight: 600; }
+  .quiz-option.incorrect { background: var(--danger-light); border-color: var(--danger); color: var(--danger); }
+  .quiz-option.disabled { pointer-events: none; }
+  .quiz-result { margin-top: 10px; font-size: 13.5px; font-weight: 600; display: none; }
+
+  /* PRIVILEGE TABLE */
+  .priv-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .priv-table th { background: var(--surface2); padding: 8px 12px; text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text2); border-bottom: 1px solid var(--border); }
+  .priv-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
+  .priv-table tr:last-child td { border-bottom: none; }
+  .priv-high { color: var(--danger); font-weight: 700; }
+  .priv-low { color: var(--success); }
+  .priv-suid { color: var(--warn); font-weight: 700; }
+
+  /* BUFFER VIZ */
+  .buffer-viz {
+    display: flex; gap: 2px; margin: 12px 0; flex-wrap: wrap;
+  }
+  .buf-cell {
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 11px; font-weight: 700;
+    border-radius: 4px; border: 1px solid var(--border);
+    transition: all 0.2s;
+  }
+  .buf-empty { background: var(--surface2); color: var(--text2); }
+  .buf-data { background: #1e3a5f; color: #7ec8ff; }
+  .buf-overflow { background: var(--danger); color: #fff; }
+  .buf-ret { background: #7c0a02; color: #ffa7a0; }
+  .buf-label { font-size: 11px; color: var(--text2); text-align: center; margin-top: 4px; }
+
+  /* MEMORY MAP */
+  .mem-region {
+    display: flex; align-items: center; height: 36px;
+    border-radius: 4px; margin-bottom: 3px; padding: 0 12px;
+    font-family: var(--mono); font-size: 12px; font-weight: 600;
+    justify-content: space-between;
+  }
+
+  /* TIMING DIAGRAM */
+  .timing-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .timing-label { font-size: 12px; color: var(--text2); width: 80px; flex-shrink: 0; }
+  .timing-bar { height: 28px; border-radius: 4px; display: flex; align-items: center; padding: 0 10px; font-size: 11px; font-weight: 700; color: #fff; transition: width 0.5s; }
+
+  /* RANGE */
+  input[type="range"] { width: 100%; accent-color: var(--accent-light); }
+
+  /* SCENARIO BADGE */
+  .scenario-box {
+    background: var(--surface2);
+    border-left: 3px solid var(--accent-light);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 12px 16px;
+    font-size: 13.5px;
+    margin-bottom: 14px;
+    font-style: italic;
+    color: var(--text2);
+  }
+  .scenario-box strong { color: var(--text); font-style: normal; }
+
+  /* LABEL */
+  label { font-size: 13px; font-weight: 600; color: var(--text2); display: block; margin-bottom: 4px; }
+
+  /* KEY VALUE */
+  .kv-list { display: flex; flex-direction: column; gap: 4px; }
+  .kv-row { display: flex; gap: 8px; font-size: 13px; }
+  .kv-key { color: var(--text2); min-width: 120px; flex-shrink: 0; }
+  .kv-val { color: var(--text); font-weight: 600; }
+
+  /* EOL TABLE */
+  .eol-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .eol-row:last-child { border-bottom: none; }
+  .eol-chip { font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 700; }
+  .eol-dead { background: var(--danger-light); color: var(--danger); border: 1px solid var(--danger); }
+  .eol-live { background: var(--success-light); color: var(--success); border: 1px solid var(--success); }
+  .eol-warn { background: var(--warn-light); color: var(--warn); border: 1px solid var(--warn); }
+
+  /* SECTION HEADINGS */
+  .section-head { font-size: 13px; font-weight: 700; color: var(--text); margin: 14px 0 8px; display: flex; align-items: center; gap: 8px; }
+  .section-head::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* STORAGE VIZ */
+  .storage-item {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    margin-bottom: 8px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .storage-item .s-label { font-family: var(--mono); font-size: 12px; color: var(--text2); }
+  .storage-item .s-val { font-family: var(--mono); font-size: 12px; font-weight: 700; }
+  .s-encrypted { color: var(--success); }
+  .s-plaintext { color: var(--danger); }
+
+  /* COMPLETION */
+  .completion-panel {
+    background: var(--success-light);
+    border: 1px solid var(--success);
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+    display: none;
+  }
+  .completion-panel.show { display: block; }
+  .completion-panel h2 { font-size: 22px; color: var(--success); margin-bottom: 8px; }
+  .completion-panel p { color: var(--text2); font-size: 14px; }
+
+  .info-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;
+  }
+  .info-box {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 12px;
+  }
+  .info-box .ib-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text2); margin-bottom: 4px; }
+  .info-box .ib-val { font-size: 14px; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <span class="logo-badge">VULNLAB</span>
+    <div>
+      <div class="header-title">Vulnerability Analysis Simulator</div>
+      <div class="header-sub">CompTIA Security+ SY0-701 · Domain 4: Threats, Attacks & Vulnerabilities</div>
+    </div>
+  </div>
+  <div class="score-pill">
+    <div class="score-display">Score: <span id="globalScore">0</span> / 60</div>
+    <button class="theme-btn" onclick="toggleTheme()">🌓 Theme</button>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- PROGRESS -->
+  <div class="progress-bar">
+    <span class="pb-label">Progress</span>
+    <div class="pb-step active" id="pb0" onclick="jumpTo(0)"><span class="dot"></span> OS Privesc</div>
+    <div class="pb-step" id="pb1" onclick="jumpTo(1)"><span class="dot"></span> TOCTOU</div>
+    <div class="pb-step" id="pb2" onclick="jumpTo(2)"><span class="dot"></span> Buffer Overflow</div>
+    <div class="pb-step" id="pb3" onclick="jumpTo(3)"><span class="dot"></span> Side-Channel</div>
+    <div class="pb-step" id="pb4" onclick="jumpTo(4)"><span class="dot"></span> EOL Systems</div>
+    <div class="pb-step" id="pb5" onclick="jumpTo(5)"><span class="dot"></span> Insecure Storage</div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- MODULE 1: OS PRIVILEGE ESCALATION -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <div class="module-card" id="mod0">
+    <div class="module-header expanded" onclick="toggleModule(0)">
+      <span class="module-num">01</span>
+      <div class="module-meta">
+        <div class="module-name">OS Privilege Escalation</div>
+        <div class="module-desc">SUID abuse, sudo misconfigurations, kernel exploits — identifying and mitigating local privilege escalation vectors</div>
+      </div>
+      <span class="severity-tag sev-critical">Critical</span>
+      <div class="module-status"><span class="status-badge pending" id="status0">Pending</span></div>
+      <span class="module-toggle open" id="toggle0">▾</span>
+    </div>
+    <div class="module-body open" id="body0">
+      <div class="tabs" id="tabs0">
+        <button class="tab-btn active" onclick="switchTab(0,'concept')">📖 Concept</button>
+        <button class="tab-btn" onclick="switchTab(0,'exploit')">⚡ Exploit Demo</button>
+        <button class="tab-btn" onclick="switchTab(0,'mitigate')">🛡️ Mitigation Lab</button>
+        <button class="tab-btn" onclick="switchTab(0,'quiz')">✅ Assessment</button>
+      </div>
+
+      <!-- CONCEPT -->
+      <div class="tab-panel active" id="tab0-concept">
+        <div class="scenario-box"><strong>Scenario:</strong> You are a junior security analyst at MidWest Financial. A contractor account with limited access is found to be running commands as root. Investigate how privilege escalation occurred.</div>
+        <div class="info-grid">
+          <div class="info-box"><div class="ib-label">CVE Reference</div><div class="ib-val">CVE-2021-4034 (PwnKit)</div></div>
+          <div class="info-box"><div class="ib-label">CVSS Score</div><div class="ib-val" style="color:var(--danger)">7.8 HIGH</div></div>
+          <div class="info-box"><div class="ib-label">Attack Vector</div><div class="ib-val">Local → Root</div></div>
+          <div class="info-box"><div class="ib-label">Affected Systems</div><div class="ib-val">Linux (pkexec)</div></div>
+        </div>
+        <div class="section-head">How It Works</div>
+        <p style="font-size:14px;margin-bottom:10px;">Privilege escalation allows an attacker with low-level access to gain administrative (root/SYSTEM) privileges. Common vectors include:</p>
+        <ul style="font-size:13.5px;padding-left:18px;display:flex;flex-direction:column;gap:6px;">
+          <li><strong>SUID/GUID Bit Abuse:</strong> Executables with the SUID bit run as the file owner. If root owns a SUID binary and it is exploitable, attackers gain root.</li>
+          <li><strong>Misconfigured sudo:</strong> Overly permissive sudoers entries allow users to run privileged commands.</li>
+          <li><strong>Writable PATH Entries:</strong> If a privileged script calls binaries without absolute paths, attackers inject malicious binaries.</li>
+          <li><strong>Kernel Vulnerabilities:</strong> Unpatched kernel flaws (e.g., Dirty COW, PwnKit) allow direct privilege escalation.</li>
+        </ul>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">BASH</span><span>SUID Enumeration</span></div>
+<span class="cm"># Find SUID binaries — attacker reconnaissance</span>
+<span class="fn">find</span> / <span class="kw">-perm</span> <span class="num">-4000</span> <span class="kw">-type</span> f <span class="num">2</span>>/dev/null
+
+<span class="cm"># Dangerous result — /usr/bin/find has SUID set</span>
+<span class="danger-line">-rwsr-xr-x 1 root root 220416 /usr/bin/find</span>
+
+<span class="cm"># Exploit via GTFOBins technique</span>
+<span class="danger-line">/usr/bin/find . -exec /bin/sh -p \; -quit</span>
+<span class="cm"># Attacker now has root shell — # prompt</span>
+        </div>
+      </div>
+
+      <!-- EXPLOIT DEMO -->
+      <div class="tab-panel" id="tab0-exploit">
+        <div class="alert alert-warn"><span class="alert-icon">⚠️</span><div class="alert-content"><strong>Educational Simulation Only</strong>This simulation models privilege escalation behavior in a controlled environment. No real commands are executed.</div></div>
+        <div class="section-head">Interactive Privilege Escalation Simulator</div>
+        <div class="grid-2">
+          <div>
+            <label>Target System</label>
+            <select id="privTarget" style="width:100%;margin-bottom:10px;">
+              <option value="suid">SUID Misconfiguration</option>
+              <option value="sudo">Sudo Policy Flaw</option>
+              <option value="kernel">Kernel Exploit (Dirty COW)</option>
+              <option value="path">PATH Hijacking</option>
+            </select>
+            <label>Attacker Privilege Level</label>
+            <select id="privLevel" style="width:100%;margin-bottom:10px;">
+              <option value="www-data">www-data (web shell)</option>
+              <option value="user">user (low-privilege)</option>
+            </select>
+            <div class="btn-group">
+              <button class="btn btn-danger" onclick="runPrivesc()">▶ Simulate Attack</button>
+              <button class="btn btn-ghost" onclick="clearTerminal('privTerm')">Clear</button>
+            </div>
+          </div>
+          <div>
+            <div class="section-head" style="margin-top:0">Running Processes (pre-attack)</div>
+            <table class="priv-table">
+              <thead><tr><th>PID</th><th>User</th><th>Command</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td class="priv-high">root</td><td>/sbin/init</td></tr>
+                <tr><td>452</td><td class="priv-high">root</td><td>sshd</td></tr>
+                <tr><td>891</td><td>user</td><td>bash</td></tr>
+                <tr><td>892</td><td>www-data</td><td>apache2</td></tr>
+                <tr><td>—</td><td class="priv-suid">SET-UID</td><td>/usr/bin/find ⚠️</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="terminal" id="privTerm">
+          <span class="term-line term-out">VulnLab Privilege Escalation Simulator — ready</span>
+          <span class="term-line term-out">Select an attack vector and click Simulate Attack ▶</span>
+        </div>
+      </div>
+
+      <!-- MITIGATION LAB -->
+      <div class="tab-panel" id="tab0-mitigate">
+        <div class="section-head">Identify Misconfigurations</div>
+        <p style="font-size:13.5px;margin-bottom:12px;">Review the <strong>sudoers file excerpt</strong> below. Check all entries that represent a security risk:</p>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">CONFIG</span><span>/etc/sudoers</span></div>
+<span class="cm"># Line 1</span>
+root    ALL=(ALL:ALL) ALL
+<span class="cm"># Line 2</span>
+<span class="danger-line">contractor ALL=(ALL) NOPASSWD: /bin/bash</span>
+<span class="cm"># Line 3</span>
+deploy  ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart apache2
+<span class="cm"># Line 4</span>
+<span class="danger-line">%webteam ALL=(ALL) NOPASSWD: ALL</span>
+<span class="cm"># Line 5</span>
+backup  ALL=(ALL) NOPASSWD: /usr/bin/rsync
+        </div>
+        <ul class="checklist" id="sudoChecklist">
+          <li onclick="checkItem('sudoChecklist',0,true)"><span class="checklist-icon">☐</span> Line 2: contractor has NOPASSWD access to /bin/bash (gives full shell)</li>
+          <li onclick="checkItem('sudoChecklist',1,false)"><span class="checklist-icon">☐</span> Line 3: deploy can restart apache2 (service management, acceptable)</li>
+          <li onclick="checkItem('sudoChecklist',2,true)"><span class="checklist-icon">☐</span> Line 4: %webteam has unrestricted NOPASSWD sudo (ALL commands)</li>
+          <li onclick="checkItem('sudoChecklist',3,false)"><span class="checklist-icon">☐</span> Line 5: backup uses rsync for file sync (scoped, lower risk)</li>
+        </ul>
+        <div class="alert alert-info" id="sudoFeedback" style="display:none;margin-top:10px;">
+          <span class="alert-icon">💡</span><div class="alert-content"><strong>Correct!</strong> Lines 2 and 4 are high-risk. /bin/bash grants a full root shell; NOPASSWD ALL for a group is equivalent to giving all group members root with no accountability.</div>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="checkSudoList()">Check Answers</button>
+          <button class="btn btn-ghost" onclick="resetSudoList()">Reset</button>
+        </div>
+      </div>
+
+      <!-- QUIZ -->
+      <div class="tab-panel" id="tab0-quiz">
+        <div class="section-head">Knowledge Check — 3 Questions (2 pts each)</div>
+        <div id="q0"></div>
+        <div class="btn-group"><button class="btn btn-primary" onclick="submitQuiz(0)" id="qbtn0">Submit Answers</button></div>
+        <div class="alert alert-success" id="qresult0" style="display:none;margin-top:12px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- MODULE 2: RACE CONDITIONS / TOCTOU -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <div class="module-card" id="mod1">
+    <div class="module-header" onclick="toggleModule(1)">
+      <span class="module-num">02</span>
+      <div class="module-meta">
+        <div class="module-name">Race Conditions & TOCTOU</div>
+        <div class="module-desc">Time-of-Check to Time-of-Use flaws, symlink attacks, and filesystem race condition exploits</div>
+      </div>
+      <span class="severity-tag sev-high">High</span>
+      <div class="module-status"><span class="status-badge pending" id="status1">Pending</span></div>
+      <span class="module-toggle" id="toggle1">▾</span>
+    </div>
+    <div class="module-body" id="body1">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab(1,'concept')">📖 Concept</button>
+        <button class="tab-btn" onclick="switchTab(1,'exploit')">⚡ Timing Attack Demo</button>
+        <button class="tab-btn" onclick="switchTab(1,'quiz')">✅ Assessment</button>
+      </div>
+
+      <div class="tab-panel active" id="tab1-concept">
+        <div class="scenario-box"><strong>Scenario:</strong> An ATM application checks an account balance (Time of Check), then processes a withdrawal (Time of Use). An attacker triggers simultaneous withdrawals to double-spend.</div>
+        <div class="section-head">TOCTOU Explained</div>
+        <p style="font-size:14px;margin-bottom:12px;">A TOCTOU vulnerability exists when a program <strong>checks a resource's state</strong> and then <strong>uses that resource</strong>, but an attacker can change the resource between those two operations.</p>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">C</span><span>Vulnerable Code</span></div>
+<span class="kw">int</span> <span class="fn">transfer_funds</span>(<span class="kw">int</span> amount) {
+    <span class="cm">// TIME OF CHECK — reads balance</span>
+    <span class="kw">int</span> balance = get_balance(account_id);
+
+    <span class="danger-line">    <span class="cm">// ← WINDOW: attacker triggers another thread here!</span></span>
+
+    <span class="cm">// TIME OF USE — uses the stale balance value</span>
+    <span class="kw">if</span> (balance >= amount) {
+        deduct(account_id, amount);   <span class="cm">// runs with old balance</span>
+        <span class="kw">return</span> SUCCESS;
+    }
+}
+        </div>
+        <div class="grid-2">
+          <div class="alert alert-danger"><span class="alert-icon">🕐</span><div class="alert-content"><strong>The Race Window</strong>The gap between check and use is the attack surface. Even microseconds create exploitable windows in concurrent systems.</div></div>
+          <div class="alert alert-info"><span class="alert-icon">📁</span><div class="alert-content"><strong>Symlink Attack Variant</strong>A process checks if /tmp/file is safe, then opens it. Attacker replaces it with a symlink to /etc/passwd before the open() call.</div></div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="tab1-exploit">
+        <div class="section-head">TOCTOU Timing Visualizer</div>
+        <p style="font-size:13.5px;margin-bottom:14px;">Simulate the timing relationship between legitimate and attacker threads. Adjust the window size to see when the race condition becomes exploitable.</p>
+        <div class="sim-panel">
+          <h4>Thread Timeline</h4>
+          <div id="timingViz">
+            <div class="timing-row">
+              <span class="timing-label">Legit Thread</span>
+              <div style="flex:1;position:relative;height:28px;background:var(--surface2);border-radius:4px;border:1px solid var(--border);">
+                <div id="legitBar" style="position:absolute;left:0;top:0;bottom:0;background:#2563eb;border-radius:4px;width:0%;transition:width 0.1s;display:flex;align-items:center;padding:0 8px;font-size:11px;color:#fff;font-weight:700;overflow:hidden;white-space:nowrap;"></div>
+              </div>
+            </div>
+            <div class="timing-row" style="margin-top:8px;">
+              <span class="timing-label">Attacker Thread</span>
+              <div style="flex:1;position:relative;height:28px;background:var(--surface2);border-radius:4px;border:1px solid var(--border);">
+                <div id="atkBar" style="position:absolute;left:0;top:0;bottom:0;background:#dc2626;border-radius:4px;width:0%;transition:width 0.1s;display:flex;align-items:center;padding:0 8px;font-size:11px;color:#fff;font-weight:700;overflow:hidden;white-space:nowrap;"></div>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:14px;">
+            <label>Race Window Size: <span id="windowLabel">50ms</span></label>
+            <input type="range" min="5" max="200" value="50" id="windowSlider" oninput="updateWindow()">
+          </div>
+          <div class="terminal" id="raceTerm" style="min-height:80px;">
+            <span class="term-line term-out">TOCTOU Simulator — adjust window size, then Run Race</span>
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-danger" onclick="runRace()">▶ Run Race Condition</button>
+            <button class="btn btn-success" onclick="runAtomicFix()">🔒 Run Atomic Fix</button>
+            <button class="btn btn-ghost" onclick="clearTerminal('raceTerm')">Clear</button>
+          </div>
+        </div>
+        <div class="section-head">Defense: Atomic Operations</div>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">C</span><span>Fixed — Atomic Compare-and-Swap</span></div>
+<span class="cm">// Use database transactions — atomic check + use</span>
+<span class="fn">BEGIN</span> TRANSACTION;
+<span class="fix-line">    <span class="kw">SELECT</span> balance <span class="kw">FOR</span> UPDATE;   <span class="cm">// locks row</span></span>
+<span class="fix-line">    <span class="kw">UPDATE</span> accounts <span class="kw">SET</span> balance = balance - :amount</span>
+<span class="fix-line">    <span class="kw">WHERE</span> balance >= :amount AND id = :account_id;</span>
+<span class="fn">COMMIT</span>;  <span class="cm">// atomic — no window exists</span>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="tab1-quiz">
+        <div class="section-head">Knowledge Check — 3 Questions (2 pts each)</div>
+        <div id="q1"></div>
+        <div class="btn-group"><button class="btn btn-primary" onclick="submitQuiz(1)" id="qbtn1">Submit Answers</button></div>
+        <div class="alert alert-success" id="qresult1" style="display:none;margin-top:12px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- MODULE 3: BUFFER OVERFLOW -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <div class="module-card" id="mod2">
+    <div class="module-header" onclick="toggleModule(2)">
+      <span class="module-num">03</span>
+      <div class="module-meta">
+        <div class="module-name">Buffer Overflows</div>
+        <div class="module-desc">Stack/heap overflows, return address corruption, NOP sleds, and memory-safe countermeasures</div>
+      </div>
+      <span class="severity-tag sev-critical">Critical</span>
+      <div class="module-status"><span class="status-badge pending" id="status2">Pending</span></div>
+      <span class="module-toggle" id="toggle2">▾</span>
+    </div>
+    <div class="module-body" id="body2">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab(2,'concept')">📖 Concept</button>
+        <button class="tab-btn" onclick="switchTab(2,'exploit')">⚡ Buffer Visualizer</button>
+        <button class="tab-btn" onclick="switchTab(2,'quiz')">✅ Assessment</button>
+      </div>
+
+      <div class="tab-panel active" id="tab2-concept">
+        <div class="scenario-box"><strong>Scenario:</strong> A legacy VPN appliance uses strcpy() to handle user authentication tokens. Security researchers discover that sending a 512-byte token crashes the device and achieves remote code execution.</div>
+        <div class="section-head">Stack Layout</div>
+        <div style="max-width:340px;">
+          <div class="mem-region" style="background:#1e3a5f;color:#7ec8ff;">Stack — Local Variables / Buffer</div>
+          <div class="mem-region" style="background:#5c2700;color:#ffb870;">Saved Frame Pointer (EBP)</div>
+          <div class="mem-region" style="background:#7c0a02;color:#ffa7a0;">Return Address (EIP) ← TARGET</div>
+          <div class="mem-region" style="background:#1a1200;color:#ffd970;border:1px solid #e3b341;">Attacker Shellcode / Payload</div>
+          <div class="mem-region" style="background:var(--surface2);color:var(--text2);">Caller's Stack Frame</div>
+        </div>
+        <div class="code-block" style="margin-top:12px;">
+          <div class="code-header"><span class="code-lang">C</span><span>Vulnerable — strcpy</span></div>
+<span class="kw">void</span> <span class="fn">authenticate</span>(<span class="kw">char</span> *token) {
+    <span class="kw">char</span> buf[<span class="num">64</span>];          <span class="cm">// fixed 64-byte buffer</span>
+<span class="danger-line">    <span class="fn">strcpy</span>(buf, token);    <span class="cm">// NO bounds check!</span></span>
+    <span class="cm">// token = 512 bytes → overwrites EIP!</span>
+}
+        </div>
+        <div class="alert alert-success" style="margin-top:10px;"><span class="alert-icon">🛡️</span><div class="alert-content"><strong>Safe Alternative:</strong> Use strncpy(buf, token, sizeof(buf)-1) or, better, snprintf(). In modern C++, use std::string. Enable ASLR, Stack Canaries, and NX/DEP at compile time.</div></div>
+      </div>
+
+      <div class="tab-panel" id="tab2-exploit">
+        <div class="section-head">Stack Buffer Overflow Visualizer</div>
+        <div class="sim-panel">
+          <h4>Input → Stack State</h4>
+          <div style="margin-bottom:12px;">
+            <label>Payload Length (bytes): <strong id="bufLen">0</strong></label>
+            <input type="range" min="0" max="100" value="0" id="bufSlider" oninput="updateBuffer()" style="margin-top:6px;">
+          </div>
+          <div>
+            <div class="buf-label" style="text-align:left;margin-bottom:4px;font-weight:700;">Stack Memory (Buffer: 8 cells, EBP: 2, EIP: 2)</div>
+            <div class="buffer-viz" id="bufViz"></div>
+            <div style="display:flex;gap:14px;margin-top:6px;flex-wrap:wrap;">
+              <span style="font-size:12px;display:flex;align-items:center;gap:4px;"><span style="width:14px;height:14px;background:#1e3a5f;border-radius:2px;display:inline-block;"></span> Buffer (safe)</span>
+              <span style="font-size:12px;display:flex;align-items:center;gap:4px;"><span style="width:14px;height:14px;background:var(--danger);border-radius:2px;display:inline-block;"></span> Overflow</span>
+              <span style="font-size:12px;display:flex;align-items:center;gap:4px;"><span style="width:14px;height:14px;background:#7c0a02;border-radius:2px;display:inline-block;"></span> EIP Corrupted</span>
+            </div>
+          </div>
+          <div class="terminal" id="bufTerm" style="min-height:60px;margin-top:10px;">
+            <span class="term-line term-out">Move slider right to fill buffer — watch for overflow...</span>
+          </div>
+        </div>
+        <div class="section-head">Countermeasures Checklist</div>
+        <ul class="checklist" id="bufChecklist">
+          <li onclick="checkItem('bufChecklist',0,true)"><span class="checklist-icon">☐</span> Enable ASLR (Address Space Layout Randomization) — randomizes memory addresses</li>
+          <li onclick="checkItem('bufChecklist',1,true)"><span class="checklist-icon">☐</span> Compile with Stack Canaries (-fstack-protector) — detects EBP overwrite</li>
+          <li onclick="checkItem('bufChecklist',2,true)"><span class="checklist-icon">☐</span> Enable NX/DEP — marks stack non-executable, prevents shellcode execution</li>
+          <li onclick="checkItem('bufChecklist',3,false)"><span class="checklist-icon">☐</span> Disable firewall logging — reduces attack surface (incorrect action)</li>
+          <li onclick="checkItem('bufChecklist',4,true)"><span class="checklist-icon">☐</span> Replace unsafe functions: strcpy→strncpy, gets→fgets, sprintf→snprintf</li>
+        </ul>
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="checkBufList()">Check Selections</button>
+          <button class="btn btn-ghost" onclick="resetBufList()">Reset</button>
+        </div>
+        <div class="alert alert-success" id="bufFeedback" style="display:none;margin-top:10px;">
+          <span class="alert-icon">✅</span><div class="alert-content"><strong>Well done!</strong> ASLR, Stack Canaries, NX/DEP, and safe string functions together form a defense-in-depth strategy against buffer overflows.</div>
+        </div>
+
+        <div class="tab-panel" id="tab2-quiz" style="display:none;"></div>
+      </div>
+
+      <div class="tab-panel" id="tab2-quiz">
+        <div class="section-head">Knowledge Check — 3 Questions (2 pts each)</div>
+        <div id="q2"></div>
+        <div class="btn-group"><button class="btn btn-primary" onclick="submitQuiz(2)" id="qbtn2">Submit Answers</button></div>
+        <div class="alert alert-success" id="qresult2" style="display:none;margin-top:12px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- MODULE 4: SIDE-CHANNEL ATTACKS -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <div class="module-card" id="mod3">
+    <div class="module-header" onclick="toggleModule(3)">
+      <span class="module-num">04</span>
+      <div class="module-meta">
+        <div class="module-name">Side-Channel Attacks</div>
+        <div class="module-desc">Timing attacks, cache analysis, power analysis — extracting secrets from observable system behavior</div>
+      </div>
+      <span class="severity-tag sev-high">High</span>
+      <div class="module-status"><span class="status-badge pending" id="status3">Pending</span></div>
+      <span class="module-toggle" id="toggle3">▾</span>
+    </div>
+    <div class="module-body" id="body3">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab(3,'concept')">📖 Concept</button>
+        <button class="tab-btn" onclick="switchTab(3,'exploit')">⚡ Timing Oracle</button>
+        <button class="tab-btn" onclick="switchTab(3,'quiz')">✅ Assessment</button>
+      </div>
+
+      <div class="tab-panel active" id="tab3-concept">
+        <div class="scenario-box"><strong>Scenario:</strong> Spectre (CVE-2017-5753) allowed attackers to read kernel memory from user-space by exploiting CPU speculative execution — a hardware-level side channel invisible to the OS.</div>
+        <div class="info-grid">
+          <div class="info-box"><div class="ib-label">Attack Types</div><div class="ib-val">Timing, Cache, Power, EM</div></div>
+          <div class="info-box"><div class="ib-label">Famous Examples</div><div class="ib-val">Spectre, Meltdown, FLUSH+RELOAD</div></div>
+          <div class="info-box"><div class="ib-label">Target</div><div class="ib-val">Crypto keys, Passwords, Data</div></div>
+          <div class="info-box"><div class="ib-label">Observable Signal</div><div class="ib-val">Time, Power, Cache state, EM</div></div>
+        </div>
+        <div class="section-head">Timing Attack on Password Comparison</div>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">PYTHON</span><span>Vulnerable — Early Exit</span></div>
+<span class="kw">def</span> <span class="fn">check_password</span>(stored, attempt):
+    <span class="kw">for</span> i <span class="kw">in</span> range(len(stored)):
+<span class="danger-line">        <span class="kw">if</span> stored[i] != attempt[i]:    <span class="cm"># exits early!</span></span>
+<span class="danger-line">            <span class="kw">return</span> <span class="kw">False</span>               <span class="cm"># leaks how many chars matched</span></span>
+    <span class="kw">return</span> <span class="kw">True</span>
+
+<span class="cm"># Fix — constant-time comparison</span>
+<span class="kw">import</span> hmac
+<span class="fix-line"><span class="kw">def</span> <span class="fn">safe_check</span>(stored, attempt):</span>
+<span class="fix-line">    <span class="kw">return</span> hmac.<span class="fn">compare_digest</span>(stored, attempt)</span>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="tab3-exploit">
+        <div class="section-head">Timing Oracle Simulator</div>
+        <div class="scenario-box"><strong>Exercise:</strong> A login API returns slightly different response times based on how many characters of the password matched. Use the timing oracle to discover the 4-character PIN.</div>
+        <div class="sim-panel">
+          <h4>Timing Attack Interface</h4>
+          <p style="font-size:13px;color:var(--text2);margin-bottom:12px;">Enter a 4-character guess. The server response time reveals information about correct characters. Analyze patterns to deduce the PIN.</p>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <input type="text" id="pinGuess" maxlength="4" placeholder="XXXX" style="width:100px;font-family:var(--mono);font-size:18px;text-align:center;letter-spacing:6px;">
+            <button class="btn btn-primary" onclick="tryPin()">▶ Send Request</button>
+            <button class="btn btn-ghost" onclick="resetPinGame()">Reset</button>
+          </div>
+          <div class="terminal" id="pinTerm" style="min-height:120px;margin-top:10px;">
+            <span class="term-line term-out">Timing Oracle ready — try guessing the 4-char PIN</span>
+            <span class="term-line term-out">Hint: characters are digits 1–4 only</span>
+          </div>
+          <div style="margin-top:10px;">
+            <label>Attempts: <span id="pinAttempts" style="color:var(--accent-light);font-weight:700;">0</span></label>
+            <div id="pinSuccess" class="alert alert-success" style="display:none;margin-top:8px;">
+              <span class="alert-icon">🎯</span><div class="alert-content"><strong>PIN Cracked via Timing Attack!</strong> This demonstrates how response time leaks can reconstruct secrets character by character — classic side-channel oracle.</div>
+            </div>
+          </div>
+        </div>
+        <div class="section-head">Countermeasures</div>
+        <div class="grid-2">
+          <div class="alert alert-success"><span class="alert-icon">⏱️</span><div class="alert-content"><strong>Constant-Time Algorithms</strong>Use hmac.compare_digest() (Python), crypto/subtle.timingSafeEqual (Node.js). Never short-circuit secret comparisons.</div></div>
+          <div class="alert alert-info"><span class="alert-icon">🔀</span><div class="alert-content"><strong>Add Jitter</strong>Introduce random delays to mask timing signals. Ensure minimum response time is always met regardless of outcome.</div></div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="tab3-quiz">
+        <div class="section-head">Knowledge Check — 3 Questions (2 pts each)</div>
+        <div id="q3"></div>
+        <div class="btn-group"><button class="btn btn-primary" onclick="submitQuiz(3)" id="qbtn3">Submit Answers</button></div>
+        <div class="alert alert-success" id="qresult3" style="display:none;margin-top:12px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- MODULE 5: EOL SYSTEMS -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <div class="module-card" id="mod4">
+    <div class="module-header" onclick="toggleModule(4)">
+      <span class="module-num">05</span>
+      <div class="module-meta">
+        <div class="module-name">Unpatched Services & EOL Systems</div>
+        <div class="module-desc">End-of-life OS/software risks, patch management failures, and legacy system isolation strategies</div>
+      </div>
+      <span class="severity-tag sev-high">High</span>
+      <div class="module-status"><span class="status-badge pending" id="status4">Pending</span></div>
+      <span class="module-toggle" id="toggle4">▾</span>
+    </div>
+    <div class="module-body" id="body4">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab(4,'concept')">📖 Concept</button>
+        <button class="tab-btn" onclick="switchTab(4,'exploit')">⚡ Patch Audit</button>
+        <button class="tab-btn" onclick="switchTab(4,'quiz')">✅ Assessment</button>
+      </div>
+
+      <div class="tab-panel active" id="tab4-concept">
+        <div class="scenario-box"><strong>Scenario:</strong> A hospital network scan reveals Windows 7 workstations processing patient data. No security patches have been issued since January 2020. The system is fully connected to the internet and running outdated SMB services.</div>
+        <div class="section-head">EOL Software Status Dashboard</div>
+        <div style="border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:14px;">
+          <div style="background:var(--surface2);padding:8px 12px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text2);display:flex;justify-content:space-between;">
+            <span>System / Software</span><span>EOL Date</span><span>Status</span><span>Action Required</span>
+          </div>
+          <div class="eol-row"><span>Windows 7 SP1</span><span>Jan 14, 2020</span><span class="eol-chip eol-dead">⛔ EOL</span><span style="font-size:12px;">Migrate or air-gap</span></div>
+          <div class="eol-row"><span>Windows Server 2008 R2</span><span>Jan 14, 2020</span><span class="eol-chip eol-dead">⛔ EOL</span><span style="font-size:12px;">Migrate immediately</span></div>
+          <div class="eol-row"><span>Windows 10 22H2</span><span>Oct 14, 2025</span><span class="eol-chip eol-warn">⚠️ Expiring</span><span style="font-size:12px;">Upgrade to Win 11</span></div>
+          <div class="eol-row"><span>Windows 11 23H2</span><span>Nov 11, 2025</span><span class="eol-chip eol-warn">⚠️ Expiring</span><span style="font-size:12px;">Update to 24H2</span></div>
+          <div class="eol-row"><span>Windows 11 24H2</span><span>Oct 2026+</span><span class="eol-chip eol-live">✅ Supported</span><span style="font-size:12px;">Keep patched</span></div>
+          <div class="eol-row"><span>OpenSSL 1.0.2</span><span>Dec 31, 2019</span><span class="eol-chip eol-dead">⛔ EOL</span><span style="font-size:12px;">Upgrade to 3.x</span></div>
+          <div class="eol-row"><span>Apache 2.4.x (latest)</span><span>Active</span><span class="eol-chip eol-live">✅ Supported</span><span style="font-size:12px;">Apply monthly patches</span></div>
+          <div class="eol-row"><span>PHP 7.4</span><span>Nov 28, 2022</span><span class="eol-chip eol-dead">⛔ EOL</span><span style="font-size:12px;">Migrate to PHP 8.3+</span></div>
+        </div>
+        <div class="alert alert-danger"><span class="alert-icon">☢️</span><div class="alert-content"><strong>EternalBlue (MS17-010)</strong> exploits SMBv1 on unpatched Windows. WannaCry ransomware (2017) infected 200,000+ systems in 150 countries. EOL systems never received the MS17-010 patch.</div></div>
+      </div>
+
+      <div class="tab-panel" id="tab4-exploit">
+        <div class="section-head">Patch Gap Risk Calculator</div>
+        <div class="sim-panel">
+          <h4>Asset Risk Assessment</h4>
+          <div class="grid-2">
+            <div>
+              <label>Operating System</label>
+              <select id="eolOS" style="width:100%;margin-bottom:10px;">
+                <option value="win7">Windows 7 (EOL 2020)</option>
+                <option value="win10">Windows 10 22H2</option>
+                <option value="ws2008">Windows Server 2008 R2</option>
+                <option value="win11">Windows 11 24H2</option>
+                <option value="rhel7">RHEL 7 (EOL 2024)</option>
+              </select>
+              <label>Patch Lag (months behind)</label>
+              <select id="patchLag" style="width:100%;margin-bottom:10px;">
+                <option value="0">Up to date</option>
+                <option value="3">3 months</option>
+                <option value="6">6 months</option>
+                <option value="12">12 months</option>
+                <option value="24">24+ months</option>
+              </select>
+              <label>Network Exposure</label>
+              <select id="netExposure" style="width:100%;margin-bottom:10px;">
+                <option value="internet">Internet-facing</option>
+                <option value="dmz">DMZ</option>
+                <option value="internal">Internal only</option>
+                <option value="airgap">Air-gapped</option>
+              </select>
+              <button class="btn btn-primary" style="width:100%" onclick="calcEOLRisk()">Calculate Risk Score</button>
+            </div>
+            <div>
+              <div class="terminal" id="eolTerm" style="min-height:200px;">
+                <span class="term-line term-out">Configure asset properties and click Calculate Risk</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="section-head">Mitigation Strategy Matrix</div>
+        <ul class="checklist" id="eolChecklist">
+          <li onclick="checkItem('eolChecklist',0,true)"><span class="checklist-icon">☐</span> Segment EOL systems into isolated VLANs with strict firewall rules</li>
+          <li onclick="checkItem('eolChecklist',1,true)"><span class="checklist-icon">☐</span> Implement application whitelisting on EOL systems to restrict execution</li>
+          <li onclick="checkItem('eolChecklist',2,false)"><span class="checklist-icon">☐</span> Enable auto-updates on EOL software (updates no longer available — ineffective)</li>
+          <li onclick="checkItem('eolChecklist',3,true)"><span class="checklist-icon">☐</span> Deploy compensating controls: IDS/IPS monitoring for known EOL exploits</li>
+          <li onclick="checkItem('eolChecklist',4,true)"><span class="checklist-icon">☐</span> Create migration plan with target architecture and timeline for EOL replacement</li>
+        </ul>
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="checkEolList()">Check Answers</button>
+          <button class="btn btn-ghost" onclick="resetEolList()">Reset</button>
+        </div>
+        <div class="alert alert-success" id="eolFeedback" style="display:none;margin-top:10px;">
+          <span class="alert-icon">✅</span><div class="alert-content"><strong>Correct!</strong> Auto-updates are ineffective for EOL systems — no patches are issued. Segmentation, whitelisting, IDS monitoring, and a migration plan are the right compensating controls.</div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="tab4-quiz">
+        <div class="section-head">Knowledge Check — 3 Questions (2 pts each)</div>
+        <div id="q4"></div>
+        <div class="btn-group"><button class="btn btn-primary" onclick="submitQuiz(4)" id="qbtn4">Submit Answers</button></div>
+        <div class="alert alert-success" id="qresult4" style="display:none;margin-top:12px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- MODULE 6: INSECURE DATA STORAGE -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <div class="module-card" id="mod5">
+    <div class="module-header" onclick="toggleModule(5)">
+      <span class="module-num">06</span>
+      <div class="module-meta">
+        <div class="module-name">Insecure Data Storage</div>
+        <div class="module-desc">Cleartext credentials, weak encryption, unprotected databases, and mobile storage misconfigurations</div>
+      </div>
+      <span class="severity-tag sev-medium">Medium</span>
+      <div class="module-status"><span class="status-badge pending" id="status5">Pending</span></div>
+      <span class="module-toggle" id="toggle5">▾</span>
+    </div>
+    <div class="module-body" id="body5">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab(5,'concept')">📖 Concept</button>
+        <button class="tab-btn" onclick="switchTab(5,'exploit')">⚡ Storage Audit</button>
+        <button class="tab-btn" onclick="switchTab(5,'quiz')">✅ Assessment</button>
+      </div>
+
+      <div class="tab-panel active" id="tab5-concept">
+        <div class="scenario-box"><strong>Scenario:</strong> A mobile banking app stores authentication tokens in SharedPreferences (Android) without encryption. A physical device compromise or backup extraction exposes all customer tokens.</div>
+        <div class="section-head">Storage Vulnerability Map</div>
+        <div class="grid-2">
+          <div class="info-box">
+            <div class="ib-label">Mobile (Android)</div>
+            <div style="font-size:13px;margin-top:6px;display:flex;flex-direction:column;gap:4px;">
+              <span style="color:var(--danger)">⛔ SharedPreferences (plaintext)</span>
+              <span style="color:var(--danger)">⛔ SQLite without encryption</span>
+              <span style="color:var(--success)">✅ Android Keystore API</span>
+              <span style="color:var(--success)">✅ EncryptedSharedPreferences</span>
+            </div>
+          </div>
+          <div class="info-box">
+            <div class="ib-label">Web / Cloud</div>
+            <div style="font-size:13px;margin-top:6px;display:flex;flex-direction:column;gap:4px;">
+              <span style="color:var(--danger)">⛔ Passwords in localStorage</span>
+              <span style="color:var(--danger)">⛔ S3 bucket — public access</span>
+              <span style="color:var(--success)">✅ Secrets Manager (AWS/Azure)</span>
+              <span style="color:var(--success)">✅ AES-256 at rest + TLS in transit</span>
+            </div>
+          </div>
+        </div>
+        <div class="code-block" style="margin-top:12px;">
+          <div class="code-header"><span class="code-lang">KOTLIN</span><span>Android — Vulnerable vs Secure</span></div>
+<span class="cm">// ❌ VULNERABLE — plaintext SharedPreferences</span>
+<span class="danger-line"><span class="kw">val</span> prefs = getSharedPreferences(<span class="str">"auth"</span>, MODE_PRIVATE)</span>
+<span class="danger-line">prefs.edit().<span class="fn">putString</span>(<span class="str">"token"</span>, authToken).<span class="fn">apply</span>()</span>
+
+<span class="cm">// ✅ SECURE — EncryptedSharedPreferences</span>
+<span class="fix-line"><span class="kw">val</span> masterKey = MasterKey.Builder(context)</span>
+<span class="fix-line">    .<span class="fn">setKeyScheme</span>(MasterKey.KeyScheme.AES256_GCM).<span class="fn">build</span>()</span>
+<span class="fix-line"><span class="kw">val</span> prefs = EncryptedSharedPreferences.<span class="fn">create</span>(</span>
+<span class="fix-line">    context, <span class="str">"auth"</span>, masterKey,</span>
+<span class="fix-line">    AES256_SIV, AES256_GCM)</span>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="tab5-exploit">
+        <div class="section-head">Data Storage Security Auditor</div>
+        <div class="sim-panel">
+          <h4>Simulated Credential Store — Rate Each Entry</h4>
+          <p style="font-size:13px;color:var(--text2);margin-bottom:12px;">Classify each storage entry: <strong>Secure</strong>, <strong>Insecure</strong>, or <strong>Needs Review</strong>.</p>
+          <div id="storageItems">
+            <div class="storage-item" id="si0">
+              <div><span class="s-label">config.json → password</span><span class="s-val s-plaintext"> "Admin123!"</span></div>
+              <div style="display:flex;gap:6px;">
+                <button class="btn btn-sm btn-danger" onclick="rateStorage(0,'insecure')">Insecure</button>
+                <button class="btn btn-sm btn-success" onclick="rateStorage(0,'secure')">Secure</button>
+                <button class="btn btn-sm btn-ghost" onclick="rateStorage(0,'review')">Review</button>
+              </div>
+            </div>
+            <div class="storage-item" id="si1">
+              <div><span class="s-label">DB → passwords column</span><span class="s-val s-encrypted"> bcrypt($2b$12$...) </span></div>
+              <div style="display:flex;gap:6px;">
+                <button class="btn btn-sm btn-danger" onclick="rateStorage(1,'insecure')">Insecure</button>
+                <button class="btn btn-sm btn-success" onclick="rateStorage(1,'secure')">Secure</button>
+                <button class="btn btn-sm btn-ghost" onclick="rateStorage(1,'review')">Review</button>
+              </div>
+            </div>
+            <div class="storage-item" id="si2">
+              <div><span class="s-label">AWS S3 bucket</span><span class="s-val s-plaintext"> public-read ACL + no encryption</span></div>
+              <div style="display:flex;gap:6px;">
+                <button class="btn btn-sm btn-danger" onclick="rateStorage(2,'insecure')">Insecure</button>
+                <button class="btn btn-sm btn-success" onclick="rateStorage(2,'secure')">Secure</button>
+                <button class="btn btn-sm btn-ghost" onclick="rateStorage(2,'review')">Review</button>
+              </div>
+            </div>
+            <div class="storage-item" id="si3">
+              <div><span class="s-label">API Key → env variable</span><span class="s-val" style="color:var(--warn)"> process.env.API_KEY</span></div>
+              <div style="display:flex;gap:6px;">
+                <button class="btn btn-sm btn-danger" onclick="rateStorage(3,'insecure')">Insecure</button>
+                <button class="btn btn-sm btn-success" onclick="rateStorage(3,'secure')">Secure</button>
+                <button class="btn btn-sm btn-ghost" onclick="rateStorage(3,'review')">Review</button>
+              </div>
+            </div>
+            <div class="storage-item" id="si4">
+              <div><span class="s-label">Mobile → Android Keystore</span><span class="s-val s-encrypted"> AES-256-GCM</span></div>
+              <div style="display:flex;gap:6px;">
+                <button class="btn btn-sm btn-danger" onclick="rateStorage(4,'insecure')">Insecure</button>
+                <button class="btn btn-sm btn-success" onclick="rateStorage(4,'secure')">Secure</button>
+                <button class="btn btn-sm btn-ghost" onclick="rateStorage(4,'review')">Review</button>
+              </div>
+            </div>
+            <div class="storage-item" id="si5">
+              <div><span class="s-label">Browser localStorage</span><span class="s-val s-plaintext"> "jwt=eyJhbGci..."</span></div>
+              <div style="display:flex;gap:6px;">
+                <button class="btn btn-sm btn-danger" onclick="rateStorage(5,'insecure')">Insecure</button>
+                <button class="btn btn-sm btn-success" onclick="rateStorage(5,'secure')">Secure</button>
+                <button class="btn btn-sm btn-ghost" onclick="rateStorage(5,'review')">Review</button>
+              </div>
+            </div>
+          </div>
+          <div class="terminal" id="storageTerm" style="min-height:80px;margin-top:10px;">
+            <span class="term-line term-out">Rate each storage entry above — 6 items total</span>
+          </div>
+          <div id="storageScore" style="display:none;" class="alert alert-success"><span class="alert-icon">📊</span><div class="alert-content" id="storageFeedback"></div></div>
+          <div class="btn-group">
+            <button class="btn btn-primary" onclick="checkStorageAll()">Check All Ratings</button>
+            <button class="btn btn-ghost" onclick="resetStorage()">Reset</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="tab5-quiz">
+        <div class="section-head">Knowledge Check — 3 Questions (2 pts each)</div>
+        <div id="q5"></div>
+        <div class="btn-group"><button class="btn btn-primary" onclick="submitQuiz(5)" id="qbtn5">Submit Answers</button></div>
+        <div class="alert alert-success" id="qresult5" style="display:none;margin-top:12px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPLETION PANEL -->
+  <div class="completion-panel" id="completionPanel">
+    <div style="font-size:48px;margin-bottom:8px;">🏆</div>
+    <h2>VulnLab Complete!</h2>
+    <p style="font-size:16px;margin-top:4px;">Final Score: <strong id="finalScore" style="color:var(--success);font-size:22px;">0 / 60</strong></p>
+    <p style="margin-top:8px;">You have analyzed 6 critical vulnerability categories aligned to CompTIA Security+ SY0-701 Domain 4.</p>
+    <div id="completionMsg" style="margin-top:14px;font-size:14px;font-weight:600;"></div>
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// THEME
+// ═══════════════════════════════════════════════════════════════
+function toggleTheme() {
+  const html = document.documentElement;
+  html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULE TOGGLE
+// ═══════════════════════════════════════════════════════════════
+function toggleModule(n) {
+  const body = document.getElementById('body'+n);
+  const toggle = document.getElementById('toggle'+n);
+  const header = document.querySelector('#mod'+n+' .module-header');
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open');
+  toggle.classList.toggle('open');
+  header.classList.toggle('expanded');
+}
+
+function jumpTo(n) {
+  const card = document.getElementById('mod'+n);
+  card.scrollIntoView({ behavior:'smooth', block:'start' });
+  const body = document.getElementById('body'+n);
+  if (!body.classList.contains('open')) toggleModule(n);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TAB SWITCHING
+// ═══════════════════════════════════════════════════════════════
+function switchTab(modN, name) {
+  const panels = document.querySelectorAll(`[id^="tab${modN}-"]`);
+  panels.forEach(p => p.classList.remove('active'));
+  const btns = document.querySelectorAll(`#mod${modN} .tab-btn`);
+  btns.forEach(b => b.classList.remove('active'));
+  const panel = document.getElementById(`tab${modN}-${name}`);
+  if (panel) panel.classList.add('active');
+  const idx = ['concept','exploit','mitigate','quiz'].indexOf(name);
+  const allNames = ['concept','exploit','mitigate','quiz'];
+  btns.forEach((b,i) => {
+    const suffix = allNames[i] || ['concept','exploit','quiz'][i];
+    if(b.textContent.includes(name === 'quiz' ? 'Assessment' : name === 'concept' ? 'Concept' : name === 'exploit' ? 'Exploit' : 'Mitig')) b.classList.add('active');
+  });
+  // Re-handle active button by click target
+  event && event.target && (event.target.closest('.tab-btn')) && (()=>{
+    btns.forEach(b=>b.classList.remove('active'));
+    event.target.classList.add('active');
+  })();
+}
+
+// Simpler approach for tabs
+document.addEventListener('click', e => {
+  const btn = e.target.closest('.tab-btn');
+  if (!btn) return;
+  const tabsEl = btn.closest('.tabs');
+  if (!tabsEl) return;
+  tabsEl.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+});
+
+// ═══════════════════════════════════════════════════════════════
+// TERMINAL HELPER
+// ═══════════════════════════════════════════════════════════════
+function addLine(termId, text, cls='term-out') {
+  const term = document.getElementById(termId);
+  const span = document.createElement('span');
+  span.className = `term-line ${cls}`;
+  span.textContent = text;
+  term.appendChild(span);
+  term.scrollTop = term.scrollHeight;
+}
+function clearTerminal(id) {
+  document.getElementById(id).innerHTML = '';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULE 1 — PRIVESC
+// ═══════════════════════════════════════════════════════════════
+const privescScripts = {
+  suid: [
+    ['$', 'id', 'term-prompt'],
+    ['uid=33(www-data) gid=33(www-data) groups=33(www-data)', '', 'term-out'],
+    ['$', 'find / -perm -4000 -type f 2>/dev/null', 'term-prompt'],
+    ['/usr/bin/find  ← SUID BIT SET ON find!', '', 'term-warn'],
+    ['$', '/usr/bin/find . -exec /bin/sh -p \\; -quit', 'term-prompt'],
+    ['# id   ← now running as root!', '', 'term-err'],
+    ['uid=0(root) gid=0(root) groups=0(root)', '', 'term-err'],
+    ['PRIVILEGE ESCALATION SUCCESSFUL — root shell obtained', '', 'term-err'],
+  ],
+  sudo: [
+    ['$', 'sudo -l', 'term-prompt'],
+    ['User contractor may run: (ALL) NOPASSWD: /bin/bash', '', 'term-warn'],
+    ['$', 'sudo /bin/bash', 'term-prompt'],
+    ['# id', '', 'term-err'],
+    ['uid=0(root) gid=0(root) groups=0(root)', '', 'term-err'],
+    ['SUDO MISCONFIGURATION EXPLOITED — instant root', '', 'term-err'],
+  ],
+  kernel: [
+    ['$', 'uname -r', 'term-prompt'],
+    ['4.4.0-21-generic  ← VULNERABLE to CVE-2016-5195 (Dirty COW)', '', 'term-warn'],
+    ['$', 'gcc -pthread dirty_cow.c -o dirty_cow', 'term-prompt'],
+    ['Compiling exploit...', '', 'term-out'],
+    ['$', './dirty_cow /etc/passwd $(python3 -c "print(\'root::0:0::/root:/bin/bash\')")', 'term-prompt'],
+    ['[*] Modifying /etc/passwd via Dirty COW race...', '', 'term-warn'],
+    ['[+] Root added! Running su root', '', 'term-err'],
+    ['# KERNEL EXPLOIT SUCCESSFUL — root via COW race condition', '', 'term-err'],
+  ],
+  path: [
+    ['$', 'echo $PATH', 'term-prompt'],
+    ['/tmp:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin', '', 'term-warn'],
+    ['  ← /tmp is FIRST in PATH!', '', 'term-warn'],
+    ['$', 'cat /usr/local/bin/backup.sh', 'term-prompt'],
+    ['#!/bin/bash  →  tar czf /backup.tgz /home  (calls tar without full path)', '', 'term-out'],
+    ['$', 'echo "/bin/bash" > /tmp/tar && chmod +x /tmp/tar', 'term-prompt'],
+    ['$', 'sudo /usr/local/bin/backup.sh', 'term-prompt'],
+    ['# PATH HIJACK SUCCESS — /tmp/tar ran as root', '', 'term-err'],
+  ]
+};
+
+function runPrivesc() {
+  const target = document.getElementById('privTarget').value;
+  clearTerminal('privTerm');
+  const script = privescScripts[target];
+  let delay = 0;
+  script.forEach(([text, cmd, cls]) => {
+    setTimeout(() => {
+      if (cls === 'term-prompt') addLine('privTerm', '$ ' + text, cls);
+      else addLine('privTerm', text, cls);
+    }, delay);
+    delay += 380;
+  });
+}
+
+// SUDO CHECKLIST
+const correctSudo = [true, false, true, false];
+let sudoDone = false;
+function checkSudoList() {
+  if (sudoDone) return;
+  const items = document.querySelectorAll('#sudoChecklist li');
+  let allCorrect = true;
+  items.forEach((li, i) => {
+    const checked = li.classList.contains('checked') || li.classList.contains('wrong');
+    const isSelected = li.querySelector('.checklist-icon').textContent === '☑';
+    // check by class
+    const sel = li.dataset.selected === 'true';
+    if (sel !== correctSudo[i]) allCorrect = false;
+  });
+  document.getElementById('sudoFeedback').style.display = 'flex';
+  if (allCorrect) markModuleComplete(0);
+}
+
+function checkItem(listId, idx, isRisk) {
+  const items = document.querySelectorAll(`#${listId} li`);
+  const li = items[idx];
+  const icon = li.querySelector('.checklist-icon');
+  if (li.dataset.selected === 'true') {
+    li.dataset.selected = 'false';
+    li.classList.remove('checked','wrong');
+    icon.textContent = '☐';
+  } else {
+    li.dataset.selected = 'true';
+    icon.textContent = '☑';
+  }
+}
+
+function resetSudoList() {
+  const items = document.querySelectorAll('#sudoChecklist li');
+  items.forEach(li => { li.dataset.selected='false'; li.classList.remove('checked','wrong'); li.querySelector('.checklist-icon').textContent='☐'; });
+  document.getElementById('sudoFeedback').style.display = 'none';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULE 2 — TOCTOU
+// ═══════════════════════════════════════════════════════════════
+let raceAnim = null;
+function updateWindow() {
+  document.getElementById('windowLabel').textContent = document.getElementById('windowSlider').value + 'ms';
+}
+
+function runRace() {
+  const window_ms = parseInt(document.getElementById('windowSlider').value);
+  clearTerminal('raceTerm');
+  document.getElementById('legitBar').style.width = '0%';
+  document.getElementById('atkBar').style.width = '0%';
+  document.getElementById('legitBar').textContent = '';
+  document.getElementById('atkBar').textContent = '';
+
+  addLine('raceTerm', '[T+0ms] Legitimate thread: CHECK — balance = $500', 'term-out');
+
+  setTimeout(() => {
+    document.getElementById('legitBar').style.width = '30%';
+    document.getElementById('legitBar').textContent = 'CHECK (balance=$500)';
+    if (window_ms > 30) {
+      addLine('raceTerm', `[T+${Math.round(window_ms*0.4)}ms] RACE WINDOW OPEN — attacker thread injected!`, 'term-warn');
+    }
+  }, 300);
+
+  setTimeout(() => {
+    document.getElementById('atkBar').style.width = '60%';
+    document.getElementById('atkBar').textContent = 'RACE: withdraw $500';
+    if (window_ms > 30) addLine('raceTerm', `[T+${window_ms}ms] Attacker thread executes withdrawal — $500 deducted!`, 'term-err');
+  }, 300 + window_ms * 5);
+
+  setTimeout(() => {
+    document.getElementById('legitBar').style.width = '90%';
+    document.getElementById('legitBar').textContent = 'USE (stale balance!)';
+    if (window_ms > 30) {
+      addLine('raceTerm', `[T+${window_ms+50}ms] Legit thread: USE — withdraws AGAIN using stale balance!`, 'term-err');
+      addLine('raceTerm', '⚠ DOUBLE SPEND! Account now at -$500. TOCTOU EXPLOIT SUCCEEDED.', 'term-err');
+    } else {
+      addLine('raceTerm', `Window too small (${window_ms}ms) — threads did not race. Try a larger window.`, 'term-out');
+    }
+  }, 300 + window_ms * 5 + 400);
+}
+
+function runAtomicFix() {
+  clearTerminal('raceTerm');
+  document.getElementById('legitBar').style.width = '0%';
+  document.getElementById('atkBar').style.width = '0%';
+  addLine('raceTerm', '[T+0ms] BEGIN TRANSACTION; — row lock acquired', 'term-out');
+  setTimeout(() => { document.getElementById('legitBar').style.width='50%'; document.getElementById('legitBar').textContent='LOCKED ROW'; addLine('raceTerm','[T+10ms] SELECT balance FOR UPDATE — balance = $500 (locked)', 'term-out'); }, 300);
+  setTimeout(() => { document.getElementById('atkBar').style.width='30%'; document.getElementById('atkBar').textContent='BLOCKED'; addLine('raceTerm','[T+15ms] Attacker thread: BLOCKED — row is locked by transaction', 'term-warn'); }, 600);
+  setTimeout(() => { document.getElementById('legitBar').style.width='100%'; document.getElementById('legitBar').textContent='COMMIT'; addLine('raceTerm','[T+20ms] COMMIT; — withdrawal applied atomically. No race window existed.','term-out'); addLine('raceTerm', '✅ ATOMIC OPERATION — TOCTOU PREVENTED', 'term-out'); markModuleComplete(1); }, 1200);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULE 3 — BUFFER OVERFLOW
+// ═══════════════════════════════════════════════════════════════
+function updateBuffer() {
+  const val = parseInt(document.getElementById('bufSlider').value);
+  document.getElementById('bufLen').textContent = val;
+  const viz = document.getElementById('bufViz');
+  viz.innerHTML = '';
+
+  // 8 buffer cells + 2 EBP + 2 EIP = 12 total
+  const labels = ['buf[0]','buf[1]','buf[2]','buf[3]','buf[4]','buf[5]','buf[6]','buf[7]','EBP+0','EBP+1','EIP+0','EIP+1'];
+  for (let i = 0; i < 12; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'buf-cell';
+    if (i < 8) {
+      // buffer cells — 0-64 maps to 0-8
+      const fillAt = Math.floor(val / 12.5);
+      if (i < fillAt) { cell.className += ' buf-data'; cell.textContent = '41'; }
+      else { cell.className += ' buf-empty'; cell.textContent = '00'; }
+    } else if (i < 10) {
+      const fillAt = Math.floor(val / 12.5);
+      if (fillAt > 8) { cell.className += ' buf-overflow'; cell.textContent = '41'; }
+      else { cell.className += ' buf-empty'; cell.textContent = '00'; }
+    } else {
+      const fillAt = Math.floor(val / 12.5);
+      if (fillAt > 10) { cell.className += ' buf-ret'; cell.textContent = 'DE AD'; }
+      else { cell.className += ' buf-empty'; cell.textContent = '00'; }
+    }
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText='display:flex;flex-direction:column;align-items:center;';
+    wrapper.appendChild(cell);
+    const lbl = document.createElement('div');
+    lbl.className='buf-label'; lbl.textContent=labels[i];
+    wrapper.appendChild(lbl);
+    viz.appendChild(wrapper);
+  }
+
+  const term = document.getElementById('bufTerm');
+  term.innerHTML = '';
+  const fillAt = Math.floor(val / 12.5);
+  if (val === 0) addLine('bufTerm','Buffer empty — input: 0 bytes','term-out');
+  else if (fillAt <= 8) addLine('bufTerm',`[OK] ${val} bytes written — within buffer bounds (max 64 bytes)`,'term-out');
+  else if (fillAt <= 10) addLine('bufTerm',`[⚠️ OVERFLOW] ${val} bytes — EBP overwritten! Stack corruption detected`,'term-warn');
+  else { addLine('bufTerm',`[💥 EXPLOIT] ${val} bytes — EIP overwritten! Attacker controls instruction pointer`,'term-err'); addLine('bufTerm','Shellcode execution redirected to attacker payload address 0xDEADBEEF','term-err'); }
+}
+
+// Initialize buffer viz
+updateBuffer();
+
+// BUF CHECKLIST
+const correctBuf = [true, true, true, false, true];
+function checkBufList() {
+  const items = document.querySelectorAll('#bufChecklist li');
+  let allCorrect = true;
+  items.forEach((li, i) => {
+    const sel = li.dataset.selected === 'true';
+    if (sel !== correctBuf[i]) allCorrect = false;
+  });
+  document.getElementById('bufFeedback').style.display = 'flex';
+  if (allCorrect) markModuleComplete(2);
+}
+function resetBufList() {
+  const items = document.querySelectorAll('#bufChecklist li');
+  items.forEach(li => { li.dataset.selected='false'; li.classList.remove('checked','wrong'); li.querySelector('.checklist-icon').textContent='☐'; });
+  document.getElementById('bufFeedback').style.display='none';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULE 4 — SIDE CHANNEL / TIMING ORACLE
+// ═══════════════════════════════════════════════════════════════
+const secretPin = '2413';
+let pinAttempts = 0;
+let pinSolved = false;
+
+function tryPin() {
+  if (pinSolved) return;
+  const guess = document.getElementById('pinGuess').value.trim();
+  if (guess.length !== 4) { addLine('pinTerm','Enter exactly 4 characters','term-warn'); return; }
+  pinAttempts++;
+  document.getElementById('pinAttempts').textContent = pinAttempts;
+
+  // Simulate timing oracle: add 80ms per correct leading char
+  let correct = 0;
+  for (let i = 0; i < 4; i++) {
+    if (guess[i] === secretPin[i]) correct++;
+    else break;
+  }
+  const fakeTime = 12 + correct * 78 + Math.floor(Math.random()*8);
+
+  addLine('pinTerm', `$ POST /login pin=${guess}`, 'term-prompt');
+  setTimeout(() => {
+    if (guess === secretPin) {
+      addLine('pinTerm', `HTTP 200 OK  [${fakeTime}ms]  → Authentication Successful!`, 'term-out');
+      addLine('pinTerm', `>>> PIN CRACKED: ${secretPin} after ${pinAttempts} attempts <<<`, 'term-err');
+      document.getElementById('pinSuccess').style.display='flex';
+      pinSolved = true;
+      markModuleComplete(3);
+    } else {
+      addLine('pinTerm', `HTTP 401 Unauthorized  [${fakeTime}ms]  (${correct} char(s) matched — timing leak!)`, correct > 0 ? 'term-warn' : 'term-out');
+      if (correct > 0) addLine('pinTerm', `  ↑ HINT: Response took ${fakeTime}ms — ${correct} leading character(s) correct`, 'term-warn');
+    }
+  }, fakeTime);
+}
+
+function resetPinGame() {
+  pinAttempts = 0; pinSolved = false;
+  document.getElementById('pinAttempts').textContent = '0';
+  document.getElementById('pinGuess').value = '';
+  document.getElementById('pinSuccess').style.display = 'none';
+  clearTerminal('pinTerm');
+  addLine('pinTerm','Timing Oracle reset — try a new set of guesses','term-out');
+  addLine('pinTerm','Hint: characters are digits 1–4 only','term-out');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULE 5 — EOL RISK CALC
+// ═══════════════════════════════════════════════════════════════
+function calcEOLRisk() {
+  const os = document.getElementById('eolOS').value;
+  const lag = parseInt(document.getElementById('patchLag').value);
+  const exp = document.getElementById('netExposure').value;
+  clearTerminal('eolTerm');
+
+  const osRisk = { win7:40, ws2008:45, win10:15, win11:5, rhel7:25 }[os];
+  const lagRisk = { 0:0, 3:10, 6:20, 12:35, 24:50 }[lag];
+  const expRisk = { internet:40, dmz:25, internal:10, airgap:0 }[exp];
+  const total = Math.min(100, osRisk + lagRisk + expRisk);
+
+  const riskLabel = total > 75 ? 'CRITICAL' : total > 50 ? 'HIGH' : total > 25 ? 'MEDIUM' : 'LOW';
+  const cls = total > 75 ? 'term-err' : total > 50 ? 'term-warn' : 'term-out';
+
+  addLine('eolTerm', '=== EOL RISK ASSESSMENT ===', 'term-prompt');
+  addLine('eolTerm', `OS Base Risk:        +${osRisk} pts`, 'term-out');
+  addLine('eolTerm', `Patch Lag Risk:      +${lagRisk} pts`, 'term-out');
+  addLine('eolTerm', `Exposure Risk:       +${expRisk} pts`, 'term-out');
+  addLine('eolTerm', '─────────────────────────────', 'term-out');
+  addLine('eolTerm', `TOTAL RISK SCORE:    ${total}/100 — ${riskLabel}`, cls);
+
+  if (total > 75) {
+    addLine('eolTerm', '[ACTION] Immediate isolation required!', 'term-err');
+    addLine('eolTerm', '[ACTION] Begin emergency migration plan', 'term-err');
+  } else if (total > 50) {
+    addLine('eolTerm', '[ACTION] Schedule patch or migration within 30 days', 'term-warn');
+    addLine('eolTerm', '[ACTION] Apply compensating controls now', 'term-warn');
+  } else if (total > 0) {
+    addLine('eolTerm', '[INFO] Monitor and plan upgrade', 'term-out');
+  } else {
+    addLine('eolTerm', '[OK] Air-gapped / up-to-date — maintain posture', 'term-out');
+  }
+  if (total < 50) markModuleComplete(4);
+}
+
+const correctEol = [true, true, false, true, true];
+function checkEolList() {
+  document.getElementById('eolFeedback').style.display='flex';
+  markModuleComplete(4);
+}
+function resetEolList() {
+  const items = document.querySelectorAll('#eolChecklist li');
+  items.forEach(li => { li.dataset.selected='false'; li.classList.remove('checked','wrong'); li.querySelector('.checklist-icon').textContent='☐'; });
+  document.getElementById('eolFeedback').style.display='none';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULE 6 — STORAGE AUDIT
+// ═══════════════════════════════════════════════════════════════
+// Correct ratings: insecure, secure, insecure, review, secure, insecure
+const correctStorage = ['insecure','secure','insecure','review','secure','insecure'];
+const storageRatings = new Array(6).fill(null);
+
+function rateStorage(idx, rating) {
+  storageRatings[idx] = rating;
+  const si = document.getElementById('si'+idx);
+  si.style.borderColor = rating === 'insecure' ? 'var(--danger)' : rating === 'secure' ? 'var(--success)' : 'var(--warn)';
+  clearTerminal('storageTerm');
+  addLine('storageTerm', `Item ${idx+1} rated: ${rating.toUpperCase()}`, 'term-out');
+  const rated = storageRatings.filter(r=>r!==null).length;
+  addLine('storageTerm', `${rated}/6 items rated`, 'term-out');
+}
+
+function checkStorageAll() {
+  const rated = storageRatings.filter(r=>r!==null).length;
+  if (rated < 6) { clearTerminal('storageTerm'); addLine('storageTerm',`Rate all 6 items first (${rated}/6 done)`,'term-warn'); return; }
+  let correct = 0;
+  storageRatings.forEach((r,i) => { if(r===correctStorage[i]) correct++; });
+  const fb = document.getElementById('storageFeedback');
+  const panel = document.getElementById('storageScore');
+  fb.innerHTML = `<strong>Score: ${correct}/6 correct.</strong> `;
+  if (correct === 6) fb.innerHTML += 'Perfect! All storage entries correctly classified.';
+  else fb.innerHTML += `Review: config.json passwords, S3 public buckets, and browser localStorage JWTs are all insecure. Env variables need review (better than hardcode, but use Secrets Manager). Android Keystore and bcrypt hashes are secure.`;
+  panel.style.display = 'flex';
+  if (correct >= 4) markModuleComplete(5);
+}
+
+function resetStorage() {
+  storageRatings.fill(null);
+  for(let i=0;i<6;i++) document.getElementById('si'+i).style.borderColor='';
+  document.getElementById('storageScore').style.display='none';
+  clearTerminal('storageTerm');
+  addLine('storageTerm','Rate each storage entry above — 6 items total','term-out');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// QUIZ ENGINE
+// ═══════════════════════════════════════════════════════════════
+const quizData = [
+  // Module 0 — Privesc
+  [
+    { q: 'What does the SUID bit on a binary mean?', opts: ['The binary can only be run by root','The binary runs with the permissions of its owner, regardless of who executes it','The binary is encrypted','The binary cannot be modified'], ans: 1 },
+    { q: 'Which sudoers entry presents the HIGHEST privilege escalation risk?', opts: ['user ALL=(root) /usr/bin/systemctl restart nginx','user ALL=(ALL) NOPASSWD: /bin/bash','user ALL=(www-data) /usr/bin/rsync','user ALL=(ALL) /usr/bin/apt update'], ans: 1 },
+    { q: 'Which mitigation best addresses kernel privilege escalation vulnerabilities?', opts: ['Disabling SSH','Applying kernel security patches promptly and enabling kernel hardening (seccomp, AppArmor)','Increasing password complexity','Enabling full disk encryption'], ans: 1 },
+  ],
+  // Module 1 — TOCTOU
+  [
+    { q: 'TOCTOU stands for:', opts: ['Transfer-Of-Control Timing-Of-Use','Time-Of-Check to Time-Of-Use','Token-Of-Compromise Trojan-Of-User','Time-On-CPU Thread-Of-Utilization'], ans: 1 },
+    { q: 'Which programming technique BEST prevents TOCTOU file race conditions?', opts: ['Using global variables','Opening files with O_RDONLY','Using atomic file operations and locks (e.g., flock, transactions)','Checking file permissions before every read'], ans: 2 },
+    { q: 'A symlink attack exploiting TOCTOU would most likely target:', opts: ['A network packet','A temporary file created by a privileged process in /tmp','A hardware interrupt','A DNS record'], ans: 1 },
+  ],
+  // Module 2 — Buffer Overflow
+  [
+    { q: 'What memory region does a classic stack buffer overflow target?', opts: ['The heap','The .data segment','The return address (EIP/RIP) on the call stack','The BSS segment'], ans: 2 },
+    { q: 'Which C function is SAFEST for copying strings?', opts: ['strcpy()','gets()','sprintf()','strncpy() with explicit size limit or strlcpy()'], ans: 3 },
+    { q: 'ASLR (Address Space Layout Randomization) defends against buffer overflows by:', opts: ['Preventing all writes to memory','Randomizing where code, stack, and heap are loaded, making return addresses unpredictable','Encrypting the stack','Disabling executable memory regions'], ans: 1 },
+  ],
+  // Module 3 — Side Channel
+  [
+    { q: 'Spectre and Meltdown are examples of:', opts: ['SQL injection attacks','Buffer overflow exploits','Hardware side-channel attacks exploiting speculative execution','Cross-site scripting attacks'], ans: 2 },
+    { q: 'A timing side-channel attack on a login function works because:', opts: ['The server logs all passwords','An early-exit comparison leaks how many characters matched via response time differences','The password is sent in cleartext','The server uses MD5 hashing'], ans: 1 },
+    { q: 'What is the correct defense against timing-based side-channel attacks on secret comparisons?', opts: ['Use longer passwords','Use constant-time comparison functions like hmac.compare_digest()','Encrypt the comparison function','Add more server threads'], ans: 1 },
+  ],
+  // Module 4 — EOL
+  [
+    { q: 'EternalBlue (MS17-010) was particularly dangerous for EOL systems because:', opts: ['It only affects Linux systems','EOL systems never received the security patch that fixed the SMBv1 vulnerability','It required physical access','It only worked on air-gapped networks'], ans: 1 },
+    { q: 'When an organization CANNOT immediately replace an EOL system, the BEST compensating control is:', opts: ['Disabling antivirus to improve performance','Connecting it directly to the internet for vendor support','Network segmentation with strict firewall rules and IDS/IPS monitoring','Increasing the account password complexity'], ans: 2 },
+    { q: 'Enabling auto-updates on a Windows 7 system is ineffective because:', opts: ['Auto-updates require a subscription','Microsoft no longer issues security patches for EOL operating systems','Auto-updates only work on servers','Windows 7 has too many vulnerabilities to patch'], ans: 1 },
+  ],
+  // Module 5 — Storage
+  [
+    { q: 'Which storage method is MOST secure for API keys in a cloud application?', opts: ['Hardcoded in source code','Stored in a .env file committed to git','Retrieved at runtime from a secrets manager (AWS Secrets Manager, HashiCorp Vault)','Stored in browser localStorage'], ans: 2 },
+    { q: 'Storing passwords as bcrypt hashes (with appropriate work factor) is preferred because:', opts: ['bcrypt is faster than MD5','bcrypt is a deliberately slow, salted hashing algorithm that resists brute-force and rainbow table attacks','bcrypt is reversible for account recovery','bcrypt compresses data'], ans: 1 },
+    { q: 'Why is storing a JWT authentication token in browser localStorage a security risk?', opts: ['localStorage is too slow','localStorage has a size limit','localStorage is accessible to any JavaScript on the page, making it vulnerable to XSS attacks','JWTs are always encrypted'], ans: 2 },
+  ],
+];
+
+const userAnswers = [new Array(3).fill(null), new Array(3).fill(null), new Array(3).fill(null), new Array(3).fill(null), new Array(3).fill(null), new Array(3).fill(null)];
+let scores = [0,0,0,0,0,0];
+
+function renderQuiz(modN) {
+  const container = document.getElementById('q'+modN);
+  if (!container || container.innerHTML) return;
+  let html = '';
+  quizData[modN].forEach((q, qi) => {
+    html += `<div style="margin-bottom:18px;"><p style="font-size:14px;font-weight:600;margin-bottom:10px;">${qi+1}. ${q.q}</p>`;
+    q.opts.forEach((opt, oi) => {
+      html += `<div class="quiz-option" id="q${modN}o${qi}-${oi}" onclick="selectOption(${modN},${qi},${oi})">${opt}</div>`;
+    });
+    html += `</div>`;
+  });
+  container.innerHTML = html;
+}
+
+function selectOption(modN, qi, oi) {
+  if (userAnswers[modN][qi] !== null && document.querySelector(`#q${modN}o${qi}-0`).classList.contains('disabled')) return;
+  userAnswers[modN][qi] = oi;
+  // clear row
+  quizData[modN][qi].opts.forEach((_, i) => {
+    const el = document.getElementById(`q${modN}o${qi}-${i}`);
+    el.classList.remove('correct','incorrect');
+    el.style.opacity = i === oi ? '1' : '0.6';
+  });
+  document.getElementById(`q${modN}o${qi}-${oi}`).style.opacity = '1';
+  document.getElementById(`q${modN}o${qi}-${oi}`).style.borderColor = 'var(--accent-light)';
+}
+
+function submitQuiz(modN) {
+  let score = 0;
+  const results = [];
+  quizData[modN].forEach((q, qi) => {
+    const ans = userAnswers[modN][qi];
+    const correct = q.ans;
+    quizData[modN][qi].opts.forEach((_, oi) => {
+      const el = document.getElementById(`q${modN}o${qi}-${oi}`);
+      if (!el) return;
+      el.classList.add('disabled');
+      if (oi === correct) el.classList.add('correct');
+      else if (oi === ans && ans !== correct) el.classList.add('incorrect');
+    });
+    if (ans === correct) score++;
+    results.push(ans === correct ? '✅' : '❌');
+  });
+
+  const pts = score * 2;
+  scores[modN] = pts;
+  updateGlobalScore();
+
+  const result = document.getElementById('qresult'+modN);
+  result.innerHTML = `<span class="alert-icon">${score===3?'🏆':score>=2?'✅':'📚'}</span><div class="alert-content"><strong>${score}/3 correct — ${pts} points earned</strong>${score<3?' Review the concept tab for missed questions.':' Excellent work!'}</div>`;
+  result.style.display='flex';
+  result.className = score>=2 ? 'alert alert-success' : 'alert alert-warn';
+
+  document.getElementById('qbtn'+modN).disabled = true;
+  document.getElementById('qbtn'+modN).style.opacity='0.5';
+
+  if (score >= 2) markModuleComplete(modN);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SCORING & COMPLETION
+// ═══════════════════════════════════════════════════════════════
+const moduleComplete = [false,false,false,false,false,false];
+
+function markModuleComplete(n) {
+  if (moduleComplete[n]) return;
+  moduleComplete[n] = true;
+  document.getElementById('status'+n).textContent = '✓ Complete';
+  document.getElementById('status'+n).className = 'status-badge complete';
+  document.getElementById('pb'+n).className = 'pb-step done';
+  scores[n] = Math.max(scores[n], 6); // minimum 6 pts on completion
+  updateGlobalScore();
+  checkAllComplete();
+}
+
+function updateGlobalScore() {
+  const total = scores.reduce((a,b)=>a+b,0);
+  document.getElementById('globalScore').textContent = total;
+}
+
+function checkAllComplete() {
+  if (moduleComplete.every(Boolean)) {
+    const total = scores.reduce((a,b)=>a+b,0);
+    document.getElementById('finalScore').textContent = `${total} / 60`;
+    document.getElementById('completionMsg').textContent = total >= 50 ? '🌟 Outstanding — Expert Level Performance' : total >= 36 ? '👍 Proficient — Strong foundational understanding' : '📖 Keep studying — review the concept tabs for missed material';
+    document.getElementById('completionPanel').classList.add('show');
+    document.getElementById('completionPanel').scrollIntoView({behavior:'smooth'});
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  // Render all quizzes
+  for(let i=0;i<6;i++) renderQuiz(i);
+  // Progress bar active state
+  document.getElementById('pb0').className='pb-step active';
+});
+
+// Lazy render quizzes when modules open
+const origToggle = window.toggleModule;
+window.toggleModule = function(n) {
+  origToggle(n);
+  renderQuiz(n);
+};
+</script>
+</body>
+</html>
