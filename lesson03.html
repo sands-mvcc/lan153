@@ -448,6 +448,212 @@ header {
 .callout-amber strong { color: var(--amber); }
 
 /* =============================================
+   INSTRUCTIONAL ILLUSTRATIONS CARDS
+   ============================================= */
+.illus-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+.illus-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.illus-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+.illus-card-header {
+  background: linear-gradient(135deg, var(--green-dark) 0%, var(--green-mid) 100%);
+  padding: 18px 20px 14px;
+  position: relative;
+  min-height: 90px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.illus-card-num {
+  position: absolute;
+  top: 12px; right: 14px;
+  font-size: 2rem; font-weight: 900;
+  color: rgba(255,255,255,0.12);
+  line-height: 1;
+}
+.illus-card-icon {
+  font-size: 1.6rem;
+  margin-bottom: 6px;
+}
+.illus-card-title {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.3;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.illus-card-body {
+  padding: 16px 20px;
+  flex: 1;
+}
+.illus-card-desc {
+  font-size: 0.84rem;
+  color: var(--text-mid);
+  line-height: 1.55;
+  margin-bottom: 16px;
+}
+.illus-card-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.btn-open-graphic {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--green-dark);
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s, transform 0.15s;
+}
+.btn-open-graphic:hover {
+  background: var(--green);
+  transform: translateY(-1px);
+  text-decoration: none;
+  color: #fff;
+}
+.btn-download-graphic {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-soft);
+  color: var(--green-dark);
+  border: 1px solid var(--border-dark);
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s, border-color 0.2s;
+}
+.btn-download-graphic:hover {
+  background: var(--green-pale);
+  border-color: var(--green);
+  text-decoration: none;
+  color: var(--green-dark);
+}
+
+/* =============================================
+   INTERACTIVE LABS CARDS
+   ============================================= */
+.labs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 18px;
+}
+.lab-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.lab-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+.lab-card-header {
+  background: linear-gradient(135deg, #0d47a1 0%, #1565c0 100%);
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.lab-card-icon-wrap {
+  width: 38px; height: 38px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+.lab-card-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.3;
+}
+.lab-badge {
+  display: inline-block;
+  background: rgba(255,255,255,0.18);
+  border: 1px solid rgba(255,255,255,0.28);
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 4px;
+}
+.lab-card-body {
+  padding: 14px 18px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.lab-card-desc {
+  font-size: 0.83rem;
+  color: var(--text-mid);
+  line-height: 1.55;
+  flex: 1;
+  margin-bottom: 14px;
+}
+.btn-open-lab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  padding: 9px 16px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s, transform 0.15s;
+  align-self: flex-start;
+}
+.btn-open-lab:hover {
+  background: #0d47a1;
+  transform: translateY(-1px);
+  text-decoration: none;
+  color: #fff;
+}
+[data-theme="dark"] .btn-open-lab {
+  background: #1976d2;
+}
+[data-theme="dark"] .btn-open-lab:hover {
+  background: #1565c0;
+}
+
+/* =============================================
    ACTIVITY COMMON
    ============================================= */
 .activity-box {
@@ -492,7 +698,6 @@ header {
 
 /* =============================================
    ACTIVITY 1 — THREAT ACTOR MATCHER
-   drag pool + drop zones
    ============================================= */
 .drag-pool {
   display: flex; flex-wrap: wrap; gap: 10px;
@@ -653,6 +858,9 @@ header {
   .topic-grid, .topic-grid-3, .malware-grid, .drop-zones-4 { grid-template-columns: 1fr; }
   .flip-grid { grid-template-columns: 1fr; }
   .se-grid { grid-template-columns: 1fr 1fr; }
+  .illus-grid { grid-template-columns: 1fr; }
+  .labs-grid  { grid-template-columns: 1fr; }
+  .illus-card-actions { flex-direction: column; }
 }
 @media (max-width: 500px) {
   .se-grid { grid-template-columns: 1fr; }
@@ -850,6 +1058,290 @@ header {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================
+       TOPIC INSTRUCTIONAL ILLUSTRATIONS
+       ============================================================ -->
+  <div class="section-gap">
+    <div class="section-label">Topic Instructional Illustrations — Click to Explore</div>
+    <div class="illus-grid">
+
+      <!-- Card 1 -->
+      <div class="illus-card">
+        <div class="illus-card-header">
+          <div class="illus-card-num">01</div>
+          <div class="illus-card-icon">🏛</div>
+          <div class="illus-card-title">Cybersecurity Threat Actors &amp; Motivations</div>
+        </div>
+        <div class="illus-card-body">
+          <div class="illus-card-desc">Who are they, and what drives their actions? Explore nation-states, organized criminals, hacktivists, insiders, and script kiddies — mapped to their motivations and capabilities.</div>
+          <div class="illus-card-actions">
+            <a class="btn-open-graphic" href="lesson03-part01.png" target="_blank" rel="noopener">
+              🖼 Open Graphic
+            </a>
+            <a class="btn-download-graphic" href="lesson03-part01.png" download="lesson03-part01.png">
+              ⬇ Download
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="illus-card">
+        <div class="illus-card-header">
+          <div class="illus-card-num">02</div>
+          <div class="illus-card-icon">🎭</div>
+          <div class="illus-card-title">Understanding Social Engineering Attacks</div>
+        </div>
+        <div class="illus-card-body">
+          <div class="illus-card-desc">Distinguishing common tactics and recognizing indicators of deception — phishing, vishing, smishing, pretexting, baiting, and the psychological principles attackers exploit.</div>
+          <div class="illus-card-actions">
+            <a class="btn-open-graphic" href="lesson03-part02.png" target="_blank" rel="noopener">
+              🖼 Open Graphic
+            </a>
+            <a class="btn-download-graphic" href="lesson03-part02.png" download="lesson03-part02.png">
+              ⬇ Download
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="illus-card">
+        <div class="illus-card-header">
+          <div class="illus-card-num">03</div>
+          <div class="illus-card-icon">🔑</div>
+          <div class="illus-card-title">Password Attacks &amp; Countermeasures</div>
+        </div>
+        <div class="illus-card-body">
+          <div class="illus-card-desc">Understanding threats and defenses — brute force, dictionary attacks, credential stuffing, password spraying, rainbow tables, and the controls that defeat each technique.</div>
+          <div class="illus-card-actions">
+            <a class="btn-open-graphic" href="lesson03-part03.png" target="_blank" rel="noopener">
+              🖼 Open Graphic
+            </a>
+            <a class="btn-download-graphic" href="lesson03-part03.png" download="lesson03-part03.png">
+              ⬇ Download
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================
+       INTERACTIVE COMPANION LABORATORIES
+       ============================================================ -->
+  <div class="section-gap">
+    <div class="section-label">Interactive Companion Laboratories</div>
+    <div class="labs-grid">
+
+      <!-- Lab 1 -->
+      <div class="lab-card">
+        <div class="lab-card-header">
+          <div class="lab-card-icon-wrap">🏛</div>
+          <div>
+            <div class="lab-card-title">Threat Actors</div>
+            <div class="lab-badge">Interactive Lab</div>
+          </div>
+        </div>
+        <div class="lab-card-body">
+          <div class="lab-card-desc">Explore the different types of threat actors and their motivations — from nation-state APTs to insider threats and opportunistic attackers.</div>
+          <a class="btn-open-lab" href="https://d2hie3dpn9wvbb.cloudfront.net/ThreatActors/ThreatActors.html" target="_blank" rel="noopener">
+            ↗ Open Lab
+          </a>
+        </div>
+      </div>
+
+      <!-- Lab 2 -->
+      <div class="lab-card">
+        <div class="lab-card-header">
+          <div class="lab-card-icon-wrap">⚔️</div>
+          <div>
+            <div class="lab-card-title">Types of Attack and Malware</div>
+            <div class="lab-badge">Interactive Lab</div>
+          </div>
+        </div>
+        <div class="lab-card-body">
+          <div class="lab-card-desc">Learn about the different types of cybersecurity attacks and malware that must be understood and controlled to protect modern organizations.</div>
+          <a class="btn-open-lab" href="https://d2hie3dpn9wvbb.cloudfront.net/attacks/attacks.html" target="_blank" rel="noopener">
+            ↗ Open Lab
+          </a>
+        </div>
+      </div>
+
+      <!-- Lab 3 -->
+      <div class="lab-card">
+        <div class="lab-card-header">
+          <div class="lab-card-icon-wrap">🎭</div>
+          <div>
+            <div class="lab-card-title">Social Engineering</div>
+            <div class="lab-badge">Interactive Lab</div>
+          </div>
+        </div>
+        <div class="lab-card-body">
+          <div class="lab-card-desc">Review the different types of social engineering attacks — how human psychology is exploited to bypass technical security controls.</div>
+          <a class="btn-open-lab" href="https://d2hie3dpn9wvbb.cloudfront.net/social_engineering/social_engineering.html" target="_blank" rel="noopener">
+            ↗ Open Lab
+          </a>
+        </div>
+      </div>
+
+      <!-- Lab 4 -->
+      <div class="lab-card">
+        <div class="lab-card-header">
+          <div class="lab-card-icon-wrap">🎯</div>
+          <div>
+            <div class="lab-card-title">Social Engineering Tactics</div>
+            <div class="lab-badge">Interactive Lab</div>
+          </div>
+        </div>
+        <div class="lab-card-body">
+          <div class="lab-card-desc">Explore the different tactics used by threat actors in a social engineering attack — urgency, authority, pretexting, and manipulation techniques.</div>
+          <a class="btn-open-lab" href="https://d2hie3dpn9wvbb.cloudfront.net/SocialEngineeringTactics/SocialEngineeringTactics.html" target="_blank" rel="noopener">
+            ↗ Open Lab
+          </a>
+        </div>
+      </div>
+
+      <!-- Lab 5 -->
+      <div class="lab-card">
+        <div class="lab-card-header">
+          <div class="lab-card-icon-wrap">🤝</div>
+          <div>
+            <div class="lab-card-title">Three-Way Handshake and Denial of Service Attacks</div>
+            <div class="lab-badge">Interactive Lab</div>
+          </div>
+        </div>
+        <div class="lab-card-body">
+          <div class="lab-card-desc">Learn about TCP three-way handshakes and how Denial of Service attacks exploit the connection process to overwhelm and disable services.</div>
+          <a class="btn-open-lab" href="https://d2hie3dpn9wvbb.cloudfront.net/handshake/threeway_handshake1_audio.html" target="_blank" rel="noopener">
+            ↗ Open Lab
+          </a>
+        </div>
+      </div>
+
+      <!-- Lab 6 -->
+      <div class="lab-card">
+        <div class="lab-card-header">
+          <div class="lab-card-icon-wrap">🎭</div>
+          <div>
+            <div class="lab-card-title">Spoofing Attack</div>
+            <div class="lab-badge">Interactive Lab</div>
+          </div>
+        </div>
+        <div class="lab-card-body">
+          <div class="lab-card-desc">Learn how spoofing attacks work — an attacker successfully masquerades as another by falsifying data to gain an illegitimate advantage.</div>
+          <a class="btn-open-lab" href="https://d2hie3dpn9wvbb.cloudfront.net/spoofing1/spoofing1.html" target="_blank" rel="noopener">
+            ↗ Open Lab
+          </a>
+        </div>
+      </div>
+
+      <!-- Lab 7 -->
+      <div class="lab-card">
+        <div class="lab-card-header">
+          <div class="lab-card-icon-wrap">💉</div>
+          <div>
+            <div class="lab-card-title">SQL Attacks</div>
+            <div class="lab-badge">Interactive Lab</div>
+          </div>
+        </div>
+        <div class="lab-card-body">
+          <div class="lab-card-desc">Learn how SQL injection attacks work and how to prevent them — one of the most persistent web application vulnerabilities in the OWASP Top 10.</div>
+          <a class="btn-open-lab" href="https://d2hie3dpn9wvbb.cloudfront.net/SQLinjection/SQLinjection.html" target="_blank" rel="noopener">
+            ↗ Open Lab
+          </a>
+        </div>
+      </div>
+
+      <!-- Lab 8 -->
+      <div class="lab-card">
+        <div class="lab-card-header">
+          <div class="lab-card-icon-wrap">🪱</div>
+          <div>
+            <div class="lab-card-title">Stuxnet</div>
+            <div class="lab-badge">Interactive Lab</div>
+          </div>
+        </div>
+        <div class="lab-card-body">
+          <div class="lab-card-desc">Learn about one of the most robust and impactful cyber-attacks in history — the Stuxnet worm that targeted industrial control systems.</div>
+          <a class="btn-open-lab" href="https://d2hie3dpn9wvbb.cloudfront.net/stuxnet/stuxnet.html" target="_blank" rel="noopener">
+            ↗ Open Lab
+          </a>
+        </div>
+      </div>
+
+      <!-- Lab 9 -->
+      <div class="lab-card">
+        <div class="lab-card-header">
+          <div class="lab-card-icon-wrap">🔒</div>
+          <div>
+            <div class="lab-card-title">Ransomware</div>
+            <div class="lab-badge">Interactive Lab</div>
+          </div>
+        </div>
+        <div class="lab-card-body">
+          <div class="lab-card-desc">Learn how ransomware works and the impact it can have on an organization — encryption mechanisms, extortion models, and defensive strategies.</div>
+          <a class="btn-open-lab" href="https://d2hie3dpn9wvbb.cloudfront.net/ransomware/RansomwareAttack.html" target="_blank" rel="noopener">
+            ↗ Open Lab
+          </a>
+        </div>
+      </div>
+
+      <!-- Lab 10 -->
+      <div class="lab-card">
+        <div class="lab-card-header">
+          <div class="lab-card-icon-wrap">💻</div>
+          <div>
+            <div class="lab-card-title">Meltdown and Spectre</div>
+            <div class="lab-badge">Interactive Lab</div>
+          </div>
+        </div>
+        <div class="lab-card-body">
+          <div class="lab-card-desc">Learn about attacks that impact computer performance and kernel memory — the Meltdown and Spectre hardware vulnerabilities and their implications.</div>
+          <a class="btn-open-lab" href="https://d2hie3dpn9wvbb.cloudfront.net/meltdown_spectre/meltdown_spectre.html" target="_blank" rel="noopener">
+            ↗ Open Lab
+          </a>
+        </div>
+      </div>
+
+      <!-- Lab 11 -->
+      <div class="lab-card">
+        <div class="lab-card-header">
+          <div class="lab-card-icon-wrap">🔍</div>
+          <div>
+            <div class="lab-card-title">Google Hacking Attacks</div>
+            <div class="lab-badge">Interactive Lab</div>
+          </div>
+        </div>
+        <div class="lab-card-body">
+          <div class="lab-card-desc">Learn how Google can be used to perform data collection and footprinting for a cybersecurity attack — Google dorking techniques and defensive countermeasures.</div>
+          <a class="btn-open-lab" href="https://d2hie3dpn9wvbb.cloudfront.net/googlehacking/googlehacking.html" target="_blank" rel="noopener">
+            ↗ Open Lab
+          </a>
+        </div>
+      </div>
+
+      <!-- Lab 12 -->
+      <div class="lab-card">
+        <div class="lab-card-header">
+          <div class="lab-card-icon-wrap">📜</div>
+          <div>
+            <div class="lab-card-title">Cross-Site Scripting</div>
+            <div class="lab-badge">Interactive Lab</div>
+          </div>
+        </div>
+        <div class="lab-card-body">
+          <div class="lab-card-desc">Learn about cross-site scripting (XSS) attacks — how they work, how malicious scripts are injected into trusted web pages, and how they can be prevented.</div>
+          <a class="btn-open-lab" href="https://sands-mvcc.github.io/MVCC/diffie.html" target="_blank" rel="noopener">
+            ↗ Open Lab
+          </a>
         </div>
       </div>
 
@@ -1680,7 +2172,7 @@ const qFeedback = {
     wrong:   "❌ The correct answer is B — Logic Bomb. The defining characteristic is the trigger condition: the malware was dormant for six months, then activated when a specific system event occurred (account removal). Ransomware encrypts files (no mention of encryption). Rootkits hide malware (the malware was hidden, but the defining behavior is the triggered payload). Worms self-propagate across networks (no mention of spread)."
   },
   q5: {
-    correct: "✅ Correct! The scenario demonstrates two distinct social engineering techniques: (1) <strong>Tailgating</strong> — following an authorized person through a badge-controlled door by exploiting politeness (the employee held the door). (2) <strong>Baiting</strong> — the USB drive labeled with an enticing name ('Payroll_Q4_Bonuses.xlsx') is designed to trigger curiosity and the desire to see the contents, causing the target to plug in the malicious device. Both exploit human psychology without any technical hacking.",
+    correct: "✅ Correct! The scenario demonstrates two distinct social engineering techniques: (1) Tailgating — following an authorized person through a badge-controlled door by exploiting politeness (the employee held the door). (2) Baiting — the USB drive labeled with an enticing name ('Payroll_Q4_Bonuses.xlsx') is designed to trigger curiosity and the desire to see the contents, causing the target to plug in the malicious device. Both exploit human psychology without any technical hacking.",
     wrong:   "❌ The correct answer is C — Tailgating and Baiting. Vishing/Smishing involve voice/SMS communication (not demonstrated). Phishing involves email (not demonstrated). Pretexting is constructing a false scenario verbally or in writing (not explicitly the technique here — the USB label is bait, not a pretext). Tailgating = following through a secure door. Baiting = the enticing USB drive. Both are present in this scenario."
   }
 };
