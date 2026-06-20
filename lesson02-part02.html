@@ -1,0 +1,1611 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Digital Signatures & Certificates — Lab Activity</title>
+<style>
+  /* ── Design tokens ── */
+  :root {
+    --bg:        #f5f6f8;
+    --surface:   #ffffff;
+    --surface2:  #eef0f4;
+    --border:    #d1d5db;
+    --text:      #111827;
+    --text-sub:  #6b7280;
+    --accent:    #1d4ed8;
+    --accent-lt: #dbeafe;
+    --green:     #15803d;
+    --green-lt:  #dcfce7;
+    --red:       #b91c1c;
+    --red-lt:    #fee2e2;
+    --amber:     #b45309;
+    --amber-lt:  #fef3c7;
+    --purple:    #6d28d9;
+    --purple-lt: #ede9fe;
+    --mono:      'Courier New', monospace;
+    --radius:    8px;
+    --shadow:    0 1px 4px rgba(0,0,0,.10);
+    --shadow-lg: 0 4px 20px rgba(0,0,0,.13);
+    --transition: .2s ease;
+  }
+  [data-theme="dark"] {
+    --bg:        #0f1117;
+    --surface:   #1c1f2b;
+    --surface2:  #252937;
+    --border:    #374151;
+    --text:      #f3f4f6;
+    --text-sub:  #9ca3af;
+    --accent:    #60a5fa;
+    --accent-lt: #1e3a5f;
+    --green:     #4ade80;
+    --green-lt:  #052e16;
+    --red:       #f87171;
+    --red-lt:    #450a0a;
+    --amber:     #fbbf24;
+    --amber-lt:  #451a03;
+    --purple:    #a78bfa;
+    --purple-lt: #2e1065;
+  }
+
+  /* ── Reset & base ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    transition: background var(--transition), color var(--transition);
+  }
+
+  /* ── Top bar ── */
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    height: 56px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow);
+  }
+  .topbar-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: -.3px;
+  }
+  .topbar-logo svg { flex-shrink: 0; }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .4px;
+    text-transform: uppercase;
+  }
+  .badge-lab { background: var(--accent-lt); color: var(--accent); }
+  .spacer { flex: 1; }
+  .theme-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    padding: 6px 14px;
+    font-size: 13px;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background var(--transition);
+  }
+  .theme-btn:hover { background: var(--border); }
+
+  /* ── Layout ── */
+  .container { max-width: 1080px; margin: 0 auto; padding: 28px 24px 60px; }
+
+  .intro-banner {
+    background: var(--accent-lt);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-bottom: 28px;
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .intro-banner strong { color: var(--accent); }
+
+  /* ── Section title ── */
+  .section-title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    color: var(--text-sub);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .step-pill {
+    background: var(--accent);
+    color: #fff;
+    border-radius: 99px;
+    font-size: 10px;
+    padding: 1px 8px;
+    font-weight: 700;
+  }
+
+  /* ── Card ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+  }
+  .card-title {
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .icon-circle {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+
+  /* ── Grid helpers ── */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  @media (max-width: 680px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+
+  /* ── Key pair display ── */
+  .key-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 14px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    line-height: 1.7;
+    word-break: break-all;
+    position: relative;
+  }
+  .key-label {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    margin-bottom: 6px;
+  }
+  .key-public  { color: var(--accent); }
+  .key-private { color: var(--purple); }
+  .key-cert    { color: var(--green); }
+
+  /* ── Persona cards ── */
+  .persona {
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    background: var(--surface);
+    transition: border-color var(--transition);
+  }
+  .persona.alice { border-top: 4px solid #1d4ed8; }
+  .persona.bob   { border-top: 4px solid #15803d; }
+  .persona.ca    { border-top: 4px solid #b45309; }
+  .persona-name {
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .avatar {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .av-a { background: #1d4ed8; }
+  .av-b { background: #15803d; }
+  .av-c { background: #b45309; }
+  .persona-role { font-size: 12px; color: var(--text-sub); margin-bottom: 8px; }
+
+  /* ── Form controls ── */
+  label { font-size: 13px; font-weight: 600; display: block; margin-bottom: 4px; }
+  input[type="text"], textarea, select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 13px;
+    color: var(--text);
+    font-family: inherit;
+    transition: border-color var(--transition);
+  }
+  input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-lt);
+  }
+  textarea { resize: vertical; min-height: 80px; }
+
+  .form-group { margin-bottom: 14px; }
+  .hint { font-size: 12px; color: var(--text-sub); margin-top: 3px; }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: opacity .15s, transform .1s;
+  }
+  .btn:active { transform: scale(.97); }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover:not(:disabled) { opacity: .88; }
+  .btn-green  { background: var(--green); color: #fff; }
+  .btn-green:hover:not(:disabled)  { opacity: .88; }
+  .btn-amber  { background: var(--amber); color: #fff; }
+  .btn-amber:hover:not(:disabled)  { opacity: .88; }
+  .btn-purple { background: var(--purple); color: #fff; }
+  .btn-purple:hover:not(:disabled) { opacity: .88; }
+  .btn-ghost  { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-ghost:hover:not(:disabled)  { background: var(--border); }
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+
+  /* ── Process flow ── */
+  .flow-steps {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+    margin: 16px 0;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+  .flow-step {
+    flex: 1;
+    min-width: 100px;
+    text-align: center;
+    position: relative;
+  }
+  .flow-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 18px;
+    right: -1px;
+    width: 50%;
+    height: 2px;
+    background: var(--border);
+    z-index: 0;
+  }
+  .flow-step:not(:first-child)::before {
+    content: '';
+    position: absolute;
+    top: 18px;
+    left: -1px;
+    width: 50%;
+    height: 2px;
+    background: var(--border);
+  }
+  .flow-step.active::after,
+  .flow-step.active::before,
+  .flow-step.done::after,
+  .flow-step.done::before { background: var(--accent); }
+  .flow-dot {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: var(--surface);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    position: relative;
+    z-index: 1;
+    margin: 0 auto 4px;
+    transition: all .25s;
+  }
+  .flow-step.active .flow-dot { border-color: var(--accent); background: var(--accent-lt); }
+  .flow-step.done .flow-dot   { border-color: var(--green); background: var(--green-lt); }
+  .flow-label { font-size: 10.5px; font-weight: 600; color: var(--text-sub); line-height: 1.3; }
+  .flow-step.active .flow-label { color: var(--accent); }
+  .flow-step.done .flow-label   { color: var(--green); }
+
+  /* ── Pipeline output panels ── */
+  .pipeline {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .pipe-row {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .pipe-op {
+    min-width: 90px;
+    flex-shrink: 0;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--text-sub);
+  }
+  .pipe-val {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    word-break: break-all;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+  }
+  .pipe-val.highlight { background: var(--accent-lt); border-color: var(--accent); color: var(--accent); }
+  .pipe-val.green-hl  { background: var(--green-lt);  border-color: var(--green);  color: var(--green); }
+  .pipe-val.red-hl    { background: var(--red-lt);    border-color: var(--red);    color: var(--red); }
+  .pipe-val.purple-hl { background: var(--purple-lt); border-color: var(--purple); color: var(--purple); }
+  .pipe-val.amber-hl  { background: var(--amber-lt);  border-color: var(--amber);  color: var(--amber); }
+
+  /* ── Email envelope ── */
+  .email-envelope {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-top: 16px;
+  }
+  .email-header {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
+    font-size: 12px;
+  }
+  .email-header-row { display: flex; gap: 8px; margin-bottom: 4px; }
+  .email-header-row:last-child { margin-bottom: 0; }
+  .email-field { font-weight: 700; color: var(--text-sub); min-width: 60px; }
+  .email-body { padding: 14px 16px; font-size: 13px; line-height: 1.7; }
+  .email-attachment {
+    border-top: 1px dashed var(--border);
+    padding: 10px 16px;
+    background: var(--surface2);
+    font-size: 11.5px;
+    font-family: var(--mono);
+  }
+  .email-attach-label {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--text-sub);
+    margin-bottom: 4px;
+  }
+
+  /* ── Verification result ── */
+  .verify-result {
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    margin-top: 14px;
+  }
+  .verify-result.success { background: var(--green-lt); border: 2px solid var(--green); }
+  .verify-result.failure { background: var(--red-lt);   border: 2px solid var(--red); }
+  .verify-result .vr-icon { font-size: 22px; flex-shrink: 0; }
+  .verify-result .vr-title { font-weight: 700; margin-bottom: 4px; font-size: 14px; }
+  .verify-result.success .vr-title { color: var(--green); }
+  .verify-result.failure .vr-title { color: var(--red); }
+  .verify-result .vr-body  { font-size: 13px; line-height: 1.6; }
+
+  /* ── Certificate display ── */
+  .cert-display {
+    background: var(--surface);
+    border: 2px solid var(--amber);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-top: 14px;
+  }
+  .cert-header {
+    background: var(--amber);
+    color: #fff;
+    padding: 8px 16px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .6px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .cert-body { padding: 14px 16px; }
+  .cert-field { display: flex; gap: 10px; margin-bottom: 8px; font-size: 12.5px; }
+  .cert-field-name { font-weight: 700; min-width: 130px; color: var(--text-sub); }
+  .cert-field-val  { font-family: var(--mono); font-size: 11.5px; word-break: break-all; color: var(--text); }
+  .cert-sig { border-top: 1px dashed var(--border); margin-top: 10px; padding-top: 10px; }
+  .cert-sig-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--amber); margin-bottom: 4px; }
+
+  /* ── Tabs ── */
+  .tabs { display: flex; gap: 2px; border-bottom: 2px solid var(--border); margin-bottom: 20px; }
+  .tab {
+    padding: 9px 18px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-sub);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: color .15s;
+  }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab:hover:not(.active) { color: var(--text); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── Scenario attack panel ── */
+  .attack-option {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .attack-option:hover { border-color: var(--red); background: var(--red-lt); }
+  .attack-option input[type="radio"] { margin-top: 3px; flex-shrink: 0; }
+  .attack-option label { cursor: pointer; font-weight: 600; font-size: 13px; display: block; }
+  .attack-option p { font-size: 12px; color: var(--text-sub); margin-top: 2px; }
+
+  /* ── Explainer callout ── */
+  .callout {
+    border-left: 4px solid var(--accent);
+    background: var(--accent-lt);
+    padding: 10px 14px;
+    border-radius: 0 6px 6px 0;
+    font-size: 12.5px;
+    line-height: 1.65;
+    margin-top: 12px;
+  }
+  .callout.amber { border-left-color: var(--amber); background: var(--amber-lt); }
+  .callout.green { border-left-color: var(--green); background: var(--green-lt); }
+  .callout.red   { border-left-color: var(--red);   background: var(--red-lt); }
+  .callout strong { color: inherit; }
+
+  /* ── Progress bar ── */
+  .progress-bar {
+    height: 6px;
+    background: var(--surface2);
+    border-radius: 99px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--purple));
+    border-radius: 99px;
+    transition: width .4s ease;
+  }
+
+  /* ── Misc ── */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+  .text-sub { color: var(--text-sub); font-size: 12.5px; }
+  .text-mono { font-family: var(--mono); font-size: 11.5px; word-break: break-all; }
+  .hidden { display: none !important; }
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+  .tag-blue   { background: var(--accent-lt); color: var(--accent); }
+  .tag-green  { background: var(--green-lt);  color: var(--green); }
+  .tag-red    { background: var(--red-lt);    color: var(--red); }
+  .tag-amber  { background: var(--amber-lt);  color: var(--amber); }
+  .tag-purple { background: var(--purple-lt); color: var(--purple); }
+
+  /* knowledge check */
+  .quiz-q { font-weight: 600; margin-bottom: 10px; font-size: 14px; }
+  .quiz-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background .15s, border-color .15s;
+  }
+  .quiz-option:hover { background: var(--surface2); border-color: var(--accent); }
+  .quiz-option input { flex-shrink: 0; margin-top: 2px; }
+  .quiz-feedback { display: none; padding: 10px 14px; border-radius: 6px; font-size: 13px; margin-top: 8px; }
+  .quiz-feedback.correct { background: var(--green-lt); border: 1px solid var(--green); color: var(--green); }
+  .quiz-feedback.wrong   { background: var(--red-lt);   border: 1px solid var(--red);   color: var(--red); }
+</style>
+</head>
+<body>
+
+<!-- ── Top bar ── -->
+<div class="topbar">
+  <div class="topbar-logo">
+    <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="26" height="26" rx="6" fill="#1d4ed8"/>
+      <path d="M7 13L11 17L19 9" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="13" cy="13" r="9" stroke="white" stroke-width="1.5" fill="none" opacity=".4"/>
+    </svg>
+    Digital Signatures &amp; PKI
+  </div>
+  <span class="badge badge-lab">Lab Activity</span>
+  <div class="spacer"></div>
+  <button class="theme-btn" id="themeToggle">
+    <span id="themeIcon">🌙</span>
+    <span id="themeLabel">Dark Mode</span>
+  </button>
+</div>
+
+<div class="container">
+
+  <!-- Progress -->
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+
+  <!-- Intro -->
+  <div class="intro-banner">
+    <strong>Scenario:</strong> Alice wants to send a signed, authenticated email to Bob. You will walk through the complete PKI workflow — from key generation and certificate issuance to signing, transmitting, and verifying the message. Complete each step in order. <strong>No cryptographic knowledge is required</strong> — the lab simulates the math for you.
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('tab1',this)">① Generate Keys</button>
+    <button class="tab" onclick="switchTab('tab2',this)">② CA Certificate</button>
+    <button class="tab" onclick="switchTab('tab3',this)">③ Sign Email</button>
+    <button class="tab" onclick="switchTab('tab4',this)">④ Verify</button>
+    <button class="tab" onclick="switchTab('tab5',this)">⑤ Attack Sim</button>
+    <button class="tab" onclick="switchTab('tab6',this)">⑥ Quiz</button>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       TAB 1 — Key Pair Generation
+  ══════════════════════════════════════════ -->
+  <div class="tab-panel active" id="tab1">
+
+    <div class="section-title">
+      <span class="step-pill">STEP 1</span>
+      Generate RSA Key Pairs for Alice &amp; Bob
+    </div>
+
+    <div class="callout" style="margin-bottom:18px;">
+      In RSA, a key pair consists of a <strong>public key</strong> (shared freely) and a <strong>private key</strong> (kept secret). The keys are mathematically linked: data encrypted with one can only be decrypted with the other.
+    </div>
+
+    <div class="grid2">
+      <!-- Alice -->
+      <div class="persona alice">
+        <div class="persona-name">
+          <div class="avatar av-a">A</div> Alice
+        </div>
+        <div class="persona-role">📧 Sender — will sign the email</div>
+        <button class="btn btn-primary" id="genAliceBtn" onclick="generateKeys('alice')">
+          🔑 Generate Alice's Key Pair
+        </button>
+        <div id="aliceKeys" class="hidden" style="margin-top:14px;">
+          <div class="form-group">
+            <div class="key-label key-public">🔓 Alice's Public Key</div>
+            <div class="key-box" id="alicePub">—</div>
+          </div>
+          <div class="form-group">
+            <div class="key-label key-private">🔒 Alice's Private Key <span class="tag tag-red">SECRET</span></div>
+            <div class="key-box" id="alicePriv">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bob -->
+      <div class="persona bob">
+        <div class="persona-name">
+          <div class="avatar av-b">B</div> Bob
+        </div>
+        <div class="persona-role">📥 Recipient — will verify the signature</div>
+        <button class="btn btn-green" id="genBobBtn" onclick="generateKeys('bob')">
+          🔑 Generate Bob's Key Pair
+        </button>
+        <div id="bobKeys" class="hidden" style="margin-top:14px;">
+          <div class="form-group">
+            <div class="key-label key-public">🔓 Bob's Public Key</div>
+            <div class="key-box" id="bobPub">—</div>
+          </div>
+          <div class="form-group">
+            <div class="key-label key-private">🔒 Bob's Private Key <span class="tag tag-red">SECRET</span></div>
+            <div class="key-box" id="bobPriv">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout" id="keyConceptBox" style="display:none; margin-top:16px;">
+      <strong>Key concept:</strong> Alice's private key never leaves her system. She will use it to <em>sign</em> messages. Bob — and the world — can have Alice's public key to <em>verify</em> those signatures. Bob's key pair works the same way in reverse for any reply he sends.
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-ghost" id="nextToTab2" disabled onclick="switchTabById('tab2')">Next: Get Certificates →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       TAB 2 — CA Certificate Issuance
+  ══════════════════════════════════════════ -->
+  <div class="tab-panel" id="tab2">
+
+    <div class="section-title">
+      <span class="step-pill">STEP 2</span>
+      Certificate Authority Issues X.509 Certificates
+    </div>
+
+    <div class="callout amber" style="margin-bottom:18px;">
+      A <strong>Certificate Authority (CA)</strong> is a trusted third party that vouches for the binding between a public key and an identity. The CA signs a certificate with <em>its own</em> private key. Anyone who trusts the CA can verify the certificate.
+    </div>
+
+    <!-- CA Panel -->
+    <div class="persona ca" style="margin-bottom:18px;">
+      <div class="persona-name">
+        <div class="avatar av-c">CA</div> TrustRoot CA
+      </div>
+      <div class="persona-role">🏛️ Trusted Certificate Authority — signs certificates</div>
+
+      <div class="grid2" style="margin-top:10px;">
+        <div>
+          <div class="key-label" style="color: var(--amber);">🔑 CA Root Key Pair</div>
+          <div class="key-box" id="caKeyDisplay" style="font-size:11px; min-height:64px;">
+            Generate below to see CA keys.
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-end;">
+          <button class="btn btn-amber" onclick="generateCAKeys()" id="caKeyBtn">
+            🏛️ Generate CA Root Keys
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CSR + Certificate for Alice -->
+    <div class="card">
+      <div class="card-title">
+        <div class="icon-circle" style="background:var(--accent-lt); color:var(--accent);">A</div>
+        Alice Requests a Certificate (CSR → Certificate)
+      </div>
+      <div class="grid2">
+        <div>
+          <div class="form-group">
+            <label>Subject Name (Alice's identity)</label>
+            <input type="text" id="aliceCN" value="alice@seclab.edu" />
+            <div class="hint">This will be embedded in the certificate.</div>
+          </div>
+          <div class="form-group">
+            <label>Organization</label>
+            <input type="text" id="aliceOrg" value="Security Lab — Spring 2025" />
+          </div>
+          <button class="btn btn-primary" id="issueAliceCertBtn" onclick="issueCert('alice')" disabled>
+            📜 Issue Alice's Certificate
+          </button>
+        </div>
+        <div id="aliceCertDisplay" class="hidden">
+          <div class="cert-display">
+            <div class="cert-header">🏅 X.509 Certificate — Alice</div>
+            <div class="cert-body">
+              <div class="cert-field"><span class="cert-field-name">Subject CN</span><span class="cert-field-val" id="certAliceCN">—</span></div>
+              <div class="cert-field"><span class="cert-field-name">Organization</span><span class="cert-field-val" id="certAliceOrg">—</span></div>
+              <div class="cert-field"><span class="cert-field-name">Public Key</span><span class="cert-field-val" id="certAlicePub">—</span></div>
+              <div class="cert-field"><span class="cert-field-name">Serial No.</span><span class="cert-field-val" id="certAliceSN">—</span></div>
+              <div class="cert-field"><span class="cert-field-name">Valid Until</span><span class="cert-field-val" id="certAliceExp">—</span></div>
+              <div class="cert-sig">
+                <div class="cert-sig-label">🖊 CA Digital Signature (over all fields above)</div>
+                <div class="text-mono" id="certAliceSig">—</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Certificate for Bob -->
+    <div class="card">
+      <div class="card-title">
+        <div class="icon-circle" style="background:var(--green-lt); color:var(--green);">B</div>
+        Bob Requests a Certificate
+      </div>
+      <button class="btn btn-green" id="issueBobCertBtn" onclick="issueCert('bob')" disabled>
+        📜 Issue Bob's Certificate
+      </button>
+      <div id="bobCertDisplay" class="hidden" style="margin-top:14px;">
+        <div class="cert-display">
+          <div class="cert-header">🏅 X.509 Certificate — Bob</div>
+          <div class="cert-body">
+            <div class="cert-field"><span class="cert-field-name">Subject CN</span><span class="cert-field-val">bob@seclab.edu</span></div>
+            <div class="cert-field"><span class="cert-field-name">Public Key</span><span class="cert-field-val" id="certBobPub">—</span></div>
+            <div class="cert-field"><span class="cert-field-name">Serial No.</span><span class="cert-field-val" id="certBobSN">—</span></div>
+            <div class="cert-field"><span class="cert-field-name">Valid Until</span><span class="cert-field-val" id="certBobExp">—</span></div>
+            <div class="cert-sig">
+              <div class="cert-sig-label">🖊 CA Signature</div>
+              <div class="text-mono" id="certBobSig">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout green" id="certConceptBox" style="display:none;">
+      <strong>Why this matters:</strong> When Bob receives an email from Alice, he doesn't just trust her public key in isolation — he trusts the CA's signature on her certificate, which proves the key genuinely belongs to her.
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="switchTabById('tab1')">← Back</button>
+      <button class="btn btn-ghost" id="nextToTab3" disabled onclick="switchTabById('tab3')">Next: Sign the Email →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       TAB 3 — Compose & Sign Email
+  ══════════════════════════════════════════ -->
+  <div class="tab-panel" id="tab3">
+
+    <div class="section-title">
+      <span class="step-pill">STEP 3</span>
+      Alice Composes, Hashes, and Signs the Email
+    </div>
+
+    <!-- Signing pipeline flow -->
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title">How Digital Signing Works</div>
+      <div class="flow-steps">
+        <div class="flow-step done" id="fs1">
+          <div class="flow-dot">✉️</div>
+          <div class="flow-label">Compose<br>Message</div>
+        </div>
+        <div class="flow-step" id="fs2">
+          <div class="flow-dot">#</div>
+          <div class="flow-label">Hash<br>(SHA-256)</div>
+        </div>
+        <div class="flow-step" id="fs3">
+          <div class="flow-dot">🔒</div>
+          <div class="flow-label">Encrypt Hash<br>with Private Key</div>
+        </div>
+        <div class="flow-step" id="fs4">
+          <div class="flow-dot">📎</div>
+          <div class="flow-label">Attach<br>Signature</div>
+        </div>
+        <div class="flow-step" id="fs5">
+          <div class="flow-dot">📤</div>
+          <div class="flow-label">Send to<br>Bob</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Compose -->
+    <div class="card">
+      <div class="card-title">
+        <div class="avatar av-a" style="width:22px;height:22px;font-size:11px;">A</div>
+        Alice's Email Compose
+      </div>
+      <div class="grid2">
+        <div>
+          <div class="form-group">
+            <label>To</label>
+            <input type="text" id="emailTo" value="bob@seclab.edu" />
+          </div>
+          <div class="form-group">
+            <label>Subject</label>
+            <input type="text" id="emailSubject" value="Q3 Budget Approval — Final Numbers" />
+          </div>
+          <div class="form-group">
+            <label>Message Body</label>
+            <textarea id="emailBody" rows="5">Hi Bob,
+
+Please find attached the final Q3 budget approval. The total is $124,500.
+
+Best,
+Alice</textarea>
+          </div>
+          <button class="btn btn-primary" onclick="signEmail()">✍️ Sign &amp; Send Email</button>
+        </div>
+
+        <!-- Pipeline output -->
+        <div id="signPipeline" class="hidden">
+          <div class="pipeline">
+            <div class="pipe-row">
+              <div class="pipe-op">📝 Message</div>
+              <div class="pipe-val" id="pipeMsg" style="font-size:10.5px;"></div>
+            </div>
+            <div class="pipe-row">
+              <div class="pipe-op"># SHA-256</div>
+              <div class="pipe-val highlight" id="pipeHash"></div>
+            </div>
+            <div class="pipe-row">
+              <div class="pipe-op">🔒 Encrypt</div>
+              <div class="pipe-val purple-hl" id="pipeSig"></div>
+            </div>
+            <div class="pipe-row">
+              <div class="pipe-op">📜 Cert</div>
+              <div class="pipe-val amber-hl" id="pipeCert"></div>
+            </div>
+          </div>
+          <div class="callout" style="margin-top:10px; font-size:12px;">
+            The <strong>signature</strong> is the hash encrypted with Alice's private key. Attaching her certificate lets Bob independently verify her public key is legitimate.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sent envelope -->
+    <div id="sentEnvelope" class="hidden">
+      <div class="section-title" style="margin-top:0;">
+        <span class="step-pill">SENT</span>
+        Email Arrives in Bob's Inbox
+      </div>
+      <div class="email-envelope">
+        <div class="email-header">
+          <div class="email-header-row"><span class="email-field">From:</span><span id="envFrom">—</span></div>
+          <div class="email-header-row"><span class="email-field">To:</span><span id="envTo">—</span></div>
+          <div class="email-header-row"><span class="email-field">Subject:</span><span id="envSubject">—</span></div>
+          <div class="email-header-row"><span class="email-field">Signed:</span>
+            <span class="tag tag-blue">✅ S/MIME Signature Present</span>
+          </div>
+        </div>
+        <div class="email-body" id="envBody">—</div>
+        <div class="email-attachment">
+          <div class="email-attach-label">📎 Attached to S/MIME Header</div>
+          <div style="margin-bottom:4px;"><strong style="font-size:11px;">Signature:</strong> <span id="envSig" style="color:var(--purple);">—</span></div>
+          <div><strong style="font-size:11px;">Certificate:</strong> <span id="envCert" style="color:var(--amber);">—</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row" style="margin-top:16px;">
+      <button class="btn btn-ghost" onclick="switchTabById('tab2')">← Back</button>
+      <button class="btn btn-ghost" id="nextToTab4" disabled onclick="switchTabById('tab4')">Next: Bob Verifies →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       TAB 4 — Verification
+  ══════════════════════════════════════════ -->
+  <div class="tab-panel" id="tab4">
+
+    <div class="section-title">
+      <span class="step-pill">STEP 4</span>
+      Bob Verifies the Digital Signature
+    </div>
+
+    <div class="callout" style="margin-bottom:18px;">
+      To verify Alice's signature, Bob: <strong>(1)</strong> extracts Alice's public key from her certificate, <strong>(2)</strong> verifies the certificate was signed by a trusted CA, <strong>(3)</strong> decrypts the signature with Alice's public key to recover the original hash, then <strong>(4)</strong> re-computes the hash of the received message and compares. If they match — the message is authentic and unaltered.
+    </div>
+
+    <!-- Verification flow -->
+    <div class="card">
+      <div class="card-title">Bob's Verification Pipeline</div>
+      <div class="flow-steps">
+        <div class="flow-step" id="vf1">
+          <div class="flow-dot">📜</div>
+          <div class="flow-label">Check<br>Certificate</div>
+        </div>
+        <div class="flow-step" id="vf2">
+          <div class="flow-dot">🔓</div>
+          <div class="flow-label">Decrypt Sig<br>w/ Public Key</div>
+        </div>
+        <div class="flow-step" id="vf3">
+          <div class="flow-dot">#</div>
+          <div class="flow-label">Re-hash<br>Message</div>
+        </div>
+        <div class="flow-step" id="vf4">
+          <div class="flow-dot">⚖️</div>
+          <div class="flow-label">Compare<br>Hashes</div>
+        </div>
+        <div class="flow-step" id="vf5">
+          <div class="flow-dot">✅</div>
+          <div class="flow-label">Accept or<br>Reject</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <div class="avatar av-b" style="width:22px;height:22px;font-size:11px;">B</div>
+        Bob's Verification
+      </div>
+      <button class="btn btn-green" onclick="verifyEmail(false)" id="verifyBtn">
+        🔍 Verify Alice's Email
+      </button>
+      <div id="verifyPipeline" class="hidden" style="margin-top:14px;">
+        <div class="pipeline">
+          <div class="pipe-row">
+            <div class="pipe-op">📜 CA Sig</div>
+            <div class="pipe-val green-hl" id="vpCert">—</div>
+          </div>
+          <div class="pipe-row">
+            <div class="pipe-op">🔓 Decrypt</div>
+            <div class="pipe-val highlight" id="vpDecrypted">—</div>
+          </div>
+          <div class="pipe-row">
+            <div class="pipe-op"># Re-hash</div>
+            <div class="pipe-val highlight" id="vpRehash">—</div>
+          </div>
+          <div class="pipe-row">
+            <div class="pipe-op">⚖️ Match?</div>
+            <div class="pipe-val green-hl" id="vpMatch">—</div>
+          </div>
+        </div>
+        <div id="verifyResult" class="hidden"></div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="switchTabById('tab3')">← Back</button>
+      <button class="btn btn-ghost" id="nextToTab5" disabled onclick="switchTabById('tab5')">Next: Attack Simulation →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       TAB 5 — Attack Simulation
+  ══════════════════════════════════════════ -->
+  <div class="tab-panel" id="tab5">
+
+    <div class="section-title">
+      <span class="step-pill">STEP 5</span>
+      Attack Scenarios — What Happens When Things Go Wrong?
+    </div>
+
+    <div class="callout red" style="margin-bottom:18px;">
+      Select an attack scenario and run the verification to see how digital signatures detect tampering and impersonation.
+    </div>
+
+    <div class="card">
+      <div class="card-title">Choose an Attack Scenario</div>
+
+      <div class="attack-option">
+        <input type="radio" name="attack" id="atk1" value="tamper" checked>
+        <div>
+          <label for="atk1">🔀 Message Tampering — Mallory intercepts and changes the email body</label>
+          <p>The message content is altered in transit (e.g., amount changed from $124,500 to $999,500). The signature was created over the original message.</p>
+        </div>
+      </div>
+
+      <div class="attack-option">
+        <input type="radio" name="attack" id="atk2" value="fakesig">
+        <div>
+          <label for="atk2">🎭 Signature Forgery — Mallory tries to forge a signature without Alice's private key</label>
+          <p>An attacker attempts to create a valid signature using a different (unknown) key and attach it to an otherwise legitimate message.</p>
+        </div>
+      </div>
+
+      <div class="attack-option">
+        <input type="radio" name="attack" id="atk3" value="fakecert">
+        <div>
+          <label for="atk3">🪪 Certificate Spoofing — Mallory creates a fake certificate claiming to be Alice</label>
+          <p>Attacker creates a certificate with Alice's name but their own public key — and does NOT have it signed by the trusted CA.</p>
+        </div>
+      </div>
+
+      <div class="attack-option">
+        <input type="radio" name="attack" id="atk4" value="replay">
+        <div>
+          <label for="atk4">📼 Replay Attack — Mallory resends a previously intercepted legitimate email</label>
+          <p>The original email and signature are valid, but the email was sent months ago. Bob receives it again with the same valid signature.</p>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn" style="background:var(--red);color:#fff;" onclick="runAttack()">⚡ Run Attack Scenario</button>
+      </div>
+
+      <div id="attackResult" class="hidden" style="margin-top:16px;"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="switchTabById('tab4')">← Back</button>
+      <button class="btn btn-ghost" onclick="switchTabById('tab6')">Next: Knowledge Check →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       TAB 6 — Knowledge Check Quiz
+  ══════════════════════════════════════════ -->
+  <div class="tab-panel" id="tab6">
+
+    <div class="section-title">
+      <span class="step-pill">STEP 6</span>
+      Knowledge Check — 5 Questions
+    </div>
+
+    <div class="card" id="quizCard">
+      <div id="quizContainer"></div>
+      <div class="btn-row" style="margin-top:16px;">
+        <button class="btn btn-primary" id="checkAnswersBtn" onclick="checkAnswers()">Check Answers</button>
+        <button class="btn btn-ghost" id="resetQuizBtn" onclick="resetQuiz()" style="display:none;">Reset Quiz</button>
+      </div>
+      <div id="quizScore" class="hidden" style="margin-top:16px;"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="switchTabById('tab5')">← Back</button>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+/* ────────────────────────────────────
+   GLOBAL STATE
+──────────────────────────────────── */
+const state = {
+  alice: { pub: null, priv: null, cert: null },
+  bob:   { pub: null, priv: null, cert: null },
+  ca:    { pub: null, priv: null },
+  email: { to: null, from: null, subject: null, body: null, hash: null, sig: null, cert: null }
+};
+
+/* ────────────────────────────────────
+   SIMULATED CRYPTO HELPERS
+   (Deterministic pseudo-crypto for education)
+──────────────────────────────────── */
+function pseudoHash(str) {
+  // Simulated SHA-256 — deterministic, hex-looking, educational
+  let h = 0x811c9dc5n;
+  for (let i = 0; i < str.length; i++) {
+    h ^= BigInt(str.charCodeAt(i));
+    h = (h * 0x01000193n) & 0xFFFFFFFFFFFFFFFFn;
+  }
+  // Expand to 64-char hex
+  let base = h.toString(16).padStart(16, '0');
+  let salt = '';
+  for (let i = 0; i < str.length; i++) salt += (str.charCodeAt(i) ^ 0x5A).toString(16).padStart(2,'0');
+  return (base.repeat(4) + salt).slice(0,64).toUpperCase();
+}
+
+function pseudoRSAKey(seed, type) {
+  // Generates a realistic-looking RSA key snippet
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+  let out = '';
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = ((h << 5) - h + seed.charCodeAt(i)) | 0;
+  h = Math.abs(h);
+  for (let i = 0; i < 88; i++) {
+    h = ((h * 1664525 + 1013904223) >>> 0);
+    out += chars[h % chars.length];
+    if ((i+1) % 64 === 0) out += '\n';
+  }
+  const label = type === 'pub' ? 'PUBLIC KEY' : 'PRIVATE KEY';
+  return `-----BEGIN RSA ${label}-----\n${out}\n-----END RSA ${label}-----`;
+}
+
+function pseudoSign(hash, privKey) {
+  // Simulated: encrypt hash with private key
+  const combined = hash + privKey.slice(27, 60);
+  return pseudoHash(combined).toLowerCase().match(/.{1,8}/g).join(' ');
+}
+
+function pseudoDecryptSig(sig, pubKey) {
+  // Reverse: decrypt signature with public key to recover hash
+  // Since we can simulate this deterministically, we just return the stored hash
+  return state.email.hash; // Honest simulation: this represents the decrypted value
+}
+
+function pseudoCASig(data, caPriv) {
+  return pseudoHash(data + caPriv.slice(30, 70)).slice(0, 40).toLowerCase()
+    .match(/.{1,10}/g).join(':');
+}
+
+function randomSerial() {
+  return Array.from({length: 8}, () => Math.floor(Math.random()*255).toString(16).padStart(2,'0')).join(':').toUpperCase();
+}
+
+function futureDate(years) {
+  const d = new Date();
+  d.setFullYear(d.getFullYear() + years);
+  return d.toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'});
+}
+
+/* ────────────────────────────────────
+   STEP 1 — KEY GENERATION
+──────────────────────────────────── */
+function generateKeys(who) {
+  const seed = who + Date.now();
+  const pub  = pseudoRSAKey(seed + 'pub', 'pub');
+  const priv = pseudoRSAKey(seed + 'priv', 'priv');
+
+  state[who].pub  = pub;
+  state[who].priv = priv;
+
+  if (who === 'alice') {
+    document.getElementById('alicePub').textContent  = pub;
+    document.getElementById('alicePriv').textContent = priv;
+    document.getElementById('aliceKeys').classList.remove('hidden');
+    document.getElementById('genAliceBtn').textContent = '🔁 Regenerate Alice\'s Keys';
+  } else {
+    document.getElementById('bobPub').textContent  = pub;
+    document.getElementById('bobPriv').textContent = priv;
+    document.getElementById('bobKeys').classList.remove('hidden');
+    document.getElementById('genBobBtn').textContent = '🔁 Regenerate Bob\'s Keys';
+  }
+
+  if (state.alice.pub && state.bob.pub) {
+    document.getElementById('keyConceptBox').style.display = 'block';
+    document.getElementById('nextToTab2').disabled = false;
+    updateProgress(15);
+  }
+}
+
+/* ────────────────────────────────────
+   STEP 2 — CA + CERTIFICATES
+──────────────────────────────────── */
+function generateCAKeys() {
+  const seed = 'TrustRootCA' + Date.now();
+  state.ca.pub  = pseudoRSAKey(seed+'pub','pub');
+  state.ca.priv = pseudoRSAKey(seed+'priv','priv');
+
+  document.getElementById('caKeyDisplay').innerHTML =
+    `<span style="color:var(--amber);font-weight:700;">Public Key (excerpt):</span><br>` +
+    state.ca.pub.slice(27,107) + `...<br><br>` +
+    `<span style="color:var(--red);font-weight:700;">Private Key: <span class="tag tag-red">KEPT SECRET BY CA</span></span>`;
+
+  document.getElementById('issueAliceCertBtn').disabled = !state.alice.pub;
+  document.getElementById('issueBobCertBtn').disabled   = !state.bob.pub;
+}
+
+function issueCert(who) {
+  if (!state.ca.priv) { alert('Generate CA keys first!'); return; }
+  if (!state[who].pub) { alert(`Generate ${who}'s keys first!`); return; }
+
+  const cn  = who === 'alice' ? document.getElementById('aliceCN').value : 'bob@seclab.edu';
+  const org = who === 'alice' ? document.getElementById('aliceOrg').value : 'Security Lab — Spring 2025';
+  const sn  = randomSerial();
+  const exp = futureDate(2);
+  const certData = cn + org + state[who].pub + sn + exp;
+  const sig = pseudoCASig(certData, state.ca.priv);
+
+  state[who].cert = { cn, org, pub: state[who].pub, sn, exp, sig };
+
+  if (who === 'alice') {
+    document.getElementById('certAliceCN').textContent  = cn;
+    document.getElementById('certAliceOrg').textContent = org;
+    document.getElementById('certAlicePub').textContent = state[who].pub.slice(27,80) + '...';
+    document.getElementById('certAliceSN').textContent  = sn;
+    document.getElementById('certAliceExp').textContent = exp;
+    document.getElementById('certAliceSig').textContent = sig;
+    document.getElementById('aliceCertDisplay').classList.remove('hidden');
+  } else {
+    document.getElementById('certBobPub').textContent = state[who].pub.slice(27,80) + '...';
+    document.getElementById('certBobSN').textContent  = sn;
+    document.getElementById('certBobExp').textContent = exp;
+    document.getElementById('certBobSig').textContent = sig;
+    document.getElementById('bobCertDisplay').classList.remove('hidden');
+  }
+
+  if (state.alice.cert && state.bob.cert) {
+    document.getElementById('certConceptBox').style.display = 'block';
+    document.getElementById('nextToTab3').disabled = false;
+    updateProgress(35);
+  }
+}
+
+/* ────────────────────────────────────
+   STEP 3 — SIGN EMAIL
+──────────────────────────────────── */
+function signEmail() {
+  if (!state.alice.cert) { alert('Alice must have a certificate first!'); return; }
+
+  const to      = document.getElementById('emailTo').value.trim();
+  const subject = document.getElementById('emailSubject').value.trim();
+  const body    = document.getElementById('emailBody').value.trim();
+  const msg     = `From: alice@seclab.edu\nTo: ${to}\nSubject: ${subject}\n\n${body}`;
+
+  const hash = pseudoHash(msg);
+  const sig  = pseudoSign(hash, state.alice.priv);
+  const cert = `CN=${state.alice.cert.cn}; SN=${state.alice.cert.sn}; CA=TrustRoot`;
+
+  state.email = { to, from: 'alice@seclab.edu', subject, body, msg, hash, sig, cert };
+
+  // Pipeline
+  document.getElementById('pipeMsg').textContent    = body.length > 60 ? body.slice(0,60) + '…' : body;
+  document.getElementById('pipeHash').textContent   = hash;
+  document.getElementById('pipeSig').textContent    = sig;
+  document.getElementById('pipeCert').textContent   = cert;
+  document.getElementById('signPipeline').classList.remove('hidden');
+
+  // Flow indicators
+  ['fs2','fs3','fs4','fs5'].forEach(id => {
+    document.getElementById(id).classList.add('done');
+    document.getElementById(id).classList.remove('active');
+  });
+
+  // Envelope
+  document.getElementById('envFrom').textContent    = 'alice@seclab.edu';
+  document.getElementById('envTo').textContent      = to;
+  document.getElementById('envSubject').textContent = subject;
+  document.getElementById('envBody').textContent    = body;
+  document.getElementById('envSig').textContent     = sig;
+  document.getElementById('envCert').textContent    = cert;
+  document.getElementById('sentEnvelope').classList.remove('hidden');
+
+  document.getElementById('nextToTab4').disabled = false;
+  updateProgress(55);
+}
+
+/* ────────────────────────────────────
+   STEP 4 — VERIFY
+──────────────────────────────────── */
+function verifyEmail(tampered, opts = {}) {
+  if (!state.email.hash) { alert('Send an email first!'); return; }
+
+  const msgToHash = opts.msg !== undefined ? opts.msg : state.email.msg;
+  const sigToUse  = opts.sig !== undefined ? opts.sig : state.email.sig;
+  const certOk    = opts.certOk !== undefined ? opts.certOk : true;
+
+  // Animate flow steps
+  const flowIds = ['vf1','vf2','vf3','vf4','vf5'];
+  let delay = 0;
+  flowIds.forEach((id, i) => {
+    setTimeout(() => {
+      document.getElementById(id).classList.add(i < flowIds.length-1 ? 'done' : (certOk && !tampered && !opts.fakeSig ? 'done' : 'active'));
+    }, delay);
+    delay += 350;
+  });
+
+  setTimeout(() => {
+    const certStatus = certOk
+      ? '✅ TrustRoot CA signature on Alice\'s certificate VALID'
+      : '❌ Certificate NOT signed by a trusted CA — REJECTED';
+
+    // Decrypted hash (what was signed)
+    const decrypted = opts.fakeSig ? pseudoHash('DIFFERENT_KEY' + sigToUse) : state.email.hash;
+    // Re-hashed received message
+    const reHash = pseudoHash(msgToHash);
+    const match  = !tampered && !opts.fakeSig && certOk;
+
+    document.getElementById('vpCert').textContent      = certStatus;
+    document.getElementById('vpDecrypted').textContent = decrypted;
+    document.getElementById('vpRehash').textContent    = reHash;
+    document.getElementById('vpMatch').textContent     = match
+      ? `✅ MATCH — ${decrypted.slice(0,16)}… == ${reHash.slice(0,16)}…`
+      : `❌ MISMATCH — ${decrypted.slice(0,16)}… ≠ ${reHash.slice(0,16)}…`;
+
+    document.getElementById('vpMatch').className =
+      'pipe-val ' + (match ? 'green-hl' : 'red-hl');
+    document.getElementById('vpCert').className =
+      'pipe-val ' + (certOk ? 'green-hl' : 'red-hl');
+    document.getElementById('vpDecrypted').className = 'pipe-val ' + (opts.fakeSig ? 'red-hl' : 'highlight');
+
+    const resultDiv = document.getElementById('verifyResult');
+    resultDiv.innerHTML = match
+      ? `<div class="verify-result success">
+          <div class="vr-icon">✅</div>
+          <div>
+            <div class="vr-title">Signature Verified — Message is Authentic</div>
+            <div class="vr-body">
+              Bob has confirmed: (1) Alice's certificate is signed by TrustRoot CA, proving her public key is genuine.
+              (2) The decrypted signature matches the re-computed hash of the received message.
+              This proves the email was written by Alice and was <strong>not altered in transit</strong>.
+              <br><br><strong>Non-repudiation:</strong> Alice cannot later deny sending this message — only her private key could have produced this signature.
+            </div>
+          </div>
+        </div>`
+      : `<div class="verify-result failure">
+          <div class="vr-icon">❌</div>
+          <div>
+            <div class="vr-title">Verification Failed — ${opts.reason || 'Message May Be Compromised'}</div>
+            <div class="vr-body">${opts.explanation || 'The computed hash does not match the decrypted signature. The message has been altered or the signature is invalid. Bob should reject this email.'}</div>
+          </div>
+        </div>`;
+    resultDiv.classList.remove('hidden');
+
+    document.getElementById('verifyPipeline').classList.remove('hidden');
+    document.getElementById('nextToTab5').disabled = false;
+    updateProgress(75);
+  }, delay);
+}
+
+/* ────────────────────────────────────
+   STEP 5 — ATTACK SIMULATION
+──────────────────────────────────── */
+function runAttack() {
+  const attack = document.querySelector('input[name="attack"]:checked').value;
+  const res = document.getElementById('attackResult');
+  res.innerHTML = '';
+  res.classList.add('hidden');
+
+  let title='', icon='', explanation='', passes=false, certOk=true;
+
+  const scenarios = {
+    tamper: {
+      title: 'Message Tampering Detected',
+      icon: '🔀',
+      run: () => {
+        const tamperedBody = state.email.body.replace('$124,500', '$999,500').replace('124,500','999,500');
+        const tamperedMsg  = state.email.msg.replace(state.email.body, tamperedBody);
+        return {
+          passes: false,
+          tampered: true,
+          msg: tamperedMsg,
+          reason: 'Message Tampering Detected',
+          explanation: `Mallory changed the dollar amount from $124,500 to $999,500. When Bob re-hashes the modified message, the result is completely different from the hash Alice originally signed. <strong>The hash function is a one-way avalanche function</strong> — even a single character change produces an entirely different hash.`,
+          concept: `<div class="callout red" style="margin-top:12px;"><strong>Why this works:</strong> Digital signatures create a cryptographic fingerprint of the <em>exact</em> message content. Any modification — even a space or punctuation change — is immediately detectable.</div>`
+        };
+      }
+    },
+    fakesig: {
+      title: 'Signature Forgery Detected',
+      icon: '🎭',
+      run: () => ({
+        passes: false,
+        fakeSig: true,
+        reason: 'Forged Signature Rejected',
+        explanation: `Mallory tried to sign the message with a different private key. When Bob decrypts the forged signature using Alice's legitimate public key (from her certificate), he recovers a hash that doesn't match the message. <strong>Only the holder of Alice's private key can create a signature that decrypts correctly with her public key.</strong>`,
+        concept: `<div class="callout red" style="margin-top:12px;"><strong>Why this works:</strong> RSA key pairs are mathematically linked. A signature created with the wrong private key cannot be verified with Alice's public key — the math simply doesn't work out.</div>`
+      })
+    },
+    fakecert: {
+      title: 'Certificate Spoofing Rejected',
+      icon: '🪪',
+      run: () => ({
+        passes: false,
+        certOk: false,
+        reason: 'Untrusted Certificate — CA Signature Missing',
+        explanation: `Mallory created a certificate claiming the identity "alice@seclab.edu" but with Mallory's own public key. However, this certificate was NOT signed by TrustRoot CA (or any trusted CA). Bob's email client checks the CA's signature on the certificate — it fails. <strong>Without a trusted CA signature, the certificate binding is worthless.</strong>`,
+        concept: `<div class="callout red" style="margin-top:12px;"><strong>Why this works:</strong> The chain of trust requires that certificates be signed by a CA whose root certificate is in Bob's trusted store. An unsigned or self-signed certificate from Mallory is immediately rejected.</div>`
+      })
+    },
+    replay: {
+      title: 'Replay Attack — Signature is Technically Valid',
+      icon: '📼',
+      run: () => ({
+        passes: true,
+        reason: 'Signature VALID — But Email is a Replay!',
+        explanation: `This is an important limitation. The original signature IS cryptographically valid — it was made by Alice with her legitimate private key. Digital signatures alone <strong>cannot prevent replay attacks</strong>. Defenses include: timestamps in the signed message, nonces (one-time values), and certificate expiration. Modern S/MIME and TLS include these protections.`,
+        concept: `<div class="callout amber" style="margin-top:12px;"><strong>Takeaway:</strong> Digital signatures provide authentication and integrity — but <em>freshness</em> must be handled separately (timestamps, nonces, sequence numbers). This is why protocols like TLS include a random nonce in every handshake.</div>`
+      })
+    }
+  };
+
+  const s = scenarios[attack].run();
+
+  setTimeout(() => {
+    const isPass = s.passes === true;
+    res.innerHTML = `
+      <div class="verify-result ${isPass ? 'success' : 'failure'}">
+        <div class="vr-icon">${scenarios[attack].icon}</div>
+        <div>
+          <div class="vr-title">${s.reason}</div>
+          <div class="vr-body">${s.explanation}</div>
+        </div>
+      </div>
+      ${s.concept || ''}
+    `;
+    res.classList.remove('hidden');
+  }, 300);
+}
+
+/* ────────────────────────────────────
+   QUIZ
+──────────────────────────────────── */
+const questions = [
+  {
+    q: "When Alice signs an email, what exactly does her private key encrypt?",
+    opts: [
+      "The entire email message body",
+      "A hash (digest) of the message",
+      "Bob's public key",
+      "The CA's certificate"
+    ],
+    correct: 1,
+    explanation: "A digital signature is created by hashing the message and then encrypting that hash with the sender's private key. Encrypting the full message would be too slow and is unnecessary for integrity purposes."
+  },
+  {
+    q: "What role does an X.509 certificate play in the signature verification process?",
+    opts: [
+      "It encrypts the email body so only Bob can read it",
+      "It contains the CA's private key for Bob to use",
+      "It binds Alice's public key to her identity, signed by a trusted CA",
+      "It replaces the need for a digital signature"
+    ],
+    correct: 2,
+    explanation: "An X.509 certificate is a CA-signed document that ties a public key to an identity. When Bob receives Alice's certificate, he can trust her public key because the CA vouches for it."
+  },
+  {
+    q: "Mallory intercepts Alice's email and changes one word. What happens when Bob verifies?",
+    opts: [
+      "The signature is still valid because only one word changed",
+      "Bob can't tell because he doesn't have Alice's original message",
+      "The re-computed hash will not match the decrypted signature — verification fails",
+      "The CA is notified automatically"
+    ],
+    correct: 2,
+    explanation: "Hash functions exhibit the avalanche effect — even a tiny change in input produces a completely different output. The re-computed hash of the tampered message will not match the hash Alice originally signed."
+  },
+  {
+    q: "What security property does a digital signature provide that standard encryption alone does NOT?",
+    opts: [
+      "Confidentiality — only Bob can read the message",
+      "Non-repudiation — Alice cannot later deny she sent the message",
+      "Anonymity — the sender's identity is hidden",
+      "Compression — the message is made smaller"
+    ],
+    correct: 1,
+    explanation: "Non-repudiation is a key property of digital signatures. Because only Alice's private key can create a valid signature verifiable with her public key, she cannot credibly deny having sent the message."
+  },
+  {
+    q: "Which attack type is NOT directly prevented by digital signatures alone?",
+    opts: [
+      "Message tampering",
+      "Signature forgery using a different key",
+      "Replay attacks using a previously captured valid message",
+      "Impersonation via a forged certificate"
+    ],
+    correct: 2,
+    explanation: "Replay attacks involve re-sending a valid message that was legitimately signed. The signature is cryptographically correct. Preventing replay attacks requires additional mechanisms like timestamps, nonces, or sequence numbers embedded in the signed content."
+  }
+];
+
+function buildQuiz() {
+  const c = document.getElementById('quizContainer');
+  c.innerHTML = '';
+  questions.forEach((q, qi) => {
+    let optsHTML = q.opts.map((o, oi) =>
+      `<label class="quiz-option">
+        <input type="radio" name="q${qi}" value="${oi}"> ${o}
+      </label>`
+    ).join('');
+    c.innerHTML += `
+      <div style="margin-bottom:20px;">
+        <div class="quiz-q">${qi+1}. ${q.q}</div>
+        ${optsHTML}
+        <div class="quiz-feedback" id="qfb${qi}"></div>
+      </div>`;
+  });
+}
+
+function checkAnswers() {
+  let score = 0;
+  questions.forEach((q, qi) => {
+    const sel = document.querySelector(`input[name="q${qi}"]:checked`);
+    const fb  = document.getElementById(`qfb${qi}`);
+    fb.style.display = 'block';
+    if (!sel) {
+      fb.className = 'quiz-feedback wrong';
+      fb.textContent = 'No answer selected.';
+      return;
+    }
+    const ans = parseInt(sel.value);
+    if (ans === q.correct) {
+      score++;
+      fb.className = 'quiz-feedback correct';
+      fb.innerHTML = `✅ Correct! ${q.explanation}`;
+    } else {
+      fb.className = 'quiz-feedback wrong';
+      fb.innerHTML = `❌ Incorrect. ${q.explanation}`;
+    }
+  });
+
+  const s = document.getElementById('quizScore');
+  const pct = Math.round((score/questions.length)*100);
+  s.innerHTML = `
+    <div class="verify-result ${pct>=80?'success':'failure'}">
+      <div class="vr-icon">${pct>=80?'🎉':'📚'}</div>
+      <div>
+        <div class="vr-title">Score: ${score}/${questions.length} (${pct}%)</div>
+        <div class="vr-body">${pct>=80
+          ? 'Excellent work! You have a solid understanding of digital signatures and PKI.'
+          : 'Review the lab steps and your textbook sections on digital signatures and X.509 certificates, then try again.'
+        }</div>
+      </div>
+    </div>`;
+  s.classList.remove('hidden');
+  document.getElementById('checkAnswersBtn').style.display = 'none';
+  document.getElementById('resetQuizBtn').style.display   = 'inline-flex';
+  updateProgress(100);
+}
+
+function resetQuiz() {
+  buildQuiz();
+  document.getElementById('quizScore').classList.add('hidden');
+  document.getElementById('checkAnswersBtn').style.display   = 'inline-flex';
+  document.getElementById('resetQuizBtn').style.display = 'none';
+}
+
+/* ────────────────────────────────────
+   TABS
+──────────────────────────────────── */
+function switchTab(panelId, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(panelId).classList.add('active');
+  btn.classList.add('active');
+}
+
+function switchTabById(panelId) {
+  const panels = document.querySelectorAll('.tab-panel');
+  const tabs   = document.querySelectorAll('.tab');
+  panels.forEach((p,i) => {
+    p.classList.toggle('active', p.id === panelId);
+    tabs[i].classList.toggle('active', p.id === panelId);
+  });
+}
+
+/* ────────────────────────────────────
+   PROGRESS
+──────────────────────────────────── */
+function updateProgress(pct) {
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+/* ────────────────────────────────────
+   THEME TOGGLE
+──────────────────────────────────── */
+document.getElementById('themeToggle').addEventListener('click', () => {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('themeIcon').textContent  = isDark ? '🌙' : '☀️';
+  document.getElementById('themeLabel').textContent = isDark ? 'Dark Mode' : 'Light Mode';
+});
+
+/* ────────────────────────────────────
+   INIT
+──────────────────────────────────── */
+buildQuiz();
+</script>
+</body>
+</html>
