@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MitigationLab — Security+ SY0-701 | Vulnerability Mitigation Simulator</title>
+<style>
+/* ── TOKENS ───────────────────────────────────────────── */
+:root {
+  --bg:          #f4f7f4;
+  --surface:     #ffffff;
+  --surface2:    #eef4ee;
+  --border:      #c8dfc8;
+  --text:        #1a2e1a;
+  --text-muted:  #4a6a4a;
+  --accent:      #2e7d32;
+  --accent-lt:   #4caf50;
+  --accent-glow: rgba(76,175,80,.18);
+  --red:         #c62828;
+  --red-lt:      #ffebee;
+  --amber:       #e65100;
+  --amber-lt:    #fff3e0;
+  --blue:        #1565c0;
+  --blue-lt:     #e3f2fd;
+  --purple:      #6a1b9a;
+  --purple-lt:   #f3e5f5;
+  --teal:        #00695c;
+  --teal-lt:     #e0f2f1;
+  --card-r:      12px;
+  --shadow:      0 2px 12px rgba(0,0,0,.08);
+  --shadow-lg:   0 8px 32px rgba(0,0,0,.14);
+  --font-head:   'Segoe UI', system-ui, sans-serif;
+  --font-mono:   'Courier New', monospace;
+  --transition:  .22s ease;
+}
+[data-theme="dark"] {
+  --bg:          #0d1a0d;
+  --surface:     #162416;
+  --surface2:    #1e2e1e;
+  --border:      #2e4a2e;
+  --text:        #d4e8d4;
+  --text-muted:  #7aad7a;
+  --accent:      #4caf50;
+  --accent-lt:   #81c784;
+  --accent-glow: rgba(76,175,80,.22);
+  --red:         #ef5350;
+  --red-lt:      #1a0a0a;
+  --amber:       #ffa726;
+  --amber-lt:    #1a1000;
+  --blue:        #42a5f5;
+  --blue-lt:     #0a1220;
+  --purple:      #ba68c8;
+  --purple-lt:   #150a1a;
+  --teal:        #4db6ac;
+  --teal-lt:     #0a1a18;
+  --shadow:      0 2px 12px rgba(0,0,0,.3);
+  --shadow-lg:   0 8px 32px rgba(0,0,0,.5);
+}
+
+/* ── RESET / BASE ─────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:var(--font-head);
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.6;
+  min-height:100vh;
+  transition:background var(--transition),color var(--transition);
+}
+h1,h2,h3,h4{line-height:1.25;font-weight:700;}
+button{cursor:pointer;font-family:inherit;}
+a{color:var(--accent-lt);}
+
+/* ── TOP BAR ──────────────────────────────────────────── */
+#topbar{
+  position:sticky;top:0;z-index:100;
+  background:var(--surface);
+  border-bottom:2px solid var(--accent);
+  padding:0 1.5rem;
+  display:flex;align-items:center;gap:1rem;
+  box-shadow:var(--shadow);
+  min-height:56px;
+}
+#topbar .brand{
+  font-size:1.15rem;font-weight:800;
+  color:var(--accent);letter-spacing:.02em;flex:1;
+}
+#topbar .brand span{color:var(--text-muted);font-weight:400;font-size:.85rem;margin-left:.5rem;}
+.score-badge{
+  background:var(--accent-glow);border:1.5px solid var(--accent);
+  color:var(--accent);
+  padding:.25rem .85rem;border-radius:20px;
+  font-size:.82rem;font-weight:700;white-space:nowrap;
+}
+#themeBtn{
+  background:none;border:1.5px solid var(--border);
+  color:var(--text);
+  border-radius:8px;padding:.3rem .7rem;font-size:1rem;
+  transition:border-color var(--transition),background var(--transition);
+}
+#themeBtn:hover{border-color:var(--accent);background:var(--accent-glow);}
+
+/* ── LAYOUT ───────────────────────────────────────────── */
+#app{max-width:1100px;margin:0 auto;padding:1.5rem 1rem 3rem;}
+
+/* ── NAV TABS ─────────────────────────────────────────── */
+.lab-nav{
+  display:flex;flex-wrap:wrap;gap:.5rem;
+  margin-bottom:1.5rem;
+}
+.lab-tab{
+  background:var(--surface);border:1.5px solid var(--border);
+  color:var(--text-muted);
+  border-radius:8px;padding:.45rem 1rem;font-size:.85rem;font-weight:600;
+  transition:all var(--transition);
+  display:flex;align-items:center;gap:.45rem;
+}
+.lab-tab:hover{border-color:var(--accent);color:var(--accent);}
+.lab-tab.active{
+  background:var(--accent);border-color:var(--accent);
+  color:#fff;
+}
+.lab-tab .dot{
+  width:8px;height:8px;border-radius:50%;
+  background:currentColor;opacity:.6;
+}
+.lab-tab.done .dot{opacity:1;background:#fff;}
+
+/* ── SECTION CARDS ────────────────────────────────────── */
+.lab-section{display:none;}
+.lab-section.active{display:block;}
+
+.card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--card-r);
+  box-shadow:var(--shadow);
+  padding:1.5rem;
+  margin-bottom:1.25rem;
+  transition:box-shadow var(--transition);
+}
+.card:hover{box-shadow:var(--shadow-lg);}
+.card-header{
+  display:flex;align-items:flex-start;gap:1rem;
+  margin-bottom:1rem;
+}
+.card-icon{
+  font-size:2rem;line-height:1;flex-shrink:0;
+  width:48px;height:48px;display:flex;align-items:center;justify-content:center;
+  border-radius:10px;
+}
+.card-title{font-size:1.1rem;font-weight:700;margin-bottom:.2rem;}
+.card-sub{font-size:.82rem;color:var(--text-muted);}
+
+/* ── OVERVIEW GRID ────────────────────────────────────── */
+.overview-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:1rem;margin-bottom:1.5rem;
+}
+.strat-card{
+  border-radius:var(--card-r);
+  border:2px solid var(--border);
+  padding:1.25rem;
+  background:var(--surface);
+  cursor:pointer;
+  transition:all var(--transition);
+  position:relative;overflow:hidden;
+}
+.strat-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:4px;
+  background:var(--strat-color);
+}
+.strat-card:hover{
+  border-color:var(--strat-color);
+  transform:translateY(-2px);
+  box-shadow:0 6px 24px rgba(0,0,0,.12);
+}
+.strat-card h3{font-size:1rem;margin:.6rem 0 .4rem;}
+.strat-card p{font-size:.82rem;color:var(--text-muted);line-height:1.5;}
+.strat-emoji{font-size:1.8rem;}
+.strat-badge{
+  display:inline-block;
+  background:var(--strat-color);color:#fff;
+  font-size:.68rem;font-weight:700;
+  padding:.15rem .55rem;border-radius:10px;letter-spacing:.04em;
+  margin-top:.5rem;
+}
+
+/* ── SCENARIO ENGINE ──────────────────────────────────── */
+.scenario-box{
+  background:var(--surface2);
+  border:1.5px solid var(--border);
+  border-left:5px solid var(--red);
+  border-radius:var(--card-r);
+  padding:1.25rem 1.5rem;
+  margin-bottom:1.25rem;
+}
+.scenario-box h3{
+  font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--red);margin-bottom:.6rem;display:flex;align-items:center;gap:.4rem;
+}
+.scenario-box p{font-size:.92rem;line-height:1.65;}
+.vuln-tags{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.75rem;}
+.vtag{
+  font-size:.72rem;font-weight:700;padding:.2rem .6rem;
+  border-radius:6px;border:1.5px solid;
+}
+
+.choice-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));
+  gap:.75rem;margin:1rem 0;
+}
+.choice-btn{
+  background:var(--surface);border:2px solid var(--border);
+  border-radius:10px;padding:.85rem 1rem;
+  font-size:.85rem;font-weight:600;color:var(--text);
+  text-align:left;
+  display:flex;flex-direction:column;gap:.25rem;
+  transition:all var(--transition);
+}
+.choice-btn:hover:not(:disabled){
+  border-color:var(--accent);background:var(--accent-glow);
+  transform:translateY(-1px);
+}
+.choice-btn.selected{border-color:var(--accent);background:var(--accent-glow);color:var(--accent);}
+.choice-btn.correct{border-color:#2e7d32;background:#e8f5e9;color:#1b5e20;}
+.choice-btn.wrong{border-color:#c62828;background:#ffebee;color:#b71c1c;}
+.choice-btn:disabled{cursor:not-allowed;opacity:.7;}
+.choice-btn .btn-icon{font-size:1.4rem;}
+.choice-btn .btn-lbl{font-size:.75rem;color:var(--text-muted);font-weight:400;}
+[data-theme="dark"] .choice-btn.correct{background:#0d2a0d;color:#81c784;}
+[data-theme="dark"] .choice-btn.wrong{background:#2a0d0d;color:#ef9a9a;}
+
+.feedback-box{
+  border-radius:10px;padding:1rem 1.25rem;
+  margin-top:1rem;font-size:.88rem;line-height:1.6;
+  display:none;
+}
+.feedback-box.show{display:block;}
+.feedback-box.correct{background:#e8f5e9;border:1.5px solid #4caf50;color:#1b5e20;}
+.feedback-box.wrong{background:#ffebee;border:1.5px solid #ef5350;color:#b71c1c;}
+.feedback-box.partial{background:var(--amber-lt);border:1.5px solid var(--amber);color:#bf360c;}
+[data-theme="dark"] .feedback-box.correct{background:#0d2a0d;color:#a5d6a7;border-color:#388e3c;}
+[data-theme="dark"] .feedback-box.wrong{background:#2a0d0d;color:#ffcdd2;border-color:#c62828;}
+[data-theme="dark"] .feedback-box.partial{background:#1a1000;color:#ffcc80;border-color:#e65100;}
+
+/* ── PATCH STATION ────────────────────────────────────── */
+.patch-table{width:100%;border-collapse:collapse;font-size:.85rem;}
+.patch-table th{
+  background:var(--surface2);color:var(--text-muted);
+  font-size:.73rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  padding:.55rem .75rem;text-align:left;
+  border-bottom:2px solid var(--border);
+}
+.patch-table td{
+  padding:.65rem .75rem;border-bottom:1px solid var(--border);vertical-align:middle;
+}
+.patch-table tr:last-child td{border-bottom:none;}
+.patch-table tr:hover td{background:var(--surface2);}
+.severity-badge{
+  font-size:.68rem;font-weight:700;padding:.2rem .55rem;
+  border-radius:6px;white-space:nowrap;
+}
+.sev-critical{background:#fce4ec;color:#c62828;border:1px solid #ef9a9a;}
+.sev-high{background:#fff3e0;color:#e65100;border:1px solid #ffcc02;}
+.sev-medium{background:#fff9c4;color:#827717;border:1px solid #f9a825;}
+.sev-low{background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7;}
+[data-theme="dark"] .sev-critical{background:#2a0d0d;color:#ff8a80;}
+[data-theme="dark"] .sev-high{background:#1a1000;color:#ffa726;}
+[data-theme="dark"] .sev-medium{background:#1a1a00;color:#fff176;}
+[data-theme="dark"] .sev-low{background:#0d2a0d;color:#69f0ae;}
+.patch-btn{
+  font-size:.75rem;padding:.3rem .7rem;border-radius:6px;
+  border:1.5px solid var(--accent);
+  background:transparent;color:var(--accent);font-weight:700;
+  transition:all .15s;
+}
+.patch-btn:hover{background:var(--accent);color:#fff;}
+.patch-btn.patched{
+  background:#e8f5e9;border-color:#4caf50;color:#2e7d32;cursor:default;
+}
+[data-theme="dark"] .patch-btn.patched{background:#0d2a0d;color:#69f0ae;}
+.patch-progress{
+  display:flex;align-items:center;gap:.75rem;margin-bottom:1rem;
+}
+.progress-bar{
+  flex:1;height:10px;background:var(--surface2);border-radius:5px;overflow:hidden;
+}
+.progress-fill{
+  height:100%;background:var(--accent);border-radius:5px;
+  transition:width .4s ease;width:0%;
+}
+
+/* ── HARDENING CHECKLIST ──────────────────────────────── */
+.harden-list{list-style:none;}
+.harden-item{
+  display:flex;align-items:flex-start;gap:.85rem;
+  padding:.85rem 1rem;border-radius:8px;margin-bottom:.5rem;
+  border:1.5px solid var(--border);background:var(--surface);
+  cursor:pointer;transition:all var(--transition);
+  font-size:.875rem;
+}
+.harden-item:hover{border-color:var(--accent);background:var(--accent-glow);}
+.harden-item.checked{
+  border-color:#4caf50;background:#e8f5e9;
+  text-decoration:line-through;color:var(--text-muted);
+}
+[data-theme="dark"] .harden-item.checked{background:#0d2a0d;}
+.harden-cb{
+  width:20px;height:20px;border:2px solid var(--border);
+  border-radius:4px;flex-shrink:0;margin-top:1px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.8rem;transition:all .15s;
+}
+.harden-item.checked .harden-cb{background:#4caf50;border-color:#4caf50;color:#fff;}
+.harden-category{
+  font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--text-muted);margin:.75rem 0 .35rem;
+}
+
+/* ── NETWORK SEGMENTATION BUILDER ─────────────────────── */
+.net-canvas{
+  background:var(--surface2);border:2px dashed var(--border);
+  border-radius:var(--card-r);padding:1.25rem;min-height:300px;
+  position:relative;font-size:.8rem;
+}
+.zone{
+  border-radius:10px;padding:1rem;margin-bottom:.75rem;
+  border:2px solid;position:relative;
+}
+.zone-label{
+  font-size:.7rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
+  margin-bottom:.65rem;
+}
+.zone-assets{display:flex;flex-wrap:wrap;gap:.5rem;}
+.asset-chip{
+  background:var(--surface);border:1.5px solid;
+  border-radius:6px;padding:.3rem .65rem;
+  font-size:.75rem;font-weight:600;cursor:grab;
+  display:flex;align-items:center;gap:.35rem;
+  user-select:none;transition:box-shadow .15s;
+}
+.asset-chip:active{cursor:grabbing;}
+.asset-chip.dragging{opacity:.5;box-shadow:0 4px 14px rgba(0,0,0,.2);}
+.drop-zone{
+  min-height:60px;border:2px dashed transparent;border-radius:8px;
+  transition:all .2s;display:flex;flex-wrap:wrap;gap:.5rem;
+  padding:.35rem;margin-top:.5rem;
+  align-items:flex-start;align-content:flex-start;
+}
+.drop-zone.drag-over{
+  border-color:var(--accent);background:var(--accent-glow);
+}
+.drop-zone-hint{
+  font-size:.75rem;color:var(--text-muted);
+  font-style:italic;padding:.25rem;
+  width:100%;text-align:center;
+}
+
+.seg-unplaced{
+  display:flex;flex-wrap:wrap;gap:.5rem;
+  background:var(--surface);border:1.5px solid var(--border);
+  border-radius:10px;padding:.85rem;margin-bottom:1rem;
+}
+.seg-check-btn{
+  background:var(--accent);color:#fff;
+  border:none;border-radius:8px;padding:.6rem 1.4rem;
+  font-size:.88rem;font-weight:700;
+  transition:opacity .15s;
+}
+.seg-check-btn:hover{opacity:.88;}
+
+/* ── ISOLATION DECISION ───────────────────────────────── */
+.incident-card{
+  border:2px solid var(--red);border-radius:var(--card-r);
+  padding:1.25rem;background:var(--red-lt);margin-bottom:1rem;
+}
+[data-theme="dark"] .incident-card{background:#1a0404;}
+.incident-card h4{color:var(--red);font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;margin-bottom:.5rem;}
+.incident-card p{font-size:.9rem;line-height:1.6;}
+.system-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.65rem;
+  margin:1rem 0;
+}
+.sys-card{
+  background:var(--surface);border:2px solid var(--border);
+  border-radius:10px;padding:.85rem .75rem;text-align:center;
+  cursor:pointer;transition:all var(--transition);font-size:.8rem;
+}
+.sys-card .sys-icon{font-size:1.6rem;display:block;margin-bottom:.3rem;}
+.sys-card.isolated{
+  border-color:#c62828;background:#ffebee;
+  position:relative;
+}
+[data-theme="dark"] .sys-card.isolated{background:#1a0404;}
+.sys-card.isolated::after{
+  content:'🔒 ISOLATED';
+  position:absolute;bottom:-1px;left:0;right:0;
+  background:#c62828;color:#fff;
+  font-size:.6rem;font-weight:800;
+  padding:.15rem;border-radius:0 0 8px 8px;letter-spacing:.05em;
+}
+.sys-card.safe{border-color:#4caf50;background:#e8f5e9;}
+[data-theme="dark"] .sys-card.safe{background:#0d2a0d;}
+.sys-card:hover:not(.disabled){transform:scale(1.04);}
+.iso-action-bar{
+  display:flex;gap:.75rem;flex-wrap:wrap;align-items:center;margin:1rem 0;
+}
+.iso-btn{
+  padding:.5rem 1.1rem;border-radius:8px;font-size:.82rem;font-weight:700;
+  border:1.5px solid;transition:all .15s;
+}
+.iso-btn-red{border-color:var(--red);color:var(--red);background:var(--red-lt);}
+.iso-btn-red:hover{background:var(--red);color:#fff;}
+.iso-btn-green{border-color:#4caf50;color:#2e7d32;background:#e8f5e9;}
+.iso-btn-green:hover{background:#4caf50;color:#fff;}
+[data-theme="dark"] .iso-btn-green{color:#81c784;background:#0d2a0d;}
+
+/* ── ACCESS CONTROL BUILDER ───────────────────────────── */
+.acl-table{width:100%;border-collapse:collapse;font-size:.82rem;}
+.acl-table th{
+  background:var(--surface2);color:var(--text-muted);
+  font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  padding:.5rem .75rem;text-align:left;
+  border-bottom:2px solid var(--border);
+}
+.acl-table td{padding:.55rem .75rem;border-bottom:1px solid var(--border);vertical-align:middle;}
+.acl-table tr:last-child td{border-bottom:none;}
+.perm-select{
+  background:var(--surface2);border:1.5px solid var(--border);
+  color:var(--text);border-radius:6px;padding:.28rem .55rem;
+  font-size:.78rem;font-family:inherit;cursor:pointer;
+}
+.perm-select:focus{outline:2px solid var(--accent);border-color:var(--accent);}
+.perm-select.perm-allow{background:#e8f5e9;border-color:#4caf50;color:#2e7d32;}
+.perm-select.perm-deny{background:#ffebee;border-color:#ef5350;color:#c62828;}
+.perm-select.perm-ro{background:var(--blue-lt);border-color:var(--blue);color:var(--blue);}
+[data-theme="dark"] .perm-select.perm-allow{background:#0d2a0d;color:#69f0ae;}
+[data-theme="dark"] .perm-select.perm-deny{background:#2a0d0d;color:#ff8a80;}
+[data-theme="dark"] .perm-select.perm-ro{background:#0a1220;color:#90caf9;}
+.user-role-chip{
+  display:inline-flex;align-items:center;gap:.35rem;
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:6px;padding:.2rem .5rem;font-size:.75rem;font-weight:600;
+}
+.acl-score{
+  display:flex;align-items:center;gap:.5rem;font-size:.82rem;font-weight:700;margin-top:.75rem;
+}
+.acl-score .acl-pts{color:var(--accent);font-size:1.1rem;}
+
+/* ── PROGRESS / SHARED ────────────────────────────────── */
+.btn-primary{
+  background:var(--accent);color:#fff;
+  border:none;border-radius:8px;
+  padding:.6rem 1.4rem;font-size:.88rem;font-weight:700;
+  transition:opacity .15s;display:inline-flex;align-items:center;gap:.4rem;
+}
+.btn-primary:hover{opacity:.88;}
+.btn-secondary{
+  background:var(--surface);color:var(--text);
+  border:1.5px solid var(--border);border-radius:8px;
+  padding:.55rem 1.2rem;font-size:.85rem;font-weight:600;
+  transition:all var(--transition);
+}
+.btn-secondary:hover{border-color:var(--accent);color:var(--accent);}
+
+.section-intro{
+  border-radius:var(--card-r);
+  background:var(--surface2);border:1.5px solid var(--border);
+  padding:1.1rem 1.4rem;margin-bottom:1.25rem;
+  font-size:.88rem;line-height:1.65;
+}
+.section-intro strong{color:var(--accent);}
+
+.tag{
+  display:inline-flex;align-items:center;gap:.3rem;
+  font-size:.7rem;font-weight:700;padding:.18rem .5rem;
+  border-radius:5px;border:1.5px solid;
+  text-transform:uppercase;letter-spacing:.04em;
+}
+
+.next-bar{
+  display:flex;justify-content:flex-end;gap:.75rem;
+  margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border);
+}
+
+/* ── RESULTS ──────────────────────────────────────────── */
+.results-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;
+  margin:1.25rem 0;
+}
+.result-cell{
+  background:var(--surface);border:2px solid var(--border);
+  border-radius:var(--card-r);padding:1rem;text-align:center;
+}
+.result-cell .r-score{font-size:2rem;font-weight:800;color:var(--accent);}
+.result-cell .r-label{font-size:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;}
+.result-cell .r-name{font-size:.88rem;font-weight:700;margin-bottom:.25rem;}
+.final-badge{
+  text-align:center;padding:1.5rem;
+  background:linear-gradient(135deg,var(--accent),var(--accent-lt));
+  border-radius:var(--card-r);color:#fff;margin-bottom:1.25rem;
+}
+.final-badge h2{font-size:2rem;}
+.final-badge p{opacity:.88;font-size:.92rem;}
+
+/* ── RESPONSIVE ───────────────────────────────────────── */
+@media(max-width:600px){
+  .choice-grid{grid-template-columns:1fr 1fr;}
+  .overview-grid{grid-template-columns:1fr;}
+  .results-grid{grid-template-columns:1fr 1fr;}
+}
+
+/* ── ANIMATIONS ───────────────────────────────────────── */
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.lab-section.active{animation:fadeIn .3s ease both;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.pulse{animation:pulse 1.5s infinite;}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<header id="topbar">
+  <div class="brand">🔐 MitigationLab <span>CompTIA Security+ SY0-701</span></div>
+  <div class="score-badge" id="globalScore">Score: 0 / 0</div>
+  <button id="themeBtn" onclick="toggleTheme()" title="Toggle light/dark mode">🌙</button>
+</header>
+
+<div id="app">
+
+  <!-- TAB NAV -->
+  <nav class="lab-nav" id="labNav">
+    <button class="lab-tab active" data-tab="0" onclick="goTab(0)"><span class="dot"></span>Overview</button>
+    <button class="lab-tab" data-tab="1" onclick="goTab(1)"><span class="dot"></span>1 · Patching</button>
+    <button class="lab-tab" data-tab="2" onclick="goTab(2)"><span class="dot"></span>2 · Hardening</button>
+    <button class="lab-tab" data-tab="3" onclick="goTab(3)"><span class="dot"></span>3 · Segmentation</button>
+    <button class="lab-tab" data-tab="4" onclick="goTab(4)"><span class="dot"></span>4 · Isolation</button>
+    <button class="lab-tab" data-tab="5" onclick="goTab(5)"><span class="dot"></span>5 · Access Control</button>
+    <button class="lab-tab" data-tab="6" onclick="goTab(6)"><span class="dot"></span>📊 Results</button>
+  </nav>
+
+  <!-- ════════ TAB 0: OVERVIEW ════════ -->
+  <section class="lab-section active" id="tab-0">
+    <div class="card">
+      <h2 style="margin-bottom:.5rem;">Vulnerability Mitigation Simulator</h2>
+      <p style="color:var(--text-muted);font-size:.9rem;margin-bottom:1.25rem;">Five interactive labs aligned to <strong>SY0-701 Domain 4 — Security Operations</strong>. Work through each station to earn points and master mitigation strategies.</p>
+
+      <div class="overview-grid">
+        <div class="strat-card" style="--strat-color:#1565c0" onclick="goTab(1)">
+          <div class="strat-emoji">🩹</div>
+          <h3>Patching</h3>
+          <p>Apply CVE patches in priority order. Understand CVSS scoring and patch windows to reduce exploit windows.</p>
+          <span class="strat-badge" style="background:#1565c0">Lab 1 · 25 pts</span>
+        </div>
+        <div class="strat-card" style="--strat-color:#6a1b9a" onclick="goTab(2)">
+          <div class="strat-emoji">🔧</div>
+          <h3>Hardening</h3>
+          <p>Configure a server to eliminate unnecessary services, enforce secure defaults, and reduce attack surface.</p>
+          <span class="strat-badge" style="background:#6a1b9a">Lab 2 · 25 pts</span>
+        </div>
+        <div class="strat-card" style="--strat-color:#00695c" onclick="goTab(3)">
+          <div class="strat-emoji">🗂️</div>
+          <h3>Network Segmentation</h3>
+          <p>Place assets into correct network zones (DMZ, internal, restricted). Limit lateral movement paths.</p>
+          <span class="strat-badge" style="background:#00695c">Lab 3 · 25 pts</span>
+        </div>
+        <div class="strat-card" style="--strat-color:#c62828" onclick="goTab(4)">
+          <div class="strat-emoji">🚨</div>
+          <h3>Isolation</h3>
+          <p>Respond to an active incident. Decide which systems to isolate to contain a spreading threat.</p>
+          <span class="strat-badge" style="background:#c62828">Lab 4 · 25 pts</span>
+        </div>
+        <div class="strat-card" style="--strat-color:#e65100" onclick="goTab(5)">
+          <div class="strat-emoji">🔑</div>
+          <h3>Access Control</h3>
+          <p>Build an ACL matrix. Apply least privilege and role-based access to protect sensitive resources.</p>
+          <span class="strat-badge" style="background:#e65100">Lab 5 · 25 pts</span>
+        </div>
+      </div>
+
+      <div style="background:var(--accent-glow);border:1.5px solid var(--accent);border-radius:10px;padding:1rem 1.25rem;font-size:.86rem;line-height:1.7;">
+        <strong>🎯 Learning Objectives:</strong> After completing all labs you will be able to <em>explain</em> how patching, hardening, segmentation, isolation, and access control function; <em>describe</em> how each is implemented; and <em>match</em> each strategy to the vulnerability types it best addresses. Click any lab card or use the tabs above to begin.
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════ TAB 1: PATCHING ════════ -->
+  <section class="lab-section" id="tab-1">
+    <div class="section-intro">
+      <strong>🩹 Lab 1 — Patch Management Station</strong><br>
+      Your organization's vulnerability scanner returned 8 CVEs. Prioritize and apply patches in the correct order. Systems must be patched from <em>Critical → High → Medium → Low</em>. Earn 25 points for completing all patches correctly.
+    </div>
+
+    <div class="card">
+      <div class="patch-progress">
+        <span style="font-size:.8rem;color:var(--text-muted);white-space:nowrap;">Patches Applied:</span>
+        <div class="progress-bar"><div class="progress-fill" id="patchFill"></div></div>
+        <span id="patchCount" style="font-size:.8rem;font-weight:700;white-space:nowrap;">0 / 8</span>
+      </div>
+
+      <!-- Scenario quiz -->
+      <div class="scenario-box">
+        <h3>⚠️ Scenario Question</h3>
+        <p>A CVE with a <strong>CVSS score of 9.8</strong> exists on your web server. A patch is available. An intern suggests waiting until the next monthly maintenance window (21 days). What should you do?</p>
+        <div id="patchQ1" style="margin-top:.85rem;">
+          <div class="choice-grid">
+            <button class="choice-btn" onclick="answerPatchQ(this,'wrong')">
+              <span class="btn-icon">📅</span>Wait — monthly window is fine<span class="btn-lbl">Defer 21 days</span>
+            </button>
+            <button class="choice-btn" onclick="answerPatchQ(this,'correct')">
+              <span class="btn-icon">⚡</span>Patch within 24–72 hours<span class="btn-lbl">Emergency change window</span>
+            </button>
+            <button class="choice-btn" onclick="answerPatchQ(this,'wrong')">
+              <span class="btn-icon">🛡️</span>Just add a firewall rule<span class="btn-lbl">Block until next window</span>
+            </button>
+            <button class="choice-btn" onclick="answerPatchQ(this,'wrong')">
+              <span class="btn-icon">📝</span>Document it and review quarterly<span class="btn-lbl">Risk acceptance</span>
+            </button>
+          </div>
+          <div class="feedback-box" id="patchQ1Feedback"></div>
+        </div>
+      </div>
+
+      <h3 style="font-size:.9rem;margin-bottom:.75rem;">Patch Queue — Click to apply each patch in priority order:</h3>
+      <table class="patch-table" id="patchTable">
+        <thead>
+          <tr>
+            <th>CVE ID</th><th>System</th><th>Vulnerability</th><th>CVSS</th><th>Severity</th><th>Exploit Available</th><th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="patchBody"></tbody>
+      </table>
+      <div class="feedback-box" id="patchOrderFeedback" style="margin-top:.75rem;"></div>
+      <div class="next-bar">
+        <button class="btn-primary" onclick="goTab(2)">Next Lab: Hardening →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════ TAB 2: HARDENING ════════ -->
+  <section class="lab-section" id="tab-2">
+    <div class="section-intro">
+      <strong>🔧 Lab 2 — Server Hardening Checklist</strong><br>
+      You are configuring a new Linux web server before production deployment. Check every control that should be <em>enabled, disabled, or configured</em> to reduce attack surface. Missing critical items will reduce your score.
+    </div>
+
+    <div class="card">
+      <div class="patch-progress">
+        <span style="font-size:.8rem;color:var(--text-muted);white-space:nowrap;">Controls Applied:</span>
+        <div class="progress-bar"><div class="progress-fill" id="hardenFill"></div></div>
+        <span id="hardenCount" style="font-size:.8rem;font-weight:700;white-space:nowrap;">0 / 0</span>
+      </div>
+
+      <div id="hardenList"></div>
+
+      <div class="scenario-box" style="margin-top:1.25rem;">
+        <h3>❓ Hardening Concept Check</h3>
+        <p>Which definition best describes <strong>"attack surface reduction"</strong> as it relates to hardening?</p>
+        <div class="choice-grid" style="margin-top:.85rem;">
+          <button class="choice-btn" onclick="answerHardenQ(this,'wrong')">
+            <span class="btn-icon">🔥</span>Installing a firewall<span class="btn-lbl">Network perimeter only</span>
+          </button>
+          <button class="choice-btn" onclick="answerHardenQ(this,'correct')">
+            <span class="btn-icon">🗑️</span>Removing all non-essential features, services, and accounts<span class="btn-lbl">Minimize exploitable components</span>
+          </button>
+          <button class="choice-btn" onclick="answerHardenQ(this,'wrong')">
+            <span class="btn-icon">🔐</span>Encrypting all data at rest<span class="btn-lbl">Data protection</span>
+          </button>
+          <button class="choice-btn" onclick="answerHardenQ(this,'wrong')">
+            <span class="btn-icon">📋</span>Performing a risk assessment<span class="btn-lbl">Risk management</span>
+          </button>
+        </div>
+        <div class="feedback-box" id="hardenQFeedback"></div>
+      </div>
+
+      <div class="next-bar">
+        <button class="btn-primary" onclick="scoreHarden();goTab(3)">Next Lab: Segmentation →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════ TAB 3: SEGMENTATION ════════ -->
+  <section class="lab-section" id="tab-3">
+    <div class="section-intro">
+      <strong>🗂️ Lab 3 — Network Segmentation Builder</strong><br>
+      Drag each network asset into the correct zone. Proper placement limits lateral movement and contains breaches. <em>DMZ</em> = public-facing; <em>Corporate LAN</em> = internal users; <em>Restricted/OT</em> = critical/sensitive systems.
+    </div>
+
+    <div class="card">
+      <h4 style="font-size:.82rem;color:var(--text-muted);margin-bottom:.5rem;">🔗 Unplaced Assets — drag into a zone:</h4>
+      <div class="seg-unplaced" id="unplacedPool"></div>
+
+      <div class="net-canvas" id="netCanvas">
+        <div class="zone" style="border-color:#1565c0;background:rgba(21,101,192,.07);" id="zone-dmz">
+          <div class="zone-label" style="color:#1565c0">🌐 DMZ (Demilitarized Zone)</div>
+          <div class="drop-zone" id="drop-dmz" ondragover="dz_over(event)" ondrop="dz_drop(event,'dmz')" ondragleave="dz_leave(event)">
+            <span class="drop-zone-hint">Drop public-facing assets here</span>
+          </div>
+        </div>
+        <div class="zone" style="border-color:#00695c;background:rgba(0,105,92,.07);" id="zone-lan">
+          <div class="zone-label" style="color:#00695c">🏢 Corporate LAN (Internal)</div>
+          <div class="drop-zone" id="drop-lan" ondragover="dz_over(event)" ondrop="dz_drop(event,'lan')" ondragleave="dz_leave(event)">
+            <span class="drop-zone-hint">Drop internal user systems here</span>
+          </div>
+        </div>
+        <div class="zone" style="border-color:#c62828;background:rgba(198,40,40,.07);" id="zone-ot">
+          <div class="zone-label" style="color:#c62828">🔒 Restricted / OT Network</div>
+          <div class="drop-zone" id="drop-ot" ondragover="dz_over(event)" ondrop="dz_drop(event,'ot')" ondragleave="dz_leave(event)">
+            <span class="drop-zone-hint">Drop critical/sensitive systems here</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:.75rem;margin-top:1rem;flex-wrap:wrap;">
+        <button class="seg-check-btn" onclick="checkSegmentation()">✅ Check My Placement</button>
+        <button class="btn-secondary" onclick="resetSegmentation()">↺ Reset</button>
+      </div>
+      <div class="feedback-box" id="segFeedback"></div>
+
+      <div class="next-bar">
+        <button class="btn-primary" onclick="goTab(4)">Next Lab: Isolation →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════ TAB 4: ISOLATION ════════ -->
+  <section class="lab-section" id="tab-4">
+    <div class="section-intro">
+      <strong>🚨 Lab 4 — Incident Isolation Decision Simulator</strong><br>
+      A ransomware infection has been detected. Click systems to <strong>isolate</strong> (network-disconnect) or <strong>mark safe</strong>. Isolate compromised and at-risk systems; do <em>not</em> isolate clean systems needed for business continuity.
+    </div>
+
+    <div class="card">
+      <div class="incident-card">
+        <h4>⚠️ ACTIVE INCIDENT — T+00:00</h4>
+        <p>Security alerts show <strong>WORKSTATION-7</strong> beaconing to a known C2 IP on port 4444. Network traffic analysis shows lateral movement attempts from WORKSTATION-7 toward the file server and HR database. The accounting workstation is clean but on the same VLAN. The domain controller is critical for authentication — isolating it will lock out all users.</p>
+      </div>
+
+      <h4 style="margin-bottom:.65rem;font-size:.88rem;">Click each system to toggle isolation status:</h4>
+      <div class="system-grid" id="systemGrid"></div>
+
+      <div class="iso-action-bar">
+        <button class="iso-btn iso-btn-red" onclick="toggleAllIso(true)">🔒 Isolate All</button>
+        <button class="iso-btn iso-btn-green" onclick="toggleAllIso(false)">✅ Clear All</button>
+        <button class="btn-primary" onclick="checkIsolation()">📋 Submit Decision</button>
+      </div>
+      <div class="feedback-box" id="isoFeedback"></div>
+
+      <div class="scenario-box" style="margin-top:1.25rem;">
+        <h3>❓ Isolation vs. Shutdown</h3>
+        <p>Why is <strong>network isolation</strong> generally preferred over <strong>powering off</strong> a compromised system during an active incident?</p>
+        <div class="choice-grid" style="margin-top:.85rem;">
+          <button class="choice-btn" onclick="answerIsoQ(this,'wrong')">
+            <span class="btn-icon">⚡</span>Faster to execute<span class="btn-lbl">Speed advantage</span>
+          </button>
+          <button class="choice-btn" onclick="answerIsoQ(this,'correct')">
+            <span class="btn-icon">🔍</span>Preserves volatile memory (RAM) evidence for forensics<span class="btn-lbl">Evidence preservation</span>
+          </button>
+          <button class="choice-btn" onclick="answerIsoQ(this,'wrong')">
+            <span class="btn-icon">💸</span>Less expensive<span class="btn-lbl">Cost saving</span>
+          </button>
+          <button class="choice-btn" onclick="answerIsoQ(this,'wrong')">
+            <span class="btn-icon">🛡️</span>Stops the malware immediately<span class="btn-lbl">Malware termination</span>
+          </button>
+        </div>
+        <div class="feedback-box" id="isoQFeedback"></div>
+      </div>
+
+      <div class="next-bar">
+        <button class="btn-primary" onclick="goTab(5)">Next Lab: Access Control →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════ TAB 5: ACCESS CONTROL ════════ -->
+  <section class="lab-section" id="tab-5">
+    <div class="section-intro">
+      <strong>🔑 Lab 5 — Access Control Matrix Builder</strong><br>
+      Apply the <em>principle of least privilege</em>. Set the correct permission for each user role / resource pair. Use <strong>Allow</strong>, <strong>Read-Only</strong>, or <strong>Deny</strong>. Earn points for each correct assignment.
+    </div>
+
+    <div class="card">
+      <div class="scenario-box">
+        <h3>🏢 Organization Context</h3>
+        <p>MidWest Financial Services stores customer PII, financial records, and payroll data. Roles: <strong>IT Admin</strong>, <strong>HR Manager</strong>, <strong>Accountant</strong>, <strong>Help Desk</strong>, <strong>External Auditor</strong>. Build the ACL that satisfies least privilege and regulatory compliance.</p>
+      </div>
+
+      <table class="acl-table" id="aclTable">
+        <thead id="aclHead"></thead>
+        <tbody id="aclBody"></tbody>
+      </table>
+
+      <div class="acl-score" id="aclScore"></div>
+
+      <div style="display:flex;gap:.75rem;margin-top:1rem;flex-wrap:wrap;">
+        <button class="btn-primary" onclick="checkACL()">✅ Grade My ACL</button>
+        <button class="btn-secondary" onclick="resetACL()">↺ Reset</button>
+      </div>
+      <div class="feedback-box" id="aclFeedback"></div>
+
+      <div class="next-bar">
+        <button class="btn-primary" onclick="goTab(6)">📊 View Results →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════ TAB 6: RESULTS ════════ -->
+  <section class="lab-section" id="tab-6">
+    <div id="resultsContainer">
+      <div class="final-badge" id="finalBadge">
+        <div style="font-size:2.5rem;margin-bottom:.5rem;">🎓</div>
+        <h2 id="finalPct">—</h2>
+        <p id="finalMsg">Complete all labs to see your final score.</p>
+      </div>
+      <div class="results-grid" id="resultsGrid"></div>
+
+      <div class="card">
+        <h3 style="margin-bottom:.85rem;">📚 Key Takeaways — Mitigation Strategy Summary</h3>
+        <div id="takeawayList"></div>
+      </div>
+
+      <div style="text-align:center;margin-top:1rem;">
+        <button class="btn-primary" onclick="resetAll()">↺ Restart All Labs</button>
+      </div>
+    </div>
+  </section>
+
+</div><!-- #app -->
+
+<script>
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   STATE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+const SCORES = {patch:0,harden:0,seg:0,iso:0,acl:0};
+const MAX    = {patch:25,harden:25,seg:25,iso:25,acl:25};
+let patchAppliedOrder=[], patchQuizDone=false;
+let hardenQuizDone=false;
+let segPlaced={}, segChecked=false;
+let isoStates={}, isoChecked=false, isoQuizDone=false;
+let aclChecked=false;
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   THEME
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function toggleTheme(){
+  const d=document.documentElement;
+  const isDark=d.getAttribute('data-theme')==='dark';
+  d.setAttribute('data-theme',isDark?'light':'dark');
+  document.getElementById('themeBtn').textContent=isDark?'🌙':'☀️';
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   TABS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function goTab(n){
+  document.querySelectorAll('.lab-section').forEach((s,i)=>{
+    s.classList.toggle('active',i===n);
+  });
+  document.querySelectorAll('.lab-tab').forEach((t,i)=>{
+    t.classList.toggle('active',i===n);
+  });
+  if(n===6) renderResults();
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   GLOBAL SCORE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function updateGlobal(){
+  const total=Object.values(SCORES).reduce((a,b)=>a+b,0);
+  const max=Object.values(MAX).reduce((a,b)=>a+b,0);
+  document.getElementById('globalScore').textContent=`Score: ${total} / ${max}`;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   LAB 1 — PATCHING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+const PATCHES=[
+  {id:'CVE-2024-1131',sys:'Web Server (Apache)',vuln:'Remote Code Execution',cvss:9.8,sev:'Critical',exploit:true},
+  {id:'CVE-2024-0582',sys:'Linux Kernel',vuln:'Privilege Escalation',cvss:8.8,sev:'High',exploit:true},
+  {id:'CVE-2024-2201',sys:'OpenSSL Library',vuln:'Memory Corruption',cvss:8.1,sev:'High',exploit:false},
+  {id:'CVE-2023-4911',sys:'glibc (DNS)',vuln:'Buffer Overflow',cvss:7.8,sev:'High',exploit:true},
+  {id:'CVE-2024-0679',sys:'SSH Daemon',vuln:'Authentication Bypass',cvss:6.5,sev:'Medium',exploit:false},
+  {id:'CVE-2024-1100',sys:'PHP Runtime',vuln:'SQL Injection Vector',cvss:6.2,sev:'Medium',exploit:false},
+  {id:'CVE-2023-5000',sys:'cURL Library',vuln:'Information Disclosure',cvss:4.3,sev:'Low',exploit:false},
+  {id:'CVE-2024-0001',sys:'Log Rotation',vuln:'Race Condition',cvss:3.1,sev:'Low',exploit:false},
+];
+const SORDER=['Critical','High','Medium','Low'];
+let patchState=PATCHES.map(p=>({...p,patched:false}));
+
+function renderPatchTable(){
+  const tbody=document.getElementById('patchBody');
+  tbody.innerHTML='';
+  patchState.forEach((p,i)=>{
+    const sevClass='sev-'+p.sev.toLowerCase();
+    tbody.innerHTML+=`<tr>
+      <td style="font-family:var(--font-mono);font-size:.78rem;">${p.id}</td>
+      <td>${p.sys}</td>
+      <td>${p.vuln}</td>
+      <td><strong>${p.cvss}</strong></td>
+      <td><span class="severity-badge ${sevClass}">${p.sev}</span></td>
+      <td>${p.exploit?'<span style="color:var(--red);font-weight:700;">YES ⚠️</span>':'No'}</td>
+      <td><button class="patch-btn ${p.patched?'patched':''}" id="pb-${i}" onclick="applyPatch(${i})">${p.patched?'✓ Patched':'Patch'}</button></td>
+    </tr>`;
+  });
+  updatePatchProgress();
+}
+
+function applyPatch(i){
+  if(patchState[i].patched) return;
+  patchState[i].patched=true;
+  patchAppliedOrder.push(patchState[i].sev);
+  renderPatchTable();
+  checkPatchOrder();
+}
+
+function updatePatchProgress(){
+  const done=patchState.filter(p=>p.patched).length;
+  const pct=(done/patchState.length)*100;
+  document.getElementById('patchFill').style.width=pct+'%';
+  document.getElementById('patchCount').textContent=`${done} / ${patchState.length}`;
+  if(done===patchState.length && patchQuizDone){
+    SCORES.patch=25; updateGlobal(); markTabDone(1);
+  }
+}
+
+function checkPatchOrder(){
+  const fb=document.getElementById('patchOrderFeedback');
+  const ord=patchAppliedOrder;
+  if(ord.length<2) return;
+  let bad=false;
+  for(let j=1;j<ord.length;j++){
+    if(SORDER.indexOf(ord[j])<SORDER.indexOf(ord[j-1])){bad=true;break;}
+  }
+  fb.className='feedback-box show '+(bad?'wrong':'correct');
+  if(bad){
+    fb.innerHTML='⚠️ <strong>Out of order!</strong> Always patch Critical → High → Medium → Low. A lower-severity patch applied before a Critical CVE leaves a high-risk window open. Continue — but remember the correct priority order.';
+  } else {
+    fb.innerHTML='✅ <strong>Correct priority order!</strong> Patching Critical and High-severity CVEs first minimizes the exploit window for the most dangerous vulnerabilities. CVSS ≥ 9.0 = patch within 24–72 hours; CVSS 7–8.9 = patch within 30 days.';
+  }
+}
+
+function answerPatchQ(btn, result){
+  if(patchQuizDone) return;
+  patchQuizDone=true;
+  const btns=btn.closest('.choice-grid').querySelectorAll('.choice-btn');
+  btns.forEach(b=>b.disabled=true);
+  btn.classList.add(result);
+  const fb=document.getElementById('patchQ1Feedback');
+  fb.classList.add('show');
+  if(result==='correct'){
+    fb.className='feedback-box show correct';
+    fb.innerHTML='✅ <strong>Correct!</strong> A CVSS 9.8 ("Critical") with a public exploit requires an <em>emergency change window</em> — do not wait 21 days. NIST SP 800-40 and most enterprise policies mandate Critical CVEs be patched within 48–72 hours. Temporary mitigations (WAF rules, firewall blocks) may reduce exposure while the patch is prepared.';
+    SCORES.patch+=5;
+  } else {
+    fb.className='feedback-box show wrong';
+    fb.innerHTML='❌ <strong>Incorrect.</strong> A CVSS 9.8 with a public exploit is an emergency. Waiting 21 days, relying solely on a firewall rule, or deferring to quarterly review all violate standard patch SLAs and leave the system critically exposed. Emergency change procedures exist for exactly this scenario.';
+  }
+  updateGlobal();
+  updatePatchProgress();
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   LAB 2 — HARDENING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+const HARDEN_ITEMS=[
+  {cat:'Services',text:'Disable Telnet (use SSH instead)',correct:true},
+  {cat:'Services',text:'Disable FTP — use SFTP/SCP',correct:true},
+  {cat:'Services',text:'Stop and disable unused print spooler service',correct:true},
+  {cat:'Services',text:'Enable Bluetooth (for wireless keyboard)',correct:false},
+  {cat:'Accounts',text:'Disable the default root/admin account',correct:true},
+  {cat:'Accounts',text:'Remove all guest/anonymous accounts',correct:true},
+  {cat:'Accounts',text:'Create shared admin account for the team',correct:false},
+  {cat:'Authentication',text:'Enforce password complexity (min 12 chars, mixed)',correct:true},
+  {cat:'Authentication',text:'Enable multi-factor authentication (MFA)',correct:true},
+  {cat:'Authentication',text:'Set account lockout after 5 failed attempts',correct:true},
+  {cat:'Authentication',text:'Allow password reuse (last 2 passwords OK)',correct:false},
+  {cat:'Network',text:'Enable host-based firewall (iptables/UFW)',correct:true},
+  {cat:'Network',text:'Disable IPv6 if not in use',correct:true},
+  {cat:'Network',text:'Open all ports for developer convenience',correct:false},
+  {cat:'Logging',text:'Enable audit logging (auditd)',correct:true},
+  {cat:'Logging',text:'Forward logs to remote SIEM/syslog server',correct:true},
+];
+let hardenChecked=[];
+
+function renderHardenList(){
+  const div=document.getElementById('hardenList');
+  div.innerHTML='';
+  let cat='';
+  HARDEN_ITEMS.forEach((item,i)=>{
+    if(item.cat!==cat){
+      cat=item.cat;
+      div.innerHTML+=`<div class="harden-category">📁 ${cat}</div>`;
+    }
+    const checked=hardenChecked.includes(i);
+    div.innerHTML+=`<ul class="harden-list" style="margin:0"><li class="harden-item ${checked?'checked':''}" onclick="toggleHarden(${i})" id="hi-${i}">
+      <div class="harden-cb">${checked?'✓':''}</div>
+      <span>${item.text}</span>
+    </li></ul>`;
+  });
+  updateHardenProgress();
+}
+
+function toggleHarden(i){
+  const idx=hardenChecked.indexOf(i);
+  if(idx>-1) hardenChecked.splice(idx,1);
+  else hardenChecked.push(i);
+  renderHardenList();
+}
+
+function updateHardenProgress(){
+  const total=HARDEN_ITEMS.length;
+  const done=hardenChecked.length;
+  const pct=(done/total)*100;
+  document.getElementById('hardenFill').style.width=pct+'%';
+  document.getElementById('hardenCount').textContent=`${done} / ${total}`;
+}
+
+function scoreHarden(){
+  if(aclChecked&&SCORES.harden>0) return;
+  let correct=0,wrong=0;
+  HARDEN_ITEMS.forEach((item,i)=>{
+    if(hardenChecked.includes(i)){
+      if(item.correct) correct++;
+      else wrong++;
+    }
+  });
+  const missed=HARDEN_ITEMS.filter((item,i)=>item.correct&&!hardenChecked.includes(i)).length;
+  const raw=Math.max(0,correct-wrong-missed);
+  const total=HARDEN_ITEMS.filter(i=>i.correct).length;
+  SCORES.harden=Math.round((raw/total)*20)+(hardenQuizDone?5:0);
+  SCORES.harden=Math.min(25,Math.max(0,SCORES.harden));
+  updateGlobal();
+  markTabDone(2);
+}
+
+function answerHardenQ(btn,result){
+  if(hardenQuizDone) return;
+  hardenQuizDone=true;
+  btn.closest('.choice-grid').querySelectorAll('.choice-btn').forEach(b=>b.disabled=true);
+  btn.classList.add(result);
+  const fb=document.getElementById('hardenQFeedback');
+  fb.classList.add('show');
+  if(result==='correct'){
+    fb.className='feedback-box show correct';
+    fb.innerHTML='✅ <strong>Correct!</strong> Hardening = attack surface reduction. By removing or disabling every non-essential service, account, protocol, and port, you eliminate potential entry points even before a vulnerability is exploited. CIS Benchmarks and DISA STIGs provide OS-specific hardening checklists used industry-wide.';
+    SCORES.harden+=5;
+  } else {
+    fb.className='feedback-box show wrong';
+    fb.innerHTML='❌ <strong>Not quite.</strong> Firewalls, encryption, and risk assessments are all valuable — but hardening specifically means eliminating unnecessary components. A firewall controls access; hardening removes the components attackers would target. The goal is to make the system as minimal as possible.';
+  }
+  updateGlobal();
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   LAB 3 — SEGMENTATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+const SEG_ASSETS=[
+  {id:'web',label:'🖥️ Web Server',correct:'dmz'},
+  {id:'mail',label:'📧 Mail Relay (MX)',correct:'dmz'},
+  {id:'vpn',label:'🔐 VPN Gateway',correct:'dmz'},
+  {id:'hr',label:'👥 HR Workstation',correct:'lan'},
+  {id:'dev',label:'💻 Dev Workstation',correct:'lan'},
+  {id:'print',label:'🖨️ Network Printer',correct:'lan'},
+  {id:'scada',label:'⚙️ SCADA Controller',correct:'ot'},
+  {id:'plc',label:'🏭 PLC (Programmable Logic)',correct:'ot'},
+  {id:'meddb',label:'🗄️ Medical Records DB',correct:'ot'},
+];
+const ZONE_COLORS={dmz:'#1565c0',lan:'#00695c',ot:'#c62828'};
+
+function renderSegmentation(){
+  const pool=document.getElementById('unplacedPool');
+  pool.innerHTML='';
+  SEG_ASSETS.forEach(a=>{
+    if(!segPlaced[a.id]){
+      pool.innerHTML+=`<div class="asset-chip" 
+        id="chip-${a.id}" draggable="true"
+        style="border-color:#888;color:var(--text)"
+        ondragstart="dz_start(event,'${a.id}')">${a.label}</div>`;
+    }
+  });
+  // render placed assets
+  ['dmz','lan','ot'].forEach(zone=>{
+    const dz=document.getElementById('drop-'+zone);
+    // keep hints
+    const placed=SEG_ASSETS.filter(a=>segPlaced[a.id]===zone);
+    let inner=placed.length===0?'<span class="drop-zone-hint">Drop assets here</span>':'';
+    placed.forEach(a=>{
+      const color=ZONE_COLORS[zone];
+      inner+=`<div class="asset-chip"
+        id="chip-${a.id}" draggable="true"
+        style="border-color:${color};color:${color}"
+        ondragstart="dz_start(event,'${a.id}')">${a.label}</div>`;
+    });
+    dz.innerHTML=inner;
+  });
+}
+
+let dragId=null;
+function dz_start(e,id){dragId=id;e.dataTransfer.effectAllowed='move';}
+function dz_over(e){e.preventDefault();e.currentTarget.classList.add('drag-over');}
+function dz_leave(e){e.currentTarget.classList.remove('drag-over');}
+function dz_drop(e,zone){
+  e.preventDefault();e.currentTarget.classList.remove('drag-over');
+  if(dragId){segPlaced[dragId]=zone;renderSegmentation();}
+}
+
+function checkSegmentation(){
+  let correct=0;
+  SEG_ASSETS.forEach(a=>{
+    if(segPlaced[a.id]===a.correct) correct++;
+  });
+  const pct=Math.round((correct/SEG_ASSETS.length)*100);
+  const fb=document.getElementById('segFeedback');
+  fb.classList.add('show');
+  const pts=Math.round((correct/SEG_ASSETS.length)*25);
+  SCORES.seg=pts;
+  updateGlobal();
+  markTabDone(3);
+  if(correct===SEG_ASSETS.length){
+    fb.className='feedback-box show correct';
+    fb.innerHTML=`✅ <strong>Perfect — ${correct}/${SEG_ASSETS.length} correct!</strong> Excellent zone placement. The DMZ hosts public-facing services exposed to untrusted networks. The Corporate LAN holds internal users who need internet access. The Restricted/OT zone isolates critical systems (SCADA, PLCs, sensitive databases) from all internet traffic. Proper segmentation ensures a breach in one zone cannot directly reach systems in another.`;
+  } else {
+    const wrong=SEG_ASSETS.filter(a=>segPlaced[a.id]&&segPlaced[a.id]!==a.correct);
+    let hints=wrong.map(a=>`<li><strong>${a.label}</strong> should be in the <em>${a.correct.toUpperCase()}</em> zone.</li>`).join('');
+    fb.className='feedback-box show '+(correct>=6?'partial':'wrong');
+    fb.innerHTML=`${correct>=6?'⚠️':'❌'} <strong>${correct}/${SEG_ASSETS.length} correct (${pct}%)</strong>. <ul style="margin:.5rem 0 0 1rem;">${hints}</ul><br>💡 Tip: SCADA, PLCs, and sensitive databases should <em>never</em> share a network segment with internet-facing servers or general workstations.`;
+  }
+}
+
+function resetSegmentation(){
+  segPlaced={};
+  document.getElementById('segFeedback').className='feedback-box';
+  renderSegmentation();
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   LAB 4 — ISOLATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+const SYSTEMS=[
+  {id:'ws7',label:'WORKSTATION-7',icon:'💻',shouldIsolate:true,reason:'Primary infection source — beaconing to C2 on port 4444.'},
+  {id:'fs',label:'FILE-SERVER-01',icon:'🗄️',shouldIsolate:true,reason:'Lateral movement detected toward this system from WS-7.'},
+  {id:'hrdb',label:'HR-DATABASE',icon:'🛢️',shouldIsolate:true,reason:'Contains PII; lateral movement path from compromised host detected.'},
+  {id:'accwks',label:'ACCT-WORKSTATION',icon:'💼',shouldIsolate:false,reason:'Same VLAN but no evidence of compromise. Isolating disrupts accounting operations unnecessarily.'},
+  {id:'dc',label:'DOMAIN-CONTROLLER',icon:'🏛️',shouldIsolate:false,reason:'Critical for authentication — isolating locks out all users. Protect via ACL changes, do not isolate unless fully compromised.'},
+  {id:'backup',label:'BACKUP-SERVER',icon:'💾',shouldIsolate:true,reason:'Ransomware commonly targets backups first. Isolate to protect recovery capability.'},
+  {id:'print',label:'PRINT-SERVER',icon:'🖨️',shouldIsolate:false,reason:'No evidence of compromise or attack path. Isolating adds no benefit and disrupts users.'},
+  {id:'siem',label:'SIEM-SERVER',icon:'📊',shouldIsolate:false,reason:'Keep SIEM active — you need logs and alerts to track the incident in real time.'},
+];
+
+function renderIso(){
+  const grid=document.getElementById('systemGrid');
+  grid.innerHTML='';
+  SYSTEMS.forEach(s=>{
+    const state=isoStates[s.id]||'none';
+    let cls='sys-card';
+    if(state==='isolated') cls+=' isolated';
+    if(state==='safe') cls+=' safe';
+    grid.innerHTML+=`<div class="${cls}" id="sys-${s.id}" onclick="toggleSys('${s.id}')">
+      <span class="sys-icon">${s.icon}</span>
+      <strong style="font-size:.8rem">${s.label}</strong>
+    </div>`;
+  });
+}
+
+function toggleSys(id){
+  if(isoChecked) return;
+  const cur=isoStates[id]||'none';
+  isoStates[id]=cur==='isolated'?'none':'isolated';
+  renderIso();
+}
+function toggleAllIso(val){
+  if(isoChecked) return;
+  SYSTEMS.forEach(s=>{isoStates[s.id]=val?'isolated':'none';});
+  renderIso();
+}
+
+function checkIsolation(){
+  if(isoChecked) return;
+  isoChecked=true;
+  let correct=0;
+  SYSTEMS.forEach(s=>{
+    const iso=isoStates[s.id]==='isolated';
+    if(iso===s.shouldIsolate) correct++;
+    const el=document.getElementById('sys-'+s.id);
+    el.classList.remove('isolated');
+    if(iso===s.shouldIsolate) el.classList.add('safe');
+    else el.classList.add('isolated');
+  });
+  const pts=Math.round((correct/SYSTEMS.length)*20)+(isoQuizDone?5:0);
+  SCORES.iso=Math.min(25,pts);
+  updateGlobal();
+  markTabDone(4);
+  const fb=document.getElementById('isoFeedback');
+  fb.classList.add('show');
+  if(correct===SYSTEMS.length){
+    fb.className='feedback-box show correct';
+    fb.innerHTML=`✅ <strong>Perfect containment!</strong> ${correct}/${SYSTEMS.length} correct. You correctly isolated the compromised and at-risk systems while keeping critical infrastructure operational. Key principle: isolate to contain, not to shut down — preserve evidence and business continuity.<br><br>📘 <em>Reasons:</em><br>${SYSTEMS.map(s=>`<strong>${s.label}</strong>: ${s.reason}`).join('<br>')}`;
+  } else {
+    const wrong=SYSTEMS.filter(s=>{const iso=isoStates[s.id]==='isolated';return iso!==s.shouldIsolate;});
+    fb.className='feedback-box show '+(correct>=6?'partial':'wrong');
+    fb.innerHTML=`${correct>=6?'⚠️':'❌'} <strong>${correct}/${SYSTEMS.length} correct.</strong><br><br>${wrong.map(s=>`❌ <strong>${s.label}</strong>: ${s.reason}`).join('<br>')}`;
+  }
+}
+
+function answerIsoQ(btn,result){
+  if(isoQuizDone) return;
+  isoQuizDone=true;
+  btn.closest('.choice-grid').querySelectorAll('.choice-btn').forEach(b=>b.disabled=true);
+  btn.classList.add(result);
+  const fb=document.getElementById('isoQFeedback');
+  fb.classList.add('show');
+  if(result==='correct'){
+    fb.className='feedback-box show correct';
+    fb.innerHTML='✅ <strong>Correct!</strong> Volatile memory (RAM) contains active processes, encryption keys, attacker tools, and network connections that disappear when power is cut. Network isolation severs C2 communication and prevents spread while preserving this critical forensic evidence. NIST SP 800-61 (Incident Response Guide) recommends isolation over shutdown in most active-incident scenarios.';
+    SCORES.iso=Math.min(25,(SCORES.iso||0)+5);
+  } else {
+    fb.className='feedback-box show wrong';
+    fb.innerHTML='❌ <strong>Not quite.</strong> Powering off can destroy volatile memory evidence — running processes, RAM-resident malware, network connections, and decryption keys. Network isolation is preferred because it stops attacker communication while preserving the forensic state of the system for investigation.';
+  }
+  updateGlobal();
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   LAB 5 — ACCESS CONTROL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+const ROLES=['IT Admin','HR Manager','Accountant','Help Desk','Ext. Auditor'];
+const RESOURCES=['Customer PII DB','Payroll System','Financial Records','HR Files','IT Audit Logs','Network Config'];
+// correct: A=Allow, R=Read-Only, D=Deny
+const ACL_CORRECT={
+  'IT Admin':     {0:'D',1:'D',2:'D',3:'D',4:'A',5:'A'},
+  'HR Manager':   {0:'R',1:'D',2:'D',3:'A',4:'D',5:'D'},
+  'Accountant':   {0:'D',1:'A',2:'A',3:'D',4:'D',5:'D'},
+  'Help Desk':    {0:'D',1:'D',2:'D',3:'D',4:'R',5:'D'},
+  'Ext. Auditor': {0:'D',1:'D',2:'R',3:'D',4:'R',5:'D'},
+};
+let aclSelections={};
+
+function renderACL(){
+  const head=document.getElementById('aclHead');
+  const body=document.getElementById('aclBody');
+  head.innerHTML=`<tr><th>Role ↓ / Resource →</th>${RESOURCES.map(r=>`<th>${r}</th>`).join('')}</tr>`;
+  body.innerHTML='';
+  ROLES.forEach(role=>{
+    if(!aclSelections[role]) aclSelections[role]={};
+    let row=`<tr><td><span class="user-role-chip">👤 ${role}</span></td>`;
+    RESOURCES.forEach((_,ri)=>{
+      const val=aclSelections[role][ri]||'';
+      row+=`<td><select class="perm-select" id="acl-${role}-${ri}" onchange="aclChange('${role}',${ri},this)">
+        <option value="">—</option>
+        <option value="A" ${val==='A'?'selected':''}>Allow</option>
+        <option value="R" ${val==='R'?'selected':''}>Read-Only</option>
+        <option value="D" ${val==='D'?'selected':''}>Deny</option>
+      </select></td>`;
+    });
+    row+='</tr>';
+    body.innerHTML+=row;
+  });
+  colorACL();
+}
+
+function aclChange(role,ri,sel){
+  aclSelections[role][ri]=sel.value;
+  colorACL();
+}
+
+function colorACL(){
+  ROLES.forEach(role=>{
+    RESOURCES.forEach((_,ri)=>{
+      const el=document.getElementById(`acl-${role}-${ri}`);
+      if(!el) return;
+      el.className='perm-select';
+      if(el.value==='A') el.classList.add('perm-allow');
+      else if(el.value==='D') el.classList.add('perm-deny');
+      else if(el.value==='R') el.classList.add('perm-ro');
+    });
+  });
+}
+
+function checkACL(){
+  aclChecked=true;
+  let correct=0;
+  const total=ROLES.length*RESOURCES.length;
+  ROLES.forEach(role=>{
+    RESOURCES.forEach((_,ri)=>{
+      const got=aclSelections[role]?.[ri]||'';
+      const exp=ACL_CORRECT[role][ri];
+      const el=document.getElementById(`acl-${role}-${ri}`);
+      if(got===exp){correct++;if(el){el.style.outline='2px solid #4caf50';}}
+      else{if(el){el.style.outline='2px solid #ef5350';}}
+    });
+  });
+  const pct=Math.round((correct/total)*100);
+  const pts=Math.round((correct/total)*25);
+  SCORES.acl=pts;
+  updateGlobal();
+  markTabDone(5);
+  const fb=document.getElementById('aclFeedback');
+  fb.classList.add('show');
+  const aclScoreEl=document.getElementById('aclScore');
+  aclScoreEl.innerHTML=`<span class="acl-pts">${correct}/${total}</span> cells correct (${pct}%) → <span style="color:var(--accent)">${pts} pts</span>`;
+
+  if(correct===total){
+    fb.className='feedback-box show correct';
+    fb.innerHTML='✅ <strong>Perfect ACL!</strong> You correctly applied least privilege across all roles. Key principles you demonstrated: IT Admin manages infrastructure but NOT business data; HR Managers own HR files only; Accountants access payroll and financial data only; Help Desk gets read-only audit logs for troubleshooting; External Auditors get read-only access to what they audit — nothing more.';
+  } else {
+    fb.className='feedback-box show '+(pct>=70?'partial':'wrong');
+    fb.innerHTML=`${pct>=70?'⚠️':'❌'} <strong>${correct}/${total} correct (${pct}%).</strong><br>Red borders = incorrect assignments. Review the <strong>principle of least privilege</strong>: each role receives only the minimum access needed to perform their job function. When in doubt, deny and grant explicitly rather than allowing broadly.`;
+  }
+  scoreHarden();
+}
+
+function resetACL(){
+  aclChecked=false;
+  aclSelections={};
+  document.getElementById('aclFeedback').className='feedback-box';
+  document.getElementById('aclScore').innerHTML='';
+  renderACL();
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   RESULTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+const LAB_META=[
+  {key:'patch',name:'Patching',icon:'🩹',vuln:'Unpatched software, known CVEs, zero-days (post-disclosure)'},
+  {key:'harden',name:'Hardening',icon:'🔧',vuln:'Misconfiguration, unnecessary services, weak defaults, privilege escalation'},
+  {key:'seg',name:'Segmentation',icon:'🗂️',vuln:'Lateral movement, flat network exposure, insider threats, VLAN hopping'},
+  {key:'iso',name:'Isolation',icon:'🚨',vuln:'Active malware spread, ransomware propagation, incident containment'},
+  {key:'acl',name:'Access Control',icon:'🔑',vuln:'Unauthorized access, privilege misuse, data exfiltration, insider threats'},
+];
+
+function renderResults(){
+  const total=Object.values(SCORES).reduce((a,b)=>a+b,0);
+  const max=Object.values(MAX).reduce((a,b)=>a+b,0);
+  const pct=Math.round((total/max)*100);
+  document.getElementById('finalPct').textContent=`${total} / ${max} pts (${pct}%)`;
+  let grade='',msg='';
+  if(pct>=90){grade='🏆 Distinction';msg='Outstanding performance — you are well-prepared for Security+ SY0-701 mitigation strategy questions.';}
+  else if(pct>=75){grade='🎓 Proficient';msg='Good work! Review the areas where you lost points to solidify your understanding before exam day.';}
+  else if(pct>=60){grade='📘 Developing';msg='You have the foundational knowledge — revisit each lab and focus on the concept explanations in the feedback.';}
+  else{grade='🔁 Needs Review';msg='Revisit the reading materials and retry each lab. Focus on understanding the "why" behind each strategy.';}
+  document.getElementById('finalBadge').querySelector('h2').textContent=`${grade} — ${pct}%`;
+  document.getElementById('finalBadge').querySelector('p').textContent=msg;
+
+  const rg=document.getElementById('resultsGrid');
+  rg.innerHTML='';
+  LAB_META.forEach(m=>{
+    const s=SCORES[m.key];const mx=MAX[m.key];const p=Math.round((s/mx)*100);
+    rg.innerHTML+=`<div class="result-cell">
+      <div class="r-name">${m.icon} ${m.name}</div>
+      <div class="r-score">${s}<span style="font-size:1rem;color:var(--text-muted)">/${mx}</span></div>
+      <div class="r-label">${p}%</div>
+    </div>`;
+  });
+
+  const tl=document.getElementById('takeawayList');
+  tl.innerHTML=LAB_META.map(m=>`
+    <div style="display:flex;gap:.85rem;padding:.85rem 0;border-bottom:1px solid var(--border);align-items:flex-start;">
+      <span style="font-size:1.5rem;flex-shrink:0">${m.icon}</span>
+      <div>
+        <strong>${m.name}</strong>
+        <div style="font-size:.82rem;color:var(--text-muted);margin-top:.2rem;line-height:1.55">Best addresses: <em>${m.vuln}</em></div>
+      </div>
+    </div>`).join('')+`
+    <div style="padding:.75rem 0;font-size:.82rem;color:var(--text-muted)">
+      💡 <strong>Exam tip:</strong> Security+ SY0-701 frequently asks you to match vulnerabilities to mitigation strategies. Remember: multiple strategies can address the same vulnerability — but each has a <em>primary</em> use case.
+    </div>`;
+}
+
+function markTabDone(n){
+  const tab=document.querySelector(`.lab-tab[data-tab="${n}"]`);
+  if(tab) tab.classList.add('done');
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   RESET
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function resetAll(){
+  Object.keys(SCORES).forEach(k=>SCORES[k]=0);
+  patchAppliedOrder=[];patchQuizDone=false;hardenChecked=[];hardenQuizDone=false;
+  segPlaced={};segChecked=false;isoStates={};isoChecked=false;isoQuizDone=false;
+  aclChecked=false;aclSelections={};
+  patchState=PATCHES.map(p=>({...p,patched:false}));
+  document.querySelectorAll('.lab-tab').forEach(t=>t.classList.remove('done'));
+  document.querySelectorAll('.feedback-box').forEach(f=>{f.className='feedback-box';f.innerHTML='';});
+  document.querySelectorAll('.choice-btn').forEach(b=>{b.disabled=false;b.className='choice-btn';});
+  updateGlobal();
+  renderPatchTable();
+  renderHardenList();
+  renderSegmentation();
+  renderIso();
+  renderACL();
+  goTab(0);
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   INIT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+renderPatchTable();
+renderHardenList();
+renderSegmentation();
+renderIso();
+renderACL();
+updateGlobal();
+</script>
+</body>
+</html>
