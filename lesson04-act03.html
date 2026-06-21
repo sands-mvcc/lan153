@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DefenseStack Lab — Security+ SY0-701 | Layered Mitigation & Remediation Prioritization</title>
+<style>
+/* ═══════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════ */
+:root {
+  --bg:           #f2f5f2;
+  --surface:      #ffffff;
+  --surface2:     #ebf0eb;
+  --surface3:     #dde8dd;
+  --border:       #c0d4c0;
+  --border-strong:#8fb48f;
+  --text:         #172217;
+  --text-muted:   #4d6b4d;
+  --text-faint:   #7a9a7a;
+  --accent:       #1e6b23;
+  --accent-mid:   #2e9934;
+  --accent-lt:    #4caf50;
+  --accent-glow:  rgba(46,153,52,.14);
+  --accent-glow2: rgba(46,153,52,.08);
+  --red:          #b71c1c;
+  --red-lt:       #ffebee;
+  --amber:        #bf360c;
+  --amber-lt:     #fff3e0;
+  --blue:         #0d47a1;
+  --blue-lt:      #e3f2fd;
+  --purple:       #4a148c;
+  --purple-lt:    #f3e5f5;
+  --teal:         #004d40;
+  --teal-lt:      #e0f2f1;
+  --yellow:       #f57f17;
+  --yellow-lt:    #fffde7;
+  --card-r:       10px;
+  --card-r-lg:    14px;
+  --shadow-sm:    0 1px 4px rgba(0,0,0,.07);
+  --shadow:       0 3px 12px rgba(0,0,0,.09);
+  --shadow-lg:    0 8px 28px rgba(0,0,0,.13);
+  --font:         'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-mono:    'Courier New', monospace;
+  --t:            .2s ease;
+  /* scenario panel always dark */
+  --scenario-bg:  #0f1f0f;
+  --scenario-text:#c8e6c9;
+  --scenario-sub: #81c784;
+  --scenario-bdr: #2e4a2e;
+}
+[data-theme="dark"] {
+  --bg:           #0a160a;
+  --surface:      #111e11;
+  --surface2:     #182818;
+  --surface3:     #1f321f;
+  --border:       #2a402a;
+  --border-strong:#3d603d;
+  --text:         #d4e8d4;
+  --text-muted:   #7aad7a;
+  --text-faint:   #4d744d;
+  --accent:       #4caf50;
+  --accent-mid:   #66bb6a;
+  --accent-lt:    #81c784;
+  --accent-glow:  rgba(76,175,80,.2);
+  --accent-glow2: rgba(76,175,80,.09);
+  --red:          #ef5350;
+  --red-lt:       #1a0505;
+  --amber:        #ffa726;
+  --amber-lt:     #1a0d00;
+  --blue:         #42a5f5;
+  --blue-lt:      #080f1a;
+  --purple:       #ba68c8;
+  --purple-lt:    #0f0515;
+  --teal:         #4db6ac;
+  --teal-lt:      #051210;
+  --yellow:       #ffee58;
+  --yellow-lt:    #1a1800;
+  --shadow-sm:    0 1px 4px rgba(0,0,0,.3);
+  --shadow:       0 3px 12px rgba(0,0,0,.4);
+  --shadow-lg:    0 8px 28px rgba(0,0,0,.6);
+}
+
+/* ═══════════════════════════════════════════
+   BASE
+═══════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--font);
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  line-height:1.6;
+  transition:background var(--t),color var(--t);
+}
+h1,h2,h3,h4,h5{font-weight:700;line-height:1.2;}
+button{cursor:pointer;font-family:inherit;}
+select{font-family:inherit;}
+
+/* ═══════════════════════════════════════════
+   TOPBAR
+═══════════════════════════════════════════ */
+#topbar{
+  position:sticky;top:0;z-index:200;
+  background:var(--surface);
+  border-bottom:2px solid var(--accent-lt);
+  display:flex;align-items:center;gap:1rem;
+  padding:0 1.25rem;min-height:54px;
+  box-shadow:var(--shadow);
+}
+.tb-brand{
+  font-size:1rem;font-weight:800;color:var(--accent);
+  letter-spacing:.02em;flex:1;display:flex;align-items:center;gap:.5rem;
+}
+.tb-brand span{
+  font-size:.78rem;color:var(--text-muted);font-weight:400;
+  border-left:1px solid var(--border);padding-left:.6rem;margin-left:.2rem;
+}
+.tb-score{
+  background:var(--accent-glow);border:1.5px solid var(--accent-lt);
+  color:var(--accent);padding:.22rem .8rem;border-radius:20px;
+  font-size:.78rem;font-weight:700;white-space:nowrap;
+}
+.tb-theme{
+  background:none;border:1.5px solid var(--border);
+  color:var(--text);border-radius:7px;padding:.28rem .65rem;
+  font-size:.9rem;transition:all var(--t);
+}
+.tb-theme:hover{border-color:var(--accent);background:var(--accent-glow);}
+
+/* ═══════════════════════════════════════════
+   MODULE TABS
+═══════════════════════════════════════════ */
+.mod-tabs{
+  display:flex;background:var(--surface2);
+  border-bottom:2px solid var(--border);
+  overflow-x:auto;
+}
+.mod-tab{
+  padding:.75rem 1.4rem;font-size:.82rem;font-weight:700;
+  border:none;background:none;color:var(--text-muted);
+  border-bottom:3px solid transparent;
+  white-space:nowrap;transition:all var(--t);
+  letter-spacing:.02em;
+}
+.mod-tab:hover{color:var(--accent);background:var(--accent-glow2);}
+.mod-tab.active{
+  color:var(--accent);border-bottom-color:var(--accent);
+  background:var(--surface);
+}
+.mod-tab .tab-badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:18px;height:18px;border-radius:50%;
+  background:var(--accent);color:#fff;
+  font-size:.62rem;margin-left:.4rem;
+}
+
+/* ═══════════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════════ */
+#app{max-width:1140px;margin:0 auto;padding:1.25rem 1rem 3rem;}
+.mod-panel{display:none;}
+.mod-panel.active{display:block;}
+
+/* ═══════════════════════════════════════════
+   CARDS
+═══════════════════════════════════════════ */
+.card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--card-r);box-shadow:var(--shadow-sm);
+  padding:1.25rem;margin-bottom:1rem;
+  transition:box-shadow var(--t);
+}
+.card:hover{box-shadow:var(--shadow);}
+
+/* Scenario (dark-panel) */
+.scenario-panel{
+  background:var(--scenario-bg);
+  border:1.5px solid var(--scenario-bdr);
+  border-radius:var(--card-r-lg);
+  padding:1.25rem 1.5rem;
+  margin-bottom:1rem;
+  position:relative;overflow:hidden;
+}
+.scenario-panel::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--accent-lt),transparent);
+}
+.scenario-panel .sp-eyebrow{
+  font-size:.68rem;font-weight:800;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--scenario-sub);
+  margin-bottom:.5rem;display:flex;align-items:center;gap:.4rem;
+}
+.scenario-panel h3{
+  color:var(--scenario-text);font-size:1.05rem;margin-bottom:.5rem;
+}
+.scenario-panel p{
+  color:#a5c8a5;font-size:.86rem;line-height:1.65;
+}
+.scenario-panel .sp-meta{
+  display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.85rem;
+}
+.sp-tag{
+  font-size:.68rem;font-weight:700;padding:.18rem .55rem;
+  border-radius:4px;border:1px solid;letter-spacing:.04em;
+  text-transform:uppercase;
+}
+
+/* ═══════════════════════════════════════════
+   FEEDBACK
+═══════════════════════════════════════════ */
+.fb{
+  border-radius:var(--card-r);padding:.9rem 1.1rem;
+  font-size:.84rem;line-height:1.65;display:none;margin-top:.75rem;
+}
+.fb.show{display:block;}
+.fb.ok{background:#e8f5e9;border:1.5px solid #66bb6a;color:#1b5e20;}
+.fb.warn{background:var(--amber-lt);border:1.5px solid var(--amber);color:#bf360c;}
+.fb.err{background:var(--red-lt);border:1.5px solid #e57373;color:#b71c1c;}
+[data-theme="dark"] .fb.ok{background:#071a07;color:#a5d6a7;border-color:#388e3c;}
+[data-theme="dark"] .fb.warn{background:#1a0d00;color:#ffcc80;border-color:#f57c00;}
+[data-theme="dark"] .fb.err{background:#1a0303;color:#ffcdd2;border-color:#c62828;}
+
+/* ═══════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════ */
+.btn{
+  display:inline-flex;align-items:center;gap:.4rem;
+  border-radius:7px;padding:.55rem 1.2rem;
+  font-size:.83rem;font-weight:700;border:none;
+  transition:all var(--t);cursor:pointer;
+}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:var(--accent-mid);transform:translateY(-1px);}
+.btn-ghost{background:none;border:1.5px solid var(--border);color:var(--text-muted);}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+.btn-red{background:var(--red);color:#fff;}
+.btn-red:hover{opacity:.88;}
+.btn-sm{padding:.35rem .85rem;font-size:.76rem;}
+
+/* ═══════════════════════════════════════════
+   ██████ MODULE 1 — LAYERED DEFENSE BUILDER
+═══════════════════════════════════════════ */
+
+/* Environment selector */
+.env-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+  gap:.75rem;margin-bottom:1rem;
+}
+.env-card{
+  border:2px solid var(--border);border-radius:var(--card-r);
+  padding:1rem;cursor:pointer;background:var(--surface);
+  transition:all var(--t);position:relative;
+}
+.env-card:hover{border-color:var(--accent-lt);transform:translateY(-2px);box-shadow:var(--shadow);}
+.env-card.selected{border-color:var(--accent);background:var(--accent-glow);}
+.env-card.selected::after{
+  content:'✓';position:absolute;top:.5rem;right:.6rem;
+  color:var(--accent);font-weight:900;font-size:.9rem;
+}
+.env-icon{font-size:1.6rem;margin-bottom:.4rem;}
+.env-name{font-size:.88rem;font-weight:700;margin-bottom:.2rem;}
+.env-desc{font-size:.74rem;color:var(--text-muted);line-height:1.45;}
+
+/* Vulnerability class selector */
+.vuln-class-row{
+  display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem;
+}
+.vc-chip{
+  border:1.5px solid var(--border);border-radius:20px;
+  padding:.3rem .85rem;font-size:.76rem;font-weight:600;
+  background:var(--surface2);cursor:pointer;transition:all var(--t);
+  color:var(--text-muted);
+}
+.vc-chip:hover{border-color:var(--accent-lt);color:var(--accent);}
+.vc-chip.active{
+  background:var(--accent);border-color:var(--accent);color:#fff;
+}
+
+/* Control palette */
+.control-palette{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));
+  gap:.65rem;margin-bottom:1rem;
+}
+.ctrl-card{
+  border:2px solid var(--border);border-radius:var(--card-r);
+  padding:.85rem;background:var(--surface2);
+  cursor:pointer;transition:all var(--t);
+  position:relative;
+}
+.ctrl-card:hover{border-color:var(--accent-lt);background:var(--accent-glow2);}
+.ctrl-card.selected-primary{
+  border-color:#1565c0;background:rgba(21,101,192,.1);
+}
+.ctrl-card.selected-supporting{
+  border-color:#00695c;background:rgba(0,105,92,.1);
+}
+.ctrl-card.selected-primary::before{
+  content:'PRIMARY';position:absolute;top:.35rem;right:.4rem;
+  font-size:.56rem;font-weight:800;letter-spacing:.06em;
+  color:#1565c0;background:rgba(21,101,192,.12);
+  padding:.1rem .35rem;border-radius:3px;
+}
+.ctrl-card.selected-supporting::before{
+  content:'SUPPORTING';position:absolute;top:.35rem;right:.4rem;
+  font-size:.56rem;font-weight:800;letter-spacing:.06em;
+  color:#00695c;background:rgba(0,105,92,.12);
+  padding:.1rem .35rem;border-radius:3px;
+}
+.ctrl-icon{font-size:1.3rem;margin-bottom:.35rem;}
+.ctrl-name{font-size:.8rem;font-weight:700;margin-bottom:.2rem;}
+.ctrl-cat{
+  font-size:.66rem;font-weight:700;padding:.1rem .4rem;
+  border-radius:3px;display:inline-block;
+  text-transform:uppercase;letter-spacing:.05em;
+}
+
+/* Layer toggle buttons */
+.layer-toggle{
+  display:flex;gap:.5rem;margin-bottom:.75rem;flex-wrap:wrap;align-items:center;
+}
+.lt-btn{
+  border:1.5px solid;border-radius:6px;padding:.3rem .8rem;
+  font-size:.75rem;font-weight:700;transition:all .15s;cursor:pointer;
+  background:none;
+}
+.lt-primary{border-color:#1565c0;color:#1565c0;}
+.lt-primary.act{background:#1565c0;color:#fff;}
+.lt-supporting{border-color:#00695c;color:#00695c;}
+.lt-supporting.act{background:#00695c;color:#fff;}
+
+/* Defense coverage meter */
+.defense-meter{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--card-r);padding:1rem 1.25rem;
+  margin-bottom:1rem;
+}
+.dm-label{
+  display:flex;justify-content:space-between;align-items:baseline;
+  margin-bottom:.55rem;
+  font-size:.78rem;font-weight:700;color:var(--text-muted);
+}
+.dm-label .dm-pct{font-size:1.4rem;font-weight:800;color:var(--accent);}
+.dm-track{
+  height:16px;background:var(--surface3);border-radius:8px;
+  overflow:hidden;position:relative;
+}
+.dm-fill{
+  height:100%;border-radius:8px;
+  background:linear-gradient(90deg,var(--accent),var(--accent-lt));
+  transition:width .5s cubic-bezier(.4,0,.2,1);width:0%;
+}
+.dm-layers{
+  display:flex;gap:.4rem;margin-top:.65rem;flex-wrap:wrap;
+}
+.dm-layer-pip{
+  height:5px;flex:1;min-width:40px;border-radius:3px;
+  background:var(--surface3);transition:background .3s;
+}
+.dm-layer-pip.filled{background:var(--accent-lt);}
+
+/* Stack visualizer */
+.stack-vis{
+  border:1.5px dashed var(--border);border-radius:var(--card-r);
+  padding:1rem;min-height:90px;
+  background:var(--surface2);
+}
+.stack-empty{
+  text-align:center;color:var(--text-faint);font-size:.8rem;
+  padding:1.2rem;font-style:italic;
+}
+.stack-layer{
+  display:flex;align-items:center;gap:.6rem;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:7px;padding:.55rem .8rem;margin-bottom:.4rem;
+  font-size:.78rem;transition:all .2s;
+  animation:slideIn .2s ease both;
+}
+@keyframes slideIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+.stack-layer .sl-type{
+  font-size:.6rem;font-weight:800;letter-spacing:.06em;
+  padding:.1rem .35rem;border-radius:3px;
+  white-space:nowrap;flex-shrink:0;
+}
+.sl-primary{background:rgba(21,101,192,.15);color:#1565c0;}
+.sl-supporting{background:rgba(0,105,92,.15);color:#00695c;}
+[data-theme="dark"] .sl-primary{background:rgba(66,165,245,.15);color:#90caf9;}
+[data-theme="dark"] .sl-supporting{background:rgba(77,182,172,.15);color:#80cbc4;}
+.stack-layer .sl-remove{
+  margin-left:auto;background:none;border:none;
+  color:var(--text-faint);font-size:.8rem;cursor:pointer;padding:0 .2rem;
+}
+.stack-layer .sl-remove:hover{color:var(--red);}
+
+/* ═══════════════════════════════════════════
+   ██████ MODULE 2 — REMEDIATION PRIORITIZER
+═══════════════════════════════════════════ */
+
+/* CVE queue */
+.cve-queue{display:flex;flex-direction:column;gap:.65rem;margin-bottom:1rem;}
+.cve-card{
+  background:var(--surface);border:2px solid var(--border);
+  border-radius:var(--card-r);padding:1rem 1.1rem;
+  transition:all var(--t);
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  gap:.75rem;align-items:start;
+}
+.cve-card.cve-dragging{opacity:.45;transform:scale(.98);}
+.cve-card.cve-drag-over{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow);}
+.cve-rank-handle{
+  width:28px;height:28px;border-radius:6px;
+  background:var(--surface2);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.75rem;font-weight:800;color:var(--text-muted);
+  cursor:grab;user-select:none;flex-shrink:0;margin-top:2px;
+}
+.cve-rank-handle:active{cursor:grabbing;}
+.cve-main{}
+.cve-id{font-family:var(--font-mono);font-size:.78rem;color:var(--text-muted);margin-bottom:.2rem;}
+.cve-title{font-size:.9rem;font-weight:700;margin-bottom:.35rem;}
+.cve-meta{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.55rem;}
+.cve-badge{
+  font-size:.67rem;font-weight:700;padding:.15rem .5rem;
+  border-radius:4px;display:inline-flex;align-items:center;gap:.25rem;
+}
+.sev-critical{background:#fce4ec;color:#c62828;border:1px solid #f48fb1;}
+.sev-high{background:#fff3e0;color:#e65100;border:1px solid #ffcc02;}
+.sev-medium{background:#fffde7;color:#f57f17;border:1px solid #ffe082;}
+.sev-low{background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7;}
+[data-theme="dark"] .sev-critical{background:#200008;color:#ff8a80;}
+[data-theme="dark"] .sev-high{background:#1a0c00;color:#ffab40;}
+[data-theme="dark"] .sev-medium{background:#1a1800;color:#fff176;}
+[data-theme="dark"] .sev-low{background:#071507;color:#69f0ae;}
+
+/* Scoring sliders */
+.cve-sliders{
+  display:flex;flex-direction:column;gap:.5rem;
+  min-width:220px;
+  background:var(--surface2);border-radius:7px;padding:.75rem;
+  flex-shrink:0;
+}
+.slider-row{display:flex;flex-direction:column;gap:.15rem;}
+.slider-label{
+  display:flex;justify-content:space-between;
+  font-size:.7rem;color:var(--text-muted);font-weight:600;
+}
+.slider-label .sl-val{color:var(--accent);font-weight:800;}
+input[type=range]{
+  width:100%;accent-color:var(--accent);height:4px;cursor:pointer;
+}
+.composite-score{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-top:.5rem;padding-top:.5rem;border-top:1px solid var(--border);
+  font-size:.72rem;font-weight:700;color:var(--text-muted);
+}
+.composite-score .cs-val{
+  font-size:1.1rem;font-weight:800;
+  padding:.15rem .5rem;border-radius:5px;
+  background:var(--accent-glow);color:var(--accent);
+}
+
+/* Priority rank column */
+.priority-col{
+  display:flex;flex-direction:column;align-items:center;gap:.3rem;
+  min-width:54px;
+}
+.rank-display{
+  width:38px;height:38px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1rem;font-weight:800;color:#fff;
+  flex-shrink:0;
+}
+.rd-1{background:linear-gradient(135deg,#c62828,#e53935);}
+.rd-2{background:linear-gradient(135deg,#e65100,#f57c00);}
+.rd-3{background:linear-gradient(135deg,#f57f17,#fbc02d);}
+.rd-4{background:linear-gradient(135deg,#1565c0,#1e88e5);}
+.rd-5{background:linear-gradient(135deg,#2e7d32,#43a047);}
+.rd-default{background:var(--surface3);}
+
+/* Scorecard */
+.prio-scorecard{
+  background:var(--surface2);border:1.5px solid var(--border);
+  border-radius:var(--card-r);padding:1rem;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.75rem;
+}
+.sc-cell{text-align:center;}
+.sc-num{font-size:1.6rem;font-weight:800;color:var(--accent);}
+.sc-lbl{font-size:.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;}
+
+/* ═══════════════════════════════════════════
+   PROGRESS
+═══════════════════════════════════════════ */
+.prog-bar{height:8px;background:var(--surface3);border-radius:4px;overflow:hidden;}
+.prog-fill{height:100%;background:var(--accent);border-radius:4px;transition:width .4s ease;}
+
+/* ═══════════════════════════════════════════
+   RESULTS
+═══════════════════════════════════════════ */
+.results-hero{
+  background:linear-gradient(135deg,var(--accent) 0%,var(--accent-mid) 100%);
+  border-radius:var(--card-r-lg);padding:1.75rem;color:#fff;text-align:center;
+  margin-bottom:1.25rem;
+}
+.results-hero h2{font-size:1.8rem;margin-bottom:.3rem;}
+.results-hero p{opacity:.88;font-size:.88rem;}
+.results-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;
+  margin-bottom:1.25rem;
+}
+.rg-cell{
+  background:var(--surface);border:1.5px solid var(--border);
+  border-radius:var(--card-r);padding:1.1rem;text-align:center;
+}
+.rg-score{font-size:1.9rem;font-weight:800;color:var(--accent);}
+.rg-lbl{font-size:.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;}
+.rg-name{font-size:.85rem;font-weight:700;margin-bottom:.2rem;}
+
+/* Table */
+.ref-table{width:100%;border-collapse:collapse;font-size:.8rem;}
+.ref-table th{
+  background:var(--surface2);color:var(--text-muted);
+  font-size:.68rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  padding:.5rem .75rem;text-align:left;border-bottom:2px solid var(--border);
+}
+.ref-table td{padding:.55rem .75rem;border-bottom:1px solid var(--border);vertical-align:middle;}
+.ref-table tr:last-child td{border-bottom:none;}
+.ref-table tr:hover td{background:var(--surface2);}
+
+/* ═══════════════════════════════════════════
+   UTILITY
+═══════════════════════════════════════════ */
+.section-intro{
+  background:var(--surface2);border:1.5px solid var(--border);
+  border-radius:var(--card-r);padding:1rem 1.25rem;margin-bottom:1rem;
+  font-size:.85rem;line-height:1.65;
+}
+.section-intro strong{color:var(--accent);}
+.row{display:flex;gap:1rem;flex-wrap:wrap;}
+.col-6{flex:1;min-width:280px;}
+.mt{margin-top:.75rem;}
+.divider{border:none;border-top:1px solid var(--border);margin:1rem 0;}
+.tooltip-hint{
+  font-size:.72rem;color:var(--text-faint);font-style:italic;margin-top:.3rem;
+}
+@media(max-width:620px){
+  .cve-card{grid-template-columns:auto 1fr;grid-template-rows:auto auto;}
+  .cve-sliders{grid-column:1/-1;}
+  .priority-col{flex-direction:row;min-width:auto;}
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.mod-panel.active{animation:fadeUp .28s ease both;}
+</style>
+</head>
+<body>
+
+<!-- ████ TOPBAR ████ -->
+<header id="topbar">
+  <div class="tb-brand">
+    🛡️ DefenseStack Lab
+    <span>Security+ SY0-701 · Domain 4</span>
+  </div>
+  <div class="tb-score" id="globalScore">0 / 100 pts</div>
+  <button class="tb-theme" id="themeBtn" onclick="toggleTheme()">🌙</button>
+</header>
+
+<!-- ████ MODULE TABS ████ -->
+<div class="mod-tabs" id="modTabs">
+  <button class="mod-tab active" data-mod="overview" onclick="switchMod('overview')">📋 Overview</button>
+  <button class="mod-tab" data-mod="m1" onclick="switchMod('m1')">🧱 Module 1 — Layered Defense Builder</button>
+  <button class="mod-tab" data-mod="m2" onclick="switchMod('m2')">⚖️ Module 2 — Remediation Prioritizer</button>
+  <button class="mod-tab" data-mod="results" onclick="switchMod('results')">📊 Results &amp; Debrief</button>
+</div>
+
+<div id="app">
+
+<!-- ════════════════════════════════
+     OVERVIEW
+════════════════════════════════ -->
+<div class="mod-panel active" id="panel-overview">
+  <div class="scenario-panel">
+    <div class="sp-eyebrow">🔐 DefenseStack Lab · Mission Briefing</div>
+    <h3>You are the Security Architect for MidWest Regional Health System</h3>
+    <p>MRHS operates a hybrid cloud environment with on-prem hospital systems, clinical workstations, and AWS-hosted patient portals. A recent risk assessment identified seven active vulnerability classes across the infrastructure. Your mission: construct layered mitigation strategies for each threat, then build a data-driven remediation queue that balances CVSS severity, business impact, and exploitability.</p>
+    <div class="sp-meta">
+      <span class="sp-tag" style="border-color:#4caf50;color:#81c784">Healthcare Sector</span>
+      <span class="sp-tag" style="border-color:#42a5f5;color:#90caf9">Hybrid Cloud</span>
+      <span class="sp-tag" style="border-color:#ef5350;color:#ef9a9a">HIPAA Regulated</span>
+      <span class="sp-tag" style="border-color:#ffa726;color:#ffcc80">7 Active Vuln Classes</span>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-6">
+      <div class="card">
+        <h3 style="font-size:.95rem;margin-bottom:.65rem;">🧱 Module 1 — Layered Defense Builder <span style="font-size:.72rem;color:var(--text-muted);font-weight:400;">(50 pts)</span></h3>
+        <p style="font-size:.84rem;color:var(--text-muted);line-height:1.6;">Select a target environment, identify the active vulnerability class, then build a <strong>layered control stack</strong> by assigning Primary and Supporting mitigations. Your selections are evaluated against the Mitigation Selection Framework.</p>
+        <div style="margin-top:.85rem;">
+          <button class="btn btn-primary" onclick="switchMod('m1')">Start Module 1 →</button>
+        </div>
+      </div>
+    </div>
+    <div class="col-6">
+      <div class="card">
+        <h3 style="font-size:.95rem;margin-bottom:.65rem;">⚖️ Module 2 — Remediation Prioritizer <span style="font-size:.72rem;color:var(--text-muted);font-weight:400;">(50 pts)</span></h3>
+        <p style="font-size:.84rem;color:var(--text-muted);line-height:1.6;">Score and rank 5 active CVEs using a <strong>weighted triage formula</strong> combining CVSS base score, exploitability (public exploit available?), and business impact (data sensitivity, system criticality). Drag to reorder your final priority queue.</p>
+        <div style="margin-top:.85rem;">
+          <button class="btn btn-primary" onclick="switchMod('m2')">Start Module 2 →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h4 style="font-size:.85rem;margin-bottom:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">Mitigation Selection Framework Reference</h4>
+    <table class="ref-table">
+      <thead><tr><th>Vulnerability Class</th><th>Primary Mitigation</th><th>Supporting Mitigations</th></tr></thead>
+      <tbody>
+        <tr><td>Unpatched OS/App CVE</td><td><span class="cve-badge" style="background:var(--blue-lt);border-color:var(--blue);color:var(--blue)">Patching</span></td><td>Network isolation, compensating controls</td></tr>
+        <tr><td>Default credentials / insecure defaults</td><td><span class="cve-badge" style="background:var(--purple-lt);border-color:var(--purple);color:var(--purple)">Hardening</span></td><td>MFA, network ACLs</td></tr>
+        <tr><td>SQL Injection / XSS</td><td><span class="cve-badge" style="background:var(--teal-lt);border-color:var(--teal);color:var(--teal)">Input Validation</span></td><td>WAF, CSP, parameterized queries</td></tr>
+        <tr><td>Lateral movement after breach</td><td><span class="cve-badge" style="background:#e8f5e9;border-color:#388e3c;color:#1b5e20">Segmentation</span></td><td>Micro-seg, ZTNA, host-based firewall</td></tr>
+        <tr><td>Ransomware blast radius</td><td><span class="cve-badge" style="background:var(--amber-lt);border-color:var(--amber);color:var(--amber)">Access Control / Least Privilege</span></td><td>Segmentation, immutable backups, EDR</td></tr>
+        <tr><td>Cloud misconfiguration</td><td><span class="cve-badge" style="background:var(--blue-lt);border-color:var(--blue);color:var(--blue)">Cloud Hardening (CSPM)</span></td><td>IaC scanning, least-privilege IAM, audit logs</td></tr>
+        <tr><td>Malware / suspicious file</td><td><span class="cve-badge" style="background:var(--red-lt);border-color:var(--red);color:var(--red)">Isolation / Sandboxing</span></td><td>EDR behavioral detection, app whitelisting</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     MODULE 1 — LAYERED DEFENSE
+════════════════════════════════ -->
+<div class="mod-panel" id="panel-m1">
+  <div class="section-intro">
+    <strong>🧱 Module 1 — Layered Defense Builder</strong> &nbsp;|&nbsp; 50 points<br>
+    For each of the 4 scenarios below, select the <strong>environment</strong>, identify the <strong>active vulnerability class</strong>, then build a layered control stack. Assign each control as <em>Primary</em> or <em>Supporting</em>. You must select exactly 1 Primary and at least 1 Supporting control per scenario.
+  </div>
+
+  <!-- Scenario progress -->
+  <div style="display:flex;align-items:center;gap:.85rem;margin-bottom:1rem;flex-wrap:wrap;">
+    <div style="flex:1;min-width:180px;">
+      <div style="display:flex;justify-content:space-between;font-size:.75rem;color:var(--text-muted);margin-bottom:.3rem;">
+        <span>Scenarios Completed</span><span id="m1ProgLbl">0 / 4</span>
+      </div>
+      <div class="prog-bar"><div class="prog-fill" id="m1ProgFill" style="width:0%"></div></div>
+    </div>
+    <div class="tb-score" id="m1Score">0 / 50</div>
+  </div>
+
+  <!-- Scenario tabs -->
+  <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem;" id="scenTabs">
+    <button class="btn btn-ghost btn-sm active-scen" id="scen-btn-0" onclick="loadScenario(0)">Scenario 1</button>
+    <button class="btn btn-ghost btn-sm" id="scen-btn-1" onclick="loadScenario(1)">Scenario 2</button>
+    <button class="btn btn-ghost btn-sm" id="scen-btn-2" onclick="loadScenario(2)">Scenario 3</button>
+    <button class="btn btn-ghost btn-sm" id="scen-btn-3" onclick="loadScenario(3)">Scenario 4</button>
+  </div>
+
+  <!-- Dynamic scenario content -->
+  <div id="scenarioContent"></div>
+</div>
+
+<!-- ════════════════════════════════
+     MODULE 2 — REMEDIATION PRIORITIZER
+════════════════════════════════ -->
+<div class="mod-panel" id="panel-m2">
+  <div class="section-intro">
+    <strong>⚖️ Module 2 — Remediation Prioritizer</strong> &nbsp;|&nbsp; 50 points<br>
+    Five CVEs have been flagged in the MRHS vulnerability scan. For each, adjust the three scoring dimensions, then <strong>drag the cards</strong> to arrange your final remediation queue from highest to lowest priority. Your order is evaluated against the optimal remediation sequence.
+  </div>
+
+  <div class="row" style="margin-bottom:1rem;align-items:stretch;">
+    <div class="col-6">
+      <div class="defense-meter" style="height:100%;">
+        <div class="dm-label">
+          <span>Scoring Progress</span>
+          <span class="dm-pct" id="m2Pct">0%</span>
+        </div>
+        <div class="dm-track"><div class="dm-fill" id="m2Fill"></div></div>
+        <div style="font-size:.72rem;color:var(--text-faint);margin-top:.4rem;">Score all 5 CVEs, then arrange your priority queue</div>
+      </div>
+    </div>
+    <div class="col-6">
+      <div class="card" style="margin-bottom:0;">
+        <div style="font-size:.78rem;font-weight:700;color:var(--text-muted);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.05em;">Priority Formula</div>
+        <div style="font-family:var(--font-mono);font-size:.8rem;background:var(--surface2);border-radius:6px;padding:.65rem .85rem;line-height:1.8;color:var(--accent);">
+          Priority Score =<br>
+          &nbsp; (CVSS × 0.4)<br>
+          + (Exploitability × 3.0)<br>
+          + (Business Impact × 2.0)
+        </div>
+        <div class="tooltip-hint">Higher score = patch first. Exploitability carries heavy weight — a CVSS 7.0 with a public exploit may outrank a CVSS 9.0 with no known exploit.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cve-queue" id="cveQueue"></div>
+
+  <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:.75rem;">
+    <button class="btn btn-primary" onclick="submitPriority()">✅ Submit Priority Queue</button>
+    <button class="btn btn-ghost" onclick="resetPriority()">↺ Reset Scores</button>
+  </div>
+  <div class="fb" id="m2Feedback"></div>
+</div>
+
+<!-- ════════════════════════════════
+     RESULTS
+════════════════════════════════ -->
+<div class="mod-panel" id="panel-results">
+  <div class="results-hero">
+    <div style="font-size:2.5rem;margin-bottom:.4rem;">🎓</div>
+    <h2 id="r-grade">Complete both modules</h2>
+    <p id="r-msg">Your score will appear here after completing Module 1 and Module 2.</p>
+  </div>
+  <div class="results-grid" id="resultsGrid"></div>
+  <div class="card" id="debriefCard">
+    <h3 style="font-size:.9rem;margin-bottom:.85rem;">📚 Debrief — Key Principles</h3>
+    <div id="debriefContent"></div>
+  </div>
+  <div style="text-align:center;margin-top:1rem;">
+    <button class="btn btn-primary" onclick="resetAll()">↺ Restart Lab</button>
+  </div>
+</div>
+
+</div><!-- #app -->
+
+<script>
+/* ══════════════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════════════ */
+let M1_SCORES = [0,0,0,0];
+let M2_SCORE = 0;
+let m1Completed = [false,false,false,false];
+let m2Submitted = false;
+
+/* ══════════════════════════════════════════════════════
+   THEME
+══════════════════════════════════════════════════════ */
+function toggleTheme(){
+  const d = document.documentElement;
+  const dark = d.getAttribute('data-theme') === 'dark';
+  d.setAttribute('data-theme', dark ? 'light' : 'dark');
+  document.getElementById('themeBtn').textContent = dark ? '🌙' : '☀️';
+}
+
+/* ══════════════════════════════════════════════════════
+   MODULE TABS
+══════════════════════════════════════════════════════ */
+function switchMod(id){
+  document.querySelectorAll('.mod-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.mod-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  document.querySelector(`[data-mod="${id}"]`).classList.add('active');
+  if(id==='results') renderResults();
+}
+
+/* ══════════════════════════════════════════════════════
+   GLOBAL SCORE
+══════════════════════════════════════════════════════ */
+function updateGlobal(){
+  const m1 = M1_SCORES.reduce((a,b)=>a+b,0);
+  const total = m1 + M2_SCORE;
+  document.getElementById('globalScore').textContent = `${total} / 100 pts`;
+  document.getElementById('m1Score').textContent = `${m1} / 50`;
+}
+
+/* ══════════════════════════════════════════════════════
+   MODULE 1 — DATA
+══════════════════════════════════════════════════════ */
+const SCENARIOS = [
+  {
+    id:0,
+    env:'Clinical Workstations (On-Prem)',
+    envIcon:'🖥️',
+    title:'Ransomware detected on nursing station network',
+    desc:'Night-shift staff reported encrypted files on three clinical workstations in the ICU wing. Security logs show lateral movement from WS-114 toward the EHR server. The affected systems share a VLAN with the pharmacy management system. No backup verification has been performed this week.',
+    tags:[{c:'#ef5350',t:'Ransomware'},{c:'#ffa726',t:'Active Lateral Movement'},{c:'#ef9a9a',t:'Patient Data at Risk'}],
+    vulnClass:'Ransomware blast radius',
+    correctPrimary:'Access Control / Least Privilege',
+    correctSupporting:['Network Segmentation','Immutable Backups','EDR / Behavioral Detection'],
+  },
+  {
+    id:1,
+    env:'AWS Patient Portal (Cloud)',
+    envIcon:'☁️',
+    title:'S3 bucket exposed with public read ACL',
+    desc:'A CSPM alert flagged an S3 bucket containing appointment records as publicly readable. IAM audit logs show the bucket policy was last modified 6 days ago by a developer account. The developer role has AdministratorAccess permissions. No bucket versioning or Object Lock is enabled.',
+    tags:[{c:'#42a5f5',t:'Cloud Misconfiguration'},{c:'#ffa726',t:'Data Exposure'},{c:'#ef5350',t:'HIPAA Violation Risk'}],
+    vulnClass:'Cloud misconfiguration',
+    correctPrimary:'Cloud Hardening (CSPM / CIS Benchmarks)',
+    correctSupporting:['Least-Privilege IAM','IaC Security Scanning','Audit Logging'],
+  },
+  {
+    id:2,
+    env:'Web Application (Patient Portal)',
+    envIcon:'🌐',
+    title:'SQL injection vectors found in appointment booking form',
+    desc:'DAST scan results show 3 SQL injection endpoints in the patient appointment form. Error messages expose database version strings. Affected parameters accept unsanitized user input. The application is publicly accessible and stores patient PII including SSNs.',
+    tags:[{c:'#ef5350',t:'SQL Injection'},{c:'#ffa726',t:'PII Exposure'},{c:'#ef9a9a',t:'Public-Facing App'}],
+    vulnClass:'SQL Injection / XSS',
+    correctPrimary:'Input Validation / Secure Coding',
+    correctSupporting:['Web Application Firewall (WAF)','Content Security Policy (CSP)','Parameterized Queries'],
+  },
+  {
+    id:3,
+    env:'Network Infrastructure',
+    envIcon:'🔌',
+    title:'Attacker pivoting from compromised radiology server',
+    desc:'EDR telemetry shows WORKSTATION-RAD-07 performing internal port scans across subnets. The radiology VLAN has direct routes to the clinical EHR VLAN and the hospital admin network. No inter-VLAN ACLs are configured. The attacker has been present for an estimated 4 hours.',
+    tags:[{c:'#ef5350',t:'Lateral Movement'},{c:'#ffa726',t:'Flat Network'},{c:'#90caf9',t:'Active Intrusion'}],
+    vulnClass:'Lateral movement after breach',
+    correctPrimary:'Network Segmentation',
+    correctSupporting:['Micro-Segmentation / ZTNA','Host-Based Firewall','Network Isolation'],
+  },
+];
+
+/* All possible controls */
+const CONTROLS = [
+  {id:'patch',name:'Patching / Patch Management',icon:'🩹',cat:'Vulnerability Mgmt',catColor:'#1565c0'},
+  {id:'harden',name:'System Hardening',icon:'🔧',cat:'Configuration',catColor:'#6a1b9a'},
+  {id:'acl',name:'Access Control / Least Privilege',icon:'🔑',cat:'Identity & Access',catColor:'#e65100'},
+  {id:'seg',name:'Network Segmentation',icon:'🗂️',cat:'Network',catColor:'#00695c'},
+  {id:'iso',name:'Isolation / Sandboxing',icon:'🔒',cat:'Containment',catColor:'#c62828'},
+  {id:'inputval',name:'Input Validation / Secure Coding',icon:'✅',cat:'Application Security',catColor:'#00695c'},
+  {id:'waf',name:'Web Application Firewall (WAF)',icon:'🛡️',cat:'Application Security',catColor:'#00695c'},
+  {id:'csp',name:'Content Security Policy (CSP)',icon:'📋',cat:'Application Security',catColor:'#00695c'},
+  {id:'paramq',name:'Parameterized Queries',icon:'🗄️',cat:'Application Security',catColor:'#00695c'},
+  {id:'mfa',name:'Multi-Factor Authentication (MFA)',icon:'📱',cat:'Identity & Access',catColor:'#e65100'},
+  {id:'backups',name:'Immutable Backups',icon:'💾',cat:'Resilience',catColor:'#1565c0'},
+  {id:'edr',name:'EDR / Behavioral Detection',icon:'🔍',cat:'Detection',catColor:'#c62828'},
+  {id:'appwhite',name:'Application Whitelisting',icon:'📑',cat:'Endpoint',catColor:'#4a148c'},
+  {id:'cspm',name:'Cloud Hardening (CSPM / CIS)',icon:'☁️',cat:'Cloud Security',catColor:'#0d47a1'},
+  {id:'iam',name:'Least-Privilege IAM',icon:'👤',cat:'Cloud Security',catColor:'#0d47a1'},
+  {id:'iac',name:'IaC Security Scanning',icon:'🔎',cat:'DevSecOps',catColor:'#1b5e20'},
+  {id:'auditlog',name:'Audit Logging',icon:'📊',cat:'Monitoring',catColor:'#bf360c'},
+  {id:'microseg',name:'Micro-Segmentation / ZTNA',icon:'🔐',cat:'Network',catColor:'#00695c'},
+  {id:'hbf',name:'Host-Based Firewall',icon:'🖥️',cat:'Endpoint',catColor:'#4a148c'},
+  {id:'netiso',name:'Network Isolation',icon:'🚧',cat:'Containment',catColor:'#c62828'},
+];
+
+/* Map control names to ids */
+function ctrlByName(name){
+  return CONTROLS.find(c=>c.name===name || c.name.includes(name.split('/')[0].trim()));
+}
+
+/* ══════════════════════════════════════════════════════
+   MODULE 1 — STATE PER SCENARIO
+══════════════════════════════════════════════════════ */
+let scenState = {0:{primary:null,supporting:[]},1:{primary:null,supporting:[]},2:{primary:null,supporting:[]},3:{primary:null,supporting:[]}};
+let currentScen = 0;
+
+function loadScenario(idx){
+  currentScen = idx;
+  document.querySelectorAll('[id^="scen-btn-"]').forEach((b,i)=>{
+    b.classList.toggle('active-scen', i===idx);
+    b.style.borderColor = i===idx ? 'var(--accent)' : '';
+    b.style.color = i===idx ? 'var(--accent)' : '';
+  });
+  renderScenario(idx);
+}
+
+function renderScenario(idx){
+  const s = SCENARIOS[idx];
+  const st = scenState[idx];
+  const done = m1Completed[idx];
+
+  const html = `
+  <div class="scenario-panel" style="margin-bottom:1rem;">
+    <div class="sp-eyebrow">🏥 Environment: ${s.envIcon} ${s.env}</div>
+    <h3>${s.title}</h3>
+    <p>${s.desc}</p>
+    <div class="sp-meta">${s.tags.map(t=>`<span class="sp-tag" style="border-color:${t.c};color:${t.c}">${t.t}</span>`).join('')}</div>
+  </div>
+
+  <div class="row">
+    <div class="col-6">
+      <div class="card" style="margin-bottom:0">
+        <div style="font-size:.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.65rem;">Step 1 — Identify Vulnerability Class</div>
+        <div class="vuln-class-row" id="vcRow">
+          ${['Unpatched OS/App CVE','Default credentials / insecure defaults','SQL Injection / XSS','Lateral movement after breach','Ransomware blast radius','Cloud misconfiguration','Malware / suspicious file'].map(v=>`
+          <button class="vc-chip ${st.vulnClass===v?'active':''}" onclick="selectVulnClass(${idx},'${v.replace(/'/g,"\\'")}',this)">${v}</button>`).join('')}
+        </div>
+        <div class="fb ${st.vulnClass?'show ok':''}" id="vc-fb-${idx}">
+          ${st.vulnClass===s.vulnClass?'✅ Correct vulnerability class identified.' : (st.vulnClass?'❌ Review the scenario details and reconsider the primary threat type.':'')}
+        </div>
+      </div>
+    </div>
+    <div class="col-6">
+      <div class="defense-meter" style="margin-bottom:0">
+        <div class="dm-label">
+          <span>Defense Coverage</span>
+          <span class="dm-pct" id="dmPct-${idx}">${calcCoverage(idx)}%</span>
+        </div>
+        <div class="dm-track"><div class="dm-fill" id="dmFill-${idx}" style="width:${calcCoverage(idx)}%"></div></div>
+        <div class="dm-layers" id="dmLayers-${idx}">${renderLayerPips(idx)}</div>
+        <div class="tooltip-hint">Coverage increases as you add Primary (40%) + each Supporting control (15% each, max 60%)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:.75rem;">
+    <div style="font-size:.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.65rem;">Step 2 — Build Your Control Stack</div>
+    <div class="layer-toggle" style="margin-bottom:.75rem;">
+      <span style="font-size:.75rem;color:var(--text-muted);">Click a control, then set its layer:</span>
+      <button class="lt-btn lt-primary ${getLayerMode()==='primary'?'act':''}" id="lt-primary" onclick="setLayerMode('primary')">🔵 Set as Primary</button>
+      <button class="lt-btn lt-supporting ${getLayerMode()==='supporting'?'act':''}" id="lt-supporting" onclick="setLayerMode('supporting')">🟢 Set as Supporting</button>
+    </div>
+    <div class="control-palette" id="ctrlPalette">
+      ${CONTROLS.map(c=>{
+        const isPrimary = st.primary===c.id;
+        const isSupp = st.supporting.includes(c.id);
+        return `<div class="ctrl-card ${isPrimary?'selected-primary':''} ${isSupp?'selected-supporting':''}" 
+          id="cc-${idx}-${c.id}" onclick="toggleControl(${idx},'${c.id}')">
+          <div class="ctrl-icon">${c.icon}</div>
+          <div class="ctrl-name">${c.name}</div>
+          <span class="ctrl-cat" style="background:${c.catColor}22;color:${c.catColor};border:1px solid ${c.catColor}44">${c.cat}</span>
+        </div>`;
+      }).join('')}
+    </div>
+
+    <div style="font-size:.8rem;font-weight:700;color:var(--text-muted);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.05em;">Your Control Stack</div>
+    <div class="stack-vis" id="stackVis-${idx}">
+      ${renderStack(idx)}
+    </div>
+  </div>
+
+  <div style="display:flex;gap:.75rem;margin-top:.85rem;flex-wrap:wrap;">
+    <button class="btn btn-primary" onclick="submitScenario(${idx})" ${done?'disabled':''}>
+      ${done?'✓ Submitted':'✅ Evaluate My Strategy'}
+    </button>
+    <button class="btn btn-ghost" onclick="resetScenario(${idx})">↺ Clear Stack</button>
+    ${idx<3?`<button class="btn btn-ghost" style="margin-left:auto" onclick="loadScenario(${idx+1})">Next Scenario →</button>`:''}
+  </div>
+  <div class="fb" id="m1-fb-${idx}"></div>
+  `;
+  document.getElementById('scenarioContent').innerHTML = html;
+
+  // restore feedback if done
+  if(done) showM1Feedback(idx);
+}
+
+let layerMode = 'primary';
+function getLayerMode(){ return layerMode; }
+function setLayerMode(m){
+  layerMode = m;
+  const pp = document.getElementById('lt-primary');
+  const sp = document.getElementById('lt-supporting');
+  if(pp) pp.classList.toggle('act', m==='primary');
+  if(sp) sp.classList.toggle('act', m==='supporting');
+}
+
+function toggleControl(idx, cid){
+  if(m1Completed[idx]) return;
+  const st = scenState[idx];
+  if(layerMode==='primary'){
+    st.primary = st.primary===cid ? null : cid;
+    // remove from supporting if there
+    st.supporting = st.supporting.filter(s=>s!==cid);
+  } else {
+    if(st.primary===cid){ st.primary=null; }
+    const si = st.supporting.indexOf(cid);
+    if(si>-1) st.supporting.splice(si,1);
+    else if(st.supporting.length<5) st.supporting.push(cid);
+  }
+  updateCoverage(idx);
+  updatePalette(idx);
+  updateStack(idx);
+}
+
+function updatePalette(idx){
+  const st = scenState[idx];
+  CONTROLS.forEach(c=>{
+    const el = document.getElementById(`cc-${idx}-${c.id}`);
+    if(!el) return;
+    el.className='ctrl-card';
+    if(st.primary===c.id) el.classList.add('selected-primary');
+    else if(st.supporting.includes(c.id)) el.classList.add('selected-supporting');
+  });
+}
+
+function renderStack(idx){
+  const st = scenState[idx];
+  const layers = [];
+  if(st.primary){
+    const c = CONTROLS.find(x=>x.id===st.primary);
+    if(c) layers.push({ctrl:c,type:'primary'});
+  }
+  st.supporting.forEach(sid=>{
+    const c = CONTROLS.find(x=>x.id===sid);
+    if(c) layers.push({ctrl:c,type:'supporting'});
+  });
+  if(layers.length===0) return '<div class="stack-empty">No controls selected yet. Choose Primary then Supporting controls above.</div>';
+  return layers.map(l=>`
+    <div class="stack-layer">
+      ${l.ctrl.icon} <strong style="font-size:.82rem">${l.ctrl.name}</strong>
+      <span class="sl-type ${l.type==='primary'?'sl-primary':'sl-supporting'}">${l.type}</span>
+      <button class="sl-remove" onclick="removeFromStack(${idx},'${l.ctrl.id}','${l.type}')">✕</button>
+    </div>`).join('');
+}
+
+function updateStack(idx){
+  const sv = document.getElementById(`stackVis-${idx}`);
+  if(sv) sv.innerHTML = renderStack(idx);
+}
+
+function removeFromStack(idx,cid,type){
+  if(m1Completed[idx]) return;
+  const st = scenState[idx];
+  if(type==='primary') st.primary=null;
+  else st.supporting=st.supporting.filter(s=>s!==cid);
+  updateCoverage(idx);
+  updatePalette(idx);
+  updateStack(idx);
+}
+
+function calcCoverage(idx){
+  const st = scenState[idx];
+  let cov = 0;
+  if(st.primary) cov+=40;
+  cov+=Math.min(st.supporting.length*15,60);
+  return Math.min(cov,100);
+}
+
+function renderLayerPips(idx){
+  const cov = calcCoverage(idx);
+  const filled = Math.floor(cov/20);
+  return Array.from({length:5},(_,i)=>`<div class="dm-layer-pip ${i<filled?'filled':''}"></div>`).join('');
+}
+
+function updateCoverage(idx){
+  const cov = calcCoverage(idx);
+  const f = document.getElementById(`dmFill-${idx}`);
+  const p = document.getElementById(`dmPct-${idx}`);
+  const l = document.getElementById(`dmLayers-${idx}`);
+  if(f) f.style.width=cov+'%';
+  if(p) p.textContent=cov+'%';
+  if(l) l.innerHTML=renderLayerPips(idx);
+}
+
+function selectVulnClass(idx,vc,btn){
+  if(m1Completed[idx]) return;
+  scenState[idx].vulnClass=vc;
+  document.querySelectorAll('.vc-chip').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const s = SCENARIOS[idx];
+  const fb = document.getElementById(`vc-fb-${idx}`);
+  if(fb){
+    fb.className='fb show '+(vc===s.vulnClass?'ok':'err');
+    fb.textContent = vc===s.vulnClass ? '✅ Correct vulnerability class identified.' : '❌ Review the scenario details and reconsider the primary threat type.';
+  }
+}
+
+function submitScenario(idx){
+  if(m1Completed[idx]) return;
+  const s = SCENARIOS[idx];
+  const st = scenState[idx];
+  let pts = 0;
+  let issues = [];
+
+  // Vuln class (3 pts)
+  if(st.vulnClass===s.vulnClass) pts+=3;
+  else issues.push(`Vulnerability class: Expected <em>${s.vulnClass}</em>`);
+
+  // Primary control (7 pts)
+  const primaryCtrl = CONTROLS.find(c=>c.id===st.primary);
+  const primaryName = primaryCtrl?primaryCtrl.name:'(none)';
+  if(primaryName===s.correctPrimary || (primaryCtrl && s.correctPrimary.includes(primaryCtrl.name.split(' ')[0]))) pts+=7;
+  else issues.push(`Primary control: Expected <em>${s.correctPrimary}</em>, got <em>${primaryName}</em>`);
+
+  // Supporting controls (up to 5 pts — 1 pt each correct, max 3 correct)
+  const suppNames = st.supporting.map(sid=>CONTROLS.find(c=>c.id===sid)?.name).filter(Boolean);
+  let suppCorrect=0;
+  suppNames.forEach(n=>{
+    if(s.correctSupporting.some(cs=>n.includes(cs.split('/')[0].trim())||cs.includes(n.split(' ')[0]))) suppCorrect++;
+  });
+  const suppPts = Math.min(suppCorrect*2, 5);
+  pts+=suppPts;
+  if(suppCorrect===0) issues.push(`Supporting controls: No correct controls selected. Expected some of: ${s.correctSupporting.join(', ')}`);
+
+  // Stack completeness (bonus — up to 3)
+  if(st.primary&&st.supporting.length>=1) pts+=3;
+  else issues.push('Stack incomplete: must have 1 Primary + at least 1 Supporting control.');
+
+  // Clamp to 12.5 max per scenario (x4 = 50)
+  pts = Math.min(pts, 12);
+
+  M1_SCORES[idx] = pts;
+  m1Completed[idx] = true;
+  updateGlobal();
+  updateM1Progress();
+  showM1Feedback(idx, issues, pts);
+}
+
+function showM1Feedback(idx, issues, pts){
+  const s = SCENARIOS[idx];
+  const earned = M1_SCORES[idx];
+  const fb = document.getElementById(`m1-fb-${idx}`);
+  if(!fb) return;
+  const isGood = earned>=10;
+  fb.className='fb show '+(isGood?'ok':(earned>=6?'warn':'err'));
+  if(issues===undefined){
+    // restoring done state
+    fb.innerHTML=`✓ Scenario ${idx+1} submitted — ${earned}/12 points.`;
+    return;
+  }
+  let html = `<strong>${isGood?'✅':'⚠️'} Scenario ${idx+1} Score: ${earned}/12 pts</strong><br>`;
+  html+=`<strong>Optimal strategy:</strong> Primary = <em>${s.correctPrimary}</em> | Supporting = <em>${s.correctSupporting.join(', ')}</em><br>`;
+  if(issues.length) html+='<br><strong>Review:</strong><ul style="margin:.35rem 0 0 1.1rem">'+issues.map(i=>`<li>${i}</li>`).join('')+'</ul>';
+  html+=`<br>💡 <strong>Why this works:</strong> ${getStrategyRationale(idx)}`;
+  fb.innerHTML=html;
+
+  // Mark tab done
+  const btn = document.getElementById(`scen-btn-${idx}`);
+  if(btn) btn.style.borderColor='var(--accent-lt)';
+}
+
+function getStrategyRationale(idx){
+  const rationales=[
+    'Ransomware blast radius is best addressed first with <strong>Access Control / Least Privilege</strong> — limiting what any compromised account can reach limits how far ransomware can spread. Segmentation further isolates VLANs, immutable backups ensure recovery, and EDR detects encryption behavior before full detonation.',
+    'Cloud misconfigurations require <strong>Cloud Hardening via CSPM</strong> to detect and remediate policy violations. Least-Privilege IAM prevents developer accounts from holding AdministratorAccess. IaC scanning prevents misconfigurations from ever reaching production, and audit logging creates an evidence trail.',
+    'SQL Injection is an application-layer vulnerability — the root fix is <strong>Input Validation and Secure Coding</strong> (parameterized queries, ORM). A WAF provides compensating control against known payloads while code is fixed. CSP limits XSS blast radius even if injection succeeds.',
+    'Active lateral movement demands immediate <strong>Network Segmentation</strong> — inter-VLAN ACLs should have isolated radiology from EHR. Micro-segmentation and ZTNA enforce per-workload policies. Host-based firewalls provide defense-in-depth even on flat networks.',
+  ];
+  return rationales[idx];
+}
+
+function resetScenario(idx){
+  scenState[idx]={primary:null,supporting:[],vulnClass:null};
+  m1Completed[idx]=false;
+  M1_SCORES[idx]=0;
+  updateGlobal();
+  updateM1Progress();
+  renderScenario(idx);
+}
+
+function updateM1Progress(){
+  const done = m1Completed.filter(Boolean).length;
+  document.getElementById('m1ProgLbl').textContent=`${done} / 4`;
+  document.getElementById('m1ProgFill').style.width=(done/4*100)+'%';
+}
+
+/* ══════════════════════════════════════════════════════
+   MODULE 2 — REMEDIATION PRIORITIZER DATA
+══════════════════════════════════════════════════════ */
+const CVES = [
+  {
+    id:'CVE-2024-21412',cveNum:'CVE-2024-21412',
+    title:'Windows SmartScreen bypass exploited in the wild',
+    system:'Clinical Workstations (Windows 10/11)',
+    cvss:8.1,sevLabel:'High',sevClass:'sev-high',
+    exploitAvail:true,exploitLabel:'Public PoC + Active Exploitation',
+    biDesc:'All 340 clinical workstations; direct path to EHR and patient data.',
+    correctBiz:5,
+    detail:'Allows attackers to execute arbitrary code by bypassing SmartScreen security prompts. CISA KEV listed.',
+    optimalRank:1,
+  },
+  {
+    id:'CVE-2023-44487',cveNum:'CVE-2023-44487',
+    title:'HTTP/2 Rapid Reset DDoS amplification',
+    system:'Patient Portal Web Server (NGINX)',
+    cvss:7.5,sevLabel:'High',sevClass:'sev-high',
+    exploitAvail:true,exploitLabel:'Weaponized — wide exploitation',
+    biDesc:'Portal availability; DDoS would disrupt patient scheduling. No data exfiltration path.',
+    correctBiz:3,
+    detail:'Allows unauthenticated attackers to cause denial-of-service via HTTP/2 RST_STREAM floods.',
+    optimalRank:3,
+  },
+  {
+    id:'CVE-2024-3094',cveNum:'CVE-2024-3094',
+    title:'XZ Utils backdoor (supply chain) — SSH daemon',
+    system:'Linux Build Servers (Internal DevOps)',
+    cvss:10.0,sevLabel:'Critical',sevClass:'sev-critical',
+    exploitAvail:true,exploitLabel:'Nation-state supply chain — public PoC',
+    biDesc:'Build servers isolated from prod; no direct patient data access. Critical if pivot path exists.',
+    correctBiz:4,
+    detail:'Malicious backdoor inserted into XZ Utils 5.6.0–5.6.1 allows unauthenticated SSH RCE.',
+    optimalRank:2,
+  },
+  {
+    id:'CVE-2024-1234',cveNum:'CVE-2024-1234',
+    title:'Stored XSS in legacy HR portal',
+    system:'Internal HR System (On-Prem)',
+    cvss:5.4,sevLabel:'Medium',sevClass:'sev-medium',
+    exploitAvail:false,exploitLabel:'No known public exploit',
+    biDesc:'Internal staff only; no patient data. Authenticated users only.',
+    correctBiz:2,
+    detail:'Allows authenticated HR users to inject persistent JavaScript into employee profiles.',
+    optimalRank:5,
+  },
+  {
+    id:'CVE-2024-0679',cveNum:'CVE-2024-0679',
+    title:'OpenSSL session ticket memory disclosure',
+    system:'Load Balancers + VPN Gateway',
+    cvss:6.8,sevLabel:'Medium',sevClass:'sev-medium',
+    exploitAvail:false,exploitLabel:'No public exploit — complex to trigger',
+    biDesc:'Partial memory disclosure from TLS sessions; VPN protects patient portal traffic.',
+    correctBiz:3,
+    detail:'Memory leak in OpenSSL TLS session ticket processing could expose session keys.',
+    optimalRank:4,
+  },
+];
+
+/* per-CVE slider state */
+let cveScores = {};
+CVES.forEach(c=>{
+  cveScores[c.id]={cvss:c.cvss,exploit:c.exploitAvail?8:2,biz:3};
+});
+
+/* drag state */
+let dragSrc=null;
+
+function renderCVEQueue(){
+  const q = document.getElementById('cveQueue');
+  q.innerHTML='';
+  CVES.forEach((c,i)=>{
+    const sc = cveScores[c.id];
+    const comp = computeScore(sc).toFixed(1);
+    const div = document.createElement('div');
+    div.className='cve-card';
+    div.id='cve-card-'+c.id;
+    div.draggable=true;
+    div.addEventListener('dragstart',e=>{dragSrc=div;div.classList.add('cve-dragging');});
+    div.addEventListener('dragend',()=>div.classList.remove('cve-dragging'));
+    div.addEventListener('dragover',e=>{e.preventDefault();div.classList.add('cve-drag-over');});
+    div.addEventListener('dragleave',()=>div.classList.remove('cve-drag-over'));
+    div.addEventListener('drop',e=>{
+      e.preventDefault();div.classList.remove('cve-drag-over');
+      if(dragSrc&&dragSrc!==div){
+        const par=q;
+        const all=[...par.children];
+        const fromIdx=all.indexOf(dragSrc);
+        const toIdx=all.indexOf(div);
+        if(fromIdx<toIdx) par.insertBefore(dragSrc,div.nextSibling);
+        else par.insertBefore(dragSrc,div);
+        updateRankBadges();
+      }
+    });
+
+    div.innerHTML=`
+      <div class="priority-col">
+        <div class="rank-display rd-default" id="rank-${c.id}">${i+1}</div>
+        <div class="cve-rank-handle" title="Drag to reorder">⠿</div>
+      </div>
+      <div class="cve-main">
+        <div class="cve-id">${c.cveNum}</div>
+        <div class="cve-title">${c.title}</div>
+        <div class="cve-meta">
+          <span class="cve-badge ${c.sevClass}">CVSS ${c.cvss} — ${c.sevLabel}</span>
+          <span class="cve-badge" style="background:${c.exploitAvail?'#ffebee':'#e8f5e9'};border:1px solid ${c.exploitAvail?'#ef9a9a':'#a5d6a7'};color:${c.exploitAvail?'#c62828':'#1b5e20'}">
+            ${c.exploitAvail?'⚠️':'✅'} ${c.exploitLabel}
+          </span>
+        </div>
+        <div style="font-size:.78rem;color:var(--text-muted);line-height:1.5;">${c.detail}</div>
+        <div style="margin-top:.4rem;font-size:.75rem;color:var(--text-faint);"><strong>Biz Impact note:</strong> ${c.biDesc}</div>
+      </div>
+      <div class="cve-sliders">
+        <div class="slider-row">
+          <div class="slider-label"><span>CVSS Score</span><span class="sl-val" id="sv-cvss-${c.id}">${sc.cvss}</span></div>
+          <input type="range" min="1" max="10" step="0.1" value="${sc.cvss}"
+            oninput="updateSlider('${c.id}','cvss',this.value)">
+        </div>
+        <div class="slider-row">
+          <div class="slider-label"><span>Exploitability (1–10)</span><span class="sl-val" id="sv-exploit-${c.id}">${sc.exploit}</span></div>
+          <input type="range" min="1" max="10" step="1" value="${sc.exploit}"
+            oninput="updateSlider('${c.id}','exploit',this.value)">
+        </div>
+        <div class="slider-row">
+          <div class="slider-label"><span>Business Impact (1–5)</span><span class="sl-val" id="sv-biz-${c.id}">${sc.biz}</span></div>
+          <input type="range" min="1" max="5" step="1" value="${sc.biz}"
+            oninput="updateSlider('${c.id}','biz',this.value)">
+        </div>
+        <div class="composite-score">
+          <span>Priority Score</span>
+          <span class="cs-val" id="cs-${c.id}">${comp}</span>
+        </div>
+      </div>
+    `;
+    q.appendChild(div);
+  });
+  updateRankBadges();
+  updateM2Progress();
+}
+
+function computeScore(sc){
+  return (sc.cvss*0.4)+(sc.exploit*3.0)+(sc.biz*2.0);
+}
+
+function updateSlider(cid,field,val){
+  cveScores[cid][field]=parseFloat(val);
+  const comp=computeScore(cveScores[cid]).toFixed(1);
+  const sv=document.getElementById(`sv-${field}-${cid}`);
+  const cs=document.getElementById(`cs-${cid}`);
+  if(sv) sv.textContent=parseFloat(val).toFixed(field==='cvss'?1:0);
+  if(cs) cs.textContent=comp;
+  updateM2Progress();
+}
+
+const RD_CLASSES=['rd-1','rd-2','rd-3','rd-4','rd-5'];
+function updateRankBadges(){
+  const cards=[...document.getElementById('cveQueue').children];
+  cards.forEach((card,i)=>{
+    const cid=card.id.replace('cve-card-','');
+    const badge=document.getElementById(`rank-${cid}`);
+    if(badge){
+      badge.textContent=i+1;
+      badge.className='rank-display '+(RD_CLASSES[i]||'rd-default');
+    }
+  });
+}
+
+function updateM2Progress(){
+  // count how many CVEs have been manually adjusted (exploit or biz != initial)
+  let adjusted=0;
+  CVES.forEach(c=>{
+    const sc=cveScores[c.id];
+    if(sc.exploit!=(c.exploitAvail?8:2)||sc.biz!==3) adjusted++;
+  });
+  const pct=Math.round(adjusted/CVES.length*100);
+  document.getElementById('m2Fill').style.width=pct+'%';
+  document.getElementById('m2Pct').textContent=pct+'%';
+}
+
+function submitPriority(){
+  if(m2Submitted) return;
+  // get current order
+  const cards=[...document.getElementById('cveQueue').children];
+  const studentOrder=cards.map(c=>c.id.replace('cve-card-',''));
+  // optimal order by optimalRank
+  const optOrder=[...CVES].sort((a,b)=>a.optimalRank-b.optimalRank).map(c=>c.id);
+  // score: +8 pts per correctly ranked CVE (5×8=40) + up to 10 pts for scoring quality
+  let rankScore=0;
+  studentOrder.forEach((id,i)=>{
+    const exp=optOrder[i];
+    if(id===exp) rankScore+=8;
+    else if(Math.abs(studentOrder.indexOf(exp)-i)<=1) rankScore+=4; // adjacent rank
+  });
+  // scoring quality: check if exploit and biz sliders reflect the CVE context
+  let scoringScore=0;
+  CVES.forEach(c=>{
+    const sc=cveScores[c.id];
+    const exploitOk=(c.exploitAvail&&sc.exploit>=7)||((!c.exploitAvail)&&sc.exploit<=4);
+    const bizOk=Math.abs(sc.biz-c.correctBiz)<=1;
+    if(exploitOk) scoringScore+=1;
+    if(bizOk) scoringScore+=1;
+  });
+  const scoringPts=Math.round((scoringScore/10)*10);
+  M2_SCORE=Math.min(rankScore+scoringPts,50);
+  m2Submitted=true;
+  updateGlobal();
+
+  // build feedback
+  const fb=document.getElementById('m2Feedback');
+  fb.className='fb show '+(M2_SCORE>=40?'ok':(M2_SCORE>=25?'warn':'err'));
+  let html=`<strong>${M2_SCORE>=40?'✅':'⚠️'} Remediation Priority Score: ${M2_SCORE}/50 pts</strong><br><br>`;
+  html+=`<strong>Optimal remediation order:</strong><ol style="margin:.35rem 0 .5rem 1.25rem">`;
+  optOrder.forEach((id,i)=>{
+    const c=CVES.find(x=>x.id===id);
+    html+=`<li><strong>${c.title}</strong> — ${getRationale(id)}</li>`;
+  });
+  html+=`</ol>`;
+  html+=`<strong>Key principle:</strong> Exploitability and business impact should override CVSS alone. CVE-2024-3094 scores CVSS 10.0 but ranks #2 because the build servers are isolated. CVE-2024-21412 ranks #1 because 340 clinical workstations are exposed with an active exploit chain.`;
+  fb.innerHTML=html;
+}
+
+function getRationale(id){
+  const r={
+    'CVE-2024-21412':'Active exploitation + 340 exposed clinical workstations = highest business risk despite CVSS 8.1',
+    'CVE-2024-3094':'CVSS 10.0 supply-chain backdoor but isolated build environment reduces immediate patient data risk — still #2',
+    'CVE-2023-44487':'Weaponized DDoS exploit + portal availability impacts patient scheduling operations',
+    'CVE-2024-0679':'VPN/LB exposure but no public exploit and complex trigger conditions — lower urgency',
+    'CVE-2024-1234':'Internal only, authenticated, no patient data path — lowest remediation urgency',
+  };
+  return r[id]||'';
+}
+
+function resetPriority(){
+  m2Submitted=false;
+  M2_SCORE=0;
+  CVES.forEach(c=>{cveScores[c.id]={cvss:c.cvss,exploit:c.exploitAvail?8:2,biz:3};});
+  document.getElementById('m2Feedback').className='fb';
+  updateGlobal();
+  renderCVEQueue();
+}
+
+/* ══════════════════════════════════════════════════════
+   RESULTS
+══════════════════════════════════════════════════════ */
+function renderResults(){
+  const m1total=M1_SCORES.reduce((a,b)=>a+b,0);
+  const total=m1total+M2_SCORE;
+  const pct=Math.round(total/100*100);
+  let grade='',gicon='';
+  if(pct>=90){grade='Distinguished — Security Architect';gicon='🏆';}
+  else if(pct>=75){grade='Proficient — Security Analyst';gicon='🎓';}
+  else if(pct>=60){grade='Developing — Junior Analyst';gicon='📘';}
+  else{grade='Needs Review — Revisit Modules';gicon='🔁';}
+  document.getElementById('r-grade').textContent=`${gicon} ${pct}% — ${grade}`;
+  document.getElementById('r-msg').textContent=`Module 1 (Defense Builder): ${m1total}/50 · Module 2 (Prioritizer): ${M2_SCORE}/50`;
+
+  const rg=document.getElementById('resultsGrid');
+  rg.innerHTML='';
+  const cells=[
+    {name:'Layered Defense',icon:'🧱',score:m1total,max:50},
+    {name:'Remediation Priority',icon:'⚖️',score:M2_SCORE,max:50},
+    {name:'Scenarios Completed',icon:'📋',score:m1Completed.filter(Boolean).length,max:4,raw:true},
+    {name:'Overall',icon:'🛡️',score:pct,max:100,pct:true},
+  ];
+  cells.forEach(c=>{
+    rg.innerHTML+=`<div class="rg-cell">
+      <div class="rg-name">${c.icon} ${c.name}</div>
+      <div class="rg-score">${c.score}${c.pct?'%':''}</div>
+      <div class="rg-lbl">${c.raw?`/ ${c.max}`:`/ ${c.max} pts`}</div>
+    </div>`;
+  });
+
+  document.getElementById('debriefContent').innerHTML=`
+    <table class="ref-table">
+      <thead><tr><th>Principle</th><th>Why It Matters in Security Architecture</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Defense-in-Depth</strong></td><td>No single control stops all attacks. Layered mitigations ensure that if the Primary control fails, Supporting controls contain the damage — aligned to NIST SP 800-53 layered security.</td></tr>
+        <tr><td><strong>Primary vs. Supporting Controls</strong></td><td>Primary controls address the root cause. Supporting controls provide compensating coverage, detection, and recovery. Applying only Primary without Supporting leaves gaps a sophisticated attacker can exploit.</td></tr>
+        <tr><td><strong>CVSS ≠ Priority</strong></td><td>CVSS measures technical severity in isolation. Real-world remediation priority must incorporate exploitability (is a working exploit public and in-use?), asset criticality, and business impact — a CVSS 7.0 being actively exploited on a patient-facing system outranks a CVSS 9.0 on an isolated test server.</td></tr>
+        <tr><td><strong>Context-Aware Triage</strong></td><td>The formula (CVSS×0.4 + Exploitability×3.0 + Biz Impact×2.0) intentionally weights exploitability highest — reflecting CISA KEV and EPSS methodology, where weaponized CVEs demand emergency response regardless of base CVSS.</td></tr>
+        <tr><td><strong>Cloud Misconfiguration</strong></td><td>CSPM tools + Least-Privilege IAM are the primary controls for cloud misconfigurations. IaC scanning shifts security left — catching misconfigurations before deployment. Audit logging provides the evidence trail for compliance and forensics.</td></tr>
+        <tr><td><strong>Lateral Movement Containment</strong></td><td>Once attackers are inside, segmentation is the primary containment tool. Flat networks are a force multiplier for attackers — every east-west connection without an ACL is a free pivot point.</td></tr>
+      </tbody>
+    </table>`;
+}
+
+function resetAll(){
+  M1_SCORES=[0,0,0,0];
+  M2_SCORE=0;
+  m1Completed=[false,false,false,false];
+  m2Submitted=false;
+  scenState={0:{primary:null,supporting:[]},1:{primary:null,supporting:[]},2:{primary:null,supporting:[]},3:{primary:null,supporting:[]}};
+  CVES.forEach(c=>{cveScores[c.id]={cvss:c.cvss,exploit:c.exploitAvail?8:2,biz:3};});
+  updateGlobal();
+  updateM1Progress();
+  loadScenario(0);
+  renderCVEQueue();
+  switchMod('overview');
+}
+
+/* ══════════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════════ */
+loadScenario(0);
+renderCVEQueue();
+updateGlobal();
+</script>
+</body>
+</html>
