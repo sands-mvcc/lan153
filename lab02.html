@@ -1,589 +1,959 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cryptography & Systems Simulator | Jr. Cybersecurity Tech</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brandGreen: '#10b981',
-                        brandGreenDark: '#059669',
-                        brandBlack: '#111827',
-                        terminalBg: '#0a0a0a',
-                        terminalText: '#4ade80'
-                    },
-                    fontFamily: {
-                        mono: ['"Fira Code"', '"Courier New"', 'monospace'],
-                        sans: ['Inter', 'sans-serif']
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        body { background-color: #ffffff; color: #111827; }
-        .terminal-scroll::-webkit-scrollbar { width: 8px; }
-        .terminal-scroll::-webkit-scrollbar-track { background: #111827; }
-        .terminal-scroll::-webkit-scrollbar-thumb { background: #10b981; border-radius: 4px; }
-        .tab-active { border-left: 4px solid #10b981; background-color: #f3f4f6; color: #111827; font-weight: 600; }
-        .tab-inactive { border-left: 4px solid transparent; color: #6b7280; }
-        .tab-inactive:hover { background-color: #f9fafb; color: #111827; }
-        
-        .typewriter { overflow: hidden; white-space: pre-wrap; word-wrap: break-word; }
-        
-        input, textarea, select { border: 1px solid #d1d5db; border-radius: 0.375rem; padding: 0.5rem; width: 100%; outline: none; }
-        input:focus, textarea:focus, select:focus { border-color: #10b981; box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2); }
-        
-        .btn { background-color: #111827; color: white; padding: 0.5rem 1rem; border-radius: 0.375rem; font-weight: 500; cursor: pointer; transition: background-color 0.2s; }
-        .btn:hover { background-color: #10b981; }
-        .btn:disabled { background-color: #9ca3af; cursor: not-allowed; }
-        
-        .btn-green { background-color: #10b981; color: white; }
-        .btn-green:hover { background-color: #059669; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lab 03 — Basic Cryptography | Cipher Ledger</title>
+<style>
+  /* ============ DESIGN TOKENS ============ */
+  :root {
+    --bg: #F4F1E6;
+    --bg-panel: #FFFFFF;
+    --bg-inset: #EDE8D9;
+    --ink: #1C2230;
+    --ink-soft: #565F72;
+    --ink-faint: #8B92A3;
+    --border: #DCD3B8;
+    --border-soft: #E6E0CC;
+    --gold: #A9791F;
+    --gold-soft: #F2E6C6;
+    --teal: #2E6B5E;
+    --teal-soft: #DCEAE5;
+    --crimson: #93382F;
+    --crimson-soft: #F2DDDA;
+    --stamp: #B23A3A;
+    --shadow: 0 1px 2px rgba(28,34,48,0.06), 0 4px 14px rgba(28,34,48,0.05);
+    --radius: 10px;
+    --serif: Georgia, 'Iowan Old Style', 'Palatino Linotype', serif;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  }
+  html[data-theme="dark"] {
+    --bg: #10141D;
+    --bg-panel: #171D29;
+    --bg-inset: #0D1119;
+    --ink: #E9E6D8;
+    --ink-soft: #A7AEC0;
+    --ink-faint: #6B7386;
+    --border: #2A3244;
+    --border-soft: #232B3B;
+    --gold: #D9AE55;
+    --gold-soft: #2E2717;
+    --teal: #6FC0AE;
+    --teal-soft: #16302B;
+    --crimson: #E08A80;
+    --crimson-soft: #34201E;
+    --stamp: #E08A80;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.55;
+    transition: background .25s ease, color .25s ease;
+  }
+  ::selection { background: var(--gold-soft); }
+
+  a { color: var(--teal); }
+
+  /* ============ HEADER ============ */
+  .masthead {
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border);
+    padding: 28px clamp(16px, 4vw, 48px) 22px;
+    position: sticky; top: 0; z-index: 50;
+    display: flex; align-items: center; justify-content: space-between; gap: 24px;
+    box-shadow: var(--shadow);
+  }
+  .mast-left { display: flex; align-items: center; gap: 18px; }
+  .cipher-disc { width: 52px; height: 52px; flex-shrink: 0; }
+  .mast-text .eyebrow {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--ink-faint); margin: 0 0 3px;
+  }
+  .mast-text h1 {
+    font-family: var(--serif); font-size: clamp(20px, 2.6vw, 27px); margin: 0; font-weight: 700; letter-spacing: -0.01em;
+  }
+  .mast-right { display: flex; align-items: center; gap: 14px; }
+  .theme-toggle {
+    border: 1px solid var(--border); background: var(--bg-inset); color: var(--ink);
+    border-radius: 999px; padding: 8px 16px; font-family: var(--mono); font-size: 12.5px;
+    cursor: pointer; display: flex; align-items: center; gap: 8px;
+  }
+  .theme-toggle:hover { border-color: var(--gold); }
+
+  .progress-strip {
+    display: flex; gap: 6px; padding: 0 clamp(16px, 4vw, 48px);
+    background: var(--bg-panel); border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .tab {
+    flex: 1; min-width: 84px; text-align: center; padding: 10px 4px 12px;
+    font-family: var(--mono); font-size: 11px; color: var(--ink-faint);
+    border-bottom: 3px solid transparent; letter-spacing: .03em; white-space: nowrap;
+  }
+  .tab.active { color: var(--ink); border-bottom-color: var(--gold); font-weight: 600; }
+  .tab.done { color: var(--teal); }
+  .tab.done::before { content: "✓ "; }
+
+  /* ============ LAYOUT ============ */
+  main { max-width: 880px; margin: 0 auto; padding: 40px clamp(16px, 4vw, 32px) 100px; }
+  .stage { display: none; }
+  .stage.visible { display: block; animation: fadein .35s ease; }
+  @keyframes fadein { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: translateY(0);} }
+
+  .case-card {
+    background: var(--bg-panel); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: clamp(20px, 4vw, 34px); margin-bottom: 22px; position: relative;
+  }
+  .case-tab {
+    position: absolute; top: -12px; left: 24px; background: var(--gold); color: #fff;
+    font-family: var(--mono); font-size: 11px; letter-spacing: .08em; padding: 4px 12px;
+    border-radius: 4px; box-shadow: var(--shadow);
+  }
+  .case-tab.teal { background: var(--teal); }
+  .case-tab.crimson { background: var(--crimson); }
+
+  h2.stage-title {
+    font-family: var(--serif); font-size: clamp(21px, 3vw, 27px); margin: 10px 0 4px; letter-spacing: -0.01em;
+  }
+  .lo-tag {
+    font-family: var(--mono); font-size: 11px; color: var(--ink-faint); text-transform: uppercase;
+    letter-spacing: .1em; margin-bottom: 14px; display: block;
+  }
+  p.lede { color: var(--ink-soft); font-size: 15.5px; max-width: 62ch; }
+
+  .brief-box {
+    background: var(--bg-inset); border-left: 3px solid var(--gold); border-radius: 6px;
+    padding: 16px 18px; font-family: var(--mono); font-size: 13.5px; color: var(--ink);
+    margin: 16px 0; white-space: pre-wrap;
+  }
+
+  label.field-label { display: block; font-size: 13px; font-weight: 600; color: var(--ink-soft); margin: 16px 0 6px; }
+  input[type="text"], input[type="password"], textarea {
+    width: 100%; font-family: var(--mono); font-size: 14px; padding: 10px 12px;
+    border: 1px solid var(--border); border-radius: 6px; background: var(--bg);
+    color: var(--ink); resize: vertical;
+  }
+  input:focus, textarea:focus, button:focus-visible {
+    outline: 2px solid var(--gold); outline-offset: 1px;
+  }
+  textarea { min-height: 70px; }
+
+  .btn-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+  button.btn {
+    font-family: var(--sans); font-weight: 600; font-size: 13.5px; padding: 10px 18px;
+    border-radius: 7px; border: 1px solid transparent; cursor: pointer; transition: transform .1s ease;
+  }
+  button.btn:active { transform: scale(.97); }
+  .btn-primary { background: var(--gold); color: #fff; }
+  .btn-primary:hover { filter: brightness(1.06); }
+  .btn-teal { background: var(--teal); color: #fff; }
+  .btn-teal:hover { filter: brightness(1.06); }
+  .btn-crimson { background: var(--crimson); color: #fff; }
+  .btn-crimson:hover { filter: brightness(1.06); }
+  .btn-ghost { background: transparent; border-color: var(--border); color: var(--ink-soft); }
+  .btn-ghost:hover { border-color: var(--ink-faint); }
+  button.btn:disabled { opacity: .45; cursor: not-allowed; }
+
+  .output-block {
+    font-family: var(--mono); font-size: 13px; background: var(--bg-inset);
+    border: 1px solid var(--border-soft); border-radius: 6px; padding: 12px 14px;
+    margin-top: 12px; word-break: break-all; white-space: pre-wrap; min-height: 20px;
+  }
+  .output-block .lbl { display: block; font-size: 10.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-faint); margin-bottom: 4px; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  details.hint {
+    margin-top: 14px; border: 1px dashed var(--border); border-radius: 6px; padding: 8px 12px; font-size: 13.5px;
+  }
+  details.hint summary { cursor: pointer; font-weight: 600; color: var(--gold); font-size: 13px; }
+  details.hint[open] summary { margin-bottom: 8px; }
+
+  .feedback { margin-top: 12px; padding: 10px 14px; border-radius: 6px; font-size: 13.5px; display: none; }
+  .feedback.show { display: block; }
+  .feedback.good { background: var(--teal-soft); color: var(--teal); border: 1px solid var(--teal); }
+  .feedback.bad { background: var(--crimson-soft); color: var(--crimson); border: 1px solid var(--crimson); }
+  .feedback.info { background: var(--gold-soft); color: var(--gold); border: 1px solid var(--gold); }
+
+  .stamp {
+    display: inline-block; border: 3px solid var(--stamp); color: var(--stamp); font-family: var(--mono);
+    font-weight: 700; letter-spacing: .1em; padding: 6px 14px; border-radius: 4px; transform: rotate(-4deg);
+    margin-top: 14px; font-size: 13px; opacity: 0; transition: opacity .3s ease;
+  }
+  .stamp.show { opacity: 1; }
+
+  .quiz-option {
+    display: block; width: 100%; text-align: left; padding: 12px 14px; margin: 6px 0;
+    border: 1px solid var(--border); background: var(--bg-panel); border-radius: 7px; cursor: pointer;
+    font-size: 14px; color: var(--ink);
+  }
+  .quiz-option:hover { border-color: var(--gold); }
+  .quiz-option.correct { background: var(--teal-soft); border-color: var(--teal); }
+  .quiz-option.incorrect { background: var(--crimson-soft); border-color: var(--crimson); }
+  .quiz-option[disabled] { cursor: default; }
+
+  .nav-footer { display: flex; justify-content: space-between; margin-top: 4px; }
+
+  .score-pill {
+    font-family: var(--mono); font-size: 12px; background: var(--bg-inset); border: 1px solid var(--border);
+    padding: 6px 12px; border-radius: 999px; color: var(--ink-soft);
+  }
+
+  table.compare-table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 13.5px; }
+  table.compare-table th, table.compare-table td {
+    border: 1px solid var(--border); padding: 8px 10px; text-align: left;
+  }
+  table.compare-table th { background: var(--bg-inset); font-family: var(--mono); font-size: 11.5px; text-transform: uppercase; letter-spacing: .04em; }
+
+  .name-gate {
+    max-width: 460px; margin: 60px auto; text-align: center;
+  }
+  .name-gate .case-card { text-align: left; }
+
+  footer.finale { text-align: center; padding: 40px 0 10px; color: var(--ink-faint); font-size: 12.5px; font-family: var(--mono); }
+</style>
 </head>
-<body class="flex flex-col h-screen overflow-hidden font-sans">
+<body>
 
-    <!-- Header -->
-    <header class="bg-white border-b-2 border-brandGreen p-4 flex justify-between items-center shadow-sm z-10">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-brandBlack rounded flex items-center justify-center text-brandGreen font-bold text-xl">
-                CS
-            </div>
-            <div>
-                <h1 class="text-xl font-bold text-brandBlack leading-tight">Cybersecurity Operations Sandbox</h1>
-                <p class="text-xs text-brandGreen font-semibold uppercase tracking-wider">Module: Symmetrical, Asymmetrical & Hashing</p>
-            </div>
-        </div>
-        <div class="flex items-center gap-4">
-            <div class="text-sm font-mono bg-gray-100 px-3 py-1 rounded text-brandBlack border border-gray-200">
-                Score: <span id="scoreDisplay" class="font-bold text-brandGreenDark">0</span> / 500
-            </div>
-            <div class="text-sm font-mono bg-gray-100 px-3 py-1 rounded text-brandBlack border border-gray-200">
-                Status: <span class="text-brandGreen font-bold animate-pulse">ONLINE</span>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Content -->
-    <div class="flex flex-1 overflow-hidden">
-        
-        <!-- Sidebar Navigation -->
-        <nav class="w-64 bg-white border-r border-gray-200 flex flex-col py-4 shadow-sm z-0">
-            <div class="px-4 pb-2 mb-2 border-b border-gray-100 text-xs font-bold text-gray-400 uppercase tracking-wider">Missions</div>
-            <button onclick="switchTab('stage1')" id="tab-stage1" class="tab-active text-left px-4 py-3 text-sm transition-all flex items-center justify-between">
-                <span>1. Symmetrical Enc.</span>
-                <span id="badge-stage1" class="hidden text-brandGreen">✔</span>
-            </button>
-            <button onclick="switchTab('stage2')" id="tab-stage2" class="tab-inactive text-left px-4 py-3 text-sm transition-all flex items-center justify-between">
-                <span>2. Asymmetrical Enc.</span>
-                <span id="badge-stage2" class="hidden text-brandGreen">✔</span>
-            </button>
-            <button onclick="switchTab('stage3')" id="tab-stage3" class="tab-inactive text-left px-4 py-3 text-sm transition-all flex items-center justify-between">
-                <span>3. Hash & Integrity</span>
-                <span id="badge-stage3" class="hidden text-brandGreen">✔</span>
-            </button>
-            <button onclick="switchTab('stage4')" id="tab-stage4" class="tab-inactive text-left px-4 py-3 text-sm transition-all flex items-center justify-between">
-                <span>4. Digital Sigs & PKI</span>
-                <span id="badge-stage4" class="hidden text-brandGreen">✔</span>
-            </button>
-            <button onclick="switchTab('stage5')" id="tab-stage5" class="tab-inactive text-left px-4 py-3 text-sm transition-all flex items-center justify-between">
-                <span>5. Obfuscation Check</span>
-                <span id="badge-stage5" class="hidden text-brandGreen">✔</span>
-            </button>
-        </nav>
-
-        <!-- Interactive Sandbox -->
-        <main class="flex-1 flex flex-col bg-gray-50 overflow-y-auto">
-            
-            <!-- Dynamic Panels -->
-            <div class="p-6 max-w-4xl mx-auto w-full flex-1">
-                
-                <!-- Stage 1: Symmetrical -->
-                <div id="panel-stage1" class="block space-y-6">
-                    <div class="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
-                        <h2 class="text-lg font-bold mb-2">Mission 1: Establish Symmetrical Link</h2>
-                        <p class="text-sm text-gray-600 mb-4"><strong>Objective:</strong> Server Alpha requires configuration. Generate a single shared secret key, select the correct symmetric algorithm, and encrypt the activation payload. Symmetrical encryption uses the <em>same</em> key for both encryption and decryption.</p>
-                        
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="bg-gray-50 p-4 rounded border border-gray-200">
-                                <label class="block text-sm font-bold mb-1">1. Generate Shared Key</label>
-                                <button onclick="generateSymmetricKey()" class="btn btn-green w-full mb-2">Generate AES-256 Key</button>
-                                <input type="text" id="symKeyDisplay" readonly placeholder="No key generated..." class="font-mono text-sm bg-gray-100 text-brandGreenDark font-bold">
-                            </div>
-                            <div class="bg-gray-50 p-4 rounded border border-gray-200">
-                                <label class="block text-sm font-bold mb-1">2. Configuration</label>
-                                <label class="text-xs text-gray-500">Algorithm</label>
-                                <select id="symAlgoSelect" class="mb-2">
-                                    <option value="none">-- Select Algorithm --</option>
-                                    <option value="aes">AES (Advanced Encryption Standard)</option>
-                                    <option value="rsa">RSA (Rivest-Shamir-Adleman)</option>
-                                </select>
-                                <label class="text-xs text-gray-500">Active Key (Paste Here)</label>
-                                <input type="text" id="symKeyInput" placeholder="Paste generated key here..." class="font-mono text-sm">
-                            </div>
-                        </div>
-
-                        <div class="mt-4 grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-bold mb-1">3. Payload Data</label>
-                                <textarea id="symPlaintext" rows="3" placeholder="Enter text to encrypt... e.g., INIT_SERVER_ALPHA"></textarea>
-                                <button onclick="executeSymmetric('encrypt')" class="btn w-full mt-2">Encrypt Payload</button>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-bold mb-1">4. Ciphertext Output</label>
-                                <textarea id="symCiphertext" rows="3" readonly class="bg-gray-100 font-mono text-sm" placeholder="Encrypted data will appear here..."></textarea>
-                                <button onclick="executeSymmetric('decrypt')" class="btn w-full mt-2 bg-gray-600 hover:bg-gray-700">Test Decryption</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Stage 2: Asymmetrical -->
-                <div id="panel-stage2" class="hidden space-y-6">
-                    <div class="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
-                        <h2 class="text-lg font-bold mb-2">Mission 2: Asymmetrical Key Exchange</h2>
-                        <p class="text-sm text-gray-600 mb-4"><strong>Objective:</strong> An external contractor needs to send us a secure credential. We cannot share a symmetric key beforehand. Use Asymmetric encryption (Public Key Infrastructure). Generate a key pair, publish your Public key, and decrypt the incoming message with your Private key.</p>
-                        
-                        <div class="bg-gray-50 p-4 rounded border border-gray-200 mb-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <label class="block text-sm font-bold">1. Key Pair Generation (RSA)</label>
-                                <button onclick="generateAsymmetricKeys()" class="btn btn-green text-sm py-1">Generate RSA Pair</button>
-                            </div>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="text-xs text-brandGreenDark font-bold">Public Key (Share openly)</label>
-                                    <textarea id="asymPubKey" readonly rows="2" class="font-mono text-xs bg-gray-100"></textarea>
-                                </div>
-                                <div>
-                                    <label class="text-xs text-red-600 font-bold">Private Key (Keep secret!)</label>
-                                    <textarea id="asymPrivKey" readonly rows="2" class="font-mono text-xs bg-gray-100"></textarea>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="p-4 border border-blue-200 bg-blue-50 rounded">
-                                <h3 class="text-sm font-bold text-blue-800 mb-2">Contractor's View (Sender)</h3>
-                                <label class="text-xs">Recipient's Public Key</label>
-                                <input type="text" id="contractorPubKey" placeholder="Paste your Public Key here..." class="font-mono text-xs mb-2">
-                                <label class="text-xs">Secret Message</label>
-                                <input type="text" id="contractorMessage" value="SYS_ADMIN_CREDS: contractor/P@ssw0rd1" class="font-mono text-xs mb-2 text-gray-500" readonly>
-                                <button onclick="contractorEncrypt()" class="btn w-full bg-blue-800 hover:bg-blue-700 text-sm">Encrypt with Public Key</button>
-                            </div>
-                            <div class="p-4 border border-brandGreen bg-green-50 rounded">
-                                <h3 class="text-sm font-bold text-brandGreenDark mb-2">Your View (Receiver)</h3>
-                                <label class="text-xs">Received Ciphertext</label>
-                                <textarea id="myCiphertext" readonly rows="2" class="font-mono text-xs bg-gray-100 mb-2"></textarea>
-                                <label class="text-xs">Your Private Key</label>
-                                <input type="text" id="myPrivKeyInput" placeholder="Paste your Private Key here to decrypt..." class="font-mono text-xs mb-2">
-                                <button onclick="myDecrypt()" class="btn-green w-full text-sm">Decrypt with Private Key</button>
-                                <input type="text" id="myDecryptedMsg" readonly class="mt-2 font-mono text-sm bg-white border-green-300 font-bold text-green-800" placeholder="Decrypted message will appear here">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Stage 3: Hashing -->
-                <div id="panel-stage3" class="hidden space-y-6">
-                    <div class="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
-                        <h2 class="text-lg font-bold mb-2">Mission 3: Integrity via Hashing</h2>
-                        <p class="text-sm text-gray-600 mb-4"><strong>Objective:</strong> A system patch (`patch_v2.bin`) has been downloaded. We must verify its integrity using a Cryptographic Hash Function (SHA-256). Notice the <em>Avalanche Effect</em>: even changing one character completely alters the resulting hash.</p>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-sm font-bold mb-1">Patch File Data (Simulated)</label>
-                                <textarea id="hashInput" rows="5" class="font-mono text-sm" oninput="liveHash()">function applyPatch() { system.update(2.0); return true; }</textarea>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-bold mb-1">Generated SHA-256 Hash</label>
-                                <div id="hashOutput" class="p-4 bg-gray-100 rounded border border-gray-300 font-mono text-sm break-all text-brandBlack min-h-[80px] flex items-center justify-center">
-                                    Awaiting input...
-                                </div>
-                                <div class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-800">
-                                    <strong>Task:</strong> Try changing a single semicolon or letter in the code block. Observe the hash output. Submit the hash of the original text to pass.
-                                </div>
-                                <button onclick="verifyHashMission()" class="btn btn-green w-full mt-3">Verify System Integrity</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Stage 4: PKI & Signatures -->
-                <div id="panel-stage4" class="hidden space-y-6">
-                    <div class="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
-                        <h2 class="text-lg font-bold mb-2">Mission 4: PKI & Digital Signatures</h2>
-                        <p class="text-sm text-gray-600 mb-4"><strong>Objective:</strong> Server Beta sent a configuration file. We need to verify Non-Repudiation and Authentication using Digital Signatures. A signature is created by <em>encrypting the hash</em> of a document with the sender's <strong>Private Key</strong>. We verify it using their <strong>Public Key</strong> from their X.509 Certificate.</p>
-                        
-                        <div class="flex gap-4 mb-4">
-                            <!-- X.509 Cert -->
-                            <div class="w-1/2 p-4 bg-gray-50 border border-gray-200 rounded font-mono text-xs">
-                                <h3 class="font-bold text-center border-b pb-2 mb-2">X.509 Certificate</h3>
-                                <p><span class="text-gray-500">Issuer (CA):</span> GlobalSign Trust</p>
-                                <p><span class="text-gray-500">Subject:</span> Server Beta</p>
-                                <p><span class="text-gray-500">Valid Until:</span> 2027-12-31</p>
-                                <p class="mt-2 text-brandGreenDark font-bold">Public Key:</p>
-                                <p class="break-all bg-white p-1 border">PUB_KEY_BETA_99A1</p>
-                            </div>
-                            <!-- Document & Signature -->
-                            <div class="w-1/2 p-4 bg-blue-50 border border-blue-200 rounded">
-                                <h3 class="font-bold text-sm text-blue-800 mb-2">Received Package</h3>
-                                <label class="text-xs text-gray-600">Document Contents:</label>
-                                <textarea id="sigDoc" readonly rows="2" class="w-full text-xs font-mono mb-2">FIREWALL_RULE: BLOCK PORT 22</textarea>
-                                <label class="text-xs text-gray-600">Attached Signature (Encrypted Hash):</label>
-                                <input type="text" id="sigAttached" value="SIG[PRIV_BETA_ENC_HASH(FIREWALL...)]" readonly class="w-full text-xs font-mono bg-gray-200 mb-2">
-                            </div>
-                        </div>
-
-                        <div class="p-4 border-2 border-dashed border-gray-300 rounded bg-white">
-                            <h3 class="font-bold text-sm mb-3">Verification Process</h3>
-                            <div class="flex items-end gap-2">
-                                <div class="flex-1">
-                                    <label class="text-xs text-gray-500">Sender's Public Key (From Cert)</label>
-                                    <input type="text" id="sigPubKeyVerify" placeholder="Paste Server Beta's Public Key..." class="font-mono text-sm">
-                                </div>
-                                <button onclick="verifySignature()" class="btn btn-green h-[42px]">Verify Signature</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Stage 5: Obfuscation -->
-                <div id="panel-stage5" class="hidden space-y-6">
-                    <div class="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
-                        <h2 class="text-lg font-bold mb-2">Mission 5: Obfuscation vs. Encryption</h2>
-                        <p class="text-sm text-gray-600 mb-4"><strong>Objective:</strong> A junior analyst flagged a suspicious payload thinking it is highly encrypted. Evaluate the payload. Remember: Obfuscation (like Base64 encoding) obscures data but requires no cryptographic key to reverse. Encryption requires a key.</p>
-                        
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="p-4 bg-gray-50 border border-gray-200 rounded">
-                                <h3 class="font-bold text-sm mb-2 text-red-700">Suspicious Payload (Found in logs)</h3>
-                                <textarea id="obfInput" rows="3" class="font-mono text-sm break-all" readonly>U1lTVEVNX0NPTVBST01JU0VEOiBCYWNrZG9vciBvcGVuIG9uIHBvcnQgNDQ0NA==</textarea>
-                                <div class="mt-2 flex gap-2">
-                                    <button onclick="attemptDecode('base64')" class="btn flex-1 text-sm bg-gray-800">Decode Base64</button>
-                                    <button onclick="attemptDecode('aes')" class="btn flex-1 text-sm bg-gray-800">Decrypt AES</button>
-                                </div>
-                            </div>
-                            <div class="p-4 border-l-4 border-brandGreen bg-white shadow-sm">
-                                <h3 class="font-bold text-sm mb-2">Analysis Results</h3>
-                                <textarea id="obfOutput" rows="3" readonly class="font-mono text-sm bg-gray-100" placeholder="Results will appear here..."></textarea>
-                                <div id="obfConclusion" class="mt-3 hidden">
-                                    <button onclick="completeSimulation()" class="btn btn-green w-full animate-bounce">Conclude Investigation & Generate Report</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </main>
-
-        <!-- Right Terminal Sidebar -->
-        <aside class="w-96 bg-terminalBg flex flex-col shadow-xl z-20">
-            <div class="bg-brandBlack p-2 border-b border-gray-800 flex justify-between items-center text-xs text-gray-400 font-mono">
-                <span>> TERMINAL_LOG :: SYS_ADMIN</span>
-                <span class="flex gap-1">
-                    <div class="w-2 h-2 rounded-full bg-red-500"></div>
-                    <div class="w-2 h-2 rounded-full bg-yellow-500"></div>
-                    <div class="w-2 h-2 rounded-full bg-green-500"></div>
-                </span>
-            </div>
-            <div id="terminalBody" class="flex-1 p-4 font-mono text-sm text-terminalText overflow-y-auto terminal-scroll leading-relaxed whitespace-pre-wrap">
-                <!-- Logs injected here -->
-            </div>
-        </aside>
+<header class="masthead">
+  <div class="mast-left">
+    <svg class="cipher-disc" viewBox="0 0 100 100" id="cipherDisc">
+      <circle cx="50" cy="50" r="46" fill="none" stroke="var(--border)" stroke-width="2"/>
+      <g id="discOuter">
+        <circle cx="50" cy="50" r="38" fill="none" stroke="var(--gold)" stroke-width="1.5"/>
+        <text x="50" y="16" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--gold)">A</text>
+        <text x="80" y="34" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--gold)">B</text>
+        <text x="80" y="70" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--gold)">C</text>
+        <text x="50" y="90" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--gold)">D</text>
+        <text x="20" y="70" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--gold)">E</text>
+        <text x="20" y="34" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--gold)">F</text>
+      </g>
+      <g id="discInner">
+        <circle cx="50" cy="50" r="20" fill="none" stroke="var(--teal)" stroke-width="1.5"/>
+        <text x="50" y="35" text-anchor="middle" font-family="var(--mono)" font-size="8" fill="var(--teal)">Q</text>
+        <text x="63" y="55" text-anchor="middle" font-family="var(--mono)" font-size="8" fill="var(--teal)">R</text>
+        <text x="50" y="68" text-anchor="middle" font-family="var(--mono)" font-size="8" fill="var(--teal)">S</text>
+        <text x="37" y="55" text-anchor="middle" font-family="var(--mono)" font-size="8" fill="var(--teal)">T</text>
+      </g>
+      <circle cx="50" cy="50" r="3" fill="var(--crimson)"/>
+    </svg>
+    <div class="mast-text">
+      <p class="eyebrow">Lab 03 &middot; Basic Cryptography</p>
+      <h1>The Cipher Ledger</h1>
     </div>
+  </div>
+  <div class="mast-right">
+    <span class="score-pill" id="scorePill">Score: 0 / 6</span>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle light and dark mode">
+      <span id="themeIcon">&#9788;</span><span id="themeLabel">Light</span>
+    </button>
+  </div>
+</header>
 
-    <script>
-        // State Management
-        let state = {
-            score: 0,
-            stagesCompleted: {
-                stage1: false,
-                stage2: false,
-                stage3: false,
-                stage4: false,
-                stage5: false
-            },
-            data: {
-                symKey: null,
-                asymPubKey: null,
-                asymPrivKey: null,
-                targetHash: "3f3a8b417b7381e5927598db4c5b1b4df2ea428615c0e643c7cbcc3f698b671a" // Hash of unmodified text
-            }
-        };
+<nav class="progress-strip" id="progressStrip"></nav>
 
-        // DOM Elements
-        const terminal = document.getElementById('terminalBody');
-        const scoreDisplay = document.getElementById('scoreDisplay');
+<main>
 
-        // Initialization
-        window.onload = () => {
-            liveHash(); // Init hash value
-            logToTerminal("System initialization complete.", "sys");
-            logToTerminal("--------------------------------------------------", "sys");
-            logToTerminal("ALERT: Multiple security policies require validation.", "warn");
-            logToTerminal("INITIATING CYBERSECURITY TECHNICIAN SANDBOX...", "info");
-            logToTerminal("\n[SCENARIO BRIEFING]", "sys");
-            logToTerminal("Welcome, Tech. We are spinning up new infrastructure. You must validate our encryption protocols, verify file integrity, and analyze a suspicious payload.", "info");
-            logToTerminal("Awaiting initial action on Mission 1 (Symmetrical).", "info");
-        };
+  <!-- ============ NAME GATE ============ -->
+  <div class="stage visible" id="stage-gate">
+    <div class="name-gate">
+      <div class="case-card">
+        <span class="case-tab">Case File Intake</span>
+        <h2 class="stage-title">Open a Case File</h2>
+        <p class="lede">Enter your name to open a personal lab ledger. Your work in each stage will be logged so you can download a completed report at the end.</p>
+        <label class="field-label" for="studentName">Analyst name</label>
+        <input type="text" id="studentName" placeholder="e.g. J. Rivera">
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="openCaseFile()">Open Case File &rarr;</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-        // Terminal Logging Function
-        function logToTerminal(message, type = "info") {
-            const entry = document.createElement('div');
-            entry.className = "mb-2 typewriter";
-            
-            let prefix = "> ";
-            let colorClass = "text-terminalText"; // default green
-            
-            if (type === "error") {
-                prefix = "[ERROR] ";
-                colorClass = "text-red-400 font-bold";
-            } else if (type === "warn") {
-                prefix = "[WARNING] ";
-                colorClass = "text-yellow-400";
-            } else if (type === "sys") {
-                prefix = "[SYSTEM] ";
-                colorClass = "text-gray-400";
-            } else if (type === "success") {
-                prefix = "[SUCCESS] ";
-                colorClass = "text-brandGreen font-bold bg-green-900 bg-opacity-20 inline-block px-1 rounded";
-            }
+  <!-- ============ STAGE 0: BRIEFING ============ -->
+  <div class="stage" id="stage-0">
+    <div class="case-card">
+      <span class="case-tab">Briefing</span>
+      <h2 class="stage-title">Incident Brief 07-C</h2>
+      <p class="lede">You've joined the incident response team at a small logistics company. Overnight, an analyst intercepted unencrypted chatter between a former contractor and an unknown external address. Leadership wants the team's communications — and its software update pipeline — properly secured before the next shift. You'll work through six cryptographic techniques used to do exactly that.</p>
+      <div class="brief-box" id="briefText">FROM: SOC Duty Manager
+TO: Incident Response Analyst (You)
+RE: Secure Communications Hardening — Lab 03
 
-            entry.innerHTML = `<span class="${colorClass}">${prefix}${message}</span>`;
-            terminal.appendChild(entry);
-            terminal.scrollTop = terminal.scrollHeight;
-        }
+1. Demonstrate basic obfuscation (XOR) and explain why it fails alone.
+2. Stand up a symmetric channel (AES) for bulk traffic.
+3. Verify integrity of a transferred file using a cryptographic hash.
+4. Establish an asymmetric channel (RSA) to solve the key-exchange problem.
+5. Apply a digital signature to prove authorship and detect tampering.
+6. Match each technique to the right real-world scenario.
 
-        function updateScore(points) {
-            state.score += points;
-            scoreDisplay.innerText = state.score;
-            scoreDisplay.classList.add('animate-ping');
-            setTimeout(() => scoreDisplay.classList.remove('animate-ping'), 300);
-        }
+Proceed to Stage 1 when ready.</div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="goTo(1)">Begin Stage 1: XOR &rarr;</button>
+      </div>
+    </div>
+  </div>
 
-        function completeStage(stageId, points) {
-            if (!state.stagesCompleted[stageId]) {
-                state.stagesCompleted[stageId] = true;
-                updateScore(points);
-                document.getElementById(`badge-${stageId}`).classList.remove('hidden');
-                logToTerminal(`Mission ${stageId.replace('stage','')} objectives achieved. Protocol verified.`, "success");
-            }
-        }
+  <!-- ============ STAGE 1: XOR ============ -->
+  <div class="stage" id="stage-1">
+    <div class="case-card">
+      <span class="case-tab">Stage 1 of 6</span>
+      <span class="lo-tag">LO1 &middot; Foundations of encryption</span>
+      <h2 class="stage-title">XOR: The Building Block</h2>
+      <p class="lede">Every byte of plaintext can be combined with a key byte using the XOR (exclusive-OR) operation. XOR is reversible: applying the same key a second time restores the original data. This is the mathematical seed that real ciphers build on — and, used alone, one of the weakest.</p>
 
-        // Tab Switching Logic
-        function switchTab(stageId) {
-            // Hide all panels
-            ['stage1', 'stage2', 'stage3', 'stage4', 'stage5'].forEach(id => {
-                document.getElementById(`panel-${id}`).classList.add('hidden');
-                document.getElementById(`tab-${id}`).className = "tab-inactive text-left px-4 py-3 text-sm transition-all flex items-center justify-between";
-            });
-            
-            // Show active panel
-            document.getElementById(`panel-${stageId}`).classList.remove('hidden');
-            document.getElementById(`tab-${stageId}`).className = "tab-active text-left px-4 py-3 text-sm transition-all flex items-center justify-between";
-            
-            logToTerminal(`Switched view to Mission ${stageId.replace('stage','')}.`, "sys");
-        }
+      <label class="field-label" for="xorPlain">Plaintext message</label>
+      <input type="text" id="xorPlain" value="MEET AT DOCK 9" maxlength="60">
+      <label class="field-label" for="xorKey">Repeating key (short word)</label>
+      <input type="text" id="xorKey" value="FOX" maxlength="16">
 
-        // --- STAGE 1 LOGIC: Symmetrical ---
-        function generateSymmetricKey() {
-            // Mock AES key generation (hex string)
-            const key = Array.from(crypto.getRandomValues(new Uint8Array(16))).map(b => b.toString(16).padStart(2, '0')).join('');
-            state.data.symKey = `AES-KEY-${key.toUpperCase()}`;
-            document.getElementById('symKeyDisplay').value = state.data.symKey;
-            logToTerminal("Symmetric AES-256 key generated successfully.", "info");
-        }
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="runXor()">Encrypt with XOR</button>
+        <button class="btn btn-ghost" onclick="runXorDecrypt()">Decrypt (re-apply XOR)</button>
+      </div>
 
-        function executeSymmetric(action) {
-            const algo = document.getElementById('symAlgoSelect').value;
-            const inputKey = document.getElementById('symKeyInput').value.trim();
-            const text = action === 'encrypt' ? document.getElementById('symPlaintext').value : document.getElementById('symCiphertext').value;
+      <div class="output-block" id="xorCipherOut"><span class="lbl">Ciphertext (hex)</span>—</div>
+      <div class="output-block" id="xorPlainOut"><span class="lbl">Recovered plaintext</span>—</div>
 
-            if (algo !== 'aes') {
-                logToTerminal("Algorithm error! RSA is Asymmetrical. This connection requires Symmetrical encryption (AES).", "error");
-                return;
-            }
-            if (!inputKey || inputKey !== state.data.symKey) {
-                logToTerminal("Key error! Provided symmetric key is invalid or missing.", "error");
-                return;
-            }
-            if (!text) {
-                logToTerminal("Missing payload data.", "warn");
-                return;
-            }
+      <details class="hint">
+        <summary>Hint: why does re-applying XOR decrypt it?</summary>
+        <p>XOR has the property A ⊕ K ⊕ K = A. Encrypting is ciphertext = plaintext ⊕ key. Decrypting is plaintext = ciphertext ⊕ key — the exact same operation, run again with the same key.</p>
+      </details>
 
-            if (action === 'encrypt') {
-                // Mock encryption: Base64 encoding + wrapper to simulate ciphertext visually
-                const cipher = `ENC[SYM|${btoa(text)}]`;
-                document.getElementById('symCiphertext').value = cipher;
-                logToTerminal("Payload successfully encrypted using symmetric key.", "info");
-            } else {
-                // Mock decryption
-                if (text.startsWith("ENC[SYM|")) {
-                    try {
-                        const raw = text.replace("ENC[SYM|", "").replace("]", "");
-                        const plain = atob(raw);
-                        logToTerminal(`Payload decrypted successfully. Contents: "${plain}"`, "success");
-                        completeStage('stage1', 100);
-                    } catch (e) {
-                        logToTerminal("Decryption failed. Ciphertext corrupted.", "error");
-                    }
-                } else {
-                    logToTerminal("Invalid ciphertext format.", "error");
-                }
-            }
-        }
+      <div id="xorQuizWrap" style="margin-top:18px;">
+        <label class="field-label">Checkpoint: A short repeating key like "FOX" is reused across a long message. What weakness does that create?</label>
+        <button class="quiz-option" data-correct="false" onclick="answerQuiz(this,'xor')">It makes the ciphertext larger than the plaintext.</button>
+        <button class="quiz-option" data-correct="true" onclick="answerQuiz(this,'xor')">Repeating the key creates a repeating pattern an attacker can use for frequency analysis.</button>
+        <button class="quiz-option" data-correct="false" onclick="answerQuiz(this,'xor')">XOR only works on numbers, not letters.</button>
+        <div class="feedback" id="fb-xor"></div>
+      </div>
 
-        // --- STAGE 2 LOGIC: Asymmetrical ---
-        function generateAsymmetricKeys() {
-            const randHex = () => Array.from(crypto.getRandomValues(new Uint8Array(4))).map(b => b.toString(16).padStart(2, '0')).join('');
-            state.data.asymPubKey = `PUB-RSA-${randHex().toUpperCase()}`;
-            state.data.asymPrivKey = `PRIV-RSA-${randHex().toUpperCase()}-SECRET`;
-            
-            document.getElementById('asymPubKey').value = state.data.asymPubKey;
-            document.getElementById('asymPrivKey').value = state.data.asymPrivKey;
-            logToTerminal("RSA Key Pair generated. Public Key can be distributed. Private Key must remain secure.", "info");
-        }
+      <div class="nav-footer">
+        <button class="btn btn-ghost" onclick="goTo(0)">&larr; Back</button>
+        <button class="btn btn-primary" onclick="goTo(2)">Continue to Stage 2 &rarr;</button>
+      </div>
+    </div>
+  </div>
 
-        function contractorEncrypt() {
-            const pubKey = document.getElementById('contractorPubKey').value.trim();
-            const msg = document.getElementById('contractorMessage').value;
+  <!-- ============ STAGE 2: SYMMETRIC (AES) ============ -->
+  <div class="stage" id="stage-2">
+    <div class="case-card">
+      <span class="case-tab">Stage 2 of 6</span>
+      <span class="lo-tag">LO1 &middot; Symmetric encryption</span>
+      <h2 class="stage-title">Symmetric Encryption with AES-256</h2>
+      <p class="lede">Modern symmetric encryption (AES, the current NIST standard) uses one shared secret key for both encryption and decryption. It's fast and well suited to bulk data — but both parties need the exact same key beforehand, which raises the key-distribution problem you'll solve in Stage 4.</p>
 
-            if (!state.data.asymPubKey) {
-                logToTerminal("Generate key pair first.", "warn");
-                return;
-            }
-            if (pubKey !== state.data.asymPubKey) {
-                logToTerminal("Contractor failed to encrypt: Incorrect Public Key provided.", "error");
-                return;
-            }
+      <div class="btn-row">
+        <button class="btn btn-teal" onclick="genAesKey()">Generate a 256-bit AES key</button>
+      </div>
+      <div class="output-block" id="aesKeyOut"><span class="lbl">Session key (raw hex, for lab visibility only)</span>—</div>
 
-            const cipher = `ENC[ASYM|PUB|${btoa(msg)}]`;
-            document.getElementById('myCiphertext').value = cipher;
-            logToTerminal("Contractor successfully encrypted message using your Public Key.", "info");
-            logToTerminal("Package received over network.", "sys");
-        }
+      <label class="field-label" for="aesPlain">Message to encrypt</label>
+      <textarea id="aesPlain">Shipment manifest attached. Confirm receipt on channel 2.</textarea>
 
-        function myDecrypt() {
-            const privKey = document.getElementById('myPrivKeyInput').value.trim();
-            const cipher = document.getElementById('myCiphertext').value;
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="runAesEncrypt()">Encrypt (AES-GCM)</button>
+        <button class="btn btn-ghost" onclick="runAesDecrypt()">Decrypt with same key</button>
+      </div>
 
-            if (!cipher) {
-                logToTerminal("No ciphertext received yet.", "warn");
-                return;
-            }
-            if (privKey !== state.data.asymPrivKey) {
-                logToTerminal("Decryption failed! The wrong Private Key was used.", "error");
-                return;
-            }
+      <div class="grid-2">
+        <div class="output-block" id="aesIvOut"><span class="lbl">Initialization vector (hex)</span>—</div>
+        <div class="output-block" id="aesCipherOut"><span class="lbl">Ciphertext (hex)</span>—</div>
+      </div>
+      <div class="output-block" id="aesPlainOut"><span class="lbl">Decrypted result</span>—</div>
 
-            try {
-                const raw = cipher.replace("ENC[ASYM|PUB|", "").replace("]", "");
-                const plain = atob(raw);
-                document.getElementById('myDecryptedMsg').value = plain;
-                logToTerminal("Asymmetric decryption successful using Private Key. Credentials secured.", "success");
-                completeStage('stage2', 100);
-            } catch(e) {
-                logToTerminal("Decryption failed. Ciphertext corrupted.", "error");
-            }
-        }
+      <details class="hint">
+        <summary>Hint: what is the IV for?</summary>
+        <p>The initialization vector randomizes each encryption so that encrypting the same message twice with the same key never produces the same ciphertext. It doesn't need to be secret, but it must never be reused with the same key.</p>
+      </details>
 
-        // --- STAGE 3 LOGIC: Hashing ---
-        // Simple hash mock that behaves deterministically like a real hash
-        function mockSHA256(string) {
-            let hash = 0;
-            for (let i = 0; i < string.length; i++) {
-                let char = string.charCodeAt(i);
-                hash = ((hash << 5) - hash) + char;
-                hash = hash & hash; // Convert to 32bit integer
-            }
-            // Obfuscate to look like SHA-256 (64 hex chars)
-            let strHash = Math.abs(hash).toString(16).padStart(8, '0');
-            // Duplicate/manipulate to make it 64 chars for visual realism
-            let fullHash = "";
-            for(let i=0; i<8; i++) {
-                fullHash += strHash.split('').reverse().join('');
-                strHash = (parseInt(strHash, 16) * 13).toString(16).padStart(8, '0').substring(0,8);
-            }
-            return fullHash;
-        }
+      <div id="aesQuizWrap" style="margin-top:18px;">
+        <label class="field-label">Checkpoint: Why is symmetric encryption still used for the bulk of internet traffic today, even though it has a key-distribution weakness?</label>
+        <button class="quiz-option" data-correct="true" onclick="answerQuiz(this,'aes')">It's computationally much faster than asymmetric encryption, which matters at scale.</button>
+        <button class="quiz-option" data-correct="false" onclick="answerQuiz(this,'aes')">It doesn't actually require a shared key.</button>
+        <button class="quiz-option" data-correct="false" onclick="answerQuiz(this,'aes')">It's mathematically impossible to break, unlike asymmetric encryption.</button>
+        <div class="feedback" id="fb-aes"></div>
+      </div>
 
-        function liveHash() {
-            const text = document.getElementById('hashInput').value;
-            const h = mockSHA256(text);
-            document.getElementById('hashOutput').innerText = h;
-        }
+      <div class="nav-footer">
+        <button class="btn btn-ghost" onclick="goTo(1)">&larr; Back</button>
+        <button class="btn btn-primary" onclick="goTo(3)">Continue to Stage 3 &rarr;</button>
+      </div>
+    </div>
+  </div>
 
-        function verifyHashMission() {
-            const currentHash = document.getElementById('hashOutput').innerText;
-            const originalTextHash = mockSHA256("function applyPatch() { system.update(2.0); return true; }");
-            
-            logToTerminal(`Comparing current hash against vendor manifest...`, "sys");
-            
-            if (currentHash === originalTextHash) {
-                logToTerminal("Hash Match! Integrity verified. File has not been tampered with.", "success");
-                completeStage('stage3', 100);
-            } else {
-                logToTerminal("HASH MISMATCH! The file has been altered. The avalanche effect shows a completely different hash output.", "error");
-            }
-        }
+  <!-- ============ STAGE 3: HASHING ============ -->
+  <div class="stage" id="stage-3">
+    <div class="case-card">
+      <span class="case-tab teal">Stage 3 of 6</span>
+      <span class="lo-tag">LO2 &middot; Cryptographic hashing &amp; integrity</span>
+      <h2 class="stage-title">SHA-256: Fingerprinting Data</h2>
+      <p class="lede">A cryptographic hash function takes input of any size and produces a fixed-length "fingerprint." A secure hash is one-way (you can't reverse it to get the input back), deterministic (same input always gives the same output), and exhibits the avalanche effect — a tiny change in input produces a wildly different hash.</p>
 
-        // --- STAGE 4 LOGIC: PKI & Signatures ---
-        function verifySignature() {
-            const pubKeyInput = document.getElementById('sigPubKeyVerify').value.trim();
-            
-            if (pubKeyInput === "PUB_KEY_BETA_99A1") {
-                logToTerminal("Public key match found in X.509 Certificate.", "sys");
-                logToTerminal("Decrypting signature using Sender's Public Key...", "info");
-                setTimeout(() => {
-                    logToTerminal("Hash recovered from signature matches document hash! Authentication and Non-repudiation verified.", "success");
-                    completeStage('stage4', 100);
-                }, 800);
-            } else {
-                logToTerminal("Signature Verification Failed! Provided Public Key does not match the X.509 Certificate for Server Beta.", "error");
-            }
-        }
+      <label class="field-label" for="hashInput">File contents (simulated)</label>
+      <textarea id="hashInput">v2.4.1 patch — resolves CVE-2026-01142, updates dependency manifest.</textarea>
+      <div class="btn-row">
+        <button class="btn btn-teal" onclick="runHash('orig')">Compute SHA-256</button>
+      </div>
+      <div class="output-block" id="hashOrigOut"><span class="lbl">Original hash</span>—</div>
 
-        // --- STAGE 5 LOGIC: Obfuscation ---
-        function attemptDecode(type) {
-            const input = document.getElementById('obfInput').value;
-            const output = document.getElementById('obfOutput');
-            
-            if (type === 'aes') {
-                logToTerminal("Attempting AES decryption... FAILED. No key provided and format is not recognized as AES ciphertext.", "error");
-                output.value = "ERR: Requires decryption key.";
-            } else if (type === 'base64') {
-                logToTerminal("Attempting Base64 decode...", "sys");
-                try {
-                    const decoded = atob(input);
-                    output.value = decoded;
-                    logToTerminal(`Decoded successfully WITHOUT a key. Contents: "${decoded}"`, "warn");
-                    logToTerminal("Analysis: This is OBFUSCATION, not encryption. Obfuscation relies on encoding schemas, not cryptographic keys. It provides NO confidentiality.", "success");
-                    document.getElementById('obfConclusion').classList.remove('hidden');
-                    completeStage('stage5', 100);
-                } catch(e) {
-                    logToTerminal("Base64 decode failed.", "error");
-                }
-            }
-        }
+      <label class="field-label" for="hashTamper">Now simulate a tampered download — change one character</label>
+      <textarea id="hashTamper">v2.4.1 patch — resolves CVE-2026-01142, updates dependency manifest!</textarea>
+      <div class="btn-row">
+        <button class="btn btn-crimson" onclick="runHash('tamper')">Compute hash of tampered version</button>
+      </div>
+      <div class="output-block" id="hashTamperOut"><span class="lbl">Tampered hash</span>—</div>
+      <div class="feedback info show" id="hashCompareMsg">Compute both hashes, then compare — even a single added character should produce a completely different fingerprint.</div>
 
-        function completeSimulation() {
-            if(Object.values(state.stagesCompleted).every(v => v === true)) {
-                logToTerminal("==================================================", "sys");
-                logToTerminal("ALL MODULES COMPLETE. FINAL SCORE: 500/500", "success");
-                logToTerminal("Cybersecurity Technician competencies verified.", "sys");
-                logToTerminal("Session terminating... goodbye.", "sys");
-                alert("Congratulations! You have completed the Symmetrical, Asymmetrical, and Hashing simulation lab.");
-            } else {
-                logToTerminal("Cannot conclude. Incomplete modules remain.", "warn");
-            }
-        }
+      <details class="hint">
+        <summary>Hint: what does this prove about integrity?</summary>
+        <p>If a published hash and a locally-computed hash of a downloaded file don't match, the file was altered or corrupted in transit — that's how software vendors let you verify updates haven't been tampered with.</p>
+      </details>
 
-    </script>
+      <div id="hashQuizWrap" style="margin-top:18px;">
+        <label class="field-label">Checkpoint: Hashing alone (without a signature) can prove a file wasn't altered, but it can NOT prove:</label>
+        <button class="quiz-option" data-correct="true" onclick="answerQuiz(this,'hash')">Who created or published the file.</button>
+        <button class="quiz-option" data-correct="false" onclick="answerQuiz(this,'hash')">That the file's contents changed.</button>
+        <button class="quiz-option" data-correct="false" onclick="answerQuiz(this,'hash')">Whether two files are byte-for-byte identical.</button>
+        <div class="feedback" id="fb-hash"></div>
+      </div>
+
+      <div class="nav-footer">
+        <button class="btn btn-ghost" onclick="goTo(2)">&larr; Back</button>
+        <button class="btn btn-primary" onclick="goTo(4)">Continue to Stage 4 &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ STAGE 4: ASYMMETRIC (RSA) ============ -->
+  <div class="stage" id="stage-4">
+    <div class="case-card">
+      <span class="case-tab crimson">Stage 4 of 6</span>
+      <span class="lo-tag">LO1 &middot; Asymmetric encryption</span>
+      <h2 class="stage-title">RSA: Solving Key Exchange</h2>
+      <p class="lede">Asymmetric (public-key) encryption uses a mathematically linked key <em>pair</em>. Anything encrypted with the public key can only be decrypted with the matching private key. The public key can be shared openly — even over an insecure channel — which is exactly the problem symmetric encryption couldn't solve on its own.</p>
+
+      <div class="btn-row">
+        <button class="btn btn-crimson" onclick="genRsaKeys()">Generate RSA-2048 key pair</button>
+      </div>
+      <div class="grid-2">
+        <div class="output-block" id="rsaPubOut"><span class="lbl">Public key (share freely)</span>—</div>
+        <div class="output-block" id="rsaPrivOut"><span class="lbl">Private key (never share)</span>—</div>
+      </div>
+
+      <label class="field-label" for="rsaPlain">Short message to send securely (RSA has a size limit — keep it brief)</label>
+      <input type="text" id="rsaPlain" value="Rendezvous confirmed 0300." maxlength="100">
+
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="runRsaEncrypt()">Encrypt with public key</button>
+        <button class="btn btn-ghost" onclick="runRsaDecrypt()">Decrypt with private key</button>
+      </div>
+      <div class="output-block" id="rsaCipherOut"><span class="lbl">Ciphertext (hex)</span>—</div>
+      <div class="output-block" id="rsaPlainOut"><span class="lbl">Decrypted result</span>—</div>
+
+      <details class="hint">
+        <summary>Hint: why not just use RSA for everything?</summary>
+        <p>RSA is far slower than AES and can only encrypt small amounts of data at once. In practice, systems like TLS use RSA (or similar) just to securely exchange a symmetric AES key, then switch to AES for the actual bulk traffic — this hybrid approach is why HTTPS is both secure and fast.</p>
+      </details>
+
+      <div id="rsaQuizWrap" style="margin-top:18px;">
+        <label class="field-label">Checkpoint: To send Priya a confidential message only she can read, you should encrypt it with:</label>
+        <button class="quiz-option" data-correct="false" onclick="answerQuiz(this,'rsa')">Your own private key.</button>
+        <button class="quiz-option" data-correct="true" onclick="answerQuiz(this,'rsa')">Priya's public key.</button>
+        <button class="quiz-option" data-correct="false" onclick="answerQuiz(this,'rsa')">Priya's private key.</button>
+        <div class="feedback" id="fb-rsa"></div>
+      </div>
+
+      <div class="nav-footer">
+        <button class="btn btn-ghost" onclick="goTo(3)">&larr; Back</button>
+        <button class="btn btn-primary" onclick="goTo(5)">Continue to Stage 5 &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ STAGE 5: DIGITAL SIGNATURES ============ -->
+  <div class="stage" id="stage-5">
+    <div class="case-card">
+      <span class="case-tab crimson">Stage 5 of 6</span>
+      <span class="lo-tag">LO3 &middot; Digital signatures</span>
+      <h2 class="stage-title">Digital Signatures: Proof of Origin</h2>
+      <p class="lede">A digital signature flips the RSA key pair around: you sign a message's hash with your <em>private</em> key, and anyone can verify it with your <em>public</em> key. A valid signature proves three things at once — authentication (it came from you), integrity (it wasn't altered), and non-repudiation (you can't credibly deny signing it).</p>
+
+      <div class="btn-row">
+        <button class="btn btn-crimson" onclick="genSigKeys()">Generate signing key pair</button>
+      </div>
+      <div class="output-block" id="sigKeyStatus"><span class="lbl">Signing key pair</span>—</div>
+
+      <label class="field-label" for="sigMessage">Message to sign</label>
+      <input type="text" id="sigMessage" value="Approve wire transfer batch #4471." maxlength="100">
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="runSign()">Sign with private key</button>
+      </div>
+      <div class="output-block" id="sigOut"><span class="lbl">Signature (hex, truncated)</span>—</div>
+
+      <label class="field-label" for="sigVerifyMsg">Message as received (edit it to simulate tampering, then verify)</label>
+      <input type="text" id="sigVerifyMsg" value="Approve wire transfer batch #4471." maxlength="100">
+      <div class="btn-row">
+        <button class="btn btn-teal" onclick="runVerify()">Verify signature</button>
+      </div>
+      <div class="feedback info show" id="verifyMsg">Sign the original message first, then try verifying it unchanged — and again after editing it.</div>
+      <div class="stamp" id="verifyStamp">VERIFIED</div>
+
+      <details class="hint">
+        <summary>Hint: why does editing even one character break verification?</summary>
+        <p>Verification recomputes the hash of the message you provide and checks it against what the signature guarantees. Any change in the message produces a different hash, so it no longer matches what was signed — the same avalanche effect from Stage 3, now used to catch tampering.</p>
+      </details>
+
+      <div id="sigQuizWrap" style="margin-top:18px;">
+        <label class="field-label">Checkpoint: A valid digital signature on a contract lets you argue in a dispute that:</label>
+        <button class="quiz-option" data-correct="false" onclick="answerQuiz(this,'sig')">The contract was encrypted, so no one else could ever read it.</button>
+        <button class="quiz-option" data-correct="true" onclick="answerQuiz(this,'sig')">The signer can't credibly deny having signed it — this is non-repudiation.</button>
+        <button class="quiz-option" data-correct="false" onclick="answerQuiz(this,'sig')">The contract was compressed to save space.</button>
+        <div class="feedback" id="fb-sig"></div>
+      </div>
+
+      <div class="nav-footer">
+        <button class="btn btn-ghost" onclick="goTo(4)">&larr; Back</button>
+        <button class="btn btn-primary" onclick="goTo(6)">Continue to Stage 6 &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ STAGE 6: SCENARIO MATCH ============ -->
+  <div class="stage" id="stage-6">
+    <div class="case-card">
+      <span class="case-tab">Stage 6 of 6</span>
+      <span class="lo-tag">LO1&ndash;3 &middot; Applied scenario matching</span>
+      <h2 class="stage-title">Final Case Review</h2>
+      <p class="lede">Match each real-world scenario to the technique that solves it. This is exactly the judgment call you'll be expected to make on the job — and on the exam.</p>
+
+      <table class="compare-table">
+        <tr><th>Technique</th><th>Best for</th><th>Key limitation</th></tr>
+        <tr><td>Symmetric (AES)</td><td>Bulk data, fast, at-scale encryption</td><td>Requires secure key exchange first</td></tr>
+        <tr><td>Asymmetric (RSA)</td><td>Key exchange, small secure messages</td><td>Slow; limited message size</td></tr>
+        <tr><td>Hashing (SHA-256)</td><td>Verifying data integrity</td><td>Doesn't prove who sent it, or hide it</td></tr>
+        <tr><td>Digital Signature</td><td>Authentication + integrity + non-repudiation</td><td>Doesn't provide confidentiality by itself</td></tr>
+      </table>
+
+      <div id="scenarioQuiz"></div>
+
+      <div class="nav-footer">
+        <button class="btn btn-ghost" onclick="goTo(5)">&larr; Back</button>
+        <button class="btn btn-primary" onclick="goTo('finale')">Close the Case &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ FINALE ============ -->
+  <div class="stage" id="stage-finale">
+    <div class="case-card">
+      <span class="case-tab teal">Case Closed</span>
+      <h2 class="stage-title">Lab Complete</h2>
+      <p class="lede" id="finalScoreText">Nice work. Here's your final case summary.</p>
+      <div class="output-block" id="finalSummary" style="min-height:120px;">—</div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="downloadReport()">Download Lab Report</button>
+        <button class="btn btn-ghost" onclick="goTo(0)">Review Case File Again</button>
+      </div>
+    </div>
+    <footer class="finale">Lab 03 — Basic Cryptography &middot; The Cipher Ledger</footer>
+  </div>
+
+</main>
+
+<script>
+/* ============================================================
+   STATE
+============================================================ */
+const STAGES = [0,1,2,3,4,5,6];
+const stageLabels = {0:'Brief',1:'XOR',2:'AES',3:'Hash',4:'RSA',5:'Sign',6:'Review'};
+let currentStage = 0;
+const state = {
+  name: '',
+  quiz: { xor:null, aes:null, hash:null, rsa:null, sig:null, scenario: {} },
+  score: 0,
+  total: 6,
+  completedStages: new Set(),
+  log: []
+};
+
+/* ============================================================
+   THEME
+============================================================ */
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  document.getElementById('themeIcon').innerHTML = t === 'dark' ? '&#9789;' : '&#9788;';
+  document.getElementById('themeLabel').textContent = t === 'dark' ? 'Dark' : 'Light';
+  localStorage.setItem('lab03-crypto-theme', t);
+}
+(function initTheme(){
+  const saved = localStorage.getItem('lab03-crypto-theme') || 'light';
+  applyTheme(saved);
+})();
+document.getElementById('themeToggle').addEventListener('click', () => {
+  const cur = document.documentElement.getAttribute('data-theme');
+  applyTheme(cur === 'dark' ? 'light' : 'dark');
+});
+
+/* ============================================================
+   NAV
+============================================================ */
+function renderProgress() {
+  const strip = document.getElementById('progressStrip');
+  strip.innerHTML = '';
+  STAGES.forEach(s => {
+    const tab = document.createElement('div');
+    tab.className = 'tab' + (s === currentStage ? ' active' : '') + (state.completedStages.has(s) ? ' done' : '');
+    tab.textContent = stageLabels[s];
+    tab.onclick = () => goTo(s);
+    strip.appendChild(tab);
+  });
+}
+
+function openCaseFile() {
+  const nameVal = document.getElementById('studentName').value.trim();
+  state.name = nameVal || 'Analyst';
+  goTo(0);
+}
+
+function goTo(stage) {
+  if (stage !== 0 || currentStage !== 'gate') {
+    if (typeof currentStage === 'number') state.completedStages.add(currentStage);
+  }
+  document.querySelectorAll('.stage').forEach(el => el.classList.remove('visible'));
+  if (stage === 'finale') {
+    document.getElementById('stage-finale').classList.add('visible');
+    buildFinale();
+    currentStage = 'finale';
+    window.scrollTo({top:0, behavior:'smooth'});
+    return;
+  }
+  document.getElementById('stage-' + stage).classList.add('visible');
+  currentStage = stage;
+  renderProgress();
+  if (stage === 6 && document.getElementById('scenarioQuiz').children.length === 0) {
+    buildScenarioQuiz();
+  }
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+renderProgress();
+
+/* ============================================================
+   HELPERS
+============================================================ */
+function bufToHex(buf) {
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+function hexToBuf(hex) {
+  const bytes = new Uint8Array(hex.length/2);
+  for (let i=0;i<hex.length;i+=2) bytes[i/2] = parseInt(hex.substr(i,2),16);
+  return bytes.buffer;
+}
+function strToBuf(str) { return new TextEncoder().encode(str); }
+function bufToStr(buf) { return new TextDecoder().decode(buf); }
+function truncate(str, n) { return str.length > n ? str.slice(0,n) + '…' : str; }
+
+function updateScorePill() {
+  document.getElementById('scorePill').textContent = `Score: ${state.score} / ${state.total}`;
+}
+
+function answerQuiz(btn, key) {
+  const wrap = btn.parentElement;
+  const opts = wrap.querySelectorAll('.quiz-option');
+  const already = state.quiz[key] !== null;
+  opts.forEach(o => o.disabled = true);
+  const correct = btn.dataset.correct === 'true';
+  btn.classList.add(correct ? 'correct' : 'incorrect');
+  if (!correct) {
+    opts.forEach(o => { if (o.dataset.correct === 'true') o.classList.add('correct'); });
+  }
+  const fb = wrap.querySelector('.feedback');
+  fb.classList.add('show');
+  if (!already) {
+    state.quiz[key] = correct;
+    if (correct) { state.score++; updateScorePill(); }
+  }
+  fb.className = 'feedback show ' + (correct ? 'good' : 'bad');
+  fb.textContent = correct ? 'Correct — logged to your case file.' : 'Not quite — the correct answer is now highlighted. Logged to your case file.';
+}
+
+/* ============================================================
+   STAGE 1 — XOR
+============================================================ */
+let xorCipherBytes = null;
+function xorBytes(dataBuf, keyStr) {
+  const data = new Uint8Array(dataBuf);
+  const key = strToBuf(keyStr);
+  const out = new Uint8Array(data.length);
+  for (let i=0;i<data.length;i++) out[i] = data[i] ^ key[i % key.length];
+  return out;
+}
+function runXor() {
+  const plain = document.getElementById('xorPlain').value;
+  const key = document.getElementById('xorKey').value || 'A';
+  const cipher = xorBytes(strToBuf(plain), key);
+  xorCipherBytes = cipher;
+  document.getElementById('xorCipherOut').innerHTML = '<span class="lbl">Ciphertext (hex)</span>' + bufToHex(cipher.buffer);
+  document.getElementById('xorPlainOut').innerHTML = '<span class="lbl">Recovered plaintext</span>—';
+}
+function runXorDecrypt() {
+  if (!xorCipherBytes) { runXor(); }
+  const key = document.getElementById('xorKey').value || 'A';
+  const recovered = xorBytes(xorCipherBytes.buffer, key);
+  document.getElementById('xorPlainOut').innerHTML = '<span class="lbl">Recovered plaintext</span>' + bufToStr(recovered);
+}
+
+/* ============================================================
+   STAGE 2 — AES-GCM
+============================================================ */
+let aesKey = null, aesIv = null, aesCipherBuf = null;
+async function genAesKey() {
+  aesKey = await crypto.subtle.generateKey({name:'AES-GCM', length:256}, true, ['encrypt','decrypt']);
+  const raw = await crypto.subtle.exportKey('raw', aesKey);
+  document.getElementById('aesKeyOut').innerHTML = '<span class="lbl">Session key (raw hex, for lab visibility only)</span>' + bufToHex(raw);
+}
+async function runAesEncrypt() {
+  if (!aesKey) await genAesKey();
+  aesIv = crypto.getRandomValues(new Uint8Array(12));
+  const plain = document.getElementById('aesPlain').value;
+  const cipherBuf = await crypto.subtle.encrypt({name:'AES-GCM', iv: aesIv}, aesKey, strToBuf(plain));
+  aesCipherBuf = cipherBuf;
+  document.getElementById('aesIvOut').innerHTML = '<span class="lbl">Initialization vector (hex)</span>' + bufToHex(aesIv.buffer);
+  document.getElementById('aesCipherOut').innerHTML = '<span class="lbl">Ciphertext (hex)</span>' + truncate(bufToHex(cipherBuf), 200);
+  document.getElementById('aesPlainOut').innerHTML = '<span class="lbl">Decrypted result</span>—';
+}
+async function runAesDecrypt() {
+  if (!aesKey || !aesCipherBuf) { document.getElementById('aesPlainOut').innerHTML = '<span class="lbl">Decrypted result</span>Encrypt a message first.'; return; }
+  try {
+    const plainBuf = await crypto.subtle.decrypt({name:'AES-GCM', iv: aesIv}, aesKey, aesCipherBuf);
+    document.getElementById('aesPlainOut').innerHTML = '<span class="lbl">Decrypted result</span>' + bufToStr(plainBuf);
+  } catch (e) {
+    document.getElementById('aesPlainOut').innerHTML = '<span class="lbl">Decrypted result</span>Decryption failed — key or IV mismatch.';
+  }
+}
+
+/* ============================================================
+   STAGE 3 — SHA-256
+============================================================ */
+async function runHash(which) {
+  const id = which === 'orig' ? 'hashInput' : 'hashTamper';
+  const outId = which === 'orig' ? 'hashOrigOut' : 'hashTamperOut';
+  const text = document.getElementById(id).value;
+  const digest = await crypto.subtle.digest('SHA-256', strToBuf(text));
+  const hex = bufToHex(digest);
+  document.getElementById(outId).innerHTML = `<span class="lbl">${which === 'orig' ? 'Original' : 'Tampered'} hash</span>` + hex;
+  const origEl = document.getElementById('hashOrigOut').textContent;
+  const tampEl = document.getElementById('hashTamperOut').textContent;
+  if (origEl.length > 20 && tampEl.length > 20 && origEl !== '—' && tampEl !== '—') {
+    const same = origEl.replace('Original hash','') === tampEl.replace('Tampered hash','');
+    const msg = document.getElementById('hashCompareMsg');
+    msg.className = 'feedback show ' + (same ? 'bad' : 'good');
+    msg.textContent = same ? 'The hashes matched — try changing at least one character in the tampered box.' : 'The hashes are completely different, even though only one character changed. That\'s the avalanche effect protecting integrity.';
+  }
+}
+
+/* ============================================================
+   STAGE 4 — RSA-OAEP
+============================================================ */
+let rsaKeyPair = null, rsaCipherBuf = null;
+async function genRsaKeys() {
+  rsaKeyPair = await crypto.subtle.generateKey(
+    { name: 'RSA-OAEP', modulusLength: 2048, publicExponent: new Uint8Array([1,0,1]), hash: 'SHA-256' },
+    true, ['encrypt','decrypt']
+  );
+  const pub = await crypto.subtle.exportKey('spki', rsaKeyPair.publicKey);
+  const priv = await crypto.subtle.exportKey('pkcs8', rsaKeyPair.privateKey);
+  document.getElementById('rsaPubOut').innerHTML = '<span class="lbl">Public key (share freely)</span>' + truncate(bufToHex(pub), 140);
+  document.getElementById('rsaPrivOut').innerHTML = '<span class="lbl">Private key (never share)</span>' + truncate(bufToHex(priv), 140);
+}
+async function runRsaEncrypt() {
+  if (!rsaKeyPair) await genRsaKeys();
+  const plain = document.getElementById('rsaPlain').value;
+  try {
+    rsaCipherBuf = await crypto.subtle.encrypt({name:'RSA-OAEP'}, rsaKeyPair.publicKey, strToBuf(plain));
+    document.getElementById('rsaCipherOut').innerHTML = '<span class="lbl">Ciphertext (hex)</span>' + truncate(bufToHex(rsaCipherBuf), 200);
+    document.getElementById('rsaPlainOut').innerHTML = '<span class="lbl">Decrypted result</span>—';
+  } catch (e) {
+    document.getElementById('rsaCipherOut').innerHTML = '<span class="lbl">Ciphertext (hex)</span>Message too long for this key size — shorten it.';
+  }
+}
+async function runRsaDecrypt() {
+  if (!rsaKeyPair || !rsaCipherBuf) { document.getElementById('rsaPlainOut').innerHTML = '<span class="lbl">Decrypted result</span>Encrypt a message first.'; return; }
+  const plainBuf = await crypto.subtle.decrypt({name:'RSA-OAEP'}, rsaKeyPair.privateKey, rsaCipherBuf);
+  document.getElementById('rsaPlainOut').innerHTML = '<span class="lbl">Decrypted result</span>' + bufToStr(plainBuf);
+}
+
+/* ============================================================
+   STAGE 5 — DIGITAL SIGNATURES (RSASSA-PKCS1-v1_5)
+============================================================ */
+let sigKeyPair = null, lastSignatureBuf = null, lastSignedMessage = null;
+async function genSigKeys() {
+  sigKeyPair = await crypto.subtle.generateKey(
+    { name: 'RSASSA-PKCS1-v1_5', modulusLength: 2048, publicExponent: new Uint8Array([1,0,1]), hash: 'SHA-256' },
+    true, ['sign','verify']
+  );
+  document.getElementById('sigKeyStatus').innerHTML = '<span class="lbl">Signing key pair</span>Generated. Private key retained locally; public key available for verification.';
+}
+async function runSign() {
+  if (!sigKeyPair) await genSigKeys();
+  const msg = document.getElementById('sigMessage').value;
+  lastSignedMessage = msg;
+  lastSignatureBuf = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', sigKeyPair.privateKey, strToBuf(msg));
+  document.getElementById('sigOut').innerHTML = '<span class="lbl">Signature (hex, truncated)</span>' + truncate(bufToHex(lastSignatureBuf), 140);
+  document.getElementById('sigVerifyMsg').value = msg;
+  document.getElementById('verifyStamp').classList.remove('show');
+}
+async function runVerify() {
+  if (!sigKeyPair || !lastSignatureBuf) {
+    document.getElementById('verifyMsg').className = 'feedback show bad';
+    document.getElementById('verifyMsg').textContent = 'Sign a message first.';
+    return;
+  }
+  const candidate = document.getElementById('sigVerifyMsg').value;
+  const valid = await crypto.subtle.verify('RSASSA-PKCS1-v1_5', sigKeyPair.publicKey, lastSignatureBuf, strToBuf(candidate));
+  const msgEl = document.getElementById('verifyMsg');
+  const stampEl = document.getElementById('verifyStamp');
+  if (valid) {
+    msgEl.className = 'feedback show good';
+    msgEl.textContent = 'Signature verified. This message matches exactly what was signed — authentic and untampered.';
+    stampEl.textContent = 'VERIFIED';
+    stampEl.style.color = 'var(--teal)';
+    stampEl.style.borderColor = 'var(--teal)';
+    stampEl.classList.add('show');
+  } else {
+    msgEl.className = 'feedback show bad';
+    msgEl.textContent = 'Signature verification FAILED. The message doesn\'t match what was originally signed — this is exactly how tampering gets caught.';
+    stampEl.textContent = 'TAMPERED';
+    stampEl.style.color = 'var(--crimson)';
+    stampEl.style.borderColor = 'var(--crimson)';
+    stampEl.classList.add('show');
+  }
+}
+
+/* ============================================================
+   STAGE 6 — SCENARIO MATCH
+============================================================ */
+const scenarios = [
+  { id:'s1', text:'A hospital needs to encrypt an entire 40GB patient records database as fast as possible.', answer:'sym' },
+  { id:'s2', text:'Two branch offices need to agree on a shared secret key over the public internet, with no prior contact.', answer:'asym' },
+  { id:'s3', text:'A user downloads a 2GB OS update and wants to confirm the file wasn\'t corrupted in transit.', answer:'hash' },
+  { id:'s4', text:'A CFO needs to prove, beyond dispute, that she personally approved a specific wire transfer.', answer:'sig' }
+];
+const scenarioOptions = [
+  {v:'sym', label:'Symmetric encryption (AES)'},
+  {v:'asym', label:'Asymmetric encryption (RSA)'},
+  {v:'hash', label:'Hashing (SHA-256)'},
+  {v:'sig', label:'Digital signature'}
+];
+function buildScenarioQuiz() {
+  const wrap = document.getElementById('scenarioQuiz');
+  scenarios.forEach(sc => {
+    const block = document.createElement('div');
+    block.style.marginBottom = '18px';
+    const label = document.createElement('label');
+    label.className = 'field-label';
+    label.textContent = sc.text;
+    block.appendChild(label);
+    scenarioOptions.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'quiz-option';
+      btn.textContent = opt.label;
+      btn.dataset.correct = (opt.v === sc.answer) ? 'true' : 'false';
+      btn.onclick = () => answerScenario(btn, sc.id, block);
+      block.appendChild(btn);
+    });
+    const fb = document.createElement('div');
+    fb.className = 'feedback';
+    fb.id = 'fb-' + sc.id;
+    block.appendChild(fb);
+    wrap.appendChild(block);
+  });
+}
+function answerScenario(btn, scId, block) {
+  const opts = block.querySelectorAll('.quiz-option');
+  const already = state.quiz.scenario[scId] !== undefined;
+  opts.forEach(o => o.disabled = true);
+  const correct = btn.dataset.correct === 'true';
+  btn.classList.add(correct ? 'correct' : 'incorrect');
+  if (!correct) opts.forEach(o => { if (o.dataset.correct === 'true') o.classList.add('correct'); });
+  const fb = block.querySelector('.feedback');
+  fb.classList.add('show');
+  fb.className = 'feedback show ' + (correct ? 'good' : 'bad');
+  fb.textContent = correct ? 'Correct.' : 'Not quite — correct answer highlighted.';
+  if (!already) {
+    state.quiz.scenario[scId] = correct;
+    if (correct) { state.score++; state.total++; updateScorePill(); }
+    else { state.total++; updateScorePill(); }
+  }
+}
+
+/* ============================================================
+   FINALE / REPORT
+============================================================ */
+function buildFinale() {
+  document.getElementById('finalScoreText').textContent =
+    `${state.name}, you completed all six stages. Final checkpoint score: ${state.score} / ${state.total}.`;
+  const lines = [];
+  lines.push(`Analyst: ${state.name}`);
+  lines.push(`Completed: ${new Date().toLocaleString()}`);
+  lines.push(`Score: ${state.score} / ${state.total}`);
+  lines.push('');
+  lines.push('Stage 1 — XOR: reversible obfuscation, weak alone due to key repetition.');
+  lines.push('Stage 2 — AES-256/GCM: fast symmetric encryption for bulk data.');
+  lines.push('Stage 3 — SHA-256: one-way hash for integrity verification.');
+  lines.push('Stage 4 — RSA-2048/OAEP: asymmetric encryption solving key exchange.');
+  lines.push('Stage 5 — RSA signatures: authentication, integrity, non-repudiation.');
+  lines.push('Stage 6 — Scenario matching: applied technique selection.');
+  document.getElementById('finalSummary').textContent = lines.join('\n');
+}
+
+function downloadReport() {
+  const now = new Date().toLocaleString();
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Lab 03 Report — ${state.name}</title>
+  <style>body{font-family:Georgia,serif;max-width:680px;margin:40px auto;color:#1C2230;line-height:1.6;padding:0 20px;}
+  h1{font-size:22px;} h2{font-size:16px;border-bottom:1px solid #ccc;padding-bottom:4px;margin-top:28px;}
+  table{border-collapse:collapse;width:100%;margin:12px 0;font-size:13px;}
+  td,th{border:1px solid #ccc;padding:6px 8px;text-align:left;}
+  .pill{display:inline-block;background:#F2E6C6;color:#A9791F;padding:4px 12px;border-radius:999px;font-size:12px;font-family:monospace;}</style>
+  </head><body>
+  <h1>Lab 03 — Basic Cryptography: Case File Report</h1>
+  <p><strong>Analyst:</strong> ${state.name}<br><strong>Completed:</strong> ${now}<br>
+  <span class="pill">Score: ${state.score} / ${state.total}</span></p>
+  <h2>Stage Summary</h2>
+  <table>
+  <tr><th>Stage</th><th>Technique</th><th>Core Concept Demonstrated</th></tr>
+  <tr><td>1</td><td>XOR</td><td>Reversible obfuscation; weakness of key repetition</td></tr>
+  <tr><td>2</td><td>AES-256/GCM (Symmetric)</td><td>Fast bulk encryption; shared-key model</td></tr>
+  <tr><td>3</td><td>SHA-256 (Hashing)</td><td>One-way fingerprint; avalanche effect; integrity checking</td></tr>
+  <tr><td>4</td><td>RSA-2048/OAEP (Asymmetric)</td><td>Public/private key pair; solves key exchange</td></tr>
+  <tr><td>5</td><td>RSA Digital Signature</td><td>Authentication, integrity, and non-repudiation</td></tr>
+  <tr><td>6</td><td>Scenario Matching</td><td>Applied selection of the correct technique per use case</td></tr>
+  </table>
+  <h2>Checkpoint Responses</h2>
+  <p>XOR checkpoint: ${state.quiz.xor === null ? 'not answered' : (state.quiz.xor ? 'correct' : 'answered, review recommended')}<br>
+  AES checkpoint: ${state.quiz.aes === null ? 'not answered' : (state.quiz.aes ? 'correct' : 'answered, review recommended')}<br>
+  Hash checkpoint: ${state.quiz.hash === null ? 'not answered' : (state.quiz.hash ? 'correct' : 'answered, review recommended')}<br>
+  RSA checkpoint: ${state.quiz.rsa === null ? 'not answered' : (state.quiz.rsa ? 'correct' : 'answered, review recommended')}<br>
+  Signature checkpoint: ${state.quiz.sig === null ? 'not answered' : (state.quiz.sig ? 'correct' : 'answered, review recommended')}</p>
+  <p style="margin-top:30px;color:#888;font-size:12px;font-family:monospace;">Lab 03 — Basic Cryptography &middot; The Cipher Ledger</p>
+  </body></html>`;
+  const blob = new Blob([html], {type:'text/html'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Lab03-Crypto-Report-${(state.name||'analyst').replace(/\s+/g,'_')}.html`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+</script>
 </body>
 </html>
