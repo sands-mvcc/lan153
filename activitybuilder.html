@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Course Simulator Prompt Builder</title>
+    <title>LAN153 Security+ Simulator Prompt Builder</title>
     <style>
         :root {
             --bg-color: #ffffff;
@@ -115,6 +115,12 @@
             font-size: 0.95rem;
         }
 
+        .field-hint {
+            font-size: 0.8rem;
+            color: #666666;
+            margin-top: 0.35rem;
+        }
+
         input[type="text"], select, textarea {
             width: 100%;
             padding: 0.75rem;
@@ -135,6 +141,110 @@
         textarea {
             resize: vertical;
             min-height: 100px;
+        }
+
+        /* File upload styling */
+        .file-drop {
+            border: 2px dashed var(--border-color);
+            border-radius: 6px;
+            padding: 1rem;
+            background-color: #fafafa;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .file-drop:hover {
+            border-color: var(--primary-green);
+            background-color: var(--light-green);
+        }
+
+        .file-drop input[type="file"] {
+            width: 100%;
+            font-size: 0.85rem;
+        }
+
+        #fileList {
+            margin-top: 0.75rem;
+            font-size: 0.85rem;
+            color: var(--dark-gray);
+        }
+
+        .file-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background-color: var(--light-green);
+            border: 1px solid var(--accent-green);
+            color: var(--dark-gray);
+            padding: 0.25rem 0.6rem;
+            border-radius: 12px;
+            margin: 0.2rem 0.3rem 0.2rem 0;
+            font-size: 0.8rem;
+        }
+
+        .file-chip button {
+            background: none;
+            border: none;
+            color: var(--primary-green);
+            font-weight: 700;
+            cursor: pointer;
+            padding: 0;
+            font-size: 0.9rem;
+            line-height: 1;
+        }
+
+        /* Persona council styling */
+        .persona-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.6rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0.9rem;
+            background-color: #fafafa;
+        }
+
+        .persona-option {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            font-weight: 400;
+            font-size: 0.88rem;
+            color: var(--text-color);
+            cursor: pointer;
+            padding: 0.4rem;
+            border-radius: 4px;
+            transition: background-color 0.15s ease;
+        }
+
+        .persona-option:hover {
+            background-color: var(--light-green);
+        }
+
+        .persona-option input[type="checkbox"] {
+            margin-top: 3px;
+            accent-color: var(--primary-green);
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+
+        .persona-option span.persona-name {
+            font-weight: 600;
+            display: block;
+        }
+
+        .persona-option span.persona-desc {
+            display: block;
+            font-size: 0.78rem;
+            color: #666666;
+            font-weight: 400;
+        }
+
+        @media (max-width: 700px) {
+            .persona-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         .toolbar {
@@ -253,7 +363,7 @@
     <header>
         <div>
             <h1>AI Simulator Prompt Engine</h1>
-            <p>Faculty Toolkit for Interactive Learning</p>
+            <p>LAN153 &mdash; CompTIA Security+ Faculty Toolkit</p>
         </div>
     </header>
 
@@ -290,12 +400,53 @@
 
                 <div class="form-group">
                     <label for="courseTitle">Course Title / Context</label>
-                    <input type="text" id="courseTitle" placeholder="e.g., Advanced Network Security, Ethical Hacking" oninput="updatePrompt()">
+                    <input type="text" id="courseTitle" placeholder="e.g., LAN153: CompTIA Security+" oninput="updatePrompt()">
                 </div>
 
                 <div class="form-group">
                     <label for="targetAudience">Target Learner Profile</label>
                     <input type="text" id="targetAudience" placeholder="e.g., Junior IT Majors, Cyber Operations Seniors" oninput="updatePrompt()">
+                </div>
+
+                <div class="form-group">
+                    <label>AI Expert Persona Council (select any that should shape/validate this build)</label>
+                    <div class="persona-grid" id="personaGrid">
+                        <label class="persona-option">
+                            <input type="checkbox" class="persona-checkbox" value="Cybersecurity SME" onchange="updatePrompt()">
+                            <span>
+                                <span class="persona-name">Cybersecurity SME</span>
+                                <span class="persona-desc">Validates technical accuracy against current frameworks and threats</span>
+                            </span>
+                        </label>
+                        <label class="persona-option">
+                            <input type="checkbox" class="persona-checkbox" value="Instructional Design Expert" onchange="updatePrompt()">
+                            <span>
+                                <span class="persona-name">Instructional Design Expert</span>
+                                <span class="persona-desc">Aligns activity to objectives, scaffolding, and assessment</span>
+                            </span>
+                        </label>
+                        <label class="persona-option">
+                            <input type="checkbox" class="persona-checkbox" value="Graphic Design Expert" onchange="updatePrompt()">
+                            <span>
+                                <span class="persona-name">Graphic Design Expert</span>
+                                <span class="persona-desc">Shapes visual hierarchy, color, typography, and accessibility</span>
+                            </span>
+                        </label>
+                        <label class="persona-option">
+                            <input type="checkbox" class="persona-checkbox" value="Webpage Expert Developer" onchange="updatePrompt()">
+                            <span>
+                                <span class="persona-name">Webpage Expert Developer</span>
+                                <span class="persona-desc">Ensures clean, single-file, cross-browser HTML/JS output</span>
+                            </span>
+                        </label>
+                        <label class="persona-option">
+                            <input type="checkbox" class="persona-checkbox" value="Data Validation Expert" onchange="updatePrompt()">
+                            <span>
+                                <span class="persona-name">Data Validation Expert</span>
+                                <span class="persona-desc">Audits scoring logic, state tracking, and edge cases</span>
+                            </span>
+                        </label>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -306,6 +457,21 @@
                 <div class="form-group">
                     <label for="scenarioConfig">Scenario Settings & Technical Details</label>
                     <textarea id="scenarioConfig" placeholder="Detail the architecture, system vulnerabilities, network infrastructure, or compliance standards involved (e.g., AWS, Linux, OWASP Top 10, NIST framework)." oninput="updatePrompt()"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="referenceUrls">Reference URL(s) for Content Context</label>
+                    <input type="text" id="referenceUrls" placeholder="e.g., https://www.comptia.org/certifications/security (comma-separated for multiple)" oninput="updatePrompt()">
+                    <div class="field-hint">Note: this tool cannot fetch page content itself. URLs are passed through as reference links for the receiving AI to consider or for you to fetch content from separately.</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="fileUpload">Upload Context File(s)</label>
+                    <div class="file-drop">
+                        <input type="file" id="fileUpload" multiple onchange="handleFileUpload(event)">
+                        <div class="field-hint">Text-based files (.txt, .md, .csv, .json, .html, .xml, .yaml) are read and embedded directly into the prompt. Other file types (images, PDFs, docx) are listed by filename as attached reference context.</div>
+                    </div>
+                    <div id="fileList"></div>
                 </div>
 
                 <div class="form-group">
@@ -345,6 +511,130 @@
     <div id="toast" class="notification">Prompt copied to clipboard!</div>
 
     <script>
+        // Holds parsed file context: [{name, type, content, isText}]
+        let uploadedFilesContext = [];
+
+        const personaMandates = {
+            "Cybersecurity SME": "Validate every technical claim, protocol, vulnerability, and mitigation step for real-world accuracy and currency against frameworks such as NIST, CompTIA Security+ exam objectives, and MITRE ATT&CK.",
+            "Instructional Design Expert": "Ensure the simulation is tightly aligned to the stated learning objective, follows a sound scaffolding/Bloom's Taxonomy progression, and ties every feedback moment to a measurable outcome.",
+            "Graphic Design Expert": "Recommend a clean, accessible visual hierarchy (color palette, typography, iconography, spacing) that reinforces the learning experience without overwhelming the learner, consistent with the existing course design system.",
+            "Webpage Expert Developer": "Ensure the resulting simulator is implemented as clean, single-file, zero-dependency HTML/CSS/JS, cross-browser compatible, responsive, and ready to deploy directly to GitHub Pages.",
+            "Data Validation Expert": "Audit all scoring logic, state tracking, conditional branching, and generated data outputs for internal consistency, correct edge-case handling, and freedom from logical contradictions."
+        };
+
+        const TEXT_EXTENSIONS = ['.txt', '.md', '.csv', '.json', '.html', '.htm', '.js', '.css', '.xml', '.yaml', '.yml', '.log'];
+        const MAX_CHARS_PER_FILE = 4000;
+
+        function isTextFile(filename) {
+            const lower = filename.toLowerCase();
+            return TEXT_EXTENSIONS.some(ext => lower.endsWith(ext));
+        }
+
+        function handleFileUpload(event) {
+            const files = Array.from(event.target.files);
+            uploadedFilesContext = [];
+            const fileListEl = document.getElementById('fileList');
+            fileListEl.innerHTML = '';
+
+            if (files.length === 0) {
+                updatePrompt();
+                return;
+            }
+
+            let pending = files.length;
+
+            files.forEach(file => {
+                const entry = { name: file.name, type: file.type || 'unknown', content: '', isText: isTextFile(file.name) };
+                uploadedFilesContext.push(entry);
+
+                if (entry.isText) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        let text = e.target.result || '';
+                        if (text.length > MAX_CHARS_PER_FILE) {
+                            text = text.slice(0, MAX_CHARS_PER_FILE) + '\n...[truncated]...';
+                        }
+                        entry.content = text;
+                        pending--;
+                        if (pending === 0) {
+                            renderFileList();
+                            updatePrompt();
+                        }
+                    };
+                    reader.onerror = () => {
+                        entry.content = '[Error reading file content]';
+                        pending--;
+                        if (pending === 0) {
+                            renderFileList();
+                            updatePrompt();
+                        }
+                    };
+                    reader.readAsText(file);
+                } else {
+                    pending--;
+                    if (pending === 0) {
+                        renderFileList();
+                        updatePrompt();
+                    }
+                }
+            });
+        }
+
+        function renderFileList() {
+            const fileListEl = document.getElementById('fileList');
+            fileListEl.innerHTML = uploadedFilesContext.map((f, idx) => {
+                const badge = f.isText ? 'text embedded' : 'binary reference';
+                return `<span class="file-chip">${f.name} <em style="font-style:normal;color:#2e7d32;">(${badge})</em> <button type="button" onclick="removeFile(${idx})" title="Remove">×</button></span>`;
+            }).join('');
+        }
+
+        function removeFile(idx) {
+            uploadedFilesContext.splice(idx, 1);
+            renderFileList();
+            updatePrompt();
+        }
+
+        function getSelectedPersonas() {
+            return Array.from(document.querySelectorAll('.persona-checkbox:checked')).map(cb => cb.value);
+        }
+
+        function buildPersonaSection() {
+            const selected = getSelectedPersonas();
+            if (selected.length === 0) {
+                return "No specific persona council selected. Proceed using general best-practice instructional design and cybersecurity education standards.";
+            }
+            return selected.map(p => `- **${p}:** ${personaMandates[p]}`).join('\n');
+        }
+
+        function buildReferenceContextBlock() {
+            const urlsRaw = document.getElementById('referenceUrls').value.trim();
+            const urls = urlsRaw ? urlsRaw.split(',').map(u => u.trim()).filter(Boolean) : [];
+
+            let block = '';
+
+            if (urls.length > 0) {
+                block += `\n**Reference URL(s) provided by the instructor:**\n${urls.map(u => `- ${u}`).join('\n')}\n`;
+            }
+
+            if (uploadedFilesContext.length > 0) {
+                const textFiles = uploadedFilesContext.filter(f => f.isText);
+                const binaryFiles = uploadedFilesContext.filter(f => !f.isText);
+
+                if (textFiles.length > 0) {
+                    block += `\n**Embedded context from uploaded file(s):**\n`;
+                    textFiles.forEach(f => {
+                        block += `\n--- BEGIN FILE: ${f.name} ---\n${f.content}\n--- END FILE: ${f.name} ---\n`;
+                    });
+                }
+
+                if (binaryFiles.length > 0) {
+                    block += `\n**Attached reference file(s) (content not extractable in this tool, filenames provided for context):**\n${binaryFiles.map(f => `- ${f.name}`).join('\n')}\n`;
+                }
+            }
+
+            return block;
+        }
+
         function updatePrompt() {
             const simulatorType = document.getElementById('simulatorType').value;
             const courseTitle = document.getElementById('courseTitle').value || '[Insert Course Title]';
@@ -354,6 +644,9 @@
             const difficulty = document.getElementById('difficulty').value;
             const feedbackMechanism = document.getElementById('feedbackMechanism').value || '[Insert Evaluation Criteria/Scoring Rules]';
 
+            const personaSection = buildPersonaSection();
+            const referenceContextBlock = buildReferenceContextBlock();
+
             const generatedPrompt = `You are an advanced, adaptive educational engine specializing in creating high-fidelity interactive training environments. Your goal is to act as a **${simulatorType}** tailored for a course titled **"${courseTitle}"**, designed for **${targetAudience}**.
 
 ### 1. CORE ROLE & ENVIRONMENT MODE
@@ -361,21 +654,25 @@
 * **Interface Rule:** Never break character, explain your AI backend mechanics, or provide the entire solution upfront unless explicitly commanded by system-level keys.
 * **Complexity Level:** ${difficulty}
 
-### 2. PRIMARY INSTRUCTIONAL OBJECTIVE
+### 2. AI EXPERT PERSONA COUNCIL
+Before and during content generation, internally consult and satisfy the following expert perspectives. Treat this as a standing review council whose mandates all apply simultaneously to the final output:
+${personaSection}
+
+### 3. PRIMARY INSTRUCTIONAL OBJECTIVE
 The core competency the student must demonstrate is:
 > ${coreObjective}
 
-### 3. TECHNICAL SCENARIO ARCHITECTURE & INITIATION
+### 4. TECHNICAL SCENARIO ARCHITECTURE & INITIATION
 Initialize a realistic scenario using the following environment, protocols, and infrastructural constraints:
 ${scenarioConfig}
-
-### 4. SIMULATION WORKFLOW & INTERACTION LOGIC
+${referenceContextBlock}
+### 5. SIMULATION WORKFLOW & INTERACTION LOGIC
 1.  **Initialization:** Present a realistic technical brief or system alert notification indicating the system's baseline status or structural failure state.
 2.  **Turn-by-Turn Execution:** Await user technical commands, diagnostic checks, configuration adjustments, or mitigation selections. 
 3.  **State Management:** Maintain an implicit state matrix tracking network topology modifications, compromised assets, system patches, and error logs based on user actions. Respond dynamically with systemic consequences for incorrect inputs.
 4.  **Formatting Outputs:** Present logs, terminal outputs, packets, or configuration files within strict raw markdown code blocks.
 
-### 5. FEEDBACK, EVALUATION & GRADING STRATEGY
+### 6. FEEDBACK, EVALUATION & GRADING STRATEGY
 Evaluate performance and guide the user dynamically via the following framework:
 ${feedbackMechanism}
 
@@ -400,7 +697,7 @@ ${feedbackMechanism}
         function downloadPrompt() {
             const text = document.getElementById('promptPreview').value;
             const type = document.getElementById('simulatorType').value.replace(/\s+/g, '-').toLowerCase();
-            const filename = `ai-${type}-prompt.txt`;
+            const filename = `lan153-${type}-prompt.txt`;
             
             const element = document.createElement('a');
             element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
@@ -416,6 +713,9 @@ ${feedbackMechanism}
         function resetForm() {
             if (confirm("Are you sure you want to clear all inputs? Your current work will be lost.")) {
                 document.getElementById('promptForm').reset();
+                uploadedFilesContext = [];
+                document.getElementById('fileList').innerHTML = '';
+                document.querySelectorAll('.persona-checkbox').forEach(cb => cb.checked = false);
                 updatePrompt();
                 showToast("Form fields reset.");
             }
@@ -423,15 +723,20 @@ ${feedbackMechanism}
 
         function loadExample() {
             document.getElementById('simulatorType').value = "Cybersecurity incident response simulator";
-            document.getElementById('courseTitle').value = "CYS 410: Enterprise Incident Response & Defense";
-            document.getElementById('targetAudience').value = "Senior Cybersecurity undergraduates familiar with Linux CLI and Wireshark";
+            document.getElementById('courseTitle').value = "LAN153: CompTIA Security+";
+            document.getElementById('targetAudience').value = "Community college students preparing for the CompTIA Security+ certification exam";
             document.getElementById('coreObjective').value = "Identify unauthorized privilege escalation, isolate the affected Linux host, and analyze authentication logs to discover the persistence mechanism used by the threat actor.";
             document.getElementById('scenarioConfig').value = "An Ubuntu 22.04 LTS production web server running an Apache API gateway. Splunk forwarder is configured. Attack vector involves a suspected CVE exploit leading to a web shell injection. The attacker is actively moving laterally across a /24 subnet infrastructure.";
             document.getElementById('difficulty').value = "Advanced / Adversarial (Dynamic chaos elements, time-critical constraints, full sandbox logic)";
             document.getElementById('feedbackMechanism').value = "Judge inputs strictly based on correct incident handling order (Containment before eradication). Deduct points for reckless steps like rebooting production servers without backing up volatility frames. Output a comprehensive 'Incident Assessment Metrics' report at completion.";
+            document.getElementById('referenceUrls').value = "https://www.comptia.org/certifications/security";
+
+            document.querySelectorAll('.persona-checkbox').forEach(cb => {
+                cb.checked = (cb.value === "Cybersecurity SME" || cb.value === "Instructional Design Expert");
+            });
             
             updatePrompt();
-            showToast("Loaded cybersecurity sample configuration!");
+            showToast("Loaded Security+ sample configuration!");
         }
 
         function showToast(message) {
