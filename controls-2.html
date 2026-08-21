@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Network Security Controls Simulator | Cybersecurity Controls</title>
+<style>
+  :root{
+    --bg:#F5F8FA;
+    --panel:#FFFFFF;
+    --panel-2:#EEF3F6;
+    --text:#152232;
+    --text-dim:#54677A;
+    --border:#D7E1E9;
+    --accent:#0E7C86;
+    --accent-dim:#0E7C8622;
+    --amber:#B5760A;
+    --amber-dim:#B5760A22;
+    --red:#C0392B;
+    --red-dim:#C0392B1F;
+    --green:#1E8449;
+    --green-dim:#1E844922;
+    --mono: 'JetBrains Mono', 'Courier New', monospace;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --radius: 10px;
+    --shadow: 0 1px 3px rgba(21,34,50,0.08), 0 6px 20px rgba(21,34,50,0.06);
+  }
+  [data-theme="dark"]{
+    --bg:#0A1420;
+    --panel:#101D2E;
+    --panel-2:#0D1826;
+    --text:#DCE6F0;
+    --text-dim:#8AA0B4;
+    --border:#1E3348;
+    --accent:#39C9D6;
+    --accent-dim:#39C9D62A;
+    --amber:#F2B441;
+    --amber-dim:#F2B4412A;
+    --red:#FF6B5D;
+    --red-dim:#FF6B5D26;
+    --green:#4FDB8F;
+    --green-dim:#4FDB8F26;
+    --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.35);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    line-height:1.5;
+    transition:background .25s ease, color .25s ease;
+    min-height:100vh;
+  }
+  a{color:var(--accent);}
+
+  /* ===== Header ===== */
+  header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 24px;
+    background:var(--panel);
+    border-bottom:1px solid var(--border);
+    position:sticky; top:0; z-index:20;
+    gap:16px; flex-wrap:wrap;
+  }
+  .brand{display:flex; align-items:center; gap:12px;}
+  .brand-mark{
+    width:38px; height:38px; border-radius:8px;
+    background:linear-gradient(145deg, var(--accent), #0A5F68);
+    display:flex; align-items:center; justify-content:center;
+    color:white; font-family:var(--mono); font-weight:700; font-size:13px;
+    flex:none;
+  }
+  .brand h1{font-size:16px; margin:0; letter-spacing:.2px;}
+  .brand .course-tag{
+    font-size:11.5px; color:var(--text-dim); font-family:var(--mono);
+    text-transform:uppercase; letter-spacing:.08em;
+  }
+  .header-right{display:flex; align-items:center; gap:14px;}
+  .score-chip{
+    font-family:var(--mono); font-size:13px; background:var(--panel-2);
+    border:1px solid var(--border); border-radius:8px; padding:6px 12px;
+    display:flex; gap:10px; align-items:center;
+  }
+  .score-chip b{color:var(--accent);}
+  #themeToggle{
+    background:var(--panel-2); border:1px solid var(--border); color:var(--text);
+    border-radius:8px; width:36px; height:36px; cursor:pointer; font-size:16px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  #themeToggle:hover{border-color:var(--accent);}
+
+  /* ===== Layout ===== */
+  .wrap{
+    max-width:1180px; margin:0 auto; padding:24px;
+    display:grid; grid-template-columns:300px 1fr; gap:20px;
+    align-items:start;
+  }
+  @media (max-width:860px){
+    .wrap{grid-template-columns:1fr;}
+  }
+
+  .panel{
+    background:var(--panel); border:1px solid var(--border); border-radius:var(--radius);
+    box-shadow:var(--shadow); padding:18px;
+  }
+  .panel h2{
+    font-size:12px; text-transform:uppercase; letter-spacing:.09em; color:var(--text-dim);
+    margin:0 0 14px 0; font-family:var(--mono); display:flex; align-items:center; gap:8px;
+  }
+
+  /* ===== Topology sidebar ===== */
+  .topo-node{
+    display:flex; align-items:center; gap:10px;
+    padding:10px 10px; border-radius:8px; margin-bottom:8px;
+    background:var(--panel-2); border:1px solid var(--border);
+    transition:all .35s ease;
+  }
+  .topo-node .icon{
+    width:34px; height:34px; border-radius:7px; flex:none;
+    display:flex; align-items:center; justify-content:center;
+    font-size:16px; background:var(--bg); border:1px solid var(--border);
+  }
+  .topo-node .meta{flex:1; min-width:0;}
+  .topo-node .name{font-size:12.5px; font-weight:600;}
+  .topo-node .status{font-size:11px; font-family:var(--mono); color:var(--text-dim);}
+  .topo-node.state-secure{border-color:var(--green); background:var(--green-dim);}
+  .topo-node.state-secure .status{color:var(--green);}
+  .topo-node.state-watch{border-color:var(--amber); background:var(--amber-dim);}
+  .topo-node.state-watch .status{color:var(--amber);}
+  .topo-node.state-alert{border-color:var(--red); background:var(--red-dim);}
+  .topo-node.state-alert .status{color:var(--red);}
+
+  .progress-track{
+    height:6px; border-radius:4px; background:var(--panel-2);
+    overflow:hidden; margin-top:6px; border:1px solid var(--border);
+  }
+  .progress-fill{height:100%; background:var(--accent); width:0%; transition:width .4s ease;}
+  .mastery-row{display:flex; justify-content:space-between; font-size:11.5px; margin:4px 0; font-family:var(--mono); color:var(--text-dim);}
+
+  /* ===== Main scenario column ===== */
+  .round-tag{
+    display:inline-flex; align-items:center; gap:6px;
+    font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:.08em;
+    color:var(--accent); background:var(--accent-dim); border:1px solid var(--accent);
+    padding:3px 9px; border-radius:20px; margin-bottom:12px;
+  }
+  .terminal{
+    background:#0B1420; color:#9BE8B4; font-family:var(--mono); font-size:13px;
+    border-radius:8px; padding:14px 16px; white-space:pre-wrap; overflow-x:auto;
+    border:1px solid #1E3348; line-height:1.6;
+  }
+  [data-theme="light"] .terminal, :root:not([data-theme]) .terminal{
+    background:#0B1420; color:#9BE8B4;
+  }
+  .terminal .tline-tag{color:#F2B441;}
+  .terminal .tline-crit{color:#FF6B5D;}
+
+  .question{font-size:15.5px; font-weight:600; margin:16px 0 6px;}
+  .question-sub{font-size:13px; color:var(--text-dim); margin-bottom:16px;}
+
+  .option-group{margin-bottom:14px;}
+  .option-group-label{font-size:11.5px; font-family:var(--mono); text-transform:uppercase; letter-spacing:.07em; color:var(--text-dim); margin-bottom:8px;}
+  .options{display:flex; flex-wrap:wrap; gap:8px;}
+  .opt-btn{
+    padding:9px 14px; border-radius:8px; border:1px solid var(--border);
+    background:var(--panel-2); color:var(--text); font-family:var(--sans);
+    font-size:13.5px; cursor:pointer; transition:all .15s ease; text-align:left;
+  }
+  .opt-btn:hover:not(:disabled){border-color:var(--accent); transform:translateY(-1px);}
+  .opt-btn:disabled{cursor:default;}
+  .opt-btn.selected{border-color:var(--accent); background:var(--accent-dim); font-weight:600;}
+  .opt-btn.correct{border-color:var(--green); background:var(--green-dim); color:var(--green); font-weight:600;}
+  .opt-btn.incorrect{border-color:var(--red); background:var(--red-dim); color:var(--red); font-weight:600;}
+  .deploy-opt{display:block; width:100%; padding:12px 14px; margin-bottom:8px; line-height:1.4;}
+  .deploy-opt .tag{
+    font-family:var(--mono); font-size:10.5px; color:var(--text-dim);
+    display:block; margin-top:4px;
+  }
+
+  .actions{display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; align-items:center;}
+  .btn{
+    padding:10px 18px; border-radius:8px; border:1px solid var(--border);
+    background:var(--panel-2); color:var(--text); font-weight:600; font-size:13.5px;
+    cursor:pointer; font-family:var(--sans);
+  }
+  .btn.primary{background:var(--accent); border-color:var(--accent); color:#04222A;}
+  .btn.primary:hover{filter:brightness(1.08);}
+  .btn.ghost{background:transparent;}
+  .btn:disabled{opacity:.45; cursor:not-allowed;}
+
+  .feedback{
+    margin-top:16px; padding:14px 16px; border-radius:8px; border:1px solid var(--border);
+    display:none; font-size:13.5px;
+  }
+  .feedback.show{display:block;}
+  .feedback.correct{border-color:var(--green); background:var(--green-dim);}
+  .feedback.incorrect{border-color:var(--red); background:var(--red-dim);}
+  .feedback .fb-title{font-weight:700; margin-bottom:6px; display:flex; align-items:center; gap:8px;}
+  .feedback .fb-ref{margin-top:8px; font-family:var(--mono); font-size:11.5px; color:var(--text-dim);}
+
+  .hint-box{
+    margin-top:10px; font-size:13px; color:var(--text-dim); background:var(--panel-2);
+    border:1px dashed var(--border); border-radius:8px; padding:10px 12px; display:none;
+  }
+  .hint-box.show{display:block;}
+
+  /* ===== End screen ===== */
+  .grade-badge{
+    font-family:var(--mono); font-size:42px; font-weight:700; color:var(--accent);
+    text-align:center; margin:6px 0 4px;
+  }
+  .grade-sub{text-align:center; color:var(--text-dim); font-size:13px; margin-bottom:20px;}
+  .mastery-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:8px;}
+  @media (max-width:560px){.mastery-grid{grid-template-columns:1fr;}}
+  .mastery-card{background:var(--panel-2); border:1px solid var(--border); border-radius:8px; padding:12px 14px;}
+  .mastery-card h3{margin:0 0 8px; font-size:12px; font-family:var(--mono); text-transform:uppercase; color:var(--text-dim); letter-spacing:.06em;}
+
+  footer{
+    text-align:center; padding:22px; color:var(--text-dim); font-size:11.5px; font-family:var(--mono);
+  }
+
+  /* ===== Intro narrative screen ===== */
+  #gameWrap.hidden{display:none;}
+  .intro-screen{
+    max-width:760px; margin:40px auto; padding:0 24px;
+  }
+  .intro-screen.hidden{display:none;}
+  .intro-card{
+    background:var(--panel); border:1px solid var(--border); border-radius:var(--radius);
+    box-shadow:var(--shadow); padding:32px 32px 28px;
+  }
+  .intro-eyebrow{
+    font-family:var(--mono); font-size:11.5px; text-transform:uppercase; letter-spacing:.09em;
+    color:var(--accent); margin-bottom:10px;
+  }
+  .intro-card h2{margin:0 0 16px; font-size:23px; letter-spacing:.1px;}
+  .intro-card p{font-size:14.5px; color:var(--text); margin:0 0 14px; line-height:1.65;}
+  .intro-card p b{color:var(--accent);}
+  .intro-meta{
+    display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin:20px 0 24px;
+  }
+  @media (max-width:640px){.intro-meta{grid-template-columns:1fr;}}
+  .intro-meta-item{
+    background:var(--panel-2); border:1px solid var(--border); border-radius:8px;
+    padding:10px 12px; font-size:12.5px; color:var(--text-dim); line-height:1.5;
+  }
+  .intro-meta-label{
+    display:block; font-family:var(--mono); font-size:10.5px; text-transform:uppercase;
+    letter-spacing:.07em; color:var(--accent); margin-bottom:4px;
+  }
+
+  /* ===== Reference chart modal ===== */
+  .chart-btn{white-space:nowrap;}
+  .modal-overlay{
+    display:none; position:fixed; inset:0; background:rgba(8,14,22,0.6);
+    z-index:100; align-items:flex-start; justify-content:center; padding:32px 16px; overflow-y:auto;
+  }
+  .modal-overlay.show{display:flex;}
+  .modal-card{
+    background:var(--panel); border:1px solid var(--border); border-radius:var(--radius);
+    box-shadow:var(--shadow); max-width:1080px; width:100%; padding:24px 26px; margin-top:12px;
+  }
+  .modal-header{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;}
+  .modal-header h2{font-size:17px; margin:0;}
+  .modal-sub{font-size:13px; color:var(--text-dim); margin:10px 0 16px; line-height:1.55;}
+  .chart-scroll{overflow-x:auto;}
+  .chart-table{
+    border-collapse:collapse; width:100%; min-width:820px; font-size:12.5px;
+  }
+  .chart-table th, .chart-table td{
+    border:1px solid var(--border); padding:9px 10px; text-align:left; vertical-align:top;
+  }
+  .chart-table thead th{
+    background:var(--panel-2); font-family:var(--mono); font-size:11px; text-transform:uppercase;
+    letter-spacing:.04em; color:var(--accent); font-weight:700;
+  }
+  .chart-table thead th span{
+    display:block; font-family:var(--sans); text-transform:none; letter-spacing:0;
+    color:var(--text-dim); font-size:10.5px; font-weight:400; margin-top:2px;
+  }
+  .chart-table td.row-label{
+    background:var(--panel-2); font-weight:700; font-family:var(--mono); font-size:11.5px;
+    white-space:nowrap;
+  }
+  .chart-table td.row-label span{
+    display:block; font-family:var(--sans); font-weight:400; color:var(--text-dim); font-size:10.5px; margin-top:2px;
+  }
+  .chart-table tbody td:not(.row-label){color:var(--text); line-height:1.4;}
+</style>
+</head>
+<body data-theme="light">
+
+<header>
+  <div class="brand">
+    <div class="brand-mark">NSC</div>
+    <div>
+      <h1>Network Security Controls Simulator</h1>
+      <div class="course-tag">Cybersecurity Controls &middot; Control Classification Trainer</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="score-chip">
+      <span>SCORE <b id="scoreVal">0</b></span>
+      <span>&middot;</span>
+      <span>ROUND <b id="roundVal">1</b>/<span id="roundTotal">10</span></span>
+    </div>
+    <button class="btn ghost chart-btn" id="chartBtn">&#128202; Reference Chart</button>
+    <button id="themeToggle" title="Toggle light / dark mode">&#9788;</button>
+  </div>
+</header>
+
+<div class="intro-screen" id="introScreen">
+  <div class="intro-card">
+    <div class="intro-eyebrow">Case File 04-B &middot; Meridian Regional Health Network</div>
+    <h2>Your First Week on the GRC Bench</h2>
+    <p>You've just started as a junior analyst on Meridian Regional Health Network's Governance, Risk &amp; Compliance
+       team &mdash; a three-hospital, twelve-clinic system that stores patient records, runs legacy medical devices
+       on its floor network, and is nine days from a scheduled HIPAA security controls audit.</p>
+    <p>Your supervisor has handed you a stack of recent security decisions, incident logs, and facilities notices
+       from across the network &mdash; some already implemented, some still pending sign-off. Before Friday's audit
+       prep meeting, she needs you to correctly classify each one: which <b>category</b> of control it belongs to
+       (Managerial, Operational, Technical, or Physical), and which <b>functional type</b> it serves (Preventive,
+       Detective, Corrective, Deterrent, Directive, or Compensating).</p>
+    <p>Get the classification wrong in the audit report, and Meridian risks a finding. Get it right, and you're
+       building the kind of judgment auditors — and hiring managers — actually trust.</p>
+    <div class="intro-meta">
+      <div class="intro-meta-item"><span class="intro-meta-label">Objective</span>Classify 10 real-world control decisions by category and function.</div>
+      <div class="intro-meta-item"><span class="intro-meta-label">Format</span>Guided, three-phase difficulty ramp with hints available.</div>
+      <div class="intro-meta-item"><span class="intro-meta-label">Reference</span>Open the Reference Chart (top right) any time you need a refresher.</div>
+    </div>
+    <button class="btn primary" id="beginBtn">Open the Case File &rarr;</button>
+  </div>
+</div>
+
+<div class="wrap" id="gameWrap">
+
+  <!-- SIDEBAR: network topology + progress -->
+  <div class="panel" id="sidebar">
+    <h2>&#128225; Network Status Matrix</h2>
+    <div id="topoList"></div>
+
+    <h2 style="margin-top:20px;">&#128202; Session Progress</h2>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="mastery-row"><span>Categories correct</span><span id="catCount">0/0</span></div>
+    <div class="mastery-row"><span>Types correct</span><span id="typeCount">0/0</span></div>
+  </div>
+
+  <!-- MAIN: scenario / question -->
+  <div class="panel" id="mainPanel">
+    <span class="round-tag" id="phaseTag">PHASE 1 &middot; CATEGORY ID</span>
+    <div class="terminal" id="briefing"></div>
+
+    <div class="question" id="questionText"></div>
+    <div class="question-sub" id="questionSub"></div>
+
+    <div id="optionsContainer"></div>
+
+    <div class="hint-box" id="hintBox"></div>
+
+    <div class="feedback" id="feedback">
+      <div class="fb-title" id="fbTitle"></div>
+      <div id="fbBody"></div>
+      <div class="fb-ref" id="fbRef"></div>
+    </div>
+
+    <div class="actions">
+      <button class="btn ghost" id="hintBtn">&#128161; Hint (&minus;3 pts)</button>
+      <button class="btn primary" id="submitBtn" disabled>Submit Action</button>
+      <button class="btn" id="nextBtn" style="display:none;">Next Incident &rarr;</button>
+    </div>
+  </div>
+
+</div>
+
+<footer>Cybersecurity Controls &middot; Control Classification Trainer &middot; Guided / Introductory Mode</footer>
+
+<div class="modal-overlay" id="chartModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h2>Control Category &times; Function Comparison Chart</h2>
+      <button class="btn ghost" id="closeChartBtn">&#10005; Close</button>
+    </div>
+    <p class="modal-sub">Every security control can be described two ways at once: <b>who/what enforces it</b>
+      (category) and <b>what job it does</b> (function). Use this chart to reason through a scenario &mdash;
+      the examples below are illustrative and won't repeat verbatim in your case file.</p>
+    <div class="chart-scroll">
+      <table class="chart-table">
+        <thead>
+          <tr>
+            <th>Category &darr; / Function &rarr;</th>
+            <th>Preventive<br><span>stops it before</span></th>
+            <th>Detective<br><span>finds it happening</span></th>
+            <th>Corrective<br><span>fixes it after</span></th>
+            <th>Deterrent<br><span>discourages it</span></th>
+            <th>Directive<br><span>mandates behavior</span></th>
+            <th>Compensating<br><span>alt. safeguard</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="row-label">Managerial<br><span>policy &amp; governance</span></td>
+            <td>Risk assessment prioritizing high-risk systems before rollout</td>
+            <td>Quarterly access-rights audit by internal review</td>
+            <td>Revising policy after a compliance failure</td>
+            <td>Published disciplinary policy for violations</td>
+            <td>Mandated organization-wide password standard</td>
+            <td>Extra management sign-off when a policy can't be fully met</td>
+          </tr>
+          <tr>
+            <td class="row-label">Operational<br><span>people &amp; process, day-to-day</span></td>
+            <td>Guard verifying badges before allowing entry</td>
+            <td>SOC analyst's daily log review</td>
+            <td>Restoring a service from backup after an outage</td>
+            <td>Visible, randomized security patrol rounds</td>
+            <td>SOP requiring escalation within 30 minutes</td>
+            <td>Manual double-check process while an automated tool is down</td>
+          </tr>
+          <tr>
+            <td class="row-label">Technical<br><span>enforced by systems</span></td>
+            <td>Firewall ACL blocking unused inbound ports</td>
+            <td>IDS/IPS alerting on anomalous traffic</td>
+            <td>Automated patch push after a vulnerability scan</td>
+            <td>Login banner warning that activity is monitored</td>
+            <td>Group Policy enforcing a screen-lock timeout</td>
+            <td>Network segmentation isolating an unpatchable legacy device</td>
+          </tr>
+          <tr>
+            <td class="row-label">Physical<br><span>tangible, facility-based</span></td>
+            <td>Mantrap requiring badge + biometric to enter</td>
+            <td>CCTV footage reviewed after an after-hours event</td>
+            <td>Replacing a damaged lock after a break-in</td>
+            <td>Warning signage and visible camera housings</td>
+            <td>Facility policy requiring badges displayed at all times</td>
+            <td>Extra guard posted while a badge reader is being repaired</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- THEME ---------- */
+  const THEME_KEY = 'cybercontrols-theme';
+  const body = document.body;
+  const themeToggle = document.getElementById('themeToggle');
+  function applyTheme(t){
+    body.setAttribute('data-theme', t);
+    themeToggle.innerHTML = t === 'dark' ? '&#9789;' : '&#9788;';
+  }
+  applyTheme(localStorage.getItem(THEME_KEY) || 'light');
+  themeToggle.addEventListener('click', function(){
+    const next = body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    localStorage.setItem(THEME_KEY, next);
+  });
+
+  /* ---------- INTRO NARRATIVE ---------- */
+  const introScreen = document.getElementById('introScreen');
+  const gameWrap = document.getElementById('gameWrap');
+  const beginBtn = document.getElementById('beginBtn');
+  gameWrap.classList.add('hidden');
+  beginBtn.addEventListener('click', function(){
+    introScreen.classList.add('hidden');
+    gameWrap.classList.remove('hidden');
+  });
+
+  /* ---------- REFERENCE CHART MODAL ---------- */
+  const chartModal = document.getElementById('chartModal');
+  const chartBtn = document.getElementById('chartBtn');
+  const closeChartBtn = document.getElementById('closeChartBtn');
+  chartBtn.addEventListener('click', ()=> chartModal.classList.add('show'));
+  closeChartBtn.addEventListener('click', ()=> chartModal.classList.remove('show'));
+  chartModal.addEventListener('click', function(e){
+    if(e.target === chartModal) chartModal.classList.remove('show');
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape') chartModal.classList.remove('show');
+  });
+
+  /* ---------- REFERENCE DATA ---------- */
+  const CATEGORIES = ['Managerial','Operational','Technical','Physical'];
+  const TYPES = ['Preventive','Detective','Corrective','Deterrent','Directive','Compensating'];
+
+  /* ---------- NETWORK TOPOLOGY (state matrix) ---------- */
+  const topology = [
+    {id:'fw',   icon:'&#128274;', name:'Perimeter Firewall',       status:'Nominal', state:'secure'},
+    {id:'ids',  icon:'&#128225;', name:'IDS / SIEM',                status:'Monitoring', state:'secure'},
+    {id:'door', icon:'&#127959;&#65039;', name:'Physical Access Points',  status:'Nominal', state:'secure'},
+    {id:'ws',   icon:'&#128421;&#65039;', name:'Workstations',             status:'Nominal', state:'secure'},
+    {id:'srv',  icon:'&#128421;', name:'Servers / DB',              status:'Nominal', state:'secure'},
+    {id:'gov',  icon:'&#128193;', name:'Governance & Policy',       status:'Current', state:'secure'}
+  ];
+  function renderTopology(){
+    const list = document.getElementById('topoList');
+    list.innerHTML = '';
+    topology.forEach(n=>{
+      const div = document.createElement('div');
+      div.className = 'topo-node state-' + n.state;
+      div.innerHTML = `<div class="icon">${n.icon}</div>
+        <div class="meta"><div class="name">${n.name}</div><div class="status">${n.status}</div></div>`;
+      list.appendChild(div);
+    });
+  }
+  function setNode(id, status, state){
+    const n = topology.find(x=>x.id===id);
+    if(n){ n.status = status; n.state = state; renderTopology(); }
+  }
+
+  /* ---------- ROUNDS ---------- */
+  const rounds = [
+    {
+      phase:'PHASE 1 · CATEGORY ID', mode:'category',
+      briefing:[
+        {tag:'HR-LOG', text:'New employee onboarding policy now requires all staff to'},
+        {tag:'', text:'complete an annual Security Awareness Training course before'},
+        {tag:'', text:'network credentials are issued.'}
+      ],
+      question:'Which control CATEGORY does this represent?',
+      sub:'Ask: was this created by a governance/leadership decision, or enforced by a device or a guard?',
+      correctCategory:'Managerial',
+      explanation:'Security awareness training and onboarding requirements are established through organizational policy and governance decisions — that makes this a <b>Managerial</b> (administrative) control, not something enforced by hardware or people on a shift.',
+      ref:'Ref: NIST SP 800-53 control families; CompTIA Security+ (SY0-701) Objective 1.1',
+      hint:'Managerial controls come from policy and risk-management decisions made by leadership — think "paperwork and governance," not devices or guards.',
+      node:{id:'gov', status:'Policy updated', state:'secure'}
+    },
+    {
+      phase:'PHASE 1 · CATEGORY ID', mode:'category',
+      briefing:[
+        {tag:'FAC-LOG', text:'A biometric palm scanner has been installed at the data'},
+        {tag:'', text:'center server room door. Entry now requires verified'},
+        {tag:'', text:'biometric authentication before the door will unlock.'}
+      ],
+      question:'Which control CATEGORY does this represent?',
+      sub:'Consider what is physically stopping entry here.',
+      correctCategory:'Physical',
+      explanation:'A biometric scanner guarding a real-world door is a tangible barrier controlling entry to a facility — this is a <b>Physical</b> control, distinct from a technical control that protects data or network traffic.',
+      ref:'Ref: CompTIA Security+ (SY0-701) Objective 1.1 — Physical controls',
+      hint:'Physical controls are things you could touch or stand in front of: locks, fences, badges, guards, mantraps.',
+      node:{id:'door', status:'Biometric lock active', state:'secure'}
+    },
+    {
+      phase:'PHASE 1 · CATEGORY ID', mode:'category',
+      briefing:[
+        {tag:'FW-LOG', text:'Perimeter firewall rule deployed:'},
+        {tag:'', text:'DENY  TCP  ANY -> ANY  PORT 3389 (RDP)  SRC:EXTERNAL'},
+        {tag:'', text:'Rule enforced at network edge, effective immediately.'}
+      ],
+      question:'Which control CATEGORY does this represent?',
+      sub:'This rule is enforced automatically by a device.',
+      correctCategory:'Technical',
+      explanation:'A firewall rule is enforced by technology (the firewall itself) rather than a person, a guard, or a policy document — that makes it a <b>Technical</b> control.',
+      ref:'Ref: CompTIA Security+ (SY0-701) Objective 1.1 — Technical controls',
+      hint:'Technical controls are implemented and enforced through systems and software: firewalls, encryption, access control lists, MFA.',
+      node:{id:'fw', status:'RDP blocked externally', state:'secure'}
+    },
+    {
+      phase:'PHASE 2 · CATEGORY + TYPE', mode:'both',
+      briefing:[
+        {tag:'IDS-ALERT', text:'47 anomalous login attempts detected from an unfamiliar'},
+        {tag:'', text:'geographic region within the last 10 minutes.'},
+        {tag:'CRIT', text:'No automatic action taken — alert logged for SOC analyst review.', crit:true}
+      ],
+      question:'Classify this control by CATEGORY and TYPE.',
+      sub:'The system identified the activity but did not block it.',
+      correctCategory:'Technical', correctType:'Detective',
+      explanation:'An IDS/SIEM is enforced by technology, so the category is <b>Technical</b>. Because it identifies and logs suspicious activity for a human to review — rather than stopping or repairing anything — the functional type is <b>Detective</b>.',
+      ref:'Ref: NIST SP 800-53 detective control guidance; CompTIA Security+ Objective 1.1',
+      hint:'Detective controls find and flag activity that is already happening or already happened — they don\'t block it or fix it.',
+      node:{id:'ids', status:'47 anomalies logged', state:'watch'}
+    },
+    {
+      phase:'PHASE 2 · CATEGORY + TYPE', mode:'both',
+      briefing:[
+        {tag:'PROC-LOG', text:'Following a data-handling incident, IT now requires two'},
+        {tag:'', text:'employees to jointly authorize any deletion of records in'},
+        {tag:'', text:'the production customer database, effective immediately.'}
+      ],
+      question:'Classify this control by CATEGORY and TYPE.',
+      sub:'This is a day-to-day procedure carried out by staff, applied before an action is allowed.',
+      correctCategory:'Operational', correctType:'Preventive',
+      explanation:'This separation-of-duties procedure is carried out by staff as part of routine operations, making the category <b>Operational</b>. Because it stops the risky action (an unauthorized deletion) from happening at all, the type is <b>Preventive</b>.',
+      ref:'Ref: CompTIA Security+ Objective 1.1 — Operational controls & separation of duties',
+      hint:'Operational controls are carried out by people, day to day, following a procedure. Preventive controls stop the bad event before it occurs.',
+      node:{id:'srv', status:'Dual-auth enforced', state:'secure'}
+    },
+    {
+      phase:'PHASE 2 · CATEGORY + TYPE', mode:'both',
+      briefing:[
+        {tag:'FAC-SIGN', text:'New signage posted at every building entrance:'},
+        {tag:'', text:'"WARNING: These premises are under 24-hour video'},
+        {tag:'', text:'surveillance."'}
+      ],
+      question:'Classify this control by CATEGORY and TYPE.',
+      sub:'No one is actively checking anything here — the sign just exists.',
+      correctCategory:'Physical', correctType:'Deterrent',
+      explanation:'The sign is a physical fixture at the facility, so the category is <b>Physical</b>. It doesn\'t stop, detect, or fix anything by itself — it simply discourages bad behavior by making the risk of getting caught visible, which is the definition of a <b>Deterrent</b> control.',
+      ref:'Ref: CompTIA Security+ Objective 1.1 — Deterrent controls',
+      hint:'Deterrent controls discourage an action by making consequences visible — they don\'t physically stop anyone.',
+      node:{id:'door', status:'Surveillance signage posted', state:'secure'}
+    },
+    {
+      phase:'PHASE 2 · CATEGORY + TYPE', mode:'both',
+      briefing:[
+        {tag:'IR-REPORT', text:'Ransomware affected 14 workstations. Response team has'},
+        {tag:'', text:'restored all affected systems from the last known-good'},
+        {tag:'', text:'backup and applied the patch that closed the exploited flaw.'}
+      ],
+      question:'Classify this control by CATEGORY and TYPE.',
+      sub:'This action happened after the incident, carried out by the IT team.',
+      correctCategory:'Operational', correctType:'Corrective',
+      explanation:'Restoring systems and patching is routine incident-response work performed by IT staff, making the category <b>Operational</b>. Because it repairs the damage and closes the gap after the incident already happened, the type is <b>Corrective</b>.',
+      ref:'Ref: CompTIA Security+ Objective 1.1 — Corrective controls',
+      hint:'Corrective controls happen after the incident to restore normal operations and fix what caused it.',
+      node:{id:'ws', status:'Restored from backup, patched', state:'secure'}
+    },
+    {
+      phase:'PHASE 3 · DEPLOYMENT DECISION', mode:'deploy',
+      briefing:[
+        {tag:'ADVISORY', text:'A 15-year-old SCADA controller on the plant floor cannot be'},
+        {tag:'', text:'patched — the vendor discontinued support years ago — and it'},
+        {tag:'CRIT', text:'is currently running a known-vulnerable protocol stack.', crit:true}
+      ],
+      question:'Select the BEST control to deploy given the constraint that patching is impossible.',
+      sub:'Choose the option that manages the risk without requiring the impossible.',
+      correctCategory:'Technical', correctType:'Compensating',
+      deployOptions:[
+        {text:'Decommission the controller immediately.', tag:'Unrealistic — halts production, not a viable option'},
+        {text:'Apply the vendor patch.', tag:'Not available — vendor support ended'},
+        {text:'Isolate the controller on a segmented VLAN behind a monitored jump host with strict ACLs.', tag:'Technical · Compensating', correct:true},
+        {text:'Take no action since the system has run fine for years.', tag:'Leaves a known vulnerability exposed'}
+      ],
+      explanation:'When the standard preventive fix (patching) isn\'t possible, the right move is an alternative safeguard that achieves similar protection — segmentation, a monitored jump host, and tight ACLs. That\'s the textbook definition of a <b>Compensating</b> control, and it\'s enforced by technology, so the category is <b>Technical</b>.',
+      ref:'Ref: NIST SP 800-53 compensating control guidance; CompTIA Security+ Objective 1.1',
+      hint:'Compensating controls are the alternative safeguard you use when the ideal control (here, patching) genuinely can\'t be applied.',
+      node:{id:'srv', status:'SCADA isolated on segmented VLAN', state:'watch'}
+    },
+    {
+      phase:'PHASE 3 · DEPLOYMENT DECISION', mode:'deploy',
+      briefing:[
+        {tag:'CISO-MEMO', text:'The CISO\'s office issues an updated Acceptable Use Policy'},
+        {tag:'', text:'explicitly directing all employees to encrypt any customer'},
+        {tag:'', text:'PII stored on removable media, with signed acknowledgment.'}
+      ],
+      question:'Select the control action being described, and its purpose.',
+      sub:'Focus on what this memo is actually doing — mandating a specific behavior.',
+      correctCategory:'Managerial', correctType:'Directive',
+      deployOptions:[
+        {text:'A firewall rule blocking removable media on endpoints.', tag:'Technical · Preventive — not what happened here'},
+        {text:'A governance-level policy mandating encryption of PII on removable media.', tag:'Managerial · Directive', correct:true},
+        {text:'A security camera monitoring the storage room.', tag:'Physical · Detective — unrelated to this memo'},
+        {text:'A backup restoration after data loss.', tag:'Operational · Corrective — this hasn\'t happened yet'}
+      ],
+      explanation:'This is a policy issued by governance leadership, so the category is <b>Managerial</b>. Because it explicitly mandates a specific required behavior rather than physically blocking, detecting, or repairing anything, the type is <b>Directive</b>.',
+      ref:'Ref: CompTIA Security+ Objective 1.1 — Directive controls',
+      hint:'Directive controls tell people exactly what they must do, through policy or mandated procedure — they rely on compliance, not enforcement by a device.',
+      node:{id:'gov', status:'AUP updated & acknowledged', state:'secure'}
+    },
+    {
+      phase:'PHASE 3 · DEPLOYMENT DECISION', mode:'deploy',
+      briefing:[
+        {tag:'LESSONS-LEARNED', text:'Following the Q1 phishing breach, the security committee'},
+        {tag:'', text:'revises the incident response plan and mandates a quarterly'},
+        {tag:'', text:'tabletop exercise to validate the updated procedures.'}
+      ],
+      question:'Select the control action being described, and its purpose.',
+      sub:'This step happens after the incident, at the governance level.',
+      correctCategory:'Managerial', correctType:'Corrective',
+      deployOptions:[
+        {text:'A SIEM rule flagging future phishing emails.', tag:'Technical · Detective — a different response entirely'},
+        {text:'The committee updates the IR plan and process based on what failed.', tag:'Managerial · Corrective', correct:true},
+        {text:'A firewall rule blocking the sender domain.', tag:'Technical · Preventive — a narrower, different fix'},
+        {text:'A mandatory badge policy for the server room.', tag:'Managerial · Directive — unrelated to this incident'}
+      ],
+      explanation:'A security committee revising governance-level plans and procedures is a <b>Managerial</b> action. Because it fixes the process gap that allowed the incident to happen — rather than a technical or physical fix — the type is <b>Corrective</b>.',
+      ref:'Ref: CompTIA Security+ Objective 1.1 — Corrective controls at the governance level',
+      hint:'Corrective controls aren\'t always technical — updating a policy or plan after a failure is also corrective, just at the managerial level.',
+      node:{id:'gov', status:'IR plan revised, exercises scheduled', state:'secure'}
+    }
+  ];
+
+  /* ---------- STATE ---------- */
+  let idx = 0;
+  let score = 0;
+  let attemptedThisRound = false;
+  let hintUsedThisRound = false;
+  let selectedCategory = null;
+  let selectedType = null;
+  let selectedDeployIdx = null;
+  let catCorrect = 0, catTotal = 0, typeCorrect = 0, typeTotal = 0;
+
+  const els = {
+    phaseTag: document.getElementById('phaseTag'),
+    briefing: document.getElementById('briefing'),
+    question: document.getElementById('questionText'),
+    sub: document.getElementById('questionSub'),
+    options: document.getElementById('optionsContainer'),
+    hintBox: document.getElementById('hintBox'),
+    hintBtn: document.getElementById('hintBtn'),
+    submitBtn: document.getElementById('submitBtn'),
+    nextBtn: document.getElementById('nextBtn'),
+    feedback: document.getElementById('feedback'),
+    fbTitle: document.getElementById('fbTitle'),
+    fbBody: document.getElementById('fbBody'),
+    fbRef: document.getElementById('fbRef'),
+    scoreVal: document.getElementById('scoreVal'),
+    roundVal: document.getElementById('roundVal'),
+    roundTotal: document.getElementById('roundTotal'),
+    progressFill: document.getElementById('progressFill'),
+    catCount: document.getElementById('catCount'),
+    typeCount: document.getElementById('typeCount'),
+    mainPanel: document.getElementById('mainPanel')
+  };
+  els.roundTotal.textContent = rounds.length;
+
+  function renderBriefing(lines){
+    els.briefing.innerHTML = lines.map(l=>{
+      const tagHtml = l.tag ? `<span class="${l.crit?'tline-crit':'tline-tag'}">[${l.tag}]</span> ` : '';
+      return tagHtml + l.text;
+    }).join('\n');
+  }
+
+  function renderRound(){
+    const r = rounds[idx];
+    attemptedThisRound = false;
+    hintUsedThisRound = false;
+    selectedCategory = null;
+    selectedType = null;
+    selectedDeployIdx = null;
+
+    els.phaseTag.textContent = r.phase;
+    renderBriefing(r.briefing);
+    els.question.textContent = r.question;
+    els.sub.textContent = r.sub;
+    els.hintBox.classList.remove('show');
+    els.hintBox.textContent = '';
+    els.feedback.classList.remove('show','correct','incorrect');
+    els.nextBtn.style.display = 'none';
+    els.submitBtn.style.display = 'inline-block';
+    els.submitBtn.disabled = true;
+    els.submitBtn.textContent = 'Submit Action';
+    els.roundVal.textContent = idx + 1;
+    els.progressFill.style.width = Math.round((idx / rounds.length) * 100) + '%';
+
+    els.options.innerHTML = '';
+
+    if(r.mode === 'category'){
+      const grp = buildGroup('Select category', CATEGORIES, (val, btn)=>{
+        selectedCategory = val;
+        highlightSingle(grp.querySelectorAll('.opt-btn'), btn);
+        checkEnable();
+      });
+      els.options.appendChild(grp);
+    } else if(r.mode === 'both'){
+      const g1 = buildGroup('Select category', CATEGORIES, (val, btn)=>{
+        selectedCategory = val;
+        highlightSingle(g1.querySelectorAll('.opt-btn'), btn);
+        checkEnable();
+      });
+      const g2 = buildGroup('Select type', TYPES, (val, btn)=>{
+        selectedType = val;
+        highlightSingle(g2.querySelectorAll('.opt-btn'), btn);
+        checkEnable();
+      });
+      els.options.appendChild(g1);
+      els.options.appendChild(g2);
+    } else if(r.mode === 'deploy'){
+      const label = document.createElement('div');
+      label.className = 'option-group-label';
+      label.textContent = 'Select the control to deploy';
+      els.options.appendChild(label);
+      const group = document.createElement('div');
+      r.deployOptions.forEach((opt, i)=>{
+        const b = document.createElement('button');
+        b.className = 'opt-btn deploy-opt';
+        b.innerHTML = opt.text + `<span class="tag">${opt.tag}</span>`;
+        b.addEventListener('click', ()=>{
+          if(attemptedThisRound) return;
+          selectedDeployIdx = i;
+          group.querySelectorAll('.opt-btn').forEach(x=>x.classList.remove('selected'));
+          b.classList.add('selected');
+          checkEnable();
+        });
+        group.appendChild(b);
+      });
+      els.options.appendChild(group);
+    }
+  }
+
+  function buildGroup(labelText, items, onPick){
+    const wrap = document.createElement('div');
+    wrap.className = 'option-group';
+    const label = document.createElement('div');
+    label.className = 'option-group-label';
+    label.textContent = labelText;
+    wrap.appendChild(label);
+    const row = document.createElement('div');
+    row.className = 'options';
+    items.forEach(val=>{
+      const b = document.createElement('button');
+      b.className = 'opt-btn';
+      b.textContent = val;
+      b.addEventListener('click', ()=>{ if(!attemptedThisRound) onPick(val, b); });
+      row.appendChild(b);
+    });
+    wrap.appendChild(row);
+    return wrap;
+  }
+
+  function highlightSingle(nodeList, active){
+    nodeList.forEach(n=>n.classList.remove('selected'));
+    active.classList.add('selected');
+  }
+
+  function checkEnable(){
+    const r = rounds[idx];
+    let ready = false;
+    if(r.mode === 'category') ready = !!selectedCategory;
+    else if(r.mode === 'both') ready = !!selectedCategory && !!selectedType;
+    else if(r.mode === 'deploy') ready = selectedDeployIdx !== null;
+    els.submitBtn.disabled = !ready || attemptedThisRound;
+  }
+
+  els.hintBtn.addEventListener('click', ()=>{
+    if(attemptedThisRound) return;
+    const r = rounds[idx];
+    els.hintBox.textContent = '💡 ' + r.hint;
+    els.hintBox.classList.add('show');
+    hintUsedThisRound = true;
+  });
+
+  els.submitBtn.addEventListener('click', ()=>{
+    const r = rounds[idx];
+    let isCorrect = false;
+
+    if(r.mode === 'category'){
+      catTotal++;
+      isCorrect = (selectedCategory === r.correctCategory);
+      if(isCorrect) catCorrect++;
+      markOptionButtons(els.options.querySelectorAll('.option-group')[0], selectedCategory, r.correctCategory);
+    } else if(r.mode === 'both'){
+      catTotal++; typeTotal++;
+      const catOk = (selectedCategory === r.correctCategory);
+      const typeOk = (selectedType === r.correctType);
+      if(catOk) catCorrect++;
+      if(typeOk) typeCorrect++;
+      isCorrect = catOk && typeOk;
+      const groups = els.options.querySelectorAll('.option-group');
+      markOptionButtons(groups[0], selectedCategory, r.correctCategory);
+      markOptionButtons(groups[1], selectedType, r.correctType);
+    } else if(r.mode === 'deploy'){
+      catTotal++; typeTotal++;
+      const chosen = r.deployOptions[selectedDeployIdx];
+      isCorrect = !!chosen.correct;
+      if(isCorrect){ catCorrect++; typeCorrect++; }
+      const buttons = els.options.querySelectorAll('.deploy-opt');
+      buttons.forEach((b,i)=>{
+        b.disabled = true;
+        if(r.deployOptions[i].correct) b.classList.add('correct');
+        else if(i === selectedDeployIdx) b.classList.add('incorrect');
+      });
+    }
+
+    attemptedThisRound = true;
+    els.submitBtn.disabled = true;
+
+    let pts = 0;
+    if(isCorrect){ pts = hintUsedThisRound ? 7 : 10; }
+    score += pts;
+    els.scoreVal.textContent = score;
+    els.catCount.textContent = catCorrect + '/' + catTotal;
+    els.typeCount.textContent = typeCorrect + '/' + typeTotal;
+
+    els.feedback.classList.add('show', isCorrect ? 'correct' : 'incorrect');
+    els.fbTitle.innerHTML = isCorrect
+      ? '&#9989; Correct deployment &middot; +' + pts + ' pts'
+      : '&#10060; Not quite &mdash; here\'s the correct classification';
+    els.fbBody.innerHTML = r.explanation;
+    els.fbRef.textContent = r.ref;
+
+    els.nextBtn.style.display = 'inline-block';
+    els.nextBtn.textContent = (idx === rounds.length - 1) ? 'View Final Report →' : 'Next Incident →';
+
+    if(r.node){ setNode(r.node.id, r.node.status, isCorrect ? r.node.state : 'watch'); }
+  });
+
+  function markOptionButtons(groupEl, chosen, correct){
+    if(!groupEl) return;
+    groupEl.querySelectorAll('.opt-btn').forEach(b=>{
+      b.disabled = true;
+      if(b.textContent === correct) b.classList.add('correct');
+      else if(b.textContent === chosen && chosen !== correct) b.classList.add('incorrect');
+    });
+  }
+
+  els.nextBtn.addEventListener('click', ()=>{
+    idx++;
+    if(idx >= rounds.length){ renderFinal(); return; }
+    renderRound();
+  });
+
+  function renderFinal(){
+    els.progressFill.style.width = '100%';
+    els.phaseTag.textContent = 'SESSION COMPLETE';
+    const maxScore = rounds.length * 10;
+    const pct = Math.round((score / maxScore) * 100);
+    let grade = 'D';
+    if(pct >= 90) grade = 'A';
+    else if(pct >= 80) grade = 'B';
+    else if(pct >= 70) grade = 'C';
+    else if(pct >= 60) grade = 'D';
+    else grade = 'F';
+
+    els.briefing.innerHTML = '[SESSION-LOG] All assigned incidents processed.\n[SESSION-LOG] Final network posture and score below.';
+    els.question.textContent = '';
+    els.sub.textContent = '';
+    els.hintBtn.style.display = 'none';
+    els.submitBtn.style.display = 'none';
+    els.nextBtn.style.display = 'none';
+    els.feedback.classList.remove('show');
+
+    els.options.innerHTML = `
+      <div class="grade-badge">${grade}</div>
+      <div class="grade-sub">${score} / ${maxScore} points &middot; ${pct}% &middot; Categories ${catCorrect}/${catTotal} &middot; Types ${typeCorrect}/${typeTotal}</div>
+      <div class="mastery-grid">
+        <div class="mastery-card">
+          <h3>Category Mastery</h3>
+          <div>Managerial · Operational · Technical · Physical</div>
+          <div style="margin-top:8px; font-family:var(--mono); font-size:13px;">${catCorrect} of ${catTotal} correct on first pass</div>
+        </div>
+        <div class="mastery-card">
+          <h3>Functional Type Mastery</h3>
+          <div>Preventive · Detective · Corrective · Deterrent · Directive · Compensating</div>
+          <div style="margin-top:8px; font-family:var(--mono); font-size:13px;">${typeCorrect} of ${typeTotal} correct on first pass</div>
+        </div>
+      </div>
+      <div class="actions" style="margin-top:20px;">
+        <button class="btn primary" id="restartBtn">Restart Simulation</button>
+      </div>
+    `;
+    document.getElementById('restartBtn').addEventListener('click', ()=>{
+      idx = 0; score = 0; catCorrect=0; catTotal=0; typeCorrect=0; typeTotal=0;
+      topology.forEach(n=>{ n.status='Nominal'; n.state='secure'; });
+      renderTopology();
+      els.hintBtn.style.display = 'inline-block';
+      els.submitBtn.style.display = 'inline-block';
+      els.scoreVal.textContent = '0';
+      els.catCount.textContent = '0/0';
+      els.typeCount.textContent = '0/0';
+      renderRound();
+    });
+  }
+
+  /* ---------- INIT ---------- */
+  renderTopology();
+  renderRound();
+})();
+</script>
+</body>
+</html>
