@@ -1,615 +1,947 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Firewall Configuration Simulator</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Configure and Test Firewall</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /*
+    Design system — "ops console" treatment.
+    Grounded in the subject: this is a real shell session against a live
+    daemon, so the palette borrows from terminal/NOC instrumentation
+    (a cool slate ground, a steady teal for interactive brand elements,
+    and semantic amber/green/red kept distinct from that brand teal) rather
+    than a generic SaaS blue. IBM Plex Sans (systems/engineering heritage)
+    pairs with JetBrains Mono (built for developer tooling) for UI chrome
+    and the live terminal respectively.
 
-        body {
-            font-family: 'Courier New', monospace;
-            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
-            color: #333;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-
-        .header {
-            background: linear-gradient(90deg, #2d5016 0%, #4a7c59 100%);
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
-
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .header p {
-            font-size: 1.2em;
-            opacity: 0.9;
-        }
-
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            padding: 20px;
-        }
-
-        .config-panel {
-            background: #f8f9fa;
-            border: 2px solid #2d5016;
-            border-radius: 8px;
-            padding: 20px;
-        }
-
-        .config-panel h2 {
-            color: #2d5016;
-            margin-bottom: 20px;
-            font-size: 1.5em;
-            border-bottom: 2px solid #4a7c59;
-            padding-bottom: 10px;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #2d5016;
-        }
-
-        .form-group select,
-        .form-group input {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #4a7c59;
-            border-radius: 5px;
-            font-size: 14px;
-            background: white;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: #2d5016;
-            box-shadow: 0 0 5px rgba(45, 80, 22, 0.3);
-        }
-
-        .btn {
-            background: linear-gradient(90deg, #2d5016 0%, #4a7c59 100%);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            margin: 10px 5px;
-            transition: all 0.3s ease;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(45, 80, 22, 0.4);
-        }
-
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        .rules-display {
-            background: #1a1a1a;
-            border: 2px solid #2d5016;
-            border-radius: 8px;
-            padding: 20px;
-            color: #00ff00;
-            font-family: 'Courier New', monospace;
-            max-height: 600px;
-            overflow-y: auto;
-        }
-
-        .rules-display h2 {
-            color: #00ff00;
-            margin-bottom: 20px;
-            font-size: 1.5em;
-            border-bottom: 2px solid #4a7c59;
-            padding-bottom: 10px;
-        }
-
-        .rule-entry {
-            background: rgba(0, 255, 0, 0.1);
-            border: 1px solid #4a7c59;
-            border-radius: 5px;
-            padding: 10px;
-            margin-bottom: 10px;
-            font-size: 12px;
-            line-height: 1.4;
-        }
-
-        .rule-number {
-            color: #ffff00;
-            font-weight: bold;
-        }
-
-        .rule-action {
-            color: #ff6b6b;
-            font-weight: bold;
-        }
-
-        .rule-allow {
-            color: #4ecdc4;
-            font-weight: bold;
-        }
-
-        .progress-section {
-            background: #f8f9fa;
-            border: 2px solid #2d5016;
-            border-radius: 8px;
-            padding: 20px;
-            margin-top: 20px;
-            grid-column: span 2;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 25px;
-            background: #e0e0e0;
-            border-radius: 12px;
-            overflow: hidden;
-            margin: 10px 0;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #2d5016 0%, #4a7c59 100%);
-            width: 0%;
-            transition: width 0.5s ease;
-            border-radius: 12px;
-        }
-
-        .scenario-info {
-            background: rgba(74, 124, 89, 0.1);
-            border-left: 4px solid #4a7c59;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 0 5px 5px 0;
-        }
-
-        .error-message {
-            background: #ff6b6b;
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-            margin: 10px 0;
-            display: none;
-        }
-
-        .success-message {
-            background: #4ecdc4;
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-            margin: 10px 0;
-            display: none;
-        }
-
-        .hint-box {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            color: #856404;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 15px 0;
-            font-style: italic;
-        }
-
-        .completed-rule {
-            opacity: 0.7;
-            border-left: 4px solid #4ecdc4;
-        }
-
-        @media (max-width: 768px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-            
-            .progress-section {
-                grid-column: span 1;
-            }
-        }
-    </style>
+    Theme handling: this page has NO third "system" state — <html> always
+    carries an explicit data-theme ("light" by default per spec, flipped by
+    the toggle), so :root holds the light palette and
+    :root[data-theme="dark"] overrides it. No prefers-color-scheme query is
+    needed because the unstamped state never occurs.
+  */
+  :root{
+    --paper:#eef1ee; --panel:#fbfcfa; --ink:#141a1a; --ink-soft:#57645f;
+    --line:#d7ddd6; --chip-bg:#e4e9e4;
+    --accent:#0d7b83; --accent-ink:#ffffff; --focus:#0d7b83;
+    --ok:#1f8a52; --ok-bg:#e3f3e9; --warn:#a6700a; --warn-bg:#fbf0d9;
+    --bad:#c23b31; --bad-bg:#fbe7e4;
+    --term-bg:#0a1412; --term-ink:#bfead9; --term-prompt:#5fd9b4; --term-err:#ff9a86; --term-sys:#7fb8c9;
+    --mono: "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    --sans: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  :root[data-theme="dark"]{
+    --paper:#0b1011; --panel:#121a1b; --ink:#e7ede9; --ink-soft:#93a39c;
+    --line:#263230; --chip-bg:#1a2422;
+    --accent:#4fd6de; --accent-ink:#08191a; --focus:#4fd6de;
+    --ok:#63d698; --ok-bg:#123324; --warn:#e3b23f; --warn-bg:#3a2c0c;
+    --bad:#ff8f7d; --bad-bg:#3a1712;
+    --term-bg:#060a09; --term-ink:#b9ead9; --term-prompt:#6fe6bd; --term-err:#ff9484; --term-sys:#79c3d6;
+  }
+  *{box-sizing:border-box;}
+  html{background:var(--paper);}
+  body{
+    margin:0; background:var(--paper); color:var(--ink); font-family:var(--sans);
+    min-height:100vh;
+  }
+  h1,h2,h3{text-wrap:balance;}
+  a{color:var(--accent);}
+  code, .mono{font-family:var(--mono);}
+  .num, .gradebig, .gradeScoreText, #progressPct, #progressText, .badge{font-variant-numeric:tabular-nums;}
+  header.appbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 20px; border-bottom:1px solid var(--line); background:var(--panel);
+    position:sticky; top:0; z-index:20; flex-wrap:wrap; gap:10px;
+  }
+  .brandblock{display:flex; flex-direction:column; gap:3px;}
+  .brandrow{display:flex; align-items:center; gap:9px; flex-wrap:wrap;}
+  .brandblock h1{font-size:1.05rem; margin:0; letter-spacing:.1px; font-weight:600;}
+  .brandblock .sub{font-size:.78rem; color:var(--ink-soft); font-family:var(--mono);}
+  .ticketchip{
+    font-family:var(--mono); font-size:.66rem; font-weight:600; letter-spacing:.04em;
+    background:var(--chip-bg); color:var(--ink-soft); padding:2px 7px; border-radius:5px;
+    border:1px solid var(--line);
+  }
+  .briefhead{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px; flex-wrap:wrap;}
+  .briefhead h2{margin:0;}
+  .statuspill{
+    font-family:var(--mono); font-size:.68rem; font-weight:600; letter-spacing:.02em;
+    background:var(--warn-bg); color:var(--warn); padding:3px 9px; border-radius:20px; white-space:nowrap;
+  }
+  .termchrome{
+    display:flex; align-items:center; gap:6px; background:var(--term-bg); border-radius:12px 12px 0 0;
+    padding:9px 12px 7px; margin-bottom:-1px;
+  }
+  .termchrome .dot{width:9px; height:9px; border-radius:50%; background:var(--ink-soft); opacity:.35;}
+  .termchrome .termtitle{
+    font-family:var(--mono); font-size:.7rem; color:var(--term-ink); opacity:.55; margin-left:6px;
+  }
+  .appbar-actions{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+  button, .btn{
+    font-family:var(--sans); font-size:.85rem; border-radius:8px; border:1px solid var(--line);
+    background:var(--panel); color:var(--ink); padding:8px 12px; cursor:pointer;
+    display:inline-flex; align-items:center; gap:6px; transition:background .15s, transform .05s;
+  }
+  button:hover{background:var(--chip-bg);}
+  button:active{transform:translateY(1px);}
+  button:focus-visible, input:focus-visible, a:focus-visible{outline:2px solid var(--focus); outline-offset:2px;}
+  button.primary{background:var(--accent); color:var(--accent-ink); border-color:var(--accent);}
+  button.primary:hover{filter:brightness(1.06);}
+  button.ghost{background:transparent;}
+  main.layout{
+    display:grid; grid-template-columns:300px 1fr; gap:16px; padding:16px 20px 40px;
+    max-width:1400px; margin:0 auto;
+  }
+  @media (max-width:900px){ main.layout{grid-template-columns:1fr;} }
+  .panel{
+    background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px 16px;
+  }
+  .panel + .panel{margin-top:14px;}
+  .panel h2{font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-soft); margin:0 0 10px;}
+  #brief p{font-size:.86rem; line-height:1.5; margin:0 0 8px;}
+  #brief code{background:var(--chip-bg); padding:1px 5px; border-radius:5px; font-family:var(--mono); font-size:.8em;}
+  .rulecard{
+    border:1px solid var(--line); border-radius:10px; padding:9px 10px; margin-bottom:8px;
+    display:flex; gap:9px; align-items:flex-start; font-size:.8rem; cursor:default;
+  }
+  .rulecard .num{
+    flex:0 0 auto; width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-size:.72rem; font-weight:600; background:var(--chip-bg); color:var(--ink-soft); margin-top:1px;
+  }
+  .rulecard.tested .num{background:var(--ok-bg); color:var(--ok);}
+  .rulecard.configured .num{background:var(--warn-bg); color:var(--warn);}
+  .rulecard .title{font-weight:600; margin-bottom:1px;}
+  .rulecard .bloom{color:var(--ink-soft); font-size:.7rem;}
+  .rulecard .status{margin-top:4px; font-size:.7rem; font-weight:600;}
+  .rulecard.tested .status{color:var(--ok);}
+  .rulecard.configured .status{color:var(--warn);}
+  .rulecard.pending .status{color:var(--ink-soft);}
+  .progresswrap{margin-top:4px; margin-bottom:12px;}
+  .progressbar{height:8px; border-radius:5px; background:var(--chip-bg); overflow:hidden;}
+  .progressbar > div{height:100%; background:var(--accent); width:0%; transition:width .3s;}
+  .progresslabel{font-size:.72rem; color:var(--ink-soft); margin-top:5px; display:flex; justify-content:space-between;}
+  #term{
+    background:var(--term-bg); color:var(--term-ink); border-radius:0 0 12px 12px; padding:14px 16px;
+    font-family:var(--mono); font-size:.83rem; height:52vh; min-height:340px; overflow-y:auto;
+    line-height:1.5; white-space:pre-wrap; word-break:break-word;
+  }
+  #term .line{margin:0 0 2px;}
+  #term .prompt{color:var(--term-prompt);}
+  #term .err{color:var(--term-err);}
+  #term .sys{color:var(--term-sys);}
+  #term .ok{color:var(--term-prompt);}
+  .termbar{display:flex; align-items:center; gap:8px; margin-top:10px;}
+  .termbar .prompt-static{
+    font-family:var(--mono); color:var(--ink-soft); font-size:.85rem; white-space:nowrap;
+  }
+  #cmdline{
+    flex:1; font-family:var(--mono); font-size:.88rem; padding:9px 10px; border-radius:8px;
+    border:1px solid var(--line); background:var(--panel); color:var(--ink);
+  }
+  .hintbox{
+    margin-top:10px; padding:9px 11px; border-radius:8px; background:var(--warn-bg); color:var(--warn);
+    font-size:.8rem; border:1px solid var(--line); display:none;
+  }
+  .hintbox.show{display:block;}
+  .toolbar-row{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;}
+  .studentrow{display:flex; gap:8px; align-items:center; margin-bottom:10px; flex-wrap:wrap;}
+  .studentrow label{font-size:.78rem; color:var(--ink-soft);}
+  .studentrow input[type=text]{
+    font-family:var(--sans); font-size:.83rem; padding:7px 9px; border-radius:8px; border:1px solid var(--line);
+    background:var(--panel); color:var(--ink); min-width:200px;
+  }
+  .modal-backdrop{
+    position:fixed; inset:0; background:rgba(10,14,18,.5); display:none; align-items:center; justify-content:center;
+    z-index:50; padding:20px;
+  }
+  .modal-backdrop.show{display:flex;}
+  .modal{
+    background:var(--panel); border-radius:14px; max-width:560px; width:100%; padding:22px 24px;
+    border:1px solid var(--line); max-height:86vh; overflow-y:auto;
+  }
+  .modal h2{margin-top:0; font-size:1.1rem;}
+  .gradebig{font-size:2.4rem; font-weight:700; margin:2px 0 0;}
+  .gradeletter{display:inline-flex; align-items:center; justify-content:center; width:64px; height:64px; border-radius:50%;
+    font-size:1.6rem; font-weight:800; margin-right:14px;}
+  .gradehead{display:flex; align-items:center; margin-bottom:14px;}
+  table.report{width:100%; border-collapse:collapse; font-size:.78rem; margin:10px 0 6px;}
+  table.report th, table.report td{text-align:left; padding:6px 6px; border-bottom:1px solid var(--line);}
+  table.report th{color:var(--ink-soft); font-weight:600; font-size:.7rem; text-transform:uppercase; letter-spacing:.04em;}
+  .badge{padding:2px 8px; border-radius:20px; font-size:.7rem; font-weight:700;}
+  .badge.tested{background:var(--ok-bg); color:var(--ok);}
+  .badge.configured{background:var(--warn-bg); color:var(--warn);}
+  .badge.pending{background:var(--chip-bg); color:var(--ink-soft);}
+  .modal-actions{display:flex; gap:8px; margin-top:16px; flex-wrap:wrap;}
+  .kicker{font-size:.72rem; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.08em;}
+  footer.foot{max-width:1400px; margin:0 auto; padding:0 20px 30px; font-size:.72rem; color:var(--ink-soft);}
+  .visually-hidden{position:absolute; width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);}
+  @media print{
+    header.appbar, .toolbar-row, .termbar, #cmdline, .hintbox, .modal-actions, main.layout > div:first-child { display:none !important; }
+    body{background:#fff; color:#000;}
+    #printarea{display:block !important;}
+  }
+  #printarea{display:none;}
+</style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🔥🛡️ Firewall Configuration Simulator</h1>
-            <p>Learn network security by configuring firewall rules step by step</p>
-        </div>
-        
-        <div class="main-content">
-            <div class="config-panel">
-                <h2>Rule Configuration</h2>
-                
-                <div id="currentScenario" class="scenario-info">
-                    <strong>Scenario 1:</strong> Block all FTP traffic from external networks to protect against unauthorized file transfers.
-                </div>
-                
-                <div id="errorMessage" class="error-message"></div>
-                <div id="successMessage" class="success-message"></div>
-                
-                <div class="form-group">
-                    <label for="ruleAction">Action:</label>
-                    <select id="ruleAction">
-                        <option value="">Select Action</option>
-                        <option value="ALLOW">ALLOW - Permit traffic</option>
-                        <option value="DENY">DENY - Block traffic</option>
-                        <option value="LOG">LOG - Monitor traffic</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="protocol">Protocol:</label>
-                    <select id="protocol">
-                        <option value="">Select Protocol</option>
-                        <option value="TCP">TCP - Transmission Control Protocol</option>
-                        <option value="UDP">UDP - User Datagram Protocol</option>
-                        <option value="ICMP">ICMP - Internet Control Message Protocol</option>
-                        <option value="ANY">ANY - All protocols</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="sourceIP">Source IP Address:</label>
-                    <input type="text" id="sourceIP" placeholder="e.g., 192.168.1.0/24 or ANY">
-                </div>
-                
-                <div class="form-group">
-                    <label for="destIP">Destination IP Address:</label>
-                    <input type="text" id="destIP" placeholder="e.g., 10.0.0.100 or ANY">
-                </div>
-                
-                <div class="form-group">
-                    <label for="port">Port Number:</label>
-                    <input type="text" id="port" placeholder="e.g., 80, 443, 21, or ANY">
-                </div>
-                
-                <div class="form-group">
-                    <label for="direction">Direction:</label>
-                    <select id="direction">
-                        <option value="">Select Direction</option>
-                        <option value="INBOUND">INBOUND - Traffic coming into network</option>
-                        <option value="OUTBOUND">OUTBOUND - Traffic leaving network</option>
-                        <option value="BOTH">BOTH - Bidirectional traffic</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="description">Rule Description:</label>
-                    <input type="text" id="description" placeholder="Brief description of this rule">
-                </div>
-                
-                <div class="hint-box" id="hintBox">
-                    💡 <strong>Hint:</strong> FTP uses port 21 for control connections. Consider blocking TCP traffic on this port from external sources.
-                </div>
-                
-                <button class="btn" onclick="addRule()">Add Firewall Rule</button>
-                <button class="btn" onclick="clearForm()">Clear Form</button>
-                <button class="btn" onclick="nextScenario()">Skip Scenario</button>
-            </div>
-            
-            <div class="rules-display">
-                <h2>Active Firewall Rules</h2>
-                <div id="rulesContainer">
-                    <div style="color: #888; font-style: italic;">No rules configured yet. Add your first rule to get started!</div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="progress-section">
-            <h2>Learning Progress</h2>
-            <p>Complete all 10 firewall configuration scenarios to master the fundamentals!</p>
-            <div class="progress-bar">
-                <div class="progress-fill" id="progressFill"></div>
-            </div>
-            <p id="progressText">Scenario 1 of 10 - Rules completed: 0/10</p>
-        </div>
-    </div>
 
-    <script>
-        let rules = [];
-        let currentScenarioIndex = 0;
-        let completedRules = 0;
-        
-        const scenarios = [
-            {
-                title: "Block FTP Traffic",
-                description: "Block all FTP traffic from external networks to protect against unauthorized file transfers.",
-                hint: "FTP uses port 21 for control connections. Consider blocking TCP traffic on this port from external sources.",
-                expectedRule: {
-                    action: "DENY",
-                    protocol: "TCP",
-                    port: "21",
-                    direction: "INBOUND"
-                }
-            },
-            {
-                title: "Allow HTTP Web Traffic",
-                description: "Allow incoming HTTP web traffic on the standard port to enable web server access.",
-                hint: "HTTP uses port 80. Web servers need to accept incoming TCP connections on this port.",
-                expectedRule: {
-                    action: "ALLOW",
-                    protocol: "TCP",
-                    port: "80",
-                    direction: "INBOUND"
-                }
-            },
-            {
-                title: "Block Telnet Access",
-                description: "Block all Telnet access as it transmits data in plain text, creating security risks.",
-                hint: "Telnet uses port 23 and transmits unencrypted data. This should be blocked for security.",
-                expectedRule: {
-                    action: "DENY",
-                    protocol: "TCP",
-                    port: "23",
-                    direction: "BOTH"
-                }
-            },
-            {
-                title: "Allow HTTPS Secure Web Traffic",
-                description: "Allow secure HTTPS connections to enable encrypted web communications.",
-                hint: "HTTPS uses port 443 for encrypted web traffic. This is essential for secure web services.",
-                expectedRule: {
-                    action: "ALLOW",
-                    protocol: "TCP",
-                    port: "443",
-                    direction: "INBOUND"
-                }
-            },
-            {
-                title: "Block SSH from Public Internet",
-                description: "Block SSH access from public internet while allowing internal network access.",
-                hint: "SSH uses port 22. Block external access but consider internal network requirements.",
-                expectedRule: {
-                    action: "DENY",
-                    protocol: "TCP",
-                    port: "22",
-                    direction: "INBOUND"
-                }
-            },
-            {
-                title: "Allow DNS Queries",
-                description: "Allow outbound DNS queries to enable domain name resolution for users.",
-                hint: "DNS typically uses UDP port 53 for queries. Users need this for web browsing.",
-                expectedRule: {
-                    action: "ALLOW",
-                    protocol: "UDP",
-                    port: "53",
-                    direction: "OUTBOUND"
-                }
-            },
-            {
-                title: "Block P2P File Sharing",
-                description: "Block common peer-to-peer file sharing ports to prevent unauthorized downloads.",
-                hint: "BitTorrent often uses ports in the range 6881-6889. Consider blocking TCP traffic on these ports.",
-                expectedRule: {
-                    action: "DENY",
-                    protocol: "TCP",
-                    port: "6881",
-                    direction: "BOTH"
-                }
-            },
-            {
-                title: "Allow Email (SMTP)",
-                description: "Allow outbound SMTP traffic for sending emails from the internal network.",
-                hint: "SMTP uses port 25 for email transmission. Users need outbound access to send emails.",
-                expectedRule: {
-                    action: "ALLOW",
-                    protocol: "TCP",
-                    port: "25",
-                    direction: "OUTBOUND"
-                }
-            },
-            {
-                title: "Log Database Access",
-                description: "Monitor and log all access attempts to database servers for audit purposes.",
-                hint: "MySQL uses port 3306. Use LOG action to monitor without blocking legitimate access.",
-                expectedRule: {
-                    action: "LOG",
-                    protocol: "TCP",
-                    port: "3306",
-                    direction: "INBOUND"
-                }
-            },
-            {
-                title: "Deny All Default Rule",
-                description: "Create a default deny rule to block all traffic not explicitly allowed by previous rules.",
-                hint: "This should deny ALL protocols, from ANY source to ANY destination. It's the final catch-all rule.",
-                expectedRule: {
-                    action: "DENY",
-                    protocol: "ANY",
-                    sourceIP: "ANY",
-                    destIP: "ANY",
-                    port: "ANY",
-                    direction: "BOTH"
-                }
-            }
-        ];
-        
-        function updateScenario() {
-            const scenario = scenarios[currentScenarioIndex];
-            document.getElementById('currentScenario').innerHTML = 
-                `<strong>Scenario ${currentScenarioIndex + 1}:</strong> ${scenario.description}`;
-            document.getElementById('hintBox').innerHTML = 
-                `💡 <strong>Hint:</strong> ${scenario.hint}`;
+<header class="appbar">
+  <div class="brandblock">
+    <div class="brandrow">
+      <h1>Configure &amp; Test Firewall</h1>
+      <span class="ticketchip">TICKET #4471</span>
+    </div>
+    <div class="sub">firewalld lab · edge01.lakeshore.local</div>
+  </div>
+  <div class="appbar-actions">
+    <button id="btnHelp" class="ghost" title="List available commands">Command Reference</button>
+    <button id="btnTheme" class="ghost" title="Toggle light/dark">🌙 Dark Mode</button>
+    <button id="btnGrade" class="primary" title="View grade and summary">Grade My Work</button>
+  </div>
+</header>
+
+<main class="layout">
+  <div>
+    <div class="panel" id="brief">
+      <div class="briefhead">
+        <h2>Ticket Brief</h2>
+        <span class="statuspill">firewalld: ACTIVE · default-deny</span>
+      </div>
+      <p>Host <code>edge01.lakeshore.local</code> (RHEL 9.2) was just provisioned. <code>firewalld</code> is active in default-deny mode with no exceptions.</p>
+      <p>Before this host goes live behind the DMZ router, harden and validate it against the pre-production checklist below. <strong>An unverified change counts as a failed rule</strong> during audit — configure it, then test it.</p>
+      <p>Type firewalld commands at the prompt below. Not sure where to start? Type <code>help</code> for the command reference, or <code>hint</code> at any time for a nudge on the next rule.</p>
+    </div>
+    <div class="panel">
+      <h2>Checklist Progress</h2>
+      <div class="progresswrap">
+        <div class="progressbar"><div id="progressFill"></div></div>
+        <div class="progresslabel"><span id="progressText">0 / 8 rules verified</span><span id="progressPct">0%</span></div>
+      </div>
+      <div id="rulesList"></div>
+    </div>
+  </div>
+
+  <div>
+    <div class="panel">
+      <div class="studentrow">
+        <label for="studentName">Student name (for grade report):</label>
+        <input type="text" id="studentName" placeholder="e.g. Jordan Alvarez" autocomplete="off">
+      </div>
+      <div class="termchrome">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <span class="termtitle">student@edge01:~ — bash</span>
+      </div>
+      <div id="term" role="log" aria-live="polite" aria-label="Terminal output"></div>
+      <div class="termbar">
+        <span class="prompt-static">[student@edge01 ~]$</span>
+        <input type="text" id="cmdline" autocomplete="off" spellcheck="false" placeholder="firewall-cmd --state" aria-label="Command input">
+      </div>
+      <div class="hintbox" id="hintbox"></div>
+      <div class="toolbar-row">
+        <button id="btnHint" class="ghost">💡 Hint</button>
+        <button id="btnObjectives" class="ghost">🎯 Current Objective</button>
+        <button id="btnClear" class="ghost">Clear Screen</button>
+        <button id="btnReset" class="ghost">↺ Reset Lab</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="foot">
+  Configure and Test Firewall — a guided firewalld simulator. Commands are simulated locally in your browser; no real network or server is affected. Reference: Red Hat, "firewalld: the Linux firewall" (redhat.com/en/blog/firewalld-linux-firewall).
+</footer>
+
+<div class="modal-backdrop" id="gradeModal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="gradeTitle">
+    <h2 id="gradeTitle">Grade &amp; Summary</h2>
+    <div class="gradehead">
+      <div class="gradeletter" id="gradeLetterBox">–</div>
+      <div>
+        <div class="kicker">Score</div>
+        <div class="gradebig" id="gradeScoreText">0 / 100</div>
+      </div>
+    </div>
+    <div id="gradeMeta" style="font-size:.8rem; color:var(--ink-soft); margin-bottom:6px;"></div>
+    <table class="report" id="gradeTable">
+      <thead><tr><th>#</th><th>Rule</th><th>Status</th><th>Points</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <p style="font-size:.78rem; color:var(--ink-soft); margin-top:10px;" id="gradeCoaching"></p>
+    <div class="modal-actions">
+      <button id="btnDownload" class="primary">⬇ Download Report</button>
+      <button id="btnPrint">🖨 Print Report</button>
+      <button id="btnCloseModal" class="ghost">Close</button>
+    </div>
+  </div>
+</div>
+
+<div id="printarea"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------------------------------------------------------------
+     RULE DEFINITIONS
+     Each rule models a real firewalld task, scaffolded Remember -> Evaluate.
+     configure(cmd,state) mutates state & returns {matched, text, isError}
+     testCheck(cmd,state)  returns {matched, success, text, isError}
+  --------------------------------------------------------------------- */
+  const RULES = [
+    {
+      id:1, bloom:"Remember",
+      title:"Confirm firewalld is running",
+      objective:"Verify the firewalld daemon is active before making any changes.",
+      hints:[
+        "A firewall you haven't confirmed is running might not be enforcing anything. Check the daemon's state first.",
+        "firewall-cmd has a flag that reports simply \"running\" or \"not running\".",
+        "Try: firewall-cmd --state"
+      ]
+    },
+    {
+      id:2, bloom:"Understand",
+      title:"Identify the default & active zones",
+      objective:"Determine which zone governs this host's interface before adding exceptions to it.",
+      hints:[
+        "Every firewalld rule lives inside a zone. Find out which zone is the default before you configure anything into it.",
+        "One command reports the default zone; a second confirms which zone is actually bound to an active interface.",
+        "Try: firewall-cmd --get-default-zone   then   firewall-cmd --get-active-zones"
+      ]
+    },
+    {
+      id:3, bloom:"Apply",
+      title:"Permit SSH management access",
+      objective:"Add the ssh service permanently so remote administration survives a reboot.",
+      hints:[
+        "Remote admins need SSH. Add it as a *service*, and make sure the change is permanent, not just runtime.",
+        "The flag is --add-service=ssh, combined with --permanent.",
+        "Try: firewall-cmd --permanent --add-service=ssh"
+      ]
+    },
+    {
+      id:4, bloom:"Apply",
+      title:"Permit HTTP web traffic",
+      objective:"Add the http service permanently for the application's plaintext listener.",
+      hints:[
+        "The app team needs port 80 reachable. There's a predefined service name for that.",
+        "Same pattern as SSH, different service name: http.",
+        "Try: firewall-cmd --permanent --add-service=http"
+      ]
+    },
+    {
+      id:5, bloom:"Apply",
+      title:"Permit HTTPS secure web traffic",
+      objective:"Add the https service permanently for TLS-encrypted application traffic.",
+      hints:[
+        "Encrypted web traffic uses a different predefined service than plain HTTP.",
+        "Same pattern again: --permanent --add-service=<name>.",
+        "Try: firewall-cmd --permanent --add-service=https"
+      ]
+    },
+    {
+      id:6, bloom:"Apply",
+      title:"Open custom application port 8443/tcp",
+      objective:"Open a non-standard TCP port for the internal monitoring dashboard, permanently.",
+      hints:[
+        "Not every service has a predefined name. The monitoring dashboard listens on 8443/tcp — you'll need to open a raw port instead of a service.",
+        "The flag is --add-port, and it takes the form PORT/PROTOCOL.",
+        "Try: firewall-cmd --permanent --add-port=8443/tcp"
+      ]
+    },
+    {
+      id:7, bloom:"Analyze",
+      title:"Reload to apply permanent rules to the running config",
+      objective:"Understand that --permanent changes do not affect live traffic until the firewall is reloaded, then verify the runtime state matches.",
+      hints:[
+        "Everything you've added so far with --permanent is saved to disk, but is it protecting live traffic yet? Runtime and permanent configs are separate until you reconcile them.",
+        "One command pushes permanent config into the running firewall without dropping active connections.",
+        "Try: firewall-cmd --reload   then verify with   firewall-cmd --list-all"
+      ]
+    },
+    {
+      id:8, bloom:"Evaluate",
+      title:"Block a known-malicious source address",
+      objective:"Author a rich rule to explicitly reject traffic from a flagged IOC address, then verify and activate it.",
+      hints:[
+        "Threat intel flagged 203.0.113.50 as a scanning source. Predefined services and plain ports can't express \"reject this specific source\" — you need a rich rule.",
+        "The syntax is: firewall-cmd --permanent --add-rich-rule='rule family=\"ipv4\" source address=\"203.0.113.50\" reject'",
+        "Try exactly: firewall-cmd --permanent --add-rich-rule='rule family=\"ipv4\" source address=\"203.0.113.50\" reject'   then reload and check with   firewall-cmd --list-rich-rules"
+      ]
+    }
+  ];
+
+  const TARGET_IP = "203.0.113.50";
+  const REQUIRED_SERVICES = ["ssh","http","https"];
+  const REQUIRED_PORT = "8443/tcp";
+
+  /* ---------------------------------------------------------------------
+     STATE
+  --------------------------------------------------------------------- */
+  function freshState(){
+    return {
+      zoneIdentified:false, zoneConfirmed:false, activeZonesChecked:false,
+      permanentServices:new Set(), permanentPorts:new Set(), permanentRichRules:new Set(),
+      runtimeServices:new Set(), runtimePorts:new Set(), runtimeRichRules:new Set(),
+      reloadCount:0,
+      progress:{ 1:{configured:false,tested:false}, 2:{configured:false,tested:false},
+                 3:{configured:false,tested:false}, 4:{configured:false,tested:false},
+                 5:{configured:false,tested:false}, 6:{configured:false,tested:false},
+                 7:{configured:false,tested:false}, 8:{configured:false,tested:false} },
+      hintCounts:{1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0},
+      commandLog:[],
+      startedAt:Date.now()
+    };
+  }
+  let state = freshState();
+
+  /* ---------------------------------------------------------------------
+     TOKENIZER — shell-like, respects single/double quoted segments
+  --------------------------------------------------------------------- */
+  function tokenize(raw){
+    // Shell-like word splitting: a single "word" may mix bare characters with
+    // '...' or "..." segments (e.g. --add-rich-rule='rule family="ipv4" ...'
+    // must become ONE token, matching how a real shell hands args to a CLI).
+    const tokens = [];
+    let i = 0;
+    const n = raw.length;
+    while(i < n){
+      while(i < n && /\s/.test(raw[i])) i++;
+      if(i >= n) break;
+      let word = "";
+      while(i < n && !/\s/.test(raw[i])){
+        const ch = raw[i];
+        if(ch === '"' || ch === "'"){
+          const quote = ch;
+          i++;
+          const start = i;
+          while(i < n && raw[i] !== quote) i++;
+          word += raw.slice(start, i);
+          if(i < n) i++; // skip closing quote
+        } else {
+          word += ch;
+          i++;
         }
-        
-        function addRule() {
-            const action = document.getElementById('ruleAction').value;
-            const protocol = document.getElementById('protocol').value;
-            const sourceIP = document.getElementById('sourceIP').value || 'ANY';
-            const destIP = document.getElementById('destIP').value || 'ANY';
-            const port = document.getElementById('port').value || 'ANY';
-            const direction = document.getElementById('direction').value;
-            const description = document.getElementById('description').value;
-            
-            // Validation
-            if (!action || !protocol || !direction) {
-                showError('Please fill in all required fields: Action, Protocol, and Direction.');
-                return;
-            }
-            
-            // Validate IP addresses (basic validation)
-            if (sourceIP !== 'ANY' && !isValidIP(sourceIP)) {
-                showError('Please enter a valid source IP address or use "ANY".');
-                return;
-            }
-            
-            if (destIP !== 'ANY' && !isValidIP(destIP)) {
-                showError('Please enter a valid destination IP address or use "ANY".');
-                return;
-            }
-            
-            const rule = {
-                id: rules.length + 1,
-                action,
-                protocol,
-                sourceIP,
-                destIP,
-                port,
-                direction,
-                description: description || `Rule ${rules.length + 1}`,
-                timestamp: new Date().toLocaleTimeString()
-            };
-            
-            rules.push(rule);
-            displayRules();
-            clearForm();
-            
-            // Check if rule matches scenario
-            const scenario = scenarios[currentScenarioIndex];
-            let isCorrect = true;
-            
-            // Check expected rule properties
-            if (scenario.expectedRule.action && action !== scenario.expectedRule.action) isCorrect = false;
-            if (scenario.expectedRule.protocol && protocol !== scenario.expectedRule.protocol) isCorrect = false;
-            if (scenario.expectedRule.port && port !== scenario.expectedRule.port) isCorrect = false;
-            if (scenario.expectedRule.direction && direction !== scenario.expectedRule.direction) isCorrect = false;
-            
-            if (isCorrect) {
-                completedRules++;
-                showSuccess(`Excellent! You've correctly configured the ${scenario.title} rule.`);
-                setTimeout(() => {
-                    nextScenario();
-                }, 2000);
-            } else {
-                showError('Rule added, but it may not fully address the current scenario. Check the hint and try again.');
-            }
-            
-            updateProgress();
+      }
+      tokens.push(word);
+    }
+    return tokens;
+  }
+
+  function parseFlags(tokens){
+    // tokens[0] is 'firewall-cmd'
+    const f = { permanent:false, zone:null, addService:null, addPort:null, addRichRule:null,
+                reload:false, state:false, getDefaultZone:false, getActiveZones:false,
+                listServices:false, listPorts:false, listRichRules:false, listAll:false,
+                getServices:false, unknown:[] };
+    for(let i=1;i<tokens.length;i++){
+      const t = tokens[i];
+      const eq = t.indexOf("=");
+      const key = eq>-1 ? t.slice(0,eq) : t;
+      const inlineVal = eq>-1 ? t.slice(eq+1) : null;
+      const nextVal = () => { if(inlineVal!==null) return inlineVal; i++; return tokens[i]; };
+      switch(key){
+        case "--permanent": f.permanent = true; break;
+        case "--zone": f.zone = nextVal(); break;
+        case "--add-service": f.addService = nextVal(); break;
+        case "--add-port": f.addPort = nextVal(); break;
+        case "--add-rich-rule": f.addRichRule = nextVal(); break;
+        case "--reload": f.reload = true; break;
+        case "--state": f.state = true; break;
+        case "--get-default-zone": f.getDefaultZone = true; break;
+        case "--get-active-zones": f.getActiveZones = true; break;
+        case "--list-services": f.listServices = true; break;
+        case "--list-ports": f.listPorts = true; break;
+        case "--list-rich-rules": f.listRichRules = true; break;
+        case "--list-all": f.listAll = true; break;
+        case "--get-services": f.getServices = true; break;
+        default: f.unknown.push(t);
+      }
+    }
+    return f;
+  }
+
+  function normRichRule(str){
+    if(!str) return "";
+    return str.replace(/\s+/g," ").trim().toLowerCase();
+  }
+
+  const EXPECTED_RICH_RULE = normRichRule(`rule family="ipv4" source address="${TARGET_IP}" reject`);
+
+  /* ---------------------------------------------------------------------
+     COMMAND EXECUTION
+  --------------------------------------------------------------------- */
+  function sortedList(set){ return Array.from(set).sort(); }
+
+  function listAllBlock(){
+    const services = sortedList(state.runtimeServices).join(" ");
+    const ports = sortedList(state.runtimePorts).join(" ");
+    const rich = sortedList(state.runtimeRichRules);
+    let out = "public (active)\n";
+    out += "  target: default\n";
+    out += "  icmp-block-inversion: no\n";
+    out += "  interfaces: eth0\n";
+    out += "  sources: \n";
+    out += "  services: " + services + "\n";
+    out += "  ports: " + ports + "\n";
+    out += "  protocols: \n";
+    out += "  masquerade: no\n";
+    out += "  forward-ports: \n";
+    out += "  source-ports: \n";
+    out += "  icmp-blocks: \n";
+    out += "  rich rules: \n";
+    rich.forEach(r => { out += "\t" + r + "\n"; });
+    return out.replace(/\n$/,"");
+  }
+
+  function markConfigured(id){ state.progress[id].configured = true; }
+  function markTested(id){ state.progress[id].tested = true; }
+
+  function runCommand(raw){
+    const trimmed = raw.trim();
+    if(trimmed === "") return null;
+    state.commandLog.push(trimmed);
+
+    const lower = trimmed.toLowerCase();
+    if(["help","man firewall-cmd","man"].includes(lower)) return { type:"help" };
+    if(lower === "hint") return { type:"hint" };
+    if(lower === "clear") return { type:"clear" };
+    if(lower === "reset") return { type:"reset" };
+    if(["objectives","objective","status"].includes(lower)) return { type:"objectives" };
+
+    let tokens = tokenize(trimmed);
+    if(tokens[0] === "sudo") tokens = tokens.slice(1);
+    if(tokens.length === 0) return { type:"error", text:"bash: command not found" };
+    if(tokens[0] !== "firewall-cmd"){
+      return { type:"error", text:`bash: ${tokens[0]}: command not found` };
+    }
+    const f = parseFlags(tokens);
+    if(f.unknown.length){
+      return { type:"error", text:`firewall-cmd: error: unrecognized arguments: ${f.unknown.join(" ")}` };
+    }
+
+    const outLines = [];
+
+    // --state
+    if(f.state){
+      outLines.push("running");
+      markConfigured(1); markTested(1);
+    }
+    // --get-default-zone
+    if(f.getDefaultZone){
+      outLines.push("public");
+      markConfigured(2);
+      state.zoneIdentified = true;
+    }
+    // --get-active-zones
+    if(f.getActiveZones){
+      outLines.push("public\n  interfaces: eth0");
+      state.activeZonesChecked = true;
+      if(!state.zoneIdentified) outLines.push("[hint: also run --get-default-zone to fully complete this rule's objective]");
+    }
+    if(state.zoneIdentified && state.activeZonesChecked) markTested(2);
+    // --add-service
+    if(f.addService){
+      const svc = f.addService.toLowerCase();
+      const known = ["ssh","http","https","dns","dhcp","ftp","imap","pop3","smtp","ntp","cockpit","samba"];
+      if(!known.includes(svc)){
+        outLines.push(`Error: INVALID_SERVICE: '${svc}' not among existing services`);
+      } else if(!f.permanent){
+        outLines.push("success");
+        outLines.push("[warning: added to runtime only — this will be lost on --reload or reboot. Add --permanent to persist it.]");
+      } else {
+        state.permanentServices.add(svc);
+        outLines.push("success");
+        const ruleFor = {ssh:3, http:4, https:5}[svc];
+        if(ruleFor) markConfigured(ruleFor);
+      }
+    }
+    // --add-port
+    if(f.addPort){
+      const portOk = /^\d{1,5}\/(tcp|udp)$/.test(f.addPort);
+      if(!portOk){
+        outLines.push(`Error: INVALID_PORT: '${f.addPort}' is not a valid port/protocol pair (expected PORT/tcp|udp)`);
+      } else if(!f.permanent){
+        outLines.push("success");
+        outLines.push("[warning: added to runtime only — this will be lost on --reload or reboot. Add --permanent to persist it.]");
+      } else {
+        state.permanentPorts.add(f.addPort.toLowerCase());
+        outLines.push("success");
+        if(f.addPort.toLowerCase() === REQUIRED_PORT) markConfigured(6);
+      }
+    }
+    // --add-rich-rule
+    if(f.addRichRule){
+      if(!f.permanent){
+        outLines.push("success");
+        outLines.push("[warning: added to runtime only — this will be lost on --reload or reboot. Add --permanent to persist it.]");
+      } else {
+        const norm = normRichRule(f.addRichRule);
+        state.permanentRichRules.add(norm);
+        outLines.push("success");
+        if(norm === EXPECTED_RICH_RULE) markConfigured(8);
+      }
+    }
+    // --reload
+    if(f.reload){
+      state.reloadCount++;
+      state.runtimeServices = new Set(state.permanentServices);
+      state.runtimePorts = new Set(state.permanentPorts);
+      state.runtimeRichRules = new Set(state.permanentRichRules);
+      outLines.push("success");
+      const hasAllServices = REQUIRED_SERVICES.every(s => state.runtimeServices.has(s));
+      const hasPort = state.runtimePorts.has(REQUIRED_PORT);
+      if(hasAllServices && hasPort) markConfigured(7);
+      if(state.runtimeRichRules.has(EXPECTED_RICH_RULE)) markTested(8);
+    }
+    // --list-services
+    if(f.listServices){
+      const set = f.permanent ? state.permanentServices : state.runtimeServices;
+      outLines.push(sortedList(set).join(" "));
+      REQUIRED_SERVICES.forEach((svc,idx) => {
+        const ruleId = [3,4,5][idx];
+        if(set.has(svc)) markTested(ruleId);
+      });
+    }
+    // --list-ports
+    if(f.listPorts){
+      const set = f.permanent ? state.permanentPorts : state.runtimePorts;
+      outLines.push(sortedList(set).join(" "));
+      if(set.has(REQUIRED_PORT)) markTested(6);
+    }
+    // --list-rich-rules
+    if(f.listRichRules){
+      const set = f.permanent ? state.permanentRichRules : state.runtimeRichRules;
+      outLines.push(sortedList(set).join("\n") || "");
+      if(set.has(EXPECTED_RICH_RULE) && (f.permanent || state.reloadCount>0)) markTested(8);
+    }
+    // --list-all (a comprehensive read — also verifies any individual
+    // service/port/rich-rule already active in the runtime config)
+    if(f.listAll){
+      outLines.push(listAllBlock());
+      REQUIRED_SERVICES.forEach((svc,idx) => {
+        const ruleId = [3,4,5][idx];
+        if(state.runtimeServices.has(svc)) markTested(ruleId);
+      });
+      if(state.runtimePorts.has(REQUIRED_PORT)) markTested(6);
+      const hasAllServices = REQUIRED_SERVICES.every(s => state.runtimeServices.has(s));
+      const hasPort = state.runtimePorts.has(REQUIRED_PORT);
+      if(hasAllServices && hasPort) markTested(7);
+      if(state.runtimeRichRules.has(EXPECTED_RICH_RULE)) markTested(8);
+    }
+    // --get-services
+    if(f.getServices){
+      outLines.push("RH-Firewall-1-INPUT amanda-client amanda-k5-client bacula bacula-client dhcp dhcpv6 dhcpv6-client dns freeipa-4 ftp http https imap imaps ldap ldaps mdns mountd ms-wbt mysql nfs ntp openvpn pmcd pmproxy pmwebapi pmwebapis pop3 pop3s postgresql proxy-dhcp radius rpc-bind rsyncd samba samba-client smtp smtp-submission snmp snmptrap squid ssh syncthing syncthing-gui telnet tftp tftp-client transmission-client vnc-server wbem-https");
+    }
+
+    if(outLines.length === 0){
+      return { type:"error", text:"firewall-cmd: error: no valid option specified. Type 'help' for the command reference." };
+    }
+    return { type:"ok", text: outLines.join("\n") };
+  }
+
+  /* ---------------------------------------------------------------------
+     RENDERING
+  --------------------------------------------------------------------- */
+  const termEl = document.getElementById("term");
+  const cmdEl = document.getElementById("cmdline");
+  const hintbox = document.getElementById("hintbox");
+  const rulesListEl = document.getElementById("rulesList");
+  const progressFill = document.getElementById("progressFill");
+  const progressText = document.getElementById("progressText");
+  const progressPct = document.getElementById("progressPct");
+
+  function esc(s){
+    return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+
+  function printLine(text, cls){
+    const div = document.createElement("div");
+    div.className = "line" + (cls ? " "+cls : "");
+    div.innerHTML = esc(text);
+    termEl.appendChild(div);
+    termEl.scrollTop = termEl.scrollHeight;
+  }
+
+  function printPrompt(cmd){
+    printLine("[student@edge01 ~]$ " + cmd, "prompt");
+  }
+
+  function ruleStatus(id){
+    const p = state.progress[id];
+    if(p.tested) return "tested";
+    if(p.configured) return "configured";
+    return "pending";
+  }
+
+  function renderRules(){
+    rulesListEl.innerHTML = "";
+    let testedCount = 0;
+    RULES.forEach(r => {
+      const st = ruleStatus(r.id);
+      if(st === "tested") testedCount++;
+      const card = document.createElement("div");
+      card.className = "rulecard " + st;
+      const statusLabel = st === "tested" ? "✅ Configured & tested" : st === "configured" ? "⚠️ Configured — not yet tested" : "◻ Not started";
+      card.innerHTML = `
+        <div class="num">${r.id}</div>
+        <div>
+          <div class="title">${esc(r.title)}</div>
+          <div class="bloom">${esc(r.bloom)} · Rule ${r.id} of 8</div>
+          <div class="status">${statusLabel}</div>
+        </div>`;
+      rulesListEl.appendChild(card);
+    });
+    const pct = Math.round((testedCount/8)*100);
+    progressFill.style.width = pct + "%";
+    progressText.textContent = testedCount + " / 8 rules verified";
+    progressPct.textContent = pct + "%";
+  }
+
+  function currentRule(){
+    return RULES.find(r => !state.progress[r.id].tested) || null;
+  }
+
+  function showHint(){
+    const r = currentRule();
+    if(!r){
+      hintbox.textContent = "🎉 All 8 rules configured and verified. Click \"Grade My Work\" when you're ready to submit.";
+      hintbox.classList.add("show");
+      return;
+    }
+    const count = state.hintCounts[r.id];
+    const tier = Math.min(count, r.hints.length-1);
+    hintbox.textContent = `Rule ${r.id} (${r.bloom}) — ${r.hints[tier]}`;
+    hintbox.classList.add("show");
+    state.hintCounts[r.id] = Math.min(count+1, r.hints.length-1+1);
+  }
+
+  function showObjective(){
+    const r = currentRule();
+    if(!r){
+      hintbox.textContent = "🎉 All 8 rules configured and verified. Click \"Grade My Work\" when you're ready to submit.";
+    } else {
+      hintbox.textContent = `Current objective — Rule ${r.id}: ${r.title}. ${r.objective}`;
+    }
+    hintbox.classList.add("show");
+  }
+
+  const HELP_TEXT =
+`Available firewalld commands in this simulation:
+  firewall-cmd --state
+  firewall-cmd --get-default-zone
+  firewall-cmd --get-active-zones
+  firewall-cmd --permanent --add-service=<name>      (ssh, http, https, ...)
+  firewall-cmd --permanent --add-port=<port>/<proto>  (e.g. 8443/tcp)
+  firewall-cmd --permanent --add-rich-rule='<rule>'
+  firewall-cmd --reload
+  firewall-cmd --list-services   [--permanent]
+  firewall-cmd --list-ports      [--permanent]
+  firewall-cmd --list-rich-rules [--permanent]
+  firewall-cmd --list-all
+  firewall-cmd --get-services
+
+Lab commands:
+  help          show this reference
+  hint          get a nudge toward the next unverified rule
+  objectives    show the current rule's learning objective
+  clear         clear the terminal screen
+  reset         restart the entire lab from zero`;
+
+  function handleSubmit(){
+    const raw = cmdEl.value;
+    if(raw.trim() === "") return;
+    printPrompt(raw);
+    cmdEl.value = "";
+    const result = runCommand(raw);
+    if(!result) return;
+    if(result.type === "help"){ printLine(HELP_TEXT, "sys"); }
+    else if(result.type === "hint"){ showHint(); printLine("(hint printed below the terminal)", "sys"); }
+    else if(result.type === "objectives"){ showObjective(); printLine("(objective printed below the terminal)", "sys"); }
+    else if(result.type === "clear"){ termEl.innerHTML = ""; }
+    else if(result.type === "reset"){
+      state = freshState();
+      termEl.innerHTML = "";
+      printLine("Lab environment reset. edge01.lakeshore.local restored to a fresh, default-deny firewalld state.", "sys");
+    }
+    else if(result.type === "error"){ printLine(result.text, "err"); }
+    else { printLine(result.text, "ok"); }
+    renderRules();
+  }
+
+  cmdEl.addEventListener("keydown", e => { if(e.key === "Enter") handleSubmit(); });
+  document.getElementById("btnHint").addEventListener("click", showHint);
+  document.getElementById("btnObjectives").addEventListener("click", showObjective);
+  document.getElementById("btnClear").addEventListener("click", () => { termEl.innerHTML = ""; });
+  document.getElementById("btnReset").addEventListener("click", () => {
+    if(confirm("Reset the entire lab? All progress will be lost.")){
+      state = freshState();
+      termEl.innerHTML = "";
+      hintbox.classList.remove("show");
+      printLine("Lab environment reset. edge01.lakeshore.local restored to a fresh, default-deny firewalld state.", "sys");
+      renderRules();
+    }
+  });
+  document.getElementById("btnHelp").addEventListener("click", () => { printLine(HELP_TEXT, "sys"); });
+
+  /* ---------------------------------------------------------------------
+     THEME TOGGLE
+  --------------------------------------------------------------------- */
+  const themeBtn = document.getElementById("btnTheme");
+  themeBtn.addEventListener("click", () => {
+    const cur = document.documentElement.getAttribute("data-theme");
+    const next = cur === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    themeBtn.textContent = next === "dark" ? "☀️ Light Mode" : "🌙 Dark Mode";
+  });
+
+  /* ---------------------------------------------------------------------
+     GRADING
+  --------------------------------------------------------------------- */
+  const POINTS_PER_RULE = 100/8;
+
+  function computeGrade(){
+    let score = 0;
+    const rows = RULES.map(r => {
+      const st = ruleStatus(r.id);
+      let pts = 0;
+      if(st === "tested") pts = POINTS_PER_RULE;
+      else if(st === "configured") pts = POINTS_PER_RULE/2;
+      score += pts;
+      return { id:r.id, title:r.title, bloom:r.bloom, status:st, points:pts };
+    });
+    score = Math.round(score*10)/10;
+    let letter = "F";
+    if(score>=90) letter="A"; else if(score>=80) letter="B"; else if(score>=70) letter="C";
+    else if(score>=60) letter="D"; else letter="F";
+    return { rows, score, letter };
+  }
+
+  function coachingMessage(rows, score){
+    const untested = rows.filter(r=>r.status!=="tested");
+    if(untested.length === 0) return "All eight rules configured and verified — this host meets the pre-production checklist. Nice work reconciling permanent config with runtime state.";
+    const configuredOnly = untested.filter(r=>r.status==="configured");
+    const notStarted = untested.filter(r=>r.status==="pending");
+    let msg = "";
+    if(configuredOnly.length){
+      msg += "You configured but didn't verify: " + configuredOnly.map(r=>`Rule ${r.id} (${r.title})`).join(", ") + ". Remember: an unverified change fails audit — always follow a config command with the matching test. ";
+    }
+    if(notStarted.length){
+      msg += "Not yet attempted: " + notStarted.map(r=>`Rule ${r.id} (${r.title})`).join(", ") + ". ";
+    }
+    return msg.trim();
+  }
+
+  const gradeModal = document.getElementById("gradeModal");
+  function openGradeModal(){
+    const { rows, score, letter } = computeGrade();
+    const letterBox = document.getElementById("gradeLetterBox");
+    letterBox.textContent = letter;
+    letterBox.style.background = letter==="A"||letter==="B" ? "var(--ok-bg)" : letter==="C" ? "var(--warn-bg)" : "var(--bad-bg)";
+    letterBox.style.color = letter==="A"||letter==="B" ? "var(--ok)" : letter==="C" ? "var(--warn)" : "var(--bad)";
+    document.getElementById("gradeScoreText").textContent = score + " / 100";
+    const name = document.getElementById("studentName").value.trim() || "(name not entered)";
+    const elapsedMin = Math.max(1, Math.round((Date.now()-state.startedAt)/60000));
+    document.getElementById("gradeMeta").textContent = `Student: ${name}  ·  Time in lab: ~${elapsedMin} min  ·  Commands entered: ${state.commandLog.length}  ·  Generated: ${new Date().toLocaleString()}`;
+    const tbody = document.querySelector("#gradeTable tbody");
+    tbody.innerHTML = "";
+    rows.forEach(r => {
+      const tr = document.createElement("tr");
+      const badgeClass = r.status;
+      const badgeLabel = r.status==="tested" ? "Tested" : r.status==="configured" ? "Configured only" : "Not started";
+      tr.innerHTML = `<td>${r.id}</td><td>${esc(r.title)}<br><span style="color:var(--ink-soft); font-size:.7rem;">${esc(r.bloom)}</span></td><td><span class="badge ${badgeClass}">${badgeLabel}</span></td><td>${r.points.toFixed(1)}</td>`;
+      tbody.appendChild(tr);
+    });
+    document.getElementById("gradeCoaching").textContent = coachingMessage(rows, score);
+    gradeModal.classList.add("show");
+  }
+  document.getElementById("btnGrade").addEventListener("click", openGradeModal);
+  document.getElementById("btnCloseModal").addEventListener("click", () => gradeModal.classList.remove("show"));
+  gradeModal.addEventListener("click", e => { if(e.target === gradeModal) gradeModal.classList.remove("show"); });
+
+  function buildReportText(){
+    const { rows, score, letter } = computeGrade();
+    const name = document.getElementById("studentName").value.trim() || "(name not entered)";
+    let out = "CONFIGURE AND TEST FIREWALL — LAB GRADE REPORT\n";
+    out += "================================================\n";
+    out += `Student: ${name}\n`;
+    out += `Generated: ${new Date().toLocaleString()}\n`;
+    out += `Commands entered: ${state.commandLog.length}\n`;
+    out += `Score: ${score} / 100   Letter Grade: ${letter}\n\n`;
+    out += "Rule-by-rule results:\n";
+    rows.forEach(r => {
+      const label = r.status==="tested" ? "CONFIGURED & TESTED" : r.status==="configured" ? "CONFIGURED ONLY (not verified)" : "NOT STARTED";
+      out += `  ${r.id}. [${r.bloom}] ${r.title} — ${label} (${r.points.toFixed(1)} pts)\n`;
+    });
+    out += "\nCoaching notes:\n  " + coachingMessage(rows, score) + "\n\n";
+    out += "Command history:\n";
+    state.commandLog.forEach((c,i) => { out += `  ${i+1}. ${c}\n`; });
+    return out;
+  }
+
+  function classicDownload(filename, text){
+    const blob = new Blob([text], {type:"text/plain"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url), 2000);
+  }
+
+  document.getElementById("btnDownload").addEventListener("click", async () => {
+    const text = buildReportText();
+    const nameSlug = (document.getElementById("studentName").value.trim() || "student").replace(/[^a-z0-9]+/gi,"_").toLowerCase();
+    const filename = `firewall-lab-report-${nameSlug}.txt`;
+
+    // When this page runs inside the Claude Artifact viewer, a plain
+    // <a download> is inert (the sandbox blocks page-initiated saves), so
+    // hand the file over via the `downloads` capability instead. When this
+    // page is self-hosted (e.g. GitHub Pages) or opened as a local file,
+    // window.claude does not exist and the classic method below runs — the
+    // same feature, two delivery paths depending on where the page lives.
+    try{
+      if(window.claude && typeof window.claude.use === "function"){
+        const downloads = await window.claude.use("downloads");
+        if(downloads){
+          try{
+            await downloads.save({ filename, data: text });
+          } catch(err){
+            if(err && err.code === "declined") return; // viewer said no — don't silently fall back
+            classicDownload(filename, text);
+          }
+          return;
         }
-        
-        function isValidIP(ip) {
-            // Basic IP validation (including CIDR notation)
-            const ipPattern = /^(\d{1,3}\.){3}\d{1,3}(\/\d{1,2})?$/;
-            if (!ipPattern.test(ip)) return false;
-            
-            const parts = ip.split('/')[0].split('.');
-            return parts.every(part => parseInt(part) >= 0 && parseInt(part) <= 255);
-        }
-        
-        function displayRules() {
-            const container = document.getElementById('rulesContainer');
-            
-            if (rules.length === 0) {
-                container.innerHTML = '<div style="color: #888; font-style: italic;">No rules configured yet. Add your first rule to get started!</div>';
-                return;
-            }
-            
-            container.innerHTML = rules.map(rule => `
-                <div class="rule-entry ${rule.completed ? 'completed-rule' : ''}">
-                    <span class="rule-number">Rule ${rule.id}:</span>
-                    <span class="${rule.action === 'ALLOW' ? 'rule-allow' : 'rule-action'}">${rule.action}</span>
-                    ${rule.protocol} traffic from ${rule.sourceIP} to ${rule.destIP}
-                    ${rule.port !== 'ANY' ? `on port ${rule.port}` : ''} 
-                    (${rule.direction}) - ${rule.description}
-                    <br><small style="color: #888;">Added at: ${rule.timestamp}</small>
-                </div>
-            `).join('');
-        }
-        
-        function clearForm() {
-            document.getElementById('ruleAction').value = '';
-            document.getElementById('protocol').value = '';
-            document.getElementById('sourceIP').value = '';
-            document.getElementById('destIP').value = '';
-            document.getElementById('port').value = '';
-            document.getElementById('direction').value = '';
-            document.getElementById('description').value = '';
-            hideMessages();
-        }
-        
-        function nextScenario() {
-            if (currentScenarioIndex < scenarios.length - 1) {
-                currentScenarioIndex++;
-                updateScenario();
-                clearForm();
-                hideMessages();
-            } else {
-                showSuccess('Congratulations! You have completed all firewall configuration scenarios!');
-                document.getElementById('currentScenario').innerHTML = 
-                    '<strong>🎉 Completed!</strong> You have successfully learned the fundamentals of firewall configuration!';
-            }
-        }
-        
-        function updateProgress() {
-            const progressPercent = (completedRules / 10) * 100;
-            document.getElementById('progressFill').style.width = progressPercent + '%';
-            document.getElementById('progressText').textContent = 
-                `Scenario ${currentScenarioIndex + 1} of 10 - Rules completed: ${completedRules}/10`;
-        }
-        
-        function showError(message) {
-            const errorDiv = document.getElementById('errorMessage');
-            errorDiv.textContent = message;
-            errorDiv.style.display = 'block';
-            setTimeout(() => errorDiv.style.display = 'none', 5000);
-        }
-        
-        function showSuccess(message) {
-            const successDiv = document.getElementById('successMessage');
-            successDiv.textContent = message;
-            successDiv.style.display = 'block';
-            setTimeout(() => successDiv.style.display = 'none', 5000);
-        }
-        
-        function hideMessages() {
-            document.getElementById('errorMessage').style.display = 'none';
-            document.getElementById('successMessage').style.display = 'none';
-        }
-        
-        // Initialize the simulator
-        updateScenario();
-        updateProgress();
-    </script>
+      }
+    } catch(e){ /* fall through to classic method below */ }
+    classicDownload(filename, text);
+  });
+
+  document.getElementById("btnPrint").addEventListener("click", () => {
+    const text = buildReportText();
+    const area = document.getElementById("printarea");
+    area.innerHTML = "<pre style='font-family:monospace; white-space:pre-wrap; font-size:12px; color:#000;'>" + esc(text) + "</pre>";
+    window.print();
+  });
+
+  /* ---------------------------------------------------------------------
+     INIT
+  --------------------------------------------------------------------- */
+  function boot(){
+    renderRules();
+    printLine("Connecting to edge01.lakeshore.local ... established.", "sys");
+    printLine("firewalld status: ACTIVE (default-deny) — no service exceptions configured.", "sys");
+    printLine("Ticket #4471 loaded. 8 rules pending configuration and verification. Type 'help' for the command reference or 'hint' to begin.", "sys");
+    cmdEl.focus();
+  }
+  boot();
+})();
+</script>
 </body>
 </html>
