@@ -1,0 +1,1265 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOC Analyst Simulator — Capturing Network Traffic</title>
+<style>
+  :root{
+    --bg:#f4f6f9; --panel:#ffffff; --panel-2:#eef1f5; --text:#1b2430; --text-dim:#5b6572; --border:#d7dee6;
+    --accent:#0f62aa; --accent-fg:#ffffff; --accent-2:#0e7c86; --danger:#c0392b; --danger-bg:#fdecea;
+    --success:#1e8f4e; --success-bg:#e9f8ee; --warning:#946200; --warning-bg:#fff6df;
+    --mono: 'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;
+    --sans: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    --proto-tcp-bg:#e7f0fb; --proto-tcp-fg:#0b4a86;
+    --proto-udp-bg:#eef7ef; --proto-udp-fg:#1f6b32;
+    --proto-arp-bg:#fff6da; --proto-arp-fg:#7a5b00;
+    --proto-dns-bg:#f1ecfb; --proto-dns-fg:#5b3aa6;
+    --proto-http-bg:#e9f9ee; --proto-http-fg:#1c6b3a;
+    --proto-ftp-bg:#fdece3; --proto-ftp-fg:#a3441a;
+    --proto-icmp-bg:#eef2f5; --proto-icmp-fg:#3c4a58;
+    --radius:10px; --shadow:0 1px 3px rgba(20,30,40,.08), 0 1px 2px rgba(20,30,40,.06);
+    color-scheme: light;
+  }
+  [data-theme="dark"]{
+    --bg:#0f151d; --panel:#161f2b; --panel-2:#1c2734; --text:#e6edf5; --text-dim:#95a4b5; --border:#2a3646;
+    --accent:#5aa9ff; --accent-fg:#0a1826; --accent-2:#49c6ce; --danger:#ff8a7a; --danger-bg:#3a2020;
+    --success:#63e097; --success-bg:#12301f; --warning:#ffd166; --warning-bg:#3a2f0f;
+    --proto-tcp-bg:#132a44; --proto-tcp-fg:#9cc9ff;
+    --proto-udp-bg:#12301c; --proto-udp-fg:#8fe0a4;
+    --proto-arp-bg:#3a2f08; --proto-arp-fg:#ffd873;
+    --proto-dns-bg:#251a3d; --proto-dns-fg:#cbb3f7;
+    --proto-http-bg:#12301f; --proto-http-fg:#8fe0ad;
+    --proto-ftp-bg:#3a2013; --proto-ftp-fg:#ffb28a;
+    --proto-icmp-bg:#1c2632; --proto-icmp-fg:#c3d0dd;
+    --shadow:0 1px 3px rgba(0,0,0,.5);
+    color-scheme: dark;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg); color:var(--text); font-family:var(--sans);
+    line-height:1.5; min-height:100vh; -webkit-font-smoothing:antialiased;
+  }
+  #app{max-width:1100px; margin:0 auto; padding:0 16px 60px;}
+  a{color:var(--accent);}
+  h1,h2,h3,h4{line-height:1.25; font-weight:700;}
+  button{font-family:inherit; cursor:pointer;}
+  .visually-hidden{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap;}
+
+  /* Top bar */
+  #topbar{
+    position:sticky; top:0; z-index:20; background:var(--bg);
+    display:flex; align-items:center; justify-content:space-between;
+    gap:12px; padding:14px 0; border-bottom:1px solid var(--border); flex-wrap:wrap;
+  }
+  #topbar .brand{display:flex; align-items:center; gap:10px; font-weight:700; font-size:1.05rem;}
+  #topbar .brand .logo{
+    width:34px; height:34px; border-radius:8px; background:var(--accent); color:var(--accent-fg);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  #topbar .brand .sub{font-weight:500; font-size:.78rem; color:var(--text-dim);}
+  #topbar .status{display:flex; align-items:center; gap:14px; flex-wrap:wrap;}
+  .pill{
+    background:var(--panel-2); border:1px solid var(--border); border-radius:999px;
+    padding:6px 12px; font-size:.82rem; font-weight:600; display:flex; align-items:center; gap:6px;
+  }
+  .icon-btn{
+    background:var(--panel-2); border:1px solid var(--border); color:var(--text);
+    border-radius:8px; padding:8px 12px; font-size:.85rem; font-weight:600;
+    display:flex; align-items:center; gap:6px;
+  }
+  .icon-btn:hover{background:var(--panel); border-color:var(--accent);}
+  #progress-track{
+    height:6px; border-radius:999px; background:var(--panel-2); overflow:hidden; margin-top:10px; width:100%;
+  }
+  #progress-fill{height:100%; background:linear-gradient(90deg,var(--accent),var(--accent-2)); width:0%; transition:width .3s ease;}
+
+  /* Screens */
+  .screen{display:none;}
+  .screen.active{display:block; animation:fadein .25s ease;}
+  @keyframes fadein{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;}}
+
+  .card{
+    background:var(--panel); border:1px solid var(--border); border-radius:var(--radius);
+    box-shadow:var(--shadow); padding:22px; margin-bottom:18px;
+  }
+  .card h2{margin-top:0;}
+  .lede{color:var(--text-dim); font-size:.95rem;}
+
+  .btn{
+    display:inline-flex; align-items:center; gap:8px; border-radius:8px; border:1px solid transparent;
+    padding:11px 18px; font-size:.92rem; font-weight:700; background:var(--accent); color:var(--accent-fg);
+  }
+  .btn:hover{filter:brightness(1.06);}
+  .btn:disabled{opacity:.45; cursor:not-allowed;}
+  .btn.secondary{background:var(--panel-2); color:var(--text); border-color:var(--border);}
+  .btn.ghost{background:transparent; color:var(--accent); border-color:var(--accent);}
+  .btn.danger{background:var(--danger); color:#fff;}
+  .btn.small{padding:7px 12px; font-size:.8rem;}
+
+  .field{margin-bottom:14px;}
+  .field label{display:block; font-weight:700; font-size:.85rem; margin-bottom:6px;}
+  .field input[type=text], .field select, .field textarea{
+    width:100%; padding:10px 12px; border-radius:8px; border:1px solid var(--border);
+    background:var(--panel); color:var(--text); font-family:inherit; font-size:.92rem;
+  }
+  .field textarea{min-height:80px; resize:vertical; font-family:var(--sans);}
+  .hint-text{font-size:.78rem; color:var(--text-dim); margin-top:4px;}
+
+  /* Objectives */
+  .obj-list{padding-left:0; list-style:none; margin:0;}
+  .obj-list li{
+    display:flex; gap:10px; padding:8px 0; border-bottom:1px dashed var(--border); font-size:.93rem;
+  }
+  .obj-list li:last-child{border-bottom:none;}
+  .obj-list .num{
+    flex-shrink:0; width:24px; height:24px; border-radius:50%; background:var(--accent); color:var(--accent-fg);
+    font-size:.75rem; font-weight:800; display:flex; align-items:center; justify-content:center;
+  }
+
+  /* Topology */
+  .topo-wrap{overflow-x:auto; background:var(--panel-2); border:1px solid var(--border); border-radius:8px; padding:10px;}
+  .topo-wrap svg{display:block; margin:0 auto; min-width:640px;}
+  .legend{display:flex; flex-wrap:wrap; gap:14px; margin-top:10px; font-size:.78rem; color:var(--text-dim);}
+  .legend span{display:inline-flex; align-items:center; gap:6px;}
+  .legend i{width:12px; height:12px; border-radius:3px; display:inline-block;}
+
+  /* Ticket header */
+  .ticket-head{
+    display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap;
+  }
+  .ticket-id{font-family:var(--mono); font-size:.78rem; color:var(--text-dim); letter-spacing:.03em;}
+  .alert-box{
+    display:flex; gap:12px; align-items:flex-start; background:var(--warning-bg); border:1px solid var(--warning);
+    color:var(--text); border-radius:8px; padding:12px 14px; margin:14px 0;
+  }
+  .alert-box .icon{font-size:1.1rem; flex-shrink:0;}
+  .meta-grid{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:10px; margin:14px 0;
+  }
+  .meta-grid div{background:var(--panel-2); border:1px solid var(--border); border-radius:8px; padding:8px 10px;}
+  .meta-grid .k{font-size:.7rem; text-transform:uppercase; letter-spacing:.04em; color:var(--text-dim); font-weight:700;}
+  .meta-grid .v{font-family:var(--mono); font-size:.85rem; margin-top:2px; word-break:break-word;}
+
+  /* Filter bar */
+  .filter-bar{display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:14px 0;}
+  .filter-bar input{
+    flex:1 1 260px; font-family:var(--mono); padding:10px 12px; border-radius:8px;
+    border:1px solid var(--border); background:var(--panel); color:var(--text); font-size:.85rem;
+  }
+  .filter-bar input.invalid{border-color:var(--danger);}
+  .filter-help{font-size:.76rem; color:var(--text-dim); margin-top:6px;}
+  .filter-help code{background:var(--panel-2); padding:1px 5px; border-radius:4px; font-family:var(--mono);}
+
+  /* Packet table */
+  .table-wrap{overflow-x:auto; border:1px solid var(--border); border-radius:8px;}
+  table.packets{border-collapse:collapse; width:100%; font-family:var(--mono); font-size:.8rem; min-width:760px;}
+  table.packets thead th{
+    position:sticky; top:0; background:var(--panel-2); text-align:left; padding:8px 10px;
+    border-bottom:1px solid var(--border); font-family:var(--sans); font-size:.72rem;
+    text-transform:uppercase; letter-spacing:.03em; color:var(--text-dim);
+  }
+  table.packets tbody td{padding:7px 10px; border-bottom:1px solid var(--border); vertical-align:top;}
+  table.packets tbody tr{cursor:pointer;}
+  table.packets tbody tr:hover{background:var(--panel-2);}
+  table.packets tbody tr.selected{outline:2px solid var(--accent); outline-offset:-2px;}
+  table.packets tbody tr.hidden-row{display:none;}
+  .proto-badge{
+    display:inline-block; padding:2px 8px; border-radius:999px; font-size:.72rem; font-weight:800;
+    letter-spacing:.02em;
+  }
+  .proto-TCP{background:var(--proto-tcp-bg); color:var(--proto-tcp-fg);}
+  .proto-UDP{background:var(--proto-udp-bg); color:var(--proto-udp-fg);}
+  .proto-ARP{background:var(--proto-arp-bg); color:var(--proto-arp-fg);}
+  .proto-DNS{background:var(--proto-dns-bg); color:var(--proto-dns-fg);}
+  .proto-HTTP{background:var(--proto-http-bg); color:var(--proto-http-fg);}
+  .proto-FTP{background:var(--proto-ftp-bg); color:var(--proto-ftp-fg);}
+  .proto-ICMP{background:var(--proto-icmp-bg); color:var(--proto-icmp-fg);}
+  .count-readout{font-size:.78rem; color:var(--text-dim); margin-top:6px;}
+
+  .detail-panel{
+    margin-top:10px; background:var(--panel-2); border:1px solid var(--border); border-radius:8px;
+    padding:12px 14px; font-family:var(--mono); font-size:.8rem; white-space:pre-wrap;
+  }
+  .detail-panel .dt-title{font-family:var(--sans); font-weight:700; margin-bottom:6px; font-size:.8rem;}
+
+  /* Hints */
+  .hint-row{display:flex; gap:8px; flex-wrap:wrap; margin:10px 0;}
+  .hint-panel{
+    background:var(--panel-2); border-left:3px solid var(--accent-2); border-radius:6px;
+    padding:10px 12px; margin-top:8px; font-size:.87rem;
+  }
+  .hint-panel + .hint-panel{margin-top:6px;}
+
+  /* Feedback */
+  .feedback{border-radius:8px; padding:14px; margin-top:14px; font-size:.9rem;}
+  .feedback.ok{background:var(--success-bg); border:1px solid var(--success); color:var(--text);}
+  .feedback.partial{background:var(--warning-bg); border:1px solid var(--warning); color:var(--text);}
+  .feedback.bad{background:var(--danger-bg); border:1px solid var(--danger); color:var(--text);}
+  .feedback h4{margin:0 0 6px;}
+  .feedback .tag{
+    display:inline-block; font-size:.7rem; font-weight:800; text-transform:uppercase; letter-spacing:.04em;
+    padding:2px 8px; border-radius:999px; margin-right:6px; margin-bottom:6px; background:rgba(120,120,120,.15);
+  }
+
+  .actions-row{display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; align-items:center;}
+
+  /* Summary */
+  table.summary{width:100%; border-collapse:collapse; font-size:.88rem;}
+  table.summary th, table.summary td{padding:9px 10px; border-bottom:1px solid var(--border); text-align:left;}
+  table.summary th{font-size:.72rem; text-transform:uppercase; color:var(--text-dim); letter-spacing:.03em;}
+  .grade-hero{
+    display:flex; align-items:center; gap:20px; flex-wrap:wrap; padding:18px; border-radius:10px;
+    background:linear-gradient(135deg, var(--panel-2), var(--panel)); border:1px solid var(--border); margin-bottom:16px;
+  }
+  .grade-circle{
+    width:96px; height:96px; border-radius:50%; background:var(--accent); color:var(--accent-fg);
+    display:flex; align-items:center; justify-content:center; flex-direction:column; flex-shrink:0;
+  }
+  .grade-circle .letter{font-size:2rem; font-weight:800; line-height:1;}
+  .grade-circle .pct{font-size:.7rem; font-weight:600;}
+  .badge-ok{color:var(--success); font-weight:800;}
+  .badge-bad{color:var(--danger); font-weight:800;}
+
+  footer.app-footer{color:var(--text-dim); font-size:.78rem; text-align:center; margin-top:30px;}
+
+  @media (max-width:640px){
+    #topbar{flex-direction:column; align-items:flex-start;}
+    .grade-hero{flex-direction:column; text-align:center;}
+    table.packets{font-size:.72rem;}
+  }
+
+  /* Print */
+  @media print{
+    #topbar, .no-print, #screen-intro, #screen-ticket, #app > footer, #progress-track{display:none !important;}
+    #screen-summary .no-print{display:none !important;}
+    body{background:#fff; color:#000;}
+    .card{box-shadow:none; border:1px solid #999;}
+    table.summary th, table.summary td{border:1px solid #999;}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header id="topbar">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L4 5v6c0 5.2 3.4 9.6 8 11 4.6-1.4 8-5.8 8-11V5l-8-3z" fill="currentColor"/>
+        </svg>
+      </span>
+      <span>
+        SOC Analyst Simulator
+        <div class="sub">Capturing Network Traffic — Packet Capture &amp; Attack Signature Lab</div>
+      </span>
+    </div>
+    <div class="status">
+      <span class="pill no-print" id="progress-pill">Ticket 0 / 6</span>
+      <span class="pill no-print" id="score-pill">Score: 0</span>
+      <button class="icon-btn no-print" id="theme-toggle" type="button" aria-pressed="false">
+        <span id="theme-icon" aria-hidden="true">&#9788;</span>
+        <span id="theme-label">Light Mode</span>
+      </button>
+    </div>
+  </header>
+  <div id="progress-track" class="no-print" aria-hidden="true"><div id="progress-fill"></div></div>
+
+  <main id="main">
+
+    <!-- ================= INTRO SCREEN ================= -->
+    <section id="screen-intro" class="screen active" aria-labelledby="intro-h">
+      <div class="card">
+        <span class="ticket-id">COURSE MODULE · CAPTURING NETWORK TRAFFIC</span>
+        <h1 id="intro-h">Welcome to the NorthPoint Logistics Security Operations Center</h1>
+        <p class="lede">
+          You are the newest analyst on the NorthPoint Logistics SOC team. Your job is to review packet
+          captures pulled from network sensors placed around the company's wired and wireless
+          infrastructure, determine what — if anything — is wrong, and document your findings the way a
+          real analyst would.
+        </p>
+
+        <h3>Learning Objectives</h3>
+        <ul class="obj-list">
+          <li><span class="num">1</span><span>Use a simulated packet-capture interface to review live traffic captures and apply Wireshark-style display filters.</span></li>
+          <li><span class="num">2</span><span>Interpret captured packet data — source/destination addresses, ports, protocol flags, and payload info — to spot anomalies.</span></li>
+          <li><span class="num">3</span><span>Identify the traffic signatures of six common network-based attacks: network/port scanning, ARP spoofing, brute-force authentication attacks, DNS spoofing, SYN flood denial-of-service, and on-path (man-in-the-middle) credential sniffing.</span></li>
+          <li><span class="num">4</span><span>Attribute each incident to its likely source and connect evidence to a recommended mitigation, aligned to MITRE ATT&amp;CK and CompTIA Security+ objectives.</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>The Network You're Watching</h3>
+        <p class="lede">NorthPoint Logistics runs a small routed network with a wired workstation/server segment and a separate wireless VLAN for laptops and mobile devices. Sensors mirror traffic from four points into your SOC console.</p>
+        <div class="topo-wrap">
+          <svg viewBox="0 0 900 360" role="img" aria-labelledby="topo-title topo-desc">
+            <title id="topo-title">NorthPoint Logistics network topology</title>
+            <desc id="topo-desc">Internet connects to a firewall/router, which connects to a core switch. The core switch connects to a server VLAN with a DNS server, application server, and file server; a workstation VLAN with three workstations; and a wireless access point serving a laptop and a mobile device. Four sensors labeled SPAN-1 through SPAN-4 mirror traffic from the workstation VLAN, wireless VLAN, server VLAN, and firewall edge respectively into the SOC console.</desc>
+            <!-- Internet -->
+            <g font-family="inherit" font-size="12">
+              <ellipse cx="450" cy="30" rx="70" ry="22" fill="var(--panel-2)" stroke="var(--border)"></ellipse>
+              <text x="450" y="34" text-anchor="middle" fill="var(--text)">Internet</text>
+              <line x1="450" y1="52" x2="450" y2="80" stroke="var(--border)" stroke-width="2"/>
+              <!-- Firewall -->
+              <rect x="395" y="80" width="110" height="38" rx="6" fill="var(--panel)" stroke="var(--accent)" stroke-width="2"/>
+              <text x="450" y="104" text-anchor="middle" fill="var(--text)">Firewall / Router</text>
+              <line x1="450" y1="118" x2="450" y2="146" stroke="var(--border)" stroke-width="2"/>
+              <!-- Core switch -->
+              <rect x="380" y="146" width="140" height="34" rx="6" fill="var(--panel)" stroke="var(--border)" stroke-width="2"/>
+              <text x="450" y="168" text-anchor="middle" fill="var(--text)">Core Switch</text>
+
+              <!-- Server VLAN -->
+              <line x1="450" y1="180" x2="180" y2="230" stroke="var(--border)" stroke-width="2"/>
+              <rect x="60" y="230" width="240" height="86" rx="6" fill="var(--panel)" stroke="var(--border)"/>
+              <text x="180" y="246" text-anchor="middle" font-weight="700" fill="var(--text)">Server VLAN 10.10.5.0/24</text>
+              <text x="180" y="266" text-anchor="middle" fill="var(--text-dim)">DNS Server · 10.10.5.10</text>
+              <text x="180" y="284" text-anchor="middle" fill="var(--text-dim)">App/Web Server · 10.10.5.20</text>
+              <text x="180" y="302" text-anchor="middle" fill="var(--text-dim)">File Server (FTP) · 10.10.5.30</text>
+
+              <!-- Workstation VLAN -->
+              <line x1="450" y1="180" x2="450" y2="230" stroke="var(--border)" stroke-width="2"/>
+              <rect x="330" y="230" width="240" height="86" rx="6" fill="var(--panel)" stroke="var(--border)"/>
+              <text x="450" y="246" text-anchor="middle" font-weight="700" fill="var(--text)">Workstation VLAN 10.10.10.0/24</text>
+              <text x="450" y="266" text-anchor="middle" fill="var(--text-dim)">WKS-01 .11 · WKS-03 .13</text>
+              <text x="450" y="284" text-anchor="middle" fill="var(--text-dim)">WKS-06 .16 (recon suspect)</text>
+              <text x="450" y="302" text-anchor="middle" fill="var(--text-dim)">Rogue host .90 (unauthorized)</text>
+
+              <!-- Wireless VLAN -->
+              <line x1="450" y1="180" x2="720" y2="230" stroke="var(--border)" stroke-width="2"/>
+              <rect x="600" y="230" width="240" height="86" rx="6" fill="var(--panel)" stroke="var(--border)"/>
+              <text x="720" y="246" text-anchor="middle" font-weight="700" fill="var(--text)">Wireless VLAN 10.10.20.0/24</text>
+              <text x="720" y="266" text-anchor="middle" fill="var(--text-dim)">Wireless AP · 10.10.20.2</text>
+              <text x="720" y="284" text-anchor="middle" fill="var(--text-dim)">LAPTOP-04 .14 · MOBILE-05 .15</text>
+              <text x="720" y="302" text-anchor="middle" fill="var(--text-dim)">Rogue device .66 (unauthorized)</text>
+
+              <!-- Sensors -->
+              <g font-size="10.5" fill="var(--accent-2)" font-weight="700">
+                <text x="180" y="330" text-anchor="middle">&#9678; SPAN-3 — Server VLAN mirror</text>
+                <text x="450" y="330" text-anchor="middle">&#9678; SPAN-1 — Workstation VLAN mirror</text>
+                <text x="720" y="330" text-anchor="middle">&#9678; SPAN-2 — Wireless VLAN mirror</text>
+                <text x="515" y="102" text-anchor="start">&#9678; SPAN-4 — Firewall edge mirror</text>
+              </g>
+            </g>
+          </svg>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--accent)"></i> Network device</span>
+          <span><i style="background:var(--accent-2)"></i> SOC sensor / mirror port</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>How This Shift Works</h3>
+        <p class="lede">You'll work six tickets, one at a time. Each ticket includes an alert, a captured packet log you can filter and inspect, and a short analysis form. Use hints if you get stuck — they cost a few points, but they never block your progress. You can always reveal the answer and move on if you're stuck.</p>
+        <div class="field">
+          <label for="analyst-name">Analyst name (optional — appears on your grade summary)</label>
+          <input type="text" id="analyst-name" placeholder="e.g., J. Rivera" maxlength="60">
+        </div>
+        <button class="btn" id="begin-btn" type="button">Begin Shift &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ================= TICKET SCREEN ================= -->
+    <section id="screen-ticket" class="screen" aria-labelledby="ticket-h">
+      <!-- populated by JS -->
+    </section>
+
+    <!-- ================= SUMMARY SCREEN ================= -->
+    <section id="screen-summary" class="screen" aria-labelledby="summary-h">
+      <!-- populated by JS -->
+    </section>
+
+  </main>
+
+  <footer class="app-footer no-print">
+    SOC Analyst Simulator — built for "Capturing Network Traffic" · All network data, IP addresses, and incidents are fictional and generated for instructional use.
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------------------------------------------------------------
+   * CONSTANTS
+   * ------------------------------------------------------------------- */
+  var ATTACK_TYPES = [
+    {key:"arp",    label:"ARP Spoofing / ARP Cache Poisoning"},
+    {key:"brute",  label:"Brute Force / Credential Stuffing Attack"},
+    {key:"dns",    label:"DNS Spoofing / Cache Poisoning"},
+    {key:"mitm",   label:"On-Path (Man-in-the-Middle) Credential Sniffing"},
+    {key:"scan",   label:"Port Scan / Network Reconnaissance"},
+    {key:"synflood", label:"SYN Flood (Denial-of-Service)"}
+  ];
+
+  function attackLabel(key){
+    for (var i=0;i<ATTACK_TYPES.length;i++){ if (ATTACK_TYPES[i].key===key) return ATTACK_TYPES[i].label; }
+    return key;
+  }
+
+  var HINT_PENALTY = 10;
+  var MAX_ATTEMPTS = 2;
+
+  /* ---------------------------------------------------------------------
+   * PACKET DATA — 6 rounds
+   * ------------------------------------------------------------------- */
+  function P(no,time,src,sport,dst,dport,proto,len,info,flags){
+    return {no:no,time:time,src:src,sport:sport||null,dst:dst,dport:dport||null,proto:proto,len:len,info:info,flags:flags||null};
+  }
+
+  var ROUNDS = [
+
+    /* ---------------- ROUND 1: PORT SCAN ---------------- */
+    {
+      id:"INC-2026-0114",
+      title:"Unusual Multi-Port Connection Attempts",
+      sensor:"SPAN-1 (Workstation VLAN mirror)",
+      alertRule:"Suricata ET SCAN — Multiple destination ports contacted by a single source within 1 second",
+      victim:"File Server — 10.10.5.30",
+      narrative:"At 09:41 AM, the IDS flagged host 10.10.10.16 (WKS-06) for contacting the File Server on an unusually high number of ports in a very short window. Review the capture below and determine what happened.",
+      packets:[
+        P(1,"0.000000","10.10.10.16",50213,"10.10.5.30",21,"TCP",60,"50213 → 21 [SYN] Seq=0 Win=1024 Len=0",{syn:1,ack:0,rst:0,fin:0}),
+        P(2,"0.001200","10.10.5.30",21,"10.10.10.16",50213,"TCP",58,"21 → 50213 [RST, ACK] Seq=0 Ack=1 Win=0 Len=0 (port closed)",{syn:0,ack:1,rst:1,fin:0}),
+        P(3,"0.002400","10.10.10.16",50214,"10.10.5.30",22,"TCP",60,"50214 → 22 [SYN] Seq=0 Win=1024 Len=0",{syn:1,ack:0,rst:0,fin:0}),
+        P(4,"0.003100","10.10.5.30",22,"10.10.10.16",50214,"TCP",60,"22 → 50214 [SYN, ACK] Seq=0 Ack=1 Win=64240 Len=0 (port open)",{syn:1,ack:1,rst:0,fin:0}),
+        P(5,"0.004000","10.10.10.16",50215,"10.10.5.30",23,"TCP",54,"50215 → 23 [SYN] Seq=0 Win=1024 Len=0",{syn:1,ack:0,rst:0,fin:0}),
+        P(6,"0.004900","10.10.5.30",23,"10.10.10.16",50215,"TCP",58,"23 → 50215 [RST, ACK] Seq=0 Ack=1 Win=0 Len=0 (port closed)",{syn:0,ack:1,rst:1,fin:0}),
+        P(7,"0.005600","10.10.10.16",50216,"10.10.5.30",25,"TCP",60,"50216 → 25 [SYN] Seq=0 Win=1024 Len=0",{syn:1,ack:0,rst:0,fin:0}),
+        P(8,"0.006300","10.10.5.30",25,"10.10.10.16",50216,"TCP",58,"25 → 50216 [RST, ACK] Seq=0 Ack=1 Win=0 Len=0 (port closed)",{syn:0,ack:1,rst:1,fin:0}),
+        P(9,"0.007000","10.10.10.16",50217,"10.10.5.30",80,"TCP",60,"50217 → 80 [SYN] Seq=0 Win=1024 Len=0",{syn:1,ack:0,rst:0,fin:0}),
+        P(10,"0.007800","10.10.5.30",80,"10.10.10.16",50217,"TCP",60,"80 → 50217 [SYN, ACK] Seq=0 Ack=1 Win=64240 Len=0 (port open)",{syn:1,ack:1,rst:0,fin:0}),
+        P(11,"0.008500","10.10.10.16",50218,"10.10.5.30",110,"TCP",54,"50218 → 110 [SYN] Seq=0 Win=1024 Len=0",{syn:1,ack:0,rst:0,fin:0}),
+        P(12,"0.009300","10.10.5.30",110,"10.10.10.16",50218,"TCP",58,"110 → 50218 [RST, ACK] Seq=0 Ack=1 Win=0 Len=0 (port closed)",{syn:0,ack:1,rst:1,fin:0}),
+        P(13,"0.009800","10.10.10.13",51500,"10.10.5.10",53,"DNS",74,"Standard query 0x1a2b A portal.company-intranet.local",null),
+        P(14,"0.010900","10.10.5.10",53,"10.10.10.13",51500,"DNS",90,"Standard query response 0x1a2b A portal.company-intranet.local A 10.10.5.20",null),
+        P(15,"0.020000","10.10.10.16",50219,"10.10.5.30",135,"TCP",60,"50219 → 135 [SYN] Seq=0 Win=1024 Len=0",{syn:1,ack:0,rst:0,fin:0}),
+        P(16,"0.020800","10.10.5.30",135,"10.10.10.16",50219,"TCP",58,"135 → 50219 [RST, ACK] Seq=0 Ack=1 Win=0 Len=0 (port closed)",{syn:0,ack:1,rst:1,fin:0}),
+        P(17,"0.021500","10.10.10.16",50220,"10.10.5.30",445,"TCP",60,"50220 → 445 [SYN] Seq=0 Win=1024 Len=0",{syn:1,ack:0,rst:0,fin:0}),
+        P(18,"0.022300","10.10.5.30",445,"10.10.10.16",50220,"TCP",60,"445 → 50220 [SYN, ACK] Seq=0 Ack=1 Win=64240 Len=0 (port open)",{syn:1,ack:1,rst:0,fin:0})
+      ],
+      hints:[
+        "Look at how many different destination ports the same source IP is contacting in under a second.",
+        "Check the Info column: most connections show a SYN followed immediately by a RST/ACK (closed) or SYN/ACK (open) — but no data ever follows. That's a classic half-open scan pattern, not a real application session.",
+        "Apply the filter ip.src==10.10.10.16 to isolate this host's traffic. Count the distinct destination ports it probed on 10.10.5.30 in about 22 milliseconds."
+      ],
+      correctAttack:"scan",
+      sourceOptions:[
+        {value:"10.10.10.16", label:"WKS-06 — 10.10.10.16"},
+        {value:"10.10.5.30", label:"File Server — 10.10.5.30"},
+        {value:"10.10.5.10", label:"DNS Server — 10.10.5.10"},
+        {value:"10.10.10.1", label:"Gateway / Router — 10.10.10.1"}
+      ],
+      correctSource:"10.10.10.16",
+      mitre:"T1046 — Network Service Discovery (Discovery, TA0007)",
+      explanation:"WKS-06 (10.10.10.16) probed eight well-known service ports (21, 22, 23, 25, 80, 110, 135, 445) on the File Server in roughly 22 milliseconds. Each attempt received either a SYN/ACK (open) or RST/ACK (closed) and none completed into a real session — the signature of a stealth/half-open TCP SYN scan, commonly run with tools like Nmap (-sS).",
+      mitigation:"Deploy IDS/IPS scan-detection signatures, rate-limit new connections per source, close/disable unused services, and review WKS-06 for compromise (recon often precedes exploitation)."
+    },
+
+    /* ---------------- ROUND 2: ARP SPOOFING ---------------- */
+    {
+      id:"INC-2026-0117",
+      title:"Duplicate Gateway MAC Address on Wireless VLAN",
+      sensor:"SPAN-2 (Wireless VLAN mirror)",
+      alertRule:"ARP Watch — Duplicate ARP replies for 10.10.20.1 from two different MAC addresses",
+      victim:"LAPTOP-04 — 10.10.20.14",
+      narrative:"A wireless client, LAPTOP-04, appears to be getting conflicting answers about who owns the gateway address 10.10.20.1. Review the ARP traffic captured on the wireless VLAN mirror.",
+      packets:[
+        P(1,"0.000000","10.10.20.14",null,"broadcast",null,"ARP",42,"Who has 10.10.20.1? Tell 10.10.20.14",null),
+        P(2,"0.000800","10.10.20.1",null,"10.10.20.14",null,"ARP",42,"10.10.20.1 is at AA:BB:CC:00:00:01 (reply)",null),
+        P(3,"0.050000","10.10.20.66",null,"broadcast",null,"ARP",42,"10.10.20.1 is at 66:66:66:66:66:66 (gratuitous ARP, unsolicited)",null),
+        P(4,"0.051000","10.10.20.66",null,"broadcast",null,"ARP",42,"10.10.20.14 is at 66:66:66:66:66:66 (gratuitous ARP, unsolicited)",null),
+        P(5,"0.100000","10.10.20.15",56110,"10.10.5.20",443,"TCP",66,"56110 → 443 [SYN] Seq=0 Win=64240 Len=0",{syn:1,ack:0,rst:0,fin:0}),
+        P(6,"0.101000","10.10.5.20",443,"10.10.20.15",56110,"TCP",66,"443 → 56110 [SYN, ACK] Seq=0 Ack=1 Win=65535 Len=0",{syn:1,ack:1,rst:0,fin:0}),
+        P(7,"0.150000","10.10.20.66",null,"broadcast",null,"ARP",42,"10.10.20.1 is at 66:66:66:66:66:66 (gratuitous ARP, unsolicited)",null),
+        P(8,"0.250000","10.10.20.66",null,"broadcast",null,"ARP",42,"10.10.20.1 is at 66:66:66:66:66:66 (gratuitous ARP, unsolicited)",null),
+        P(9,"0.300000","10.10.20.14",null,"broadcast",null,"ARP",42,"Who has 10.10.20.1? Tell 10.10.20.14 (cache refresh)",null),
+        P(10,"0.300500","10.10.20.66",null,"10.10.20.14",null,"ARP",42,"10.10.20.1 is at 66:66:66:66:66:66 (reply, wins race)",null),
+        P(11,"0.301000","10.10.20.1",null,"10.10.20.14",null,"ARP",42,"10.10.20.1 is at AA:BB:CC:00:00:01 (legitimate reply, arrives after cache already poisoned)",null),
+        P(12,"0.350000","10.10.20.15",56230,"8.8.8.8",53,"DNS",70,"Standard query 0x77aa A weatherapp.example.com",null),
+        P(13,"0.351200","8.8.8.8",53,"10.10.20.15",56230,"DNS",86,"Standard query response 0x77aa A weatherapp.example.com A 93.184.216.34",null),
+        P(14,"0.400000","10.10.20.66",null,"broadcast",null,"ARP",42,"10.10.20.1 is at 66:66:66:66:66:66 (gratuitous ARP, unsolicited)",null)
+      ],
+      hints:[
+        "Notice that IP address 10.10.20.1 (the gateway) appears to be “at” two different MAC addresses in this capture.",
+        "Gratuitous ARP replies are sent without a matching request. Look for ARP replies that were not preceded by a matching “Who has...?” broadcast.",
+        "Filter on arp and compare the sender MAC in each “is at” reply — one legitimate reply comes from AA:BB:CC:00:00:01, but 66:66:66:66:66:66 repeats the same claim four separate times, unsolicited."
+      ],
+      correctAttack:"arp",
+      sourceOptions:[
+        {value:"10.10.20.66", label:"Unknown rogue device — 10.10.20.66 (66:66:66:66:66:66)"},
+        {value:"10.10.20.1", label:"Gateway — 10.10.20.1"},
+        {value:"10.10.20.14", label:"LAPTOP-04 — 10.10.20.14"},
+        {value:"10.10.20.2", label:"Wireless AP — 10.10.20.2"}
+      ],
+      correctSource:"10.10.20.66",
+      mitre:"T1557.002 — Adversary-in-the-Middle: ARP Cache Poisoning",
+      explanation:"A rogue device (10.10.20.66, MAC 66:66:66:66:66:66) sent repeated, unsolicited (gratuitous) ARP replies claiming to own the gateway's IP address, which legitimately belongs to MAC AA:BB:CC:00:00:01. Because ARP has no authentication, LAPTOP-04 accepted the forged mapping — a classic ARP cache poisoning / on-path attack setup.",
+      mitigation:"Enable Dynamic ARP Inspection (DAI) on switches, use static ARP entries for critical hosts/gateways, and alert on gratuitous ARP anomalies."
+    },
+
+    /* ---------------- ROUND 3: BRUTE FORCE FTP ---------------- */
+    {
+      id:"INC-2026-0119",
+      title:"Repeated FTP Login Failures From an External Host",
+      sensor:"SPAN-3 (Server VLAN mirror)",
+      alertRule:"Failed-login threshold — 5+ FTP 530 responses to a single source within 10 seconds",
+      victim:"File Server (FTP) — 10.10.5.30:21",
+      narrative:"The File Server logged a burst of failed FTP logins from an external IP address. FTP was left open to the internet for a vendor integration that was never fully locked down. Review the capture and determine what happened.",
+      packets:[
+        P(1,"0.000000","203.0.113.77",41001,"10.10.5.30",21,"FTP",68,"Request: USER admin",null),
+        P(2,"0.050000","10.10.5.30",21,"203.0.113.77",41001,"FTP",70,"Response: 331 Password required for admin",null),
+        P(3,"0.060000","203.0.113.77",41001,"10.10.5.30",21,"FTP",70,"Request: PASS admin123",null),
+        P(4,"0.061000","10.10.5.30",21,"203.0.113.77",41001,"FTP",64,"Response: 530 Login incorrect",null),
+        P(5,"0.100000","203.0.113.77",41002,"10.10.5.30",21,"FTP",68,"Request: USER admin",null),
+        P(6,"0.150000","10.10.5.30",21,"203.0.113.77",41002,"FTP",70,"Response: 331 Password required for admin",null),
+        P(7,"0.160000","203.0.113.77",41002,"10.10.5.30",21,"FTP",70,"Request: PASS password",null),
+        P(8,"0.161000","10.10.5.30",21,"203.0.113.77",41002,"FTP",64,"Response: 530 Login incorrect",null),
+        P(9,"0.200000","203.0.113.77",41003,"10.10.5.30",21,"FTP",75,"Request: USER administrator",null),
+        P(10,"0.250000","10.10.5.30",21,"203.0.113.77",41003,"FTP",78,"Response: 331 Password required for administrator",null),
+        P(11,"0.260000","203.0.113.77",41003,"10.10.5.30",21,"FTP",65,"Request: PASS root",null),
+        P(12,"0.261000","10.10.5.30",21,"203.0.113.77",41003,"FTP",64,"Response: 530 Login incorrect",null),
+        P(13,"0.300000","203.0.113.77",41004,"10.10.5.30",21,"FTP",71,"Request: USER ftpadmin",null),
+        P(14,"0.350000","10.10.5.30",21,"203.0.113.77",41004,"FTP",73,"Response: 331 Password required for ftpadmin",null),
+        P(15,"0.360000","203.0.113.77",41004,"10.10.5.30",21,"FTP",72,"Request: PASS changeme",null),
+        P(16,"0.361000","10.10.5.30",21,"203.0.113.77",41004,"FTP",64,"Response: 530 Login incorrect",null),
+        P(17,"0.400000","10.10.10.11",52011,"10.10.5.30",445,"TCP",210,"52011 → 445 [PSH, ACK] SMB file listing request Len=144",{syn:0,ack:1,rst:0,fin:0}),
+        P(18,"0.450000","203.0.113.77",41005,"10.10.5.30",21,"FTP",68,"Request: USER admin",null),
+        P(19,"0.500000","10.10.5.30",21,"203.0.113.77",41005,"FTP",70,"Response: 331 Password required for admin",null),
+        P(20,"0.510000","203.0.113.77",41005,"10.10.5.30",21,"FTP",74,"Request: PASS Summer2024!",null),
+        P(21,"0.511000","10.10.5.30",21,"203.0.113.77",41005,"FTP",66,"Response: 230 Login successful",null)
+      ],
+      hints:[
+        "Count how many times the same source IP sends a USER/PASS pair to the FTP server in a few seconds.",
+        "Watch the server's response code after each PASS command — repeated 530 Login incorrect responses across many different username/password guesses is a strong indicator.",
+        "Filter with ftp and follow the sequence all the way to the end — does one attempt eventually receive a 230 Login successful?"
+      ],
+      correctAttack:"brute",
+      sourceOptions:[
+        {value:"203.0.113.77", label:"External host — 203.0.113.77"},
+        {value:"10.10.5.30", label:"File Server — 10.10.5.30"},
+        {value:"10.10.10.11", label:"WKS-01 — 10.10.10.11"},
+        {value:"10.10.10.1", label:"Gateway / Router — 10.10.10.1"}
+      ],
+      correctSource:"203.0.113.77",
+      mitre:"T1110 — Brute Force",
+      explanation:"External host 203.0.113.77 attempted four rapid FTP logins with different username/password combinations, each receiving 530 Login incorrect, until a fifth attempt (admin / Summer2024!) succeeded with 230 Login successful. FTP transmits credentials in cleartext and offers no built-in lockout, making the account fully compromised by the end of this capture.",
+      mitigation:"Enforce account lockout and rate-limiting on authentication services, require strong unique passwords, retire cleartext protocols like FTP in favor of SFTP/FTPS, and add MFA where possible."
+    },
+
+    /* ---------------- ROUND 4: DNS SPOOFING ---------------- */
+    {
+      id:"INC-2026-0122",
+      title:"Conflicting DNS Answers for the Same Query",
+      sensor:"SPAN-1 (Workstation VLAN mirror)",
+      alertRule:"DNS anomaly — duplicate transaction ID with mismatched resolved address",
+      victim:"WKS-03 — 10.10.10.13",
+      narrative:"WKS-03 tried to reach the internal employee portal and ended up somewhere unexpected. Review the DNS exchange and the connection that followed it.",
+      packets:[
+        P(1,"0.000000","10.10.10.13",51702,"10.10.5.10",53,"DNS",76,"Standard query 0x4a2f A portal.company-intranet.local",null),
+        P(2,"0.001000","10.10.20.15",56340,"8.8.8.8",53,"DNS",68,"Standard query 0x0c11 A cdn.example.com",null),
+        P(3,"0.002200","10.10.10.90",53,"10.10.10.13",51702,"DNS",92,"Standard query response 0x4a2f A portal.company-intranet.local A 198.51.100.23 (source is NOT the authoritative DNS server)",null),
+        P(4,"0.003500","10.10.5.10",53,"10.10.10.13",51702,"DNS",90,"Standard query response 0x4a2f A portal.company-intranet.local A 10.10.5.20 (duplicate answer, arrives after client already accepted first reply)",null),
+        P(5,"0.010000","10.10.10.13",51703,"198.51.100.23",80,"TCP",66,"51703 → 80 [SYN] Seq=0 Win=64240 Len=0",{syn:1,ack:0,rst:0,fin:0}),
+        P(6,"0.011000","198.51.100.23",80,"10.10.10.13",51703,"TCP",66,"80 → 51703 [SYN, ACK] Seq=0 Ack=1 Win=65535 Len=0",{syn:1,ack:1,rst:0,fin:0}),
+        P(7,"0.012000","10.10.10.13",51703,"198.51.100.23",80,"TCP",60,"51703 → 80 [ACK] Seq=1 Ack=1 Win=64240 Len=0",{syn:0,ack:1,rst:0,fin:0}),
+        P(8,"0.015000","10.10.10.13",51703,"198.51.100.23",80,"HTTP",300,"GET /login HTTP/1.1 Host: portal.company-intranet.local",null),
+        P(9,"0.016000","198.51.100.23",80,"10.10.10.13",51703,"HTTP",520,"HTTP/1.1 200 OK (cloned login page)",null),
+        P(10,"0.400000","10.10.10.12",52080,"10.10.5.30",445,"TCP",188,"52080 → 445 [PSH, ACK] SMB session setup Len=120",{syn:0,ack:1,rst:0,fin:0}),
+        P(11,"0.401000","10.10.5.30",445,"10.10.10.12",52080,"TCP",120,"445 → 52080 [PSH, ACK] SMB session setup response Len=60",{syn:0,ack:1,rst:0,fin:0})
+      ],
+      hints:[
+        "Compare the DNS transaction ID (the hex value right after “Standard query response”) across the two responses WKS-03 receives.",
+        "The two responses to the same query resolve portal.company-intranet.local to two different IP addresses. Which source IP is NOT the real DNS server (10.10.5.10)?",
+        "Filter with dns, then check what WKS-03 does immediately afterward — which IP address does its next TCP/HTTP connection actually go to?"
+      ],
+      correctAttack:"dns",
+      sourceOptions:[
+        {value:"10.10.10.90", label:"Rogue host — 10.10.10.90"},
+        {value:"10.10.5.10", label:"DNS Server — 10.10.5.10"},
+        {value:"10.10.10.13", label:"WKS-03 — 10.10.10.13"},
+        {value:"10.10.5.20", label:"App/Web Server — 10.10.5.20"}
+      ],
+      correctSource:"10.10.10.90",
+      mitre:"T1557 — Adversary-in-the-Middle (DNS)",
+      explanation:"WKS-03 queried the real DNS server for portal.company-intranet.local (transaction ID 0x4a2f). A rogue host (10.10.10.90) raced the legitimate server and injected a forged response with the same transaction ID, resolving the name to an attacker-controlled address (198.51.100.23) instead of the real app server (10.10.5.20). Because the forged reply arrived first, WKS-03 accepted it and connected to a cloned login page.",
+      mitigation:"Deploy DNSSEC, restrict which hosts are permitted to answer as DNS servers on the network, and consider DNS over TLS/HTTPS where supported."
+    },
+
+    /* ---------------- ROUND 5: SYN FLOOD ---------------- */
+    {
+      id:"INC-2026-0125",
+      title:"Web Server Unresponsive — Connection Queue Exhausted",
+      sensor:"SPAN-4 (Firewall edge mirror)",
+      alertRule:"Traffic-volume anomaly — approx. 12,400 SYN packets/sec to 10.10.5.20:443, <0.1% completing handshake",
+      victim:"App/Web Server — 10.10.5.20:443",
+      narrative:"Customers report the employee web portal is timing out. The firewall sensor captured an enormous spike of connection attempts a few seconds before the outage. A short representative sample is shown below (the real capture contains tens of thousands of packets per second).",
+      packets:[
+        P(1,"0.000000","10.10.10.12",50500,"10.10.5.20",443,"TCP",66,"50500 → 443 [SYN] Seq=0 Win=64240 Len=0 (baseline legitimate client)",{syn:1,ack:0,rst:0,fin:0}),
+        P(2,"0.000900","10.10.5.20",443,"10.10.10.12",50500,"TCP",66,"443 → 50500 [SYN, ACK] Seq=0 Ack=1 Win=65535 Len=0 (handshake completes normally)",{syn:1,ack:1,rst:0,fin:0}),
+        P(3,"5.000000","45.33.10.5",22011,"10.10.5.20",443,"TCP",60,"22011 → 443 [SYN] Seq=0 Win=512 Len=0",{syn:1,ack:0,rst:0,fin:0}),
+        P(4,"5.000050","198.51.100.14",9931,"10.10.5.20",443,"TCP",60,"9931 → 443 [SYN] Seq=0 Win=512 Len=0",{syn:1,ack:0,rst:0,fin:0}),
+        P(5,"5.000100","203.0.113.201",44120,"10.10.5.20",443,"TCP",60,"44120 → 443 [SYN] Seq=0 Win=512 Len=0",{syn:1,ack:0,rst:0,fin:0}),
+        P(6,"5.000150","45.33.22.9",18832,"10.10.5.20",443,"TCP",60,"18832 → 443 [SYN] Seq=0 Win=512 Len=0",{syn:1,ack:0,rst:0,fin:0}),
+        P(7,"5.000200","91.198.174.2",5541,"10.10.5.20",443,"TCP",60,"5541 → 443 [SYN] Seq=0 Win=512 Len=0",{syn:1,ack:0,rst:0,fin:0}),
+        P(8,"5.000250","198.51.100.77",27710,"10.10.5.20",443,"TCP",60,"27710 → 443 [SYN] Seq=0 Win=512 Len=0",{syn:1,ack:0,rst:0,fin:0}),
+        P(9,"5.000300","203.0.113.5",39902,"10.10.5.20",443,"TCP",60,"39902 → 443 [SYN] Seq=0 Win=512 Len=0",{syn:1,ack:0,rst:0,fin:0}),
+        P(10,"5.000350","45.33.8.100",61023,"10.10.5.20",443,"TCP",60,"61023 → 443 [SYN] Seq=0 Win=512 Len=0",{syn:1,ack:0,rst:0,fin:0}),
+        P(11,"5.000400","198.51.100.201",8890,"10.10.5.20",443,"TCP",60,"8890 → 443 [SYN] Seq=0 Win=512 Len=0",{syn:1,ack:0,rst:0,fin:0}),
+        P(12,"5.000450","203.0.113.150",13321,"10.10.5.20",443,"TCP",60,"13321 → 443 [SYN] Seq=0 Win=512 Len=0",{syn:1,ack:0,rst:0,fin:0}),
+        P(13,"5.000500","91.198.174.88",44201,"10.10.5.20",443,"TCP",60,"44201 → 443 [SYN] Seq=0 Win=512 Len=0",{syn:1,ack:0,rst:0,fin:0}),
+        P(14,"5.000550","45.33.19.44",29981,"10.10.5.20",443,"TCP",60,"29981 → 443 [SYN] Seq=0 Win=512 Len=0",{syn:1,ack:0,rst:0,fin:0}),
+        P(15,"5.000600","198.51.100.9",6602,"10.10.5.20",443,"TCP",60,"6602 → 443 [SYN] Seq=0 Win=512 Len=0",{syn:1,ack:0,rst:0,fin:0}),
+        P(16,"5.000650","10.10.5.20",443,null,null,"TCP",54,"[TCP Retransmission queue full — SYN backlog exceeded, new connections dropped]",null)
+      ],
+      hints:[
+        "Look at the destination — is this flood aimed at one host and port, or many different ones?",
+        "Check the source IP address on each SYN packet after the first pair — do you see a small number of repeat offenders, or dozens of unrelated, seemingly random addresses?",
+        "Consider the timing: many SYN packets arrive within fractions of a millisecond of each other, none completing a handshake, all aimed at 10.10.5.20:443 — with no single IP you could block to stop it."
+      ],
+      correctAttack:"synflood",
+      sourceOptions:[
+        {value:"distributed", label:"Multiple spoofed/distributed source IPs (no single attributable host)"},
+        {value:"10.10.10.16", label:"WKS-06 — 10.10.10.16"},
+        {value:"10.10.5.20", label:"App/Web Server — 10.10.5.20"},
+        {value:"10.10.20.66", label:"Rogue device — 10.10.20.66"}
+      ],
+      correctSource:"distributed",
+      mitre:"T1498 / T1499 — Network / Endpoint Denial of Service",
+      explanation:"A flood of TCP SYN packets from many different, likely spoofed source IP addresses targeted the App/Web Server on port 443, with none of the connections completing a three-way handshake. This exhausts the server's SYN backlog and denies service to legitimate users — a classic SYN flood DoS attack. Because the sources are spoofed/distributed, there is no single attacker IP to block, unlike the other incidents in this exercise.",
+      mitigation:"Enable SYN cookies on the server, apply connection rate-limiting, and use upstream DDoS scrubbing plus anti-spoofing filtering (BCP38) at the network edge."
+    },
+
+    /* ---------------- ROUND 6: MITM / ON-PATH CREDENTIAL SNIFFING ---------------- */
+    {
+      id:"INC-2026-0128",
+      title:"Plaintext Credentials Observed Following Prior ARP Anomaly",
+      sensor:"SPAN-2 (Wireless VLAN mirror)",
+      alertRule:"Cleartext credential pattern detected in HTTP traffic traversing a suspicious relay path",
+      victim:"LAPTOP-04 — 10.10.20.14",
+      narrative:"This capture picks up shortly after the ARP anomaly from incident INC-2026-0117 on the same wireless VLAN. LAPTOP-04's user just logged into the internal portal. Review the traffic path and payload.",
+      packets:[
+        P(1,"0.000000","10.10.20.66",null,"broadcast",null,"ARP",42,"10.10.20.1 is at 66:66:66:66:66:66 (gratuitous ARP — matches rogue MAC from INC-2026-0117)",null),
+        P(2,"0.050000","10.10.20.14",52201,"10.10.5.20",80,"TCP",66,"52201 → 80 [SYN] Seq=0 Win=64240 Len=0",{syn:1,ack:0,rst:0,fin:0}),
+        P(3,"0.051000","10.10.5.20",80,"10.10.20.14",52201,"TCP",66,"80 → 52201 [SYN, ACK] Seq=0 Ack=1 Win=65535 Len=0",{syn:1,ack:1,rst:0,fin:0}),
+        P(4,"0.052000","10.10.20.14",52201,"10.10.5.20",80,"TCP",60,"52201 → 80 [ACK] Seq=1 Ack=1 Win=64240 Len=0",{syn:0,ack:1,rst:0,fin:0}),
+        P(5,"0.080000","10.10.20.14",52201,"10.10.5.20",80,"HTTP",360,"POST /login HTTP/1.1 Host: internal-portal.local",null),
+        P(6,"0.081000","10.10.20.14",52201,"10.10.5.20",80,"HTTP",96,"[HTTP request body] username=r.chen&password=Autumn2026! (sent in cleartext)",null),
+        P(7,"0.090000","10.10.5.20",80,"10.10.20.14",52201,"HTTP",210,"HTTP/1.1 302 Found Location: /dashboard",null),
+        P(8,"0.150000","10.10.20.15",56412,"10.10.5.20",443,"TCP",66,"56412 → 443 [SYN] Seq=0 Win=64240 Len=0 (MOBILE-05, TLS-protected session)",{syn:1,ack:0,rst:0,fin:0}),
+        P(9,"0.151000","10.10.5.20",443,"10.10.20.15",56412,"TCP",66,"443 → 56412 [SYN, ACK] Seq=0 Ack=1 Win=65535 Len=0",{syn:1,ack:1,rst:0,fin:0}),
+        P(10,"0.152000","10.10.20.15",56412,"10.10.5.20",443,"TLS",180,"Client Hello (credentials, if any, protected by encryption — not readable here)",null),
+        P(11,"0.400000","10.10.20.66",null,"broadcast",null,"ARP",42,"10.10.20.1 is at 66:66:66:66:66:66 (gratuitous ARP, still active)",null)
+      ],
+      hints:[
+        "Notice the protocol used to reach the internal portal — is it HTTP or HTTPS? What does that mean for anything typed into the login form?",
+        "Look at the Info column for the POST request — can you read the username and password directly in the packet?",
+        "Check the ARP evidence at the top and bottom of this capture — does the MAC address match the rogue device from the earlier ARP spoofing incident on this same VLAN?"
+      ],
+      correctAttack:"mitm",
+      sourceOptions:[
+        {value:"10.10.20.66", label:"Rogue device — 10.10.20.66 (same as INC-2026-0117)"},
+        {value:"10.10.20.14", label:"LAPTOP-04 — 10.10.20.14"},
+        {value:"10.10.5.20", label:"App/Web Server — 10.10.5.20"},
+        {value:"10.10.20.2", label:"Wireless AP — 10.10.20.2"}
+      ],
+      correctSource:"10.10.20.66",
+      mitre:"T1040 — Network Sniffing (enabled by earlier T1557.002 ARP spoofing)",
+      explanation:"After the earlier ARP spoofing repositioned the rogue device (10.10.20.66) as an on-path relay for the wireless VLAN, LAPTOP-04's login request to the internal portal traveled through the attacker before reaching the real server. Because the connection used plaintext HTTP rather than HTTPS, the POST /login request — including username (r.chen) and password (Autumn2026!) — was fully readable to the attacker. Compare this to MOBILE-05's TLS-protected session, where the same relay position reveals nothing.",
+      mitigation:"Enforce HTTPS/TLS everywhere (with HSTS), implement Dynamic ARP Inspection, and use 802.1X / WPA2-Enterprise with client isolation on wireless networks."
+    }
+  ];
+
+  /* ---------------------------------------------------------------------
+   * STATE
+   * ------------------------------------------------------------------- */
+  var state = {
+    analystName:"",
+    currentRound:-1, // -1 = intro
+    startedAt:null,
+    finishedAt:null,
+    rounds: ROUNDS.map(function(){
+      return {
+        attackAttempts:0, sourceAttempts:0,
+        attackEverCorrect:false, sourceEverCorrect:false,
+        attackFirstCorrectAttempt:null, sourceFirstCorrectAttempt:null,
+        hintsUsed:0, hintsRevealed:0,
+        evidenceText:"", finalized:false, score:0,
+        selectedAttack:"", selectedSource:""
+      };
+    })
+  };
+
+  /* ---------------------------------------------------------------------
+   * HELPERS
+   * ------------------------------------------------------------------- */
+  function $(sel, ctx){ return (ctx||document).querySelector(sel); }
+  function $all(sel, ctx){ return Array.prototype.slice.call((ctx||document).querySelectorAll(sel)); }
+  function esc(str){
+    return String(str).replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];
+    });
+  }
+  function showScreen(id){
+    $all(".screen").forEach(function(s){ s.classList.remove("active"); });
+    $("#"+id).classList.add("active");
+    window.scrollTo({top:0, behavior:"instant" in window ? "instant" : "auto"});
+  }
+  function totalScore(){
+    var sum = 0, done = 0;
+    state.rounds.forEach(function(r){ if (r.finalized){ sum += r.score; done++; } });
+    return {sum:sum, done:done, avg: done ? Math.round(sum/done) : 0};
+  }
+  function updateHeader(){
+    var idx = state.currentRound;
+    var label = idx < 0 ? "Ticket 0 / 6" : (idx >= ROUNDS.length ? "Complete" : "Ticket " + (idx+1) + " / " + ROUNDS.length);
+    $("#progress-pill").textContent = label;
+    var t = totalScore();
+    $("#score-pill").textContent = "Score: " + (t.done ? t.avg + "%" : "0");
+    var pct = idx < 0 ? 0 : Math.min(100, Math.round(((idx>=ROUNDS.length?ROUNDS.length:idx) / ROUNDS.length) * 100));
+    $("#progress-fill").style.width = pct + "%";
+  }
+
+  /* ---------------------------------------------------------------------
+   * DISPLAY FILTER ENGINE (simplified Wireshark-style)
+   * Supports: bare protocol keywords (arp, dns, http, ftp, tcp, udp, icmp, tls),
+   * ip.addr==x, ip.src==x, ip.dst==x, tcp.port==n, udp.port==n,
+   * tcp.flags.syn==0/1, tcp.flags.ack==0/1, tcp.flags.rst==0/1,
+   * info contains "text", combined with && or || (single operator per filter).
+   * ------------------------------------------------------------------- */
+  function evalClause(clause, pkt){
+    clause = clause.trim();
+    if (!clause) return true;
+    var lower = clause.toLowerCase();
+
+    var containsMatch = clause.match(/^info\s+contains\s+"(.*)"$/i);
+    if (containsMatch){
+      return pkt.info.toLowerCase().indexOf(containsMatch[1].toLowerCase()) !== -1;
+    }
+
+    var eqMatch = clause.match(/^([a-zA-Z0-9_.]+)\s*(==|!=)\s*"?([^"]+)"?$/);
+    if (eqMatch){
+      var field = eqMatch[1].toLowerCase(), op = eqMatch[2], val = eqMatch[3].trim();
+      var actual = null;
+      if (field === "ip.addr"){ return (pkt.src===val || pkt.dst===val) === (op==="==" ); }
+      if (field === "ip.src"){ actual = pkt.src; }
+      else if (field === "ip.dst"){ actual = pkt.dst; }
+      else if (field === "tcp.port"){ actual = (String(pkt.sport)===val || String(pkt.dport)===val) ? val : "__nomatch__"; }
+      else if (field === "udp.port"){ actual = (String(pkt.sport)===val || String(pkt.dport)===val) ? val : "__nomatch__"; }
+      else if (field === "tcp.srcport"){ actual = pkt.sport; }
+      else if (field === "tcp.dstport"){ actual = pkt.dport; }
+      else if (field === "tcp.flags.syn"){ actual = pkt.flags ? String(pkt.flags.syn) : "0"; }
+      else if (field === "tcp.flags.ack"){ actual = pkt.flags ? String(pkt.flags.ack) : "0"; }
+      else if (field === "tcp.flags.rst"){ actual = pkt.flags ? String(pkt.flags.rst) : "0"; }
+      else if (field === "tcp.flags.fin"){ actual = pkt.flags ? String(pkt.flags.fin) : "0"; }
+      else { return true; }
+      var isEqual = String(actual) === String(val);
+      return op === "==" ? isEqual : !isEqual;
+    }
+
+    // bare protocol keyword
+    var protoWords = ["arp","dns","http","ftp","tcp","udp","icmp","tls"];
+    if (protoWords.indexOf(lower) !== -1){
+      return pkt.proto.toLowerCase() === lower;
+    }
+    // unknown clause -> treat as no-match filter (fails closed, safer for teaching)
+    return false;
+  }
+
+  function packetMatchesFilter(pkt, filterStr){
+    filterStr = (filterStr||"").trim();
+    if (!filterStr) return true;
+    if (filterStr.indexOf("&&") !== -1){
+      return filterStr.split("&&").every(function(c){ return evalClause(c, pkt); });
+    }
+    if (filterStr.indexOf("||") !== -1){
+      return filterStr.split("||").some(function(c){ return evalClause(c, pkt); });
+    }
+    return evalClause(filterStr, pkt);
+  }
+
+  /* ---------------------------------------------------------------------
+   * RENDER: TICKET SCREEN
+   * ------------------------------------------------------------------- */
+  function renderTicket(idx){
+    var round = ROUNDS[idx];
+    var rs = state.rounds[idx];
+    var host = $("#screen-ticket");
+
+    var optionsHtml = '<option value="">Select an attack type…</option>' +
+      ATTACK_TYPES.map(function(a){ return '<option value="'+a.key+'">'+esc(a.label)+'</option>'; }).join("");
+
+    var sourceHtml = '<option value="">Select a likely source…</option>' +
+      round.sourceOptions.map(function(o){ return '<option value="'+esc(o.value)+'">'+esc(o.label)+'</option>'; }).join("");
+
+    var rowsHtml = round.packets.map(function(p){
+      var flagsInfo = "";
+      return '<tr data-pno="'+p.no+'" tabindex="0" role="button" aria-label="Packet '+p.no+' details">' +
+        '<td>'+p.no+'</td><td>'+esc(p.time)+'</td>' +
+        '<td>'+esc(p.src)+(p.sport?':'+p.sport:'')+'</td>' +
+        '<td>'+esc(p.dst)+(p.dport?':'+p.dport:'')+'</td>' +
+        '<td><span class="proto-badge proto-'+p.proto+'">'+p.proto+'</span></td>' +
+        '<td>'+p.len+'</td>' +
+        '<td>'+esc(p.info)+'</td>' +
+        '</tr>';
+    }).join("");
+
+    host.innerHTML =
+      '<div class="card">' +
+        '<div class="ticket-head">' +
+          '<div><span class="ticket-id">TICKET '+esc(round.id)+'</span><h2 id="ticket-h" style="margin:4px 0 0;">'+esc(round.title)+'</h2></div>' +
+          '<span class="pill">Ticket '+(idx+1)+' of '+ROUNDS.length+'</span>' +
+        '</div>' +
+        '<div class="alert-box"><span class="icon" aria-hidden="true">&#9888;</span><div><strong>Alert Rule:</strong> '+esc(round.alertRule)+'</div></div>' +
+        '<p>'+esc(round.narrative)+'</p>' +
+        '<div class="meta-grid">' +
+          '<div><div class="k">Sensor</div><div class="v">'+esc(round.sensor)+'</div></div>' +
+          '<div><div class="k">Affected Asset</div><div class="v">'+esc(round.victim)+'</div></div>' +
+          '<div><div class="k">Packets Captured</div><div class="v">'+round.packets.length+'</div></div>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="card">' +
+        '<h3>Packet Capture</h3>' +
+        '<div class="filter-bar">' +
+          '<label for="filter-input" class="visually-hidden">Display filter</label>' +
+          '<input type="text" id="filter-input" placeholder="e.g. tcp.flags.syn==1  or  arp  or  ip.src==10.10.10.16" autocomplete="off" spellcheck="false">' +
+          '<button class="btn secondary small" id="filter-apply" type="button">Apply Filter</button>' +
+          '<button class="btn ghost small" id="filter-clear" type="button">Clear</button>' +
+        '</div>' +
+        '<div class="filter-help">Supported: bare protocols (<code>arp</code>, <code>dns</code>, <code>http</code>, <code>ftp</code>, <code>tcp</code>, <code>udp</code>, <code>icmp</code>, <code>tls</code>) &middot; <code>ip.addr==</code>, <code>ip.src==</code>, <code>ip.dst==</code> &middot; <code>tcp.port==</code>, <code>udp.port==</code> &middot; <code>tcp.flags.syn==1</code>, <code>tcp.flags.ack==0</code>, <code>tcp.flags.rst==1</code> &middot; <code>info contains "text"</code> &middot; combine with <code>&amp;&amp;</code> or <code>||</code></div>' +
+        '<div class="table-wrap" style="margin-top:10px;">' +
+          '<table class="packets" id="packet-table">' +
+            '<thead><tr><th>No.</th><th>Time</th><th>Source</th><th>Destination</th><th>Protocol</th><th>Length</th><th>Info</th></tr></thead>' +
+            '<tbody>'+rowsHtml+'</tbody>' +
+          '</table>' +
+        '</div>' +
+        '<div class="count-readout" id="count-readout">Showing '+round.packets.length+' of '+round.packets.length+' packets. Click a row to inspect it.</div>' +
+        '<div class="detail-panel" id="detail-panel" style="display:none;"></div>' +
+      '</div>' +
+
+      '<div class="card">' +
+        '<h3>Your Analysis</h3>' +
+        '<div class="field">' +
+          '<label for="sel-attack">What type of attack does this evidence show?</label>' +
+          '<select id="sel-attack">'+optionsHtml+'</select>' +
+        '</div>' +
+        '<div class="field">' +
+          '<label for="sel-source">What is the most likely source of the attack?</label>' +
+          '<select id="sel-source">'+sourceHtml+'</select>' +
+        '</div>' +
+        '<div class="field">' +
+          '<label for="evidence-text">What packet-level evidence supports your conclusion? (required for full credit)</label>' +
+          '<textarea id="evidence-text" placeholder="Reference specific packet numbers, fields, or values you observed…" minlength="15"></textarea>' +
+          '<div class="hint-text">This is reviewed like a real incident report — be specific. Minimum 15 characters for credit.</div>' +
+        '</div>' +
+
+        '<div class="hint-row">' +
+          '<button class="btn secondary small" id="hint-btn" type="button">Show Hint (1/3) — −10 pts</button>' +
+          '<button class="btn ghost small" id="reveal-btn" type="button">I\'m stuck — reveal answer</button>' +
+        '</div>' +
+        '<div id="hints-container"></div>' +
+
+        '<div class="actions-row">' +
+          '<button class="btn" id="submit-btn" type="button">Check Answer</button>' +
+          '<button class="btn secondary" id="next-btn" type="button" disabled>Next Ticket &rarr;</button>' +
+        '</div>' +
+        '<div id="feedback-container"></div>' +
+      '</div>';
+
+    // restore any prior in-progress selections (in case of back/forward, though not used currently)
+    $("#sel-attack").value = rs.selectedAttack;
+    $("#sel-source").value = rs.selectedSource;
+    $("#evidence-text").value = rs.evidenceText;
+
+    wireTicketEvents(idx);
+    if (rs.finalized){ lockRoundUI(idx); }
+    updateHeader();
+  }
+
+  function wireTicketEvents(idx){
+    var round = ROUNDS[idx];
+    var rs = state.rounds[idx];
+
+    $("#filter-apply").addEventListener("click", function(){ applyFilter(idx); });
+    $("#filter-input").addEventListener("keydown", function(e){ if (e.key === "Enter"){ applyFilter(idx); } });
+    $("#filter-clear").addEventListener("click", function(){
+      $("#filter-input").value = "";
+      applyFilter(idx);
+    });
+
+    $all("#packet-table tbody tr").forEach(function(tr){
+      function openDetail(){
+        var no = parseInt(tr.getAttribute("data-pno"), 10);
+        var pkt = round.packets.filter(function(p){ return p.no === no; })[0];
+        $all("#packet-table tbody tr").forEach(function(t){ t.classList.remove("selected"); });
+        tr.classList.add("selected");
+        renderDetail(pkt);
+      }
+      tr.addEventListener("click", openDetail);
+      tr.addEventListener("keydown", function(e){ if (e.key === "Enter" || e.key === " "){ e.preventDefault(); openDetail(); } });
+    });
+
+    $("#hint-btn").addEventListener("click", function(){ showNextHint(idx); });
+    $("#reveal-btn").addEventListener("click", function(){ finalizeRound(idx, true); });
+    $("#submit-btn").addEventListener("click", function(){ handleSubmit(idx); });
+    $("#next-btn").addEventListener("click", function(){ goToRound(idx+1); });
+
+    ["sel-attack","sel-source","evidence-text"].forEach(function(id){
+      $("#"+id).addEventListener("input", function(){
+        rs.selectedAttack = $("#sel-attack").value;
+        rs.selectedSource = $("#sel-source").value;
+        rs.evidenceText = $("#evidence-text").value;
+      });
+    });
+
+    renderHints(idx);
+  }
+
+  function applyFilter(idx){
+    var round = ROUNDS[idx];
+    var filterStr = $("#filter-input").value;
+    var shown = 0;
+    $("#filter-input").classList.remove("invalid");
+    round.packets.forEach(function(p){
+      var tr = $('#packet-table tbody tr[data-pno="'+p.no+'"]');
+      var match;
+      try{
+        match = packetMatchesFilter(p, filterStr);
+      } catch(e){
+        match = true;
+        $("#filter-input").classList.add("invalid");
+      }
+      tr.classList.toggle("hidden-row", !match);
+      if (match) shown++;
+    });
+    $("#count-readout").textContent = "Showing " + shown + " of " + round.packets.length + " packets." + (filterStr ? "  Filter: " + filterStr : "");
+  }
+
+  function renderDetail(pkt){
+    var panel = $("#detail-panel");
+    var lines = [];
+    lines.push("Frame " + pkt.no + ": " + pkt.len + " bytes on the wire");
+    lines.push("Time offset: " + pkt.time + " s");
+    lines.push("Source: " + pkt.src + (pkt.sport ? ":" + pkt.sport : ""));
+    lines.push("Destination: " + pkt.dst + (pkt.dport ? ":" + pkt.dport : ""));
+    lines.push("Protocol: " + pkt.proto);
+    if (pkt.flags){
+      lines.push("TCP Flags: SYN=" + pkt.flags.syn + "  ACK=" + pkt.flags.ack + "  RST=" + pkt.flags.rst + "  FIN=" + pkt.flags.fin);
+    }
+    lines.push("Info: " + pkt.info);
+    panel.style.display = "block";
+    panel.innerHTML = '<div class="dt-title">Packet Detail — Frame '+pkt.no+'</div>' + esc(lines.join("\n"));
+  }
+
+  function renderHints(idx){
+    var round = ROUNDS[idx];
+    var rs = state.rounds[idx];
+    var container = $("#hints-container");
+    container.innerHTML = "";
+    for (var i=0;i<rs.hintsUsed;i++){
+      var div = document.createElement("div");
+      div.className = "hint-panel";
+      div.innerHTML = "<strong>Hint " + (i+1) + ":</strong> " + esc(round.hints[i]);
+      container.appendChild(div);
+    }
+    var btn = $("#hint-btn");
+    if (rs.hintsUsed >= round.hints.length || rs.finalized){
+      btn.disabled = true;
+      btn.textContent = rs.hintsUsed >= round.hints.length ? "All hints shown" : "Hints locked";
+    } else {
+      btn.disabled = false;
+      btn.textContent = "Show Hint (" + (rs.hintsUsed+1) + "/" + round.hints.length + ") −" + HINT_PENALTY + " pts";
+    }
+  }
+
+  function showNextHint(idx){
+    var rs = state.rounds[idx];
+    var round = ROUNDS[idx];
+    if (rs.finalized || rs.hintsUsed >= round.hints.length) return;
+    rs.hintsUsed++;
+    renderHints(idx);
+  }
+
+  function handleSubmit(idx){
+    var round = ROUNDS[idx];
+    var rs = state.rounds[idx];
+    if (rs.finalized) return;
+
+    var selAttack = $("#sel-attack").value;
+    var selSource = $("#sel-source").value;
+    if (!selAttack || !selSource){
+      renderFeedback(idx, "bad", "Please select both an attack type and a likely source before checking your answer.");
+      return;
+    }
+
+    rs.selectedAttack = selAttack;
+    rs.selectedSource = selSource;
+    rs.evidenceText = $("#evidence-text").value;
+    rs.attackAttempts++;
+    rs.sourceAttempts++;
+
+    var attackRight = selAttack === round.correctAttack;
+    var sourceRight = selSource === round.correctSource;
+    if (attackRight){
+      rs.attackEverCorrect = true;
+      if (rs.attackFirstCorrectAttempt === null) rs.attackFirstCorrectAttempt = rs.attackAttempts;
+    }
+    if (sourceRight){
+      rs.sourceEverCorrect = true;
+      if (rs.sourceFirstCorrectAttempt === null) rs.sourceFirstCorrectAttempt = rs.sourceAttempts;
+    }
+
+    if (attackRight && sourceRight){
+      finalizeRound(idx, false);
+      return;
+    }
+
+    if (rs.attackAttempts >= MAX_ATTEMPTS){
+      finalizeRound(idx, false);
+      return;
+    }
+
+    // Wrong, but attempts remain: give partial guidance without revealing the answer.
+    var msg = "Attempt " + rs.attackAttempts + " of " + MAX_ATTEMPTS + ": ";
+    msg += "Attack type — " + (attackRight ? "correct." : "not quite.") + "  ";
+    msg += "Likely source — " + (sourceRight ? "correct." : "not quite.") + "  ";
+    msg += "Review the capture and hints, then try again.";
+    renderFeedback(idx, "partial", msg);
+  }
+
+  function finalizeRound(idx, revealed){
+    var round = ROUNDS[idx];
+    var rs = state.rounds[idx];
+    if (rs.finalized) return;
+
+    var attackPts = 0, sourcePts = 0;
+    if (revealed){
+      rs.hintsRevealed = round.hints.length - rs.hintsUsed;
+    } else {
+      if (rs.attackEverCorrect) attackPts = (rs.attackFirstCorrectAttempt <= 1) ? 50 : 30;
+      if (rs.sourceEverCorrect) sourcePts = (rs.sourceFirstCorrectAttempt <= 1) ? 30 : 15;
+    }
+
+    var evidence = (rs.evidenceText || "").trim();
+    var evidencePts = evidence.length >= 15 ? 20 : 0;
+
+    var hintPenalty = rs.hintsUsed * HINT_PENALTY;
+    var raw = attackPts + sourcePts + evidencePts - hintPenalty;
+    rs.score = Math.max(0, Math.min(100, raw));
+    rs.finalized = true;
+    rs.wasRevealed = !!revealed;
+
+    lockRoundUI(idx);
+
+    var tone = revealed ? "bad" : ((attackPts>0 && sourcePts>0) ? "ok" : "partial");
+    var html = "<h4>" + (revealed ? "Answer Revealed" : (attackPts>0 && sourcePts>0 ? "Correct — Nice work." : "Ticket Closed")) + "</h4>";
+    html += '<div><span class="tag">Attack Type</span>' + esc(attackLabel(round.correctAttack)) + "</div>";
+    var sourceLabel = round.sourceOptions.filter(function(o){return o.value===round.correctSource;})[0];
+    html += '<div style="margin-top:4px;"><span class="tag">Likely Source</span>' + esc(sourceLabel ? sourceLabel.label : round.correctSource) + "</div>";
+    html += '<div style="margin-top:4px;"><span class="tag">MITRE ATT&amp;CK</span>' + esc(round.mitre) + "</div>";
+    html += "<p style='margin-top:10px;'>" + esc(round.explanation) + "</p>";
+    html += "<p><strong>Recommended mitigation:</strong> " + esc(round.mitigation) + "</p>";
+    html += "<p style='margin-top:10px; font-weight:700;'>Ticket score: " + rs.score + " / 100" + (hintPenalty ? "  (−" + hintPenalty + " for hints used)" : "") + "</p>";
+
+    renderFeedback(idx, tone, html, true);
+
+    $("#sel-attack").disabled = true;
+    $("#sel-source").disabled = true;
+    $("#evidence-text").disabled = true;
+    $("#submit-btn").disabled = true;
+    $("#hint-btn").disabled = true;
+    $("#reveal-btn").disabled = true;
+    $("#next-btn").disabled = false;
+    if (idx === ROUNDS.length - 1){
+      $("#next-btn").textContent = "View Shift Summary →";
+    }
+    updateHeader();
+  }
+
+  function lockRoundUI(idx){
+    var rs = state.rounds[idx];
+    if (!$("#sel-attack")) return;
+    $("#sel-attack").disabled = rs.finalized;
+    $("#sel-source").disabled = rs.finalized;
+    $("#evidence-text").disabled = rs.finalized;
+    $("#submit-btn").disabled = rs.finalized;
+    $("#hint-btn").disabled = rs.finalized;
+    $("#reveal-btn").disabled = rs.finalized;
+    $("#next-btn").disabled = !rs.finalized;
+  }
+
+  function renderFeedback(idx, tone, htmlOrText, isHtml){
+    var el = $("#feedback-container");
+    el.innerHTML = '<div class="feedback ' + tone + '">' + (isHtml ? htmlOrText : esc(htmlOrText)) + "</div>";
+  }
+
+  function goToRound(idx){
+    if (idx >= ROUNDS.length){
+      state.finishedAt = new Date();
+      renderSummary();
+      showScreen("screen-summary");
+      updateHeader();
+      return;
+    }
+    state.currentRound = idx;
+    renderTicket(idx);
+    showScreen("screen-ticket");
+  }
+
+  /* ---------------------------------------------------------------------
+   * SUMMARY SCREEN
+   * ------------------------------------------------------------------- */
+  function letterGrade(pct){
+    if (pct >= 90) return "A";
+    if (pct >= 80) return "B";
+    if (pct >= 70) return "C";
+    if (pct >= 60) return "D";
+    return "F";
+  }
+  function socTier(pct){
+    if (pct >= 90) return "Tier 3 — Senior SOC Analyst: sharp, evidence-based detection across every ticket.";
+    if (pct >= 80) return "Tier 2 — SOC Analyst II: solid detection skills with minor gaps.";
+    if (pct >= 70) return "Tier 2 — SOC Analyst I: developing solid fundamentals; review the missed signatures.";
+    if (pct >= 60) return "Tier 1 — SOC Analyst Trainee: foundational skills present; more practice needed.";
+    return "Tier 1 — New Hire (in training): revisit the packet-capture fundamentals and retry the shift.";
+  }
+
+  function buildSummaryRowsHtml(){
+    return ROUNDS.map(function(round, i){
+      var rs = state.rounds[i];
+      var correct = !rs.wasRevealed && rs.attackEverCorrect && rs.sourceEverCorrect;
+      return "<tr>" +
+        "<td>" + (i+1) + "</td>" +
+        "<td>" + esc(round.title) + "</td>" +
+        "<td>" + esc(attackLabel(round.correctAttack)) + "</td>" +
+        "<td>" + (rs.wasRevealed ? '<span class="badge-bad">Revealed</span>' : (correct ? '<span class="badge-ok">Correct</span>' : '<span class="badge-bad">Incorrect</span>')) + "</td>" +
+        "<td>" + rs.attackAttempts + "</td>" +
+        "<td>" + rs.hintsUsed + "</td>" +
+        "<td>" + rs.score + " / 100</td>" +
+        "</tr>";
+    }).join("");
+  }
+
+  function renderSummary(){
+    var t = totalScore();
+    var pct = t.avg;
+    var grade = letterGrade(pct);
+    var tier = socTier(pct);
+    var name = state.analystName || "Analyst";
+    var dateStr = (state.finishedAt || new Date()).toLocaleString();
+
+    var rowsHtml = buildSummaryRowsHtml();
+
+    var host = $("#screen-summary");
+    host.innerHTML =
+      '<div class="card">' +
+        '<span class="ticket-id">SHIFT DEBRIEF</span>' +
+        '<h2 id="summary-h" style="margin-top:6px;">End-of-Shift Performance Summary</h2>' +
+        '<div class="grade-hero">' +
+          '<div class="grade-circle"><span class="letter">'+grade+'</span><span class="pct">'+pct+'%</span></div>' +
+          '<div>' +
+            '<div style="font-weight:700; font-size:1.05rem;">'+esc(name)+'</div>' +
+            '<div class="lede" style="margin:4px 0;">'+esc(tier)+'</div>' +
+            '<div class="lede">Completed '+t.done+' of '+ROUNDS.length+' tickets &middot; '+dateStr+'</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="table-wrap">' +
+          '<table class="summary">' +
+            '<thead><tr><th>#</th><th>Ticket</th><th>Attack Type</th><th>Result</th><th>Attempts</th><th>Hints</th><th>Score</th></tr></thead>' +
+            '<tbody>'+rowsHtml+'</tbody>' +
+          '</table>' +
+        '</div>' +
+        '<p class="lede" style="margin-top:14px;">SOC Analyst Simulator — built for &quot;Capturing Network Traffic.&quot; All network data, IP addresses, and incidents are fictional and generated for instructional use.</p>' +
+        '<div class="actions-row no-print">' +
+          '<button class="btn" id="print-btn" type="button">Print Summary</button>' +
+          '<button class="btn secondary" id="save-btn" type="button">Save Summary (.html)</button>' +
+          '<button class="btn ghost" id="restart-btn" type="button">Restart Shift</button>' +
+        '</div>' +
+      '</div>';
+
+    $("#print-btn").addEventListener("click", function(){ window.print(); });
+    $("#save-btn").addEventListener("click", function(){ downloadSummary(name, pct, grade, tier, dateStr, rowsHtml); });
+    $("#restart-btn").addEventListener("click", restartShift);
+  }
+
+  function downloadSummary(name, pct, grade, tier, dateStr, rowsHtml){
+    var htmlDoc = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>SOC Simulator Summary — ' + esc(name) + '</title>' +
+      '<style>body{font-family:Arial,Helvetica,sans-serif;max-width:800px;margin:40px auto;color:#111;}' +
+      'table{width:100%;border-collapse:collapse;margin-top:16px;}th,td{border:1px solid #999;padding:8px;text-align:left;font-size:14px;}' +
+      'th{background:#f0f0f0;}h1{font-size:1.4rem;}.hero{background:#f4f6f9;border:1px solid #ccc;border-radius:8px;padding:16px;margin-bottom:16px;}</style>' +
+      '</head><body>' +
+      '<h1>SOC Analyst Simulator — Capturing Network Traffic</h1>' +
+      '<div class="hero"><strong>Analyst:</strong> ' + esc(name) + '<br>' +
+      '<strong>Date:</strong> ' + esc(dateStr) + '<br>' +
+      '<strong>Score:</strong> ' + pct + '% (Grade ' + grade + ')<br>' +
+      '<strong>Tier:</strong> ' + esc(tier) + '</div>' +
+      '<table><thead><tr><th>#</th><th>Ticket</th><th>Attack Type</th><th>Result</th><th>Attempts</th><th>Hints</th><th>Score</th></tr></thead>' +
+      '<tbody>' + rowsHtml + '</tbody></table>' +
+      '<p style="color:#666;font-size:12px;margin-top:24px;">Generated by the SOC Analyst Simulator for "Capturing Network Traffic." All network data is fictional and for instructional use.</p>' +
+      '</body></html>';
+
+    var blob = new Blob([htmlDoc], {type:"text/html"});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    var safeName = (name||"analyst").replace(/[^a-z0-9]+/gi,"_");
+    a.href = url;
+    a.download = "SOC-Simulator-Summary_" + safeName + ".html";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 2000);
+  }
+
+  function restartShift(){
+    state.currentRound = -1;
+    state.startedAt = null;
+    state.finishedAt = null;
+    state.rounds = ROUNDS.map(function(){
+      return {
+        attackAttempts:0, sourceAttempts:0,
+        attackEverCorrect:false, sourceEverCorrect:false,
+        attackFirstCorrectAttempt:null, sourceFirstCorrectAttempt:null,
+        hintsUsed:0, hintsRevealed:0,
+        evidenceText:"", finalized:false, score:0,
+        selectedAttack:"", selectedSource:"", wasRevealed:false
+      };
+    });
+    updateHeader();
+    showScreen("screen-intro");
+  }
+
+  /* ---------------------------------------------------------------------
+   * THEME TOGGLE (default light)
+   * ------------------------------------------------------------------- */
+  function setTheme(dark){
+    document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+    $("#theme-icon").innerHTML = dark ? "&#9789;" : "&#9788;";
+    $("#theme-label").textContent = dark ? "Dark Mode" : "Light Mode";
+    $("#theme-toggle").setAttribute("aria-pressed", dark ? "true" : "false");
+  }
+
+  /* ---------------------------------------------------------------------
+   * INIT
+   * ------------------------------------------------------------------- */
+  function init(){
+    setTheme(false);
+    $("#theme-toggle").addEventListener("click", function(){
+      var isDark = document.documentElement.getAttribute("data-theme") === "dark";
+      setTheme(!isDark);
+    });
+    $("#begin-btn").addEventListener("click", function(){
+      state.analystName = $("#analyst-name").value.trim();
+      state.startedAt = new Date();
+      goToRound(0);
+    });
+    updateHeader();
+  }
+
+  document.addEventListener("DOMContentLoaded", init);
+})();
+</script>
+</body>
+</html>
