@@ -1,658 +1,785 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ARP Poisoning Educational Simulator</title>
-    <style>
-        body {
-            font-family: 'Courier New', monospace;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            margin: 0;
-            padding: 20px;
-            min-height: 100vh;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARP Poisoning Lab | Man-in-the-Middle Simulator</title>
+<style>
+:root{
+  --navy-deep:#0a1628;
+  --navy-panel:#101f38;
+  --navy-panel-2:#16294a;
+  --line:#22375c;
+  --term-green:#3ddc84;
+  --term-green-dim:#1f7a4c;
+  --amber:#f2a541;
+  --red:#e0555a;
+  --text:#e8edf5;
+  --text-dim:#9fb0c8;
+  --font-display:Georgia,'Times New Roman',serif;
+  --font-ui:'Arial Narrow',Arial,sans-serif;
+  --font-mono:'Consolas','Menlo','Monaco',monospace;
+  --bg:var(--navy-deep);
+  --panel:var(--navy-panel);
+  --panel2:var(--navy-panel-2);
+  --border:var(--line);
+  --accent:var(--term-green);
+  --accent-dim:var(--term-green-dim);
+  --fg:var(--text);
+  --fg-dim:var(--text-dim);
+  --winterm-bg:#0c0c0c;
+  --winterm-fg:#e8e8e8;
+  --linterm-bg:#0d1117;
+  --linterm-fg:#3ddc84;
+}
+[data-theme="light"]{
+  --bg:#eef2f7;
+  --panel:#ffffff;
+  --panel2:#f3f6fb;
+  --border:#cdd8e6;
+  --accent:#177a45;
+  --accent-dim:#a9d9bd;
+  --fg:#0e1c30;
+  --fg-dim:#4a5b74;
+  --winterm-bg:#f4f4f4;
+  --winterm-fg:#101010;
+  --linterm-bg:#0d1117;
+  --linterm-fg:#1f9d55;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--fg);
+  font-family:var(--font-ui);
+  transition:background .2s ease,color .2s ease;
+}
+h1,h2,h3{font-family:var(--font-display);margin:0 0 6px 0;}
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 22px;border-bottom:1px solid var(--border);
+  background:var(--panel);position:sticky;top:0;z-index:50;
+  flex-wrap:wrap;gap:10px;
+}
+.brand{display:flex;align-items:center;gap:12px;}
+.brand-badge{
+  width:38px;height:38px;border-radius:6px;
+  background:linear-gradient(135deg,var(--accent),var(--accent-dim));
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-mono);font-weight:bold;color:var(--panel);font-size:13px;
+}
+.brand h1{font-size:20px;letter-spacing:.3px;}
+.brand .sub{font-size:12px;color:var(--fg-dim);font-family:var(--font-ui);}
+.tools{display:flex;gap:8px;flex-wrap:wrap;}
+button.tool{
+  border:1px solid var(--border);background:var(--panel2);color:var(--fg);
+  padding:8px 14px;border-radius:6px;font-family:var(--font-ui);font-size:13px;
+  cursor:pointer;transition:.15s;
+}
+button.tool:hover{border-color:var(--accent);color:var(--accent);}
+button.tool.primary{background:var(--accent);color:var(--panel);border-color:var(--accent);font-weight:bold;}
+button.tool.primary:hover{opacity:.88;color:var(--panel);}
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
+.wrap{max-width:1400px;margin:0 auto;padding:20px;}
 
-        .header {
-            background: linear-gradient(90deg, #2c3e50, #34495e);
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
+.brief{
+  background:var(--panel);border:1px solid var(--border);border-left:4px solid var(--accent);
+  border-radius:8px;padding:18px 22px;margin-bottom:18px;
+}
+.brief.collapsed .brief-body{display:none;}
+.brief-head{display:flex;justify-content:space-between;align-items:center;cursor:pointer;}
+.brief small{color:var(--fg-dim);}
+.brief-body p{line-height:1.55;color:var(--fg);font-size:14.5px;}
+.brief-body ul{margin:6px 0 14px 20px;font-size:14px;line-height:1.6;color:var(--fg);}
+.brief-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:10px;}
+@media(max-width:800px){.brief-grid{grid-template-columns:1fr;}}
+.brief-card{background:var(--panel2);border:1px solid var(--border);border-radius:6px;padding:12px 14px;}
+.brief-card h3{font-size:14px;color:var(--accent);}
+.brief-card p{font-size:13px;margin:4px 0 0 0;}
+.tag{display:inline-block;font-family:var(--font-mono);font-size:11px;background:var(--panel2);
+  border:1px solid var(--border);padding:2px 7px;border-radius:4px;color:var(--fg-dim);margin-right:6px;}
 
-        .header h1 {
-            margin: 0;
-            font-size: 2.5rem;
-        }
+.main-grid{display:grid;grid-template-columns:340px 1fr;gap:18px;align-items:start;}
+@media(max-width:980px){.main-grid{grid-template-columns:1fr;}}
 
-        .header p {
-            margin: 10px 0 0 0;
-            opacity: 0.9;
-        }
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:18px;}
+.panel h2{font-size:16px;}
 
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            padding: 20px;
-        }
+.topo-svg{width:100%;height:auto;}
+.node-label{font-family:var(--font-mono);font-size:11px;fill:var(--fg);}
+.node-ip{font-family:var(--font-mono);font-size:10px;fill:var(--fg-dim);}
+.mac-tag{font-family:var(--font-mono);font-size:9.5px;}
 
-        .network-topology {
-            background: #f8f9fa;
-            border: 2px solid #27ae60;
-            border-radius: 8px;
-            padding: 20px;
-            min-height: 400px;
-            position: relative;
-        }
+.progress-track{background:var(--panel2);border:1px solid var(--border);border-radius:5px;height:10px;overflow:hidden;margin:8px 0 4px;}
+.progress-fill{height:100%;background:var(--accent);width:0%;transition:width .3s ease;}
+.progress-num{font-family:var(--font-mono);font-size:12px;color:var(--fg-dim);}
 
-        .arp-tables {
-            background: #f8f9fa;
-            border: 2px solid #2980b9;
-            border-radius: 8px;
-            padding: 20px;
-        }
+.obj-list{list-style:none;margin:12px 0 0 0;padding:0;}
+.obj-list li{
+  display:flex;gap:8px;align-items:flex-start;padding:8px 0;
+  border-bottom:1px dashed var(--border);font-size:13px;line-height:1.4;
+}
+.obj-list li:last-child{border-bottom:none;}
+.obj-check{
+  flex:0 0 18px;height:18px;border-radius:4px;border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;font-size:12px;color:transparent;
+  margin-top:1px;
+}
+.obj-check.done{background:var(--accent);border-color:var(--accent);color:var(--panel);}
+.obj-text.done{color:var(--fg-dim);text-decoration:line-through;}
+.obj-pts{font-family:var(--font-mono);font-size:11px;color:var(--fg-dim);white-space:nowrap;}
 
-        .device {
-            position: absolute;
-            width: 80px;
-            height: 80px;
-            border-radius: 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 3px solid;
-        }
+.tabs{display:flex;gap:6px;margin-bottom:10px;}
+.tabbtn{
+  padding:9px 18px;border-radius:6px 6px 0 0;border:1px solid var(--border);border-bottom:none;
+  background:var(--panel2);color:var(--fg-dim);font-family:var(--font-mono);font-size:13px;cursor:pointer;
+}
+.tabbtn.active{background:var(--panel);color:var(--accent);border-color:var(--accent);font-weight:bold;}
 
-        .device:hover {
-            transform: scale(1.1);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
+.terminal-wrap{border:1px solid var(--border);border-radius:0 8px 8px 8px;overflow:hidden;}
+.term-titlebar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:6px 12px;background:var(--panel2);font-family:var(--font-mono);font-size:11.5px;color:var(--fg-dim);
+}
+.dots span{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;}
+.d1{background:#e0555a;}.d2{background:#f2a541;}.d3{background:#3ddc84;}
 
-        .computer {
-            background: #3498db;
-            color: white;
-            border-color: #2980b9;
-        }
+.terminal{
+  height:340px;overflow-y:auto;padding:14px;font-family:var(--font-mono);font-size:13px;line-height:1.5;
+  white-space:pre-wrap;word-break:break-word;
+}
+.terminal.win{background:var(--winterm-bg);color:var(--winterm-fg);}
+.terminal.lin{background:var(--linterm-bg);color:var(--linterm-fg);}
+.term-line-cmd{color:inherit;}
+.term-line-cmd .prompt{color:var(--accent);}
+.term-line-err{color:var(--red);}
+.term-line-ok{color:var(--accent);}
+.term-line-warn{color:var(--amber);}
 
-        .router {
-            background: #e74c3c;
-            color: white;
-            border-color: #c0392b;
-        }
+.term-input-row{display:flex;border-top:1px solid var(--border);}
+.term-input-row .prompt-fixed{
+  font-family:var(--font-mono);font-size:13px;padding:9px 4px 9px 12px;color:var(--fg-dim);
+  background:var(--panel2);display:flex;align-items:center;white-space:nowrap;
+}
+.term-input-row input{
+  flex:1;border:none;outline:none;background:var(--panel2);color:var(--fg);
+  font-family:var(--font-mono);font-size:13px;padding:9px 12px;
+}
+.term-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.small-btn{
+  border:1px solid var(--border);background:var(--panel2);color:var(--fg-dim);
+  font-family:var(--font-ui);font-size:12px;padding:6px 12px;border-radius:5px;cursor:pointer;
+}
+.small-btn:hover{color:var(--accent);border-color:var(--accent);}
 
-        .attacker {
-            background: #2c3e50;
-            color: white;
-            border-color: #1a252f;
-        }
+.quiz{margin-top:18px;}
+.quiz-q{margin-bottom:16px;}
+.quiz-q h3{font-size:14px;color:var(--accent);margin-bottom:8px;}
+.quiz-opt{
+  display:block;padding:8px 12px;border:1px solid var(--border);border-radius:6px;margin-bottom:6px;
+  cursor:pointer;font-size:13.5px;background:var(--panel2);
+}
+.quiz-opt:hover{border-color:var(--accent);}
+.quiz-opt input{margin-right:8px;}
+.quiz-opt.correct{border-color:var(--accent);background:rgba(61,220,132,.12);}
+.quiz-opt.incorrect{border-color:var(--red);background:rgba(224,85,90,.12);}
 
-        .attacker.active {
-            background: #e67e22;
-            border-color: #d35400;
-            animation: pulse 1s infinite;
-        }
+.hint-box{
+  background:var(--panel2);border:1px dashed var(--amber);border-radius:6px;
+  padding:10px 12px;font-size:12.5px;color:var(--fg-dim);margin-top:10px;display:none;
+}
+.hint-box.show{display:block;}
+.hint-box code{color:var(--amber);}
 
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(4,10,20,.72);display:none;align-items:center;justify-content:center;z-index:200;padding:20px;
+}
+.modal-overlay.show{display:flex;}
+.modal{
+  background:var(--panel);border:1px solid var(--border);border-radius:10px;max-width:560px;width:100%;
+  padding:26px;max-height:85vh;overflow-y:auto;
+}
+.modal h2{font-size:20px;}
+.grade-circle{
+  width:110px;height:110px;border-radius:50%;border:6px solid var(--accent);
+  display:flex;align-items:center;justify-content:center;flex-direction:column;margin:16px auto;
+}
+.grade-circle .letter{font-family:var(--font-display);font-size:34px;font-weight:bold;}
+.grade-circle .pct{font-family:var(--font-mono);font-size:12px;color:var(--fg-dim);}
+.summary-row{display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px dashed var(--border);}
+.summary-row.total{font-weight:bold;border-bottom:none;padding-top:10px;}
+.modal-actions{display:flex;gap:10px;margin-top:18px;justify-content:flex-end;}
 
-        .connection {
-            position: absolute;
-            height: 3px;
-            background: transparent;
-            transform-origin: left center;
-        }
+footer{text-align:center;padding:26px 10px 40px;color:var(--fg-dim);font-size:12px;}
 
-        .connection.poisoned {
-            background: #e74c3c;
-            animation: flow 1s infinite;
-        }
-
-        @keyframes flow {
-            0% { opacity: 0.5; }
-            50% { opacity: 1; }
-            100% { opacity: 0.5; }
-        }
-
-        .arp-table {
-            background: white;
-            border: 1px solid #bdc3c7;
-            border-radius: 5px;
-            margin: 10px 0;
-            overflow: hidden;
-        }
-
-        .arp-table h3 {
-            background: #34495e;
-            color: white;
-            margin: 0;
-            padding: 10px;
-            font-size: 14px;
-        }
-
-        .arp-table table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .arp-table th,
-        .arp-table td {
-            padding: 8px;
-            text-align: left;
-            border-bottom: 1px solid #ecf0f1;
-            font-size: 12px;
-        }
-
-        .arp-table th {
-            background: #f8f9fa;
-            font-weight: bold;
-        }
-
-        .poisoned-entry {
-            background: #ffebee !important;
-            color: #c62828;
-            font-weight: bold;
-        }
-
-        .controls {
-            grid-column: 1 / -1;
-            background: #2c3e50;
-            border-radius: 8px;
-            padding: 20px;
-            margin-top: 20px;
-        }
-
-        .controls h3 {
-            color: white;
-            margin: 0 0 15px 0;
-        }
-
-        .button-group {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 15px;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary {
-            background: #3498db;
-            color: white;
-        }
-
-        .btn-danger {
-            background: #e74c3c;
-            color: white;
-        }
-
-        .btn-success {
-            background: #27ae60;
-            color: white;
-        }
-
-        .btn-warning {
-            background: #f39c12;
-            color: white;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-
-        .input-group {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .input-group input {
-            padding: 8px;
-            border: 1px solid #bdc3c7;
-            border-radius: 4px;
-            font-family: 'Courier New', monospace;
-        }
-
-        .input-group label {
-            color: white;
-            min-width: 100px;
-        }
-
-        .log {
-            grid-column: 1 / -1;
-            background: #1a1a1a;
-            color: #00ff00;
-            border-radius: 8px;
-            padding: 15px;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            max-height: 200px;
-            overflow-y: auto;
-            margin-top: 20px;
-        }
-
-        .log h3 {
-            color: #00ff00;
-            margin: 0 0 10px 0;
-        }
-
-        .log-entry {
-            margin: 5px 0;
-            padding: 3px 0;
-            border-left: 3px solid #00ff00;
-            padding-left: 10px;
-        }
-
-        .log-entry.attack {
-            border-left-color: #ff4444;
-            color: #ff4444;
-        }
-
-        .log-entry.warning {
-            border-left-color: #ffaa00;
-            color: #ffaa00;
-        }
-
-        .tooltip {
-            position: relative;
-            cursor: help;
-        }
-
-        .tooltip::after {
-            content: attr(data-tooltip);
-            position: absolute;
-            bottom: 125%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #2c3e50;
-            color: white;
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-size: 12px;
-            white-space: nowrap;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-            z-index: 1000;
-        }
-
-        .tooltip:hover::after {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .status-indicator {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            margin-right: 8px;
-        }
-
-        .status-normal { background: #27ae60; }
-        .status-compromised { background: #e74c3c; }
-        .status-attacking { background: #f39c12; }
-    </style>
+@media print{
+  .topbar .tools, .tabs, .term-input-row, .term-actions, .brief-head, .modal-overlay{display:none !important;}
+  body{background:#fff;color:#000;}
+}
+</style>
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>🛡️ ARP Poisoning Educational Simulator</h1>
-            <p>Learn how ARP (Address Resolution Protocol) poisoning attacks work and how to detect them</p>
+<body data-theme="light">
+
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-badge">ARP</div>
+    <div>
+      <h1>ARP Poisoning Lab</h1>
+      <div class="sub">Windows &amp; Linux Command Track &middot; Guided / Introductory</div>
+    </div>
+  </div>
+  <div class="tools">
+    <button class="tool" onclick="toggleTheme()" id="themeBtn">🌙 Dark Mode</button>
+    <button class="tool" onclick="window.print()">🖨 Print</button>
+    <button class="tool" onclick="downloadSummary()">⬇ Download Report</button>
+    <button class="tool primary" onclick="openGrade()">📊 Grade My Work</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="brief" id="briefPanel">
+    <div class="brief-head" onclick="document.getElementById('briefPanel').classList.toggle('collapsed')">
+      <h2>Mission Briefing: Address Resolution Protocol (ARP) Poisoning</h2>
+      <small>tap to collapse ▾</small>
+    </div>
+    <div class="brief-body">
+      <p><span class="tag">Security+ 2.4 / 2.5</span><span class="tag">MITRE ATT&CK T1557.002</span><span class="tag">CIA: Confidentiality &amp; Integrity</span></p>
+      <p><strong>What is ARP?</strong> The Address Resolution Protocol maps a known IPv4 address to the physical (MAC) address a switch needs to deliver a frame on the local segment. ARP has no built-in authentication — any host on the LAN can broadcast an ARP reply, and other hosts will trust it and update their local ARP cache without verification.</p>
+      <p><strong>What is ARP poisoning (ARP spoofing)?</strong> An attacker sends forged, unsolicited ARP replies telling the victim "I am the gateway" and telling the gateway "I am the victim." Because ARP is stateless and unauthenticated, both machines silently overwrite their ARP cache with the attacker's MAC address. Traffic that should flow directly between the victim and the gateway is now routed through the attacker's machine first — a classic on-path (man-in-the-middle) attack that enables traffic interception, session hijacking, or denial of service.</p>
+      <ul>
+        <li><strong>Learning objective:</strong> Use native Windows commands to inspect and poison an ARP table, then verify the redirection.</li>
+        <li><strong>Learning objective:</strong> Use native Linux commands to enable IP forwarding, poison an ARP table bidirectionally, and capture the diverted traffic.</li>
+        <li><strong>Learning objective:</strong> Identify controls (Dynamic ARP Inspection, static ARP entries, port security) that mitigate this attack class.</li>
+      </ul>
+      <div class="brief-grid">
+        <div class="brief-card">
+          <h3>Scenario Topology</h3>
+          <p>Three hosts share a single unmanaged Layer 2 switch in a small office segment (192.168.1.0/24). You control the <strong>Attacker Workstation</strong>, a dual-boot lab machine you can operate from either its Windows or Linux install.</p>
         </div>
-
-        <div class="main-content">
-            <div class="network-topology">
-                <h3 style="margin: 0 0 20px 0; color: #27ae60;">🌐 Network Topology</h3>
-                
-                <!-- Network devices -->
-                <div class="device computer tooltip" id="computer1" style="top: 50px; left: 50px;" 
-                     data-tooltip="Computer A - IP: 192.168.1.10">
-                    💻<br>PC-A
-                </div>
-                
-                <div class="device computer tooltip" id="computer2" style="top: 104px; left: 50px;" 
-                     data-tooltip="Computer B - IP: 192.168.1.20">
-                    💻<br>PC-B
-                </div>
-                
-                <div class="device router tooltip" id="router" style="top: 29px; left: 300px;" 
-                     data-tooltip="Router/Gateway - IP: 192.168.1.1">
-                    🔧<br>Router
-                </div>
-                
-                <div class="device attacker tooltip" id="attacker" style="top: -46px; left: 200px;" 
-                     data-tooltip="Attacker Machine - IP: 192.168.1.99">
-                    ☠️<br>Attacker
-                </div>
-
-                <!-- Network connections -->
-                <div class="connection" id="conn1" style="top: 90px; left: 130px; width: 90px; transform: rotate(0deg);"></div>
-                <div class="connection" id="conn2" style="top: 144px; left: 130px; width: 90px; transform: rotate(0deg);"></div>
-                <div class="connection" id="conn3" style="top: 69px; left: 130px; width: 90px; transform: rotate(90deg);"></div>
-                <div class="connection" id="conn4" style="top: -6px; left: 280px; width: 90px; transform: rotate(45deg);"></div>
-                <div class="connection" id="conn5" style="top: 104px; left: 280px; width: 90px; transform: rotate(-45deg);"></div>
-            </div>
-
-            <div class="arp-tables">
-                <h3 style="margin: 0 0 20px 0; color: #2980b9;">📋 ARP Tables</h3>
-                
-                <div class="arp-table">
-                    <h3><span class="status-indicator status-normal" id="pc-a-status"></span>Computer A ARP Table</h3>
-                    <table id="arp-table-a">
-                        <thead>
-                            <tr>
-                                <th>IP Address</th>
-                                <th>MAC Address</th>
-                                <th>Type</th>
-                            </tr>
-                        </thead>
-                        <tbody id="arp-entries-a">
-                            <tr>
-                                <td>192.168.1.1</td>
-                                <td>aa:bb:cc:dd:ee:01</td>
-                                <td>Dynamic</td>
-                            </tr>
-                            <tr>
-                                <td>192.168.1.20</td>
-                                <td>aa:bb:cc:dd:ee:02</td>
-                                <td>Dynamic</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="arp-table">
-                    <h3><span class="status-indicator status-normal" id="pc-b-status"></span>Computer B ARP Table</h3>
-                    <table id="arp-table-b">
-                        <thead>
-                            <tr>
-                                <th>IP Address</th>
-                                <th>MAC Address</th>
-                                <th>Type</th>
-                            </tr>
-                        </thead>
-                        <tbody id="arp-entries-b">
-                            <tr>
-                                <td>192.168.1.1</td>
-                                <td>aa:bb:cc:dd:ee:01</td>
-                                <td>Dynamic</td>
-                            </tr>
-                            <tr>
-                                <td>192.168.1.10</td>
-                                <td>aa:bb:cc:dd:ee:10</td>
-                                <td>Dynamic</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="controls">
-                <h3>🎮 Attack Controls</h3>
-                
-                <div class="button-group">
-                    <button class="btn btn-primary" onclick="resetNetwork()">🔄 Reset Network</button>
-                    <button class="btn btn-danger" onclick="performArpPoisoning()">⚡ Execute ARP Poisoning</button>
-                    <button class="btn btn-warning" onclick="detectAttack()">🔍 Detect Attack</button>
-                    <button class="btn btn-success" onclick="mitigateAttack()">🛡️ Mitigate Attack</button>
-                </div>
-
-                <div class="input-group">
-                    <label>Target IP:</label>
-                    <input type="text" id="target-ip" value="192.168.1.1" placeholder="e.g., 192.168.1.1">
-                    <label>Fake MAC:</label>
-                    <input type="text" id="fake-mac" value="aa:bb:cc:dd:ee:99" placeholder="e.g., aa:bb:cc:dd:ee:99">
-                </div>
-
-                <div class="input-group">
-                    <label>Victim:</label>
-                    <select id="victim-select">
-                        <option value="both">Both Computers</option>
-                        <option value="pc-a">Computer A</option>
-                        <option value="pc-b">Computer B</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="log">
-                <h3>📜 Network Activity Log</h3>
-                <div id="log-content">
-                    <div class="log-entry">[SYSTEM] Network initialized. All devices operational.</div>
-                    <div class="log-entry">[INFO] ARP tables populated with legitimate entries.</div>
-                </div>
-            </div>
+        <div class="brief-card">
+          <h3>Rules of Engagement</h3>
+          <p>This is an isolated lab network you are authorized to test. In the real world, ARP poisoning outside a network you own or have written authorization to test is illegal under most computer-fraud statutes.</p>
         </div>
+      </div>
+      <p style="font-size:12px;color:var(--fg-dim);margin-top:10px;">Note on realism: native Windows <code>arp</code> only manages the local host's cache and cannot forge replies toward a remote host. This lab includes a bundled instructional utility, <code>labspoof.exe</code>, so you can practice the Windows-side workflow. In the field, Windows-based attackers typically use a packet-capture-driven tool (Cain &amp; Abel, Ettercap for Windows) or pivot through WSL/Kali — <code>arpspoof</code> on Linux remains the more common real-world tool.</p>
+    </div>
+  </div>
+
+  <div class="main-grid">
+
+    <!-- LEFT COLUMN -->
+    <div>
+      <div class="panel">
+        <h2>Network Topology</h2>
+        <svg class="topo-svg" viewBox="0 0 320 260" id="topoSvg">
+          <!-- links -->
+          <line id="linkGwVictim" x1="70" y1="60" x2="250" y2="60" stroke="#4a6280" stroke-width="2"/>
+          <line id="linkGwAtk" x1="70" y1="60" x2="160" y2="200" stroke="#4a6280" stroke-width="2"/>
+          <line id="linkVictimAtk" x1="250" y1="60" x2="160" y2="200" stroke="#4a6280" stroke-width="2"/>
+          <path id="flowPath" d="M70,60 L250,60" fill="none" stroke="#3ddc84" stroke-width="0" stroke-dasharray="6 6"/>
+
+          <!-- Gateway -->
+          <rect x="35" y="30" width="70" height="46" rx="6" fill="var(--panel2)" stroke="var(--border)"/>
+          <text x="70" y="50" text-anchor="middle" class="node-label">Gateway</text>
+          <text x="70" y="63" text-anchor="middle" class="node-ip">192.168.1.1</text>
+          <text x="70" y="74" text-anchor="middle" class="mac-tag" id="macGw" fill="#9fb0c8">AA:01</text>
+
+          <!-- Victim -->
+          <rect x="215" y="30" width="70" height="46" rx="6" fill="var(--panel2)" stroke="var(--border)"/>
+          <text x="250" y="50" text-anchor="middle" class="node-label">Victim-PC</text>
+          <text x="250" y="63" text-anchor="middle" class="node-ip">192.168.1.20</text>
+          <text x="250" y="74" text-anchor="middle" class="mac-tag" id="macVictim" fill="#9fb0c8">BB:02</text>
+
+          <!-- Attacker -->
+          <rect x="120" y="178" width="80" height="46" rx="6" fill="var(--panel2)" stroke="var(--border)"/>
+          <text x="160" y="198" text-anchor="middle" class="node-label">Attacker WKS</text>
+          <text x="160" y="211" text-anchor="middle" class="node-ip">192.168.1.50</text>
+          <text x="160" y="222" text-anchor="middle" class="mac-tag" id="macAtk" fill="#9fb0c8">CC:03</text>
+        </svg>
+        <p id="topoStatus" style="font-size:12px;color:var(--fg-dim);margin-top:6px;">Status: baseline — traffic flows directly between Gateway and Victim-PC.</p>
+      </div>
+
+      <div class="panel">
+        <h2>Objectives</h2>
+        <div class="progress-track"><div class="progress-fill" id="progFill"></div></div>
+        <div class="progress-num"><span id="progNum">0</span> / 100 pts</div>
+        <ul class="obj-list" id="objList"></ul>
+      </div>
     </div>
 
-    <script>
-        let isAttacking = false;
-        let attackActive = false;
+    <!-- RIGHT COLUMN -->
+    <div>
+      <div class="panel">
+        <div class="tabs">
+          <button class="tabbtn active" id="tabWinBtn" onclick="switchTab('win')">C:\Windows — Attacker (Windows)</button>
+          <button class="tabbtn" id="tabLinBtn" onclick="switchTab('lin')">kali@attacker — Attacker (Linux)</button>
+        </div>
 
-        const originalArpTables = {
-            'pc-a': [
-                {ip: '192.168.1.1', mac: 'aa:bb:cc:dd:ee:01', type: 'Dynamic'},
-                {ip: '192.168.1.20', mac: 'aa:bb:cc:dd:ee:02', type: 'Dynamic'}
-            ],
-            'pc-b': [
-                {ip: '192.168.1.1', mac: 'aa:bb:cc:dd:ee:01', type: 'Dynamic'},
-                {ip: '192.168.1.10', mac: 'aa:bb:cc:dd:ee:10', type: 'Dynamic'}
-            ]
-        };
+        <div id="winTerminalBlock">
+          <div class="terminal-wrap">
+            <div class="term-titlebar"><span class="dots"><span class="d1"></span><span class="d2"></span><span class="d3"></span></span>ATTACKER-WKS — Command Prompt</div>
+            <div class="terminal win" id="winTerm"></div>
+            <div class="term-input-row">
+              <div class="prompt-fixed">C:\Users\student&gt;</div>
+              <input type="text" id="winInput" placeholder="type a command, or 'help'" autocomplete="off">
+            </div>
+          </div>
+        </div>
 
-        function addLogEntry(message, type = 'info') {
-            const logContent = document.getElementById('log-content');
-            const timestamp = new Date().toLocaleTimeString();
-            const entry = document.createElement('div');
-            entry.className = `log-entry ${type}`;
-            entry.innerHTML = `[${timestamp}] ${message}`;
-            logContent.appendChild(entry);
-            logContent.scrollTop = logContent.scrollHeight;
-        }
+        <div id="linTerminalBlock" style="display:none;">
+          <div class="terminal-wrap">
+            <div class="term-titlebar"><span class="dots"><span class="d1"></span><span class="d2"></span><span class="d3"></span></span>attacker@kali: ~</div>
+            <div class="terminal lin" id="linTerm"></div>
+            <div class="term-input-row">
+              <div class="prompt-fixed">attacker@kali:~$</div>
+              <input type="text" id="linInput" placeholder="type a command, or 'help'" autocomplete="off">
+            </div>
+          </div>
+        </div>
 
-        function updateArpTable(device, entries) {
-            const tableBody = document.getElementById(`arp-entries-${device}`);
-            tableBody.innerHTML = '';
-            
-            entries.forEach(entry => {
-                const row = document.createElement('tr');
-                if (entry.poisoned) {
-                    row.className = 'poisoned-entry';
-                }
-                row.innerHTML = `
-                    <td>${entry.ip}</td>
-                    <td>${entry.mac}</td>
-                    <td>${entry.type}</td>
-                `;
-                tableBody.appendChild(row);
-            });
-        }
+        <div class="term-actions">
+          <button class="small-btn" onclick="showHint()">💡 Hint for current step</button>
+          <button class="small-btn" onclick="clearActiveTerm()">Clear screen</button>
+        </div>
+        <div class="hint-box" id="hintBox"></div>
+      </div>
 
-        function updateDeviceStatus(device, status) {
-            const statusIndicator = document.getElementById(`${device}-status`);
-            statusIndicator.className = `status-indicator status-${status}`;
-        }
+      <div class="panel quiz" id="quizPanel" style="display:none;">
+        <h2>Mitigation Check — Short Quiz</h2>
+        <p style="font-size:13px;color:var(--fg-dim);">You've successfully redirected traffic on both platforms. Now identify the control that stops this attack class.</p>
+        <div id="quizBody"></div>
+      </div>
+    </div>
+  </div>
+</div>
 
-        function performArpPoisoning() {
-            if (attackActive) {
-                addLogEntry('Attack already in progress!', 'warning');
-                return;
-            }
+<div class="modal-overlay" id="gradeModal">
+  <div class="modal">
+    <h2>Lab Performance Summary</h2>
+    <div class="grade-circle">
+      <div class="letter" id="gLetter">–</div>
+      <div class="pct" id="gPct">0%</div>
+    </div>
+    <div id="gBreakdown"></div>
+    <div class="summary-row total"><span>Total</span><span id="gTotal">0 / 100</span></div>
+    <p style="font-size:12px;color:var(--fg-dim);margin-top:10px;">Generated <span id="gTime"></span> — Objective: demonstrate ARP poisoning and traffic diversion using native Windows and Linux commands.</p>
+    <div class="modal-actions">
+      <button class="tool" onclick="closeGrade()">Close</button>
+      <button class="tool primary" onclick="window.print()">Print Summary</button>
+    </div>
+  </div>
+</div>
 
-            const targetIp = document.getElementById('target-ip').value;
-            const fakeMac = document.getElementById('fake-mac').value;
-            const victim = document.getElementById('victim-select').value;
+<footer>ARP Poisoning Lab &middot; Guided Networking Simulator &middot; Isolated training environment — do not run these techniques on networks you do not own or have written authorization to test.</footer>
 
-            // Validate inputs
-            if (!targetIp || !fakeMac) {
-                addLogEntry('Please specify target IP and fake MAC address!', 'warning');
-                return;
-            }
+<script>
+/* ---------------- THEME ---------------- */
+function toggleTheme(){
+  const b=document.body;
+  const dark = b.getAttribute('data-theme')!=='dark';
+  b.setAttribute('data-theme', dark?'dark':'light');
+  document.getElementById('themeBtn').textContent = dark? '☀ Light Mode':'🌙 Dark Mode';
+}
 
-            attackActive = true;
-            isAttacking = true;
+/* ---------------- STATE ---------------- */
+const state = {
+  activeTab:'win',
+  hintsUsed:0,
+  objectives:[
+    {id:'winRecon',   os:'win', label:'Windows: Baseline ARP table (arp -a)', pts:10, done:false,
+     hint:'Run <code>arp -a</code> to view the current ARP cache before making changes.'},
+    {id:'winPoison',  os:'win', label:'Windows: Poison victim &amp; gateway (labspoof.exe)', pts:15, done:false,
+     hint:'Run <code>labspoof.exe -t 192.168.1.20 -s 192.168.1.1</code> then <code>labspoof.exe -t 192.168.1.1 -s 192.168.1.20</code> to poison both directions.'},
+    {id:'winVerify',  os:'win', label:'Windows: Verify redirection (arp -a again)', pts:10, done:false,
+     hint:'Run <code>arp -a</code> again — the gateway entry should now resolve to the attacker MAC (CC-CC-CC-CC-CC-03).'},
+    {id:'linRecon',   os:'lin', label:'Linux: Baseline ARP table (arp -a or ip neigh)', pts:10, done:false,
+     hint:'Run <code>arp -a</code> or <code>ip neigh show</code> to see the current cache.'},
+    {id:'linForward', os:'lin', label:'Linux: Enable IP forwarding', pts:10, done:false,
+     hint:'Run <code>echo 1 &gt; /proc/sys/net/ipv4/ip_forward</code> so relayed traffic actually reaches its destination instead of being dropped.'},
+    {id:'linPoison',  os:'lin', label:'Linux: Poison victim &amp; gateway (arpspoof)', pts:15, done:false,
+     hint:'Run <code>arpspoof -i eth0 -t 192.168.1.20 192.168.1.1</code> then <code>arpspoof -i eth0 -t 192.168.1.1 192.168.1.20</code>.'},
+    {id:'linVerify',  os:'lin', label:'Linux: Capture diverted traffic (tcpdump)', pts:10, done:false,
+     hint:'Run <code>tcpdump -i eth0 -n</code> to confirm victim &lt;-&gt; gateway packets are now traversing your interface.'},
+    {id:'quiz',       os:'any', label:'Mitigation quiz answered correctly', pts:20, done:false,
+     hint:'Scroll down once both platforms show a successful redirection — the quiz unlocks automatically.'}
+  ],
+  quizAnswered:[false,false,false],
+  winPoisonStep:0, // 0 none, 1 victim direction done, 2 both done
+  linPoisonStep:0
+};
 
-            // Visual effects
-            document.getElementById('attacker').classList.add('active');
-            const connections = document.querySelectorAll('.connection');
-            connections.forEach(conn => conn.classList.add('poisoned'));
+const NODE = {
+  gw:{ip:'192.168.1.1', mac:'AA-AA-AA-AA-AA-01', shortmac:'AA:01'},
+  victim:{ip:'192.168.1.20', mac:'BB-BB-BB-BB-BB-02', shortmac:'BB:02'},
+  atk:{ip:'192.168.1.50', mac:'CC-CC-CC-CC-CC-03', shortmac:'CC:03'}
+};
 
-            addLogEntry(`ATTACK INITIATED: ARP Poisoning targeting ${targetIp}`, 'attack');
-            addLogEntry(`Attacker sending fake ARP replies with MAC ${fakeMac}`, 'attack');
+/* ---------------- TERMINAL HELPERS ---------------- */
+function term(id){return document.getElementById(id);}
+function printLine(termId, text, cls){
+  const t = term(termId);
+  const div = document.createElement('div');
+  div.className = cls||'';
+  div.innerHTML = text;
+  t.appendChild(div);
+  t.scrollTop = t.scrollHeight;
+}
+function printEcho(termId, promptStr, cmd){
+  printLine(termId, '<span class="prompt">'+promptStr+'</span>'+escapeHtml(cmd), 'term-line-cmd');
+}
+function escapeHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
-            // Poison ARP tables
-            setTimeout(() => {
-                if (victim === 'both' || victim === 'pc-a') {
-                    const poisonedTableA = originalArpTables['pc-a'].map(entry => {
-                        if (entry.ip === targetIp) {
-                            addLogEntry(`PC-A ARP table poisoned: ${targetIp} now maps to ${fakeMac}`, 'attack');
-                            updateDeviceStatus('pc-a', 'compromised');
-                            return {...entry, mac: fakeMac, type: 'Dynamic*', poisoned: true};
-                        }
-                        return entry;
-                    });
-                    updateArpTable('a', poisonedTableA);
-                }
+function switchTab(which){
+  state.activeTab = which;
+  document.getElementById('tabWinBtn').classList.toggle('active', which==='win');
+  document.getElementById('tabLinBtn').classList.toggle('active', which==='lin');
+  document.getElementById('winTerminalBlock').style.display = which==='win' ? 'block':'none';
+  document.getElementById('linTerminalBlock').style.display = which==='lin' ? 'block':'none';
+  document.getElementById(which==='win'?'winInput':'linInput').focus();
+}
 
-                if (victim === 'both' || victim === 'pc-b') {
-                    const poisonedTableB = originalArpTables['pc-b'].map(entry => {
-                        if (entry.ip === targetIp) {
-                            addLogEntry(`PC-B ARP table poisoned: ${targetIp} now maps to ${fakeMac}`, 'attack');
-                            updateDeviceStatus('pc-b', 'compromised');
-                            return {...entry, mac: fakeMac, type: 'Dynamic*', poisoned: true};
-                        }
-                        return entry;
-                    });
-                    updateArpTable('b', poisonedTableB);
-                }
+function clearActiveTerm(){
+  term(state.activeTab==='win'?'winTerm':'linTerm').innerHTML='';
+}
 
-                addLogEntry('ARP POISONING SUCCESSFUL: Traffic being intercepted!', 'attack');
-                addLogEntry('Attacker can now perform Man-in-the-Middle attacks', 'attack');
-            }, 1500);
-        }
+/* ---------------- OBJECTIVES / SCORING ---------------- */
+function renderObjectives(){
+  const ul = document.getElementById('objList');
+  ul.innerHTML='';
+  let earned=0;
+  state.objectives.forEach(o=>{
+    if(o.done) earned+=o.pts;
+    const li=document.createElement('li');
+    li.innerHTML = '<span class="obj-check '+(o.done?'done':'')+'">'+(o.done?'✓':'')+'</span>'+
+      '<span class="obj-text '+(o.done?'done':'')+'" style="flex:1;">'+o.label+'</span>'+
+      '<span class="obj-pts">'+o.pts+'pt</span>';
+    ul.appendChild(li);
+  });
+  document.getElementById('progFill').style.width = earned+'%';
+  document.getElementById('progNum').textContent = earned;
+  if(state.objectives.filter(o=>o.id!=='quiz').every(o=>o.done)){
+    document.getElementById('quizPanel').style.display='block';
+  }
+}
+function markDone(id){
+  const o = state.objectives.find(x=>x.id===id);
+  if(o && !o.done){ o.done=true; renderObjectives(); }
+}
 
-        function detectAttack() {
-            if (!attackActive) {
-                addLogEntry('No attack detected. Network appears normal.', 'info');
-                return;
-            }
+/* ---------------- TOPOLOGY VISUAL ---------------- */
+function updateTopology(){
+  const macGw = document.getElementById('macGw');
+  const macVictim = document.getElementById('macVictim');
+  const status = document.getElementById('topoStatus');
 
-            addLogEntry('SECURITY ALERT: Suspicious ARP activity detected!', 'warning');
-            addLogEntry('Detection method: Multiple MAC addresses for same IP', 'warning');
-            addLogEntry('Recommendation: Investigate ARP tables for inconsistencies', 'warning');
-            
-            // Simulate detection tools
-            setTimeout(() => {
-                addLogEntry('ARP monitoring tool: Duplicate IP-MAC mappings found', 'warning');
-                addLogEntry('Potential ARP spoofing attack in progress', 'warning');
-            }, 1000);
-        }
+  const winDone = state.winPoisonStep>=2;
+  const linDone = state.linPoisonStep>=2;
 
-        function mitigateAttack() {
-            if (!attackActive) {
-                addLogEntry('No active attack to mitigate.', 'info');
-                return;
-            }
+  if(winDone || linDone){
+    macGw.textContent = NODE.atk.shortmac + ' (spoofed)';
+    macGw.setAttribute('fill', winDone||linDone ? '#e0555a':'#9fb0c8');
+    macVictim.textContent = NODE.atk.shortmac + ' (spoofed)';
+    macVictim.setAttribute('fill', '#e0555a');
+    status.innerHTML = 'Status: <strong style="color:#e0555a;">MITM ACTIVE</strong> — Gateway and Victim-PC both resolve each other to the attacker MAC. All traffic between them now transits the Attacker Workstation.';
+    document.getElementById('flowPath').setAttribute('d','M70,60 L160,200 L250,60');
+    document.getElementById('flowPath').setAttribute('stroke-width','2');
+  } else {
+    macGw.textContent = NODE.gw.shortmac;
+    macGw.setAttribute('fill','#9fb0c8');
+    macVictim.textContent = NODE.victim.shortmac;
+    macVictim.setAttribute('fill','#9fb0c8');
+    status.textContent = 'Status: baseline — traffic flows directly between Gateway and Victim-PC.';
+    document.getElementById('flowPath').setAttribute('stroke-width','0');
+  }
+}
 
-            addLogEntry('MITIGATION: Implementing countermeasures...', 'info');
-            
-            // Simulate mitigation steps
-            setTimeout(() => {
-                addLogEntry('Step 1: Clearing ARP caches...', 'info');
-                setTimeout(() => {
-                    addLogEntry('Step 2: Implementing static ARP entries...', 'info');
-                    setTimeout(() => {
-                        addLogEntry('Step 3: Enabling ARP inspection...', 'info');
-                        setTimeout(() => {
-                            resetNetwork();
-                            addLogEntry('MITIGATION SUCCESSFUL: Network restored to secure state', 'info');
-                        }, 1000);
-                    }, 1000);
-                }, 1000);
-            }, 1000);
-        }
+/* ---------------- COMMAND NORMALIZATION ---------------- */
+function norm(s){ return s.trim().toLowerCase().replace(/\s+/g,' '); }
 
-        function resetNetwork() {
-            attackActive = false;
-            isAttacking = false;
+/* ---------------- WINDOWS TERMINAL LOGIC ---------------- */
+function handleWinCommand(raw){
+  const cmd = norm(raw);
+  printEcho('winTerm','C:\\Users\\student&gt; ', raw);
 
-            // Reset visual effects
-            document.getElementById('attacker').classList.remove('active');
-            const connections = document.querySelectorAll('.connection');
-            connections.forEach(conn => conn.classList.remove('poisoned'));
+  if(cmd===''){ return; }
+  if(cmd==='help'){
+    printLine('winTerm',
+      'Available commands:\n'+
+      '  arp -a                              show the local ARP cache\n'+
+      '  arp -d *                            clear the local ARP cache\n'+
+      '  labspoof.exe -t &lt;target&gt; -s &lt;spoof&gt;  send a forged ARP reply (lab tool)\n'+
+      '  cls                                 clear the screen\n'+
+      '  help                                show this list', '');
+    return;
+  }
+  if(cmd==='cls'){ clearActiveTerm(); return; }
 
-            // Reset ARP tables
-            updateArpTable('a', originalArpTables['pc-a']);
-            updateArpTable('b', originalArpTables['pc-b']);
+  if(cmd==='arp -a'){
+    if(state.winPoisonStep<2){
+      printLine('winTerm',
+        'Interface: 192.168.1.50 --- 0x3\n'+
+        '  Internet Address      Physical Address      Type\n'+
+        '  192.168.1.1            '+NODE.gw.mac+'    dynamic\n'+
+        '  192.168.1.20           '+NODE.victim.mac+'    dynamic', '');
+      markDone('winRecon');
+    } else {
+      printLine('winTerm',
+        'Interface: 192.168.1.50 --- 0x3\n'+
+        '  Internet Address      Physical Address      Type\n'+
+        '  192.168.1.1            '+NODE.gw.mac+'    dynamic   <-- local cache unaffected (verify from victim view below)\n'+
+        '  192.168.1.20           '+NODE.victim.mac+'    dynamic\n\n'+
+        'Note: your own cache is unchanged because you spoofed *their* caches, not yours.\n'+
+        'Use the victim-side check below to confirm the poison landed.', 'term-line-warn');
+      markDone('winVerify');
+      printLine('winTerm','[victim-pc arp -a, captured for lab visibility]\n  192.168.1.1            '+NODE.atk.mac+'    dynamic   <-- POISONED, resolves to attacker\n  192.168.1.50           '+NODE.atk.mac+'    dynamic','term-line-ok');
+    }
+    return;
+  }
 
-            // Reset device status
-            updateDeviceStatus('pc-a', 'normal');
-            updateDeviceStatus('pc-b', 'normal');
+  if(cmd==='arp -d *' || cmd==='arp -d'){
+    printLine('winTerm','ARP cache cleared.','term-line-ok');
+    return;
+  }
 
-            addLogEntry('NETWORK RESET: All devices restored to original state', 'info');
-            addLogEntry('ARP tables cleared and repopulated with legitimate entries', 'info');
-        }
+  const spoofMatch = raw.trim().match(/^labspoof\.exe\s+-t\s+([\d.]+)\s+-s\s+([\d.]+)$/i);
+  if(spoofMatch){
+    const target = spoofMatch[1], spoof = spoofMatch[2];
+    if(target==='192.168.1.20' && spoof==='192.168.1.1'){
+      printLine('winTerm','[+] Forged ARP reply sent to 192.168.1.20: "192.168.1.1 is at '+NODE.atk.mac+'"\n[+] Victim-PC ARP cache updated.','term-line-ok');
+      state.winPoisonStep = Math.max(state.winPoisonStep,1);
+    } else if(target==='192.168.1.1' && spoof==='192.168.1.20'){
+      printLine('winTerm','[+] Forged ARP reply sent to 192.168.1.1: "192.168.1.20 is at '+NODE.atk.mac+'"\n[+] Gateway ARP cache updated.','term-line-ok');
+      state.winPoisonStep = state.winPoisonStep>=1 ? 2 : 1;
+    } else {
+      printLine('winTerm','[!] Host '+target+' not found on this segment. Valid hosts: 192.168.1.1 (gateway), 192.168.1.20 (victim).','term-line-err');
+      return;
+    }
+    if(state.winPoisonStep>=2){
+      markDone('winPoison');
+      printLine('winTerm','\n[!] Bidirectional poison complete — both endpoints now resolve each other to your MAC. Run "arp -a" again to verify from the victim perspective.','term-line-warn');
+    }
+    updateTopology();
+    return;
+  }
 
-        // Add click handlers for devices
-        document.getElementById('computer1').onclick = () => {
-            addLogEntry('Computer A selected - IP: 192.168.1.10, MAC: aa:bb:cc:dd:ee:10', 'info');
-        };
+  printLine('winTerm', "'"+raw+"' is not recognized as an internal or external command.\nType 'help' for the command list.", 'term-line-err');
+}
 
-        document.getElementById('computer2').onclick = () => {
-            addLogEntry('Computer B selected - IP: 192.168.1.20, MAC: aa:bb:cc:dd:ee:02', 'info');
-        };
+/* ---------------- LINUX TERMINAL LOGIC ---------------- */
+function handleLinCommand(raw){
+  const cmd = norm(raw);
+  printEcho('linTerm','attacker@kali:~$ ', raw);
 
-        document.getElementById('router').onclick = () => {
-            addLogEntry('Router selected - IP: 192.168.1.1 (Gateway), MAC: aa:bb:cc:dd:ee:01', 'info');
-        };
+  if(cmd===''){ return; }
+  if(cmd==='help'){
+    printLine('linTerm',
+      'Available commands:\n'+
+      '  arp -a                                     show local ARP cache\n'+
+      '  ip neigh show                              show local ARP/neighbor table\n'+
+      '  cat /proc/sys/net/ipv4/ip_forward           check forwarding state\n'+
+      '  echo 1 > /proc/sys/net/ipv4/ip_forward       enable IP forwarding\n'+
+      '  arpspoof -i eth0 -t &lt;target&gt; &lt;impersonate&gt;   send forged ARP replies\n'+
+      '  tcpdump -i eth0 -n                          capture live interface traffic\n'+
+      '  clear                                       clear the screen\n'+
+      '  help                                        show this list', '');
+    return;
+  }
+  if(cmd==='clear'){ clearActiveTerm(); return; }
 
-        document.getElementById('attacker').onclick = () => {
-            if (attackActive) {
-                addLogEntry('Attacker machine currently executing ARP poisoning attack', 'attack');
-            } else {
-                addLogEntry('Attacker machine - IP: 192.168.1.99, MAC: aa:bb:cc:dd:ee:99', 'info');
-            }
-        };
+  if(cmd==='arp -a' || cmd==='ip neigh show' || cmd==='ip neigh'){
+    printLine('linTerm',
+      '192.168.1.1  ether  '+NODE.gw.mac.toLowerCase()+'  C  eth0\n'+
+      '192.168.1.20 ether  '+NODE.victim.mac.toLowerCase()+'  C  eth0', '');
+    markDone('linRecon');
+    return;
+  }
 
-        // Educational information
-        function showEducationalInfo() {
-            addLogEntry('=== ARP POISONING EDUCATIONAL INFO ===', 'info');
-            addLogEntry('ARP maps IP addresses to MAC addresses on local networks', 'info');
-            addLogEntry('ARP has no authentication - any device can respond to requests', 'info');
-            addLogEntry('Attackers send fake ARP replies to poison victim ARP tables', 'info');
-            addLogEntry('This allows Man-in-the-Middle attacks and traffic interception', 'info');
-            addLogEntry('Detection: Look for duplicate MAC addresses or suspicious ARP traffic', 'info');
-            addLogEntry('Mitigation: Static ARP entries, ARP inspection, network segmentation', 'info');
-        }
+  if(cmd==='cat /proc/sys/net/ipv4/ip_forward'){
+    printLine('linTerm', state.ipForward ? '1' : '0', '');
+    return;
+  }
+  if(cmd==='echo 1 > /proc/sys/net/ipv4/ip_forward'){
+    state.ipForward = true;
+    printLine('linTerm','[ip_forward set to 1 — this host will now relay packets between interfaces instead of dropping them]','term-line-ok');
+    markDone('linForward');
+    return;
+  }
 
-        // Initialize the simulation with educational info
-        setTimeout(showEducationalInfo, 2000);
-    </script>
+  const spoofMatch = raw.trim().match(/^arpspoof\s+-i\s+eth0\s+-t\s+([\d.]+)\s+([\d.]+)$/i);
+  if(spoofMatch){
+    const target = spoofMatch[1], impersonate = spoofMatch[2];
+    if(!state.ipForward){
+      printLine('linTerm','[!] Warning: IP forwarding is disabled. Traffic will be poisoned but silently dropped, causing a denial of service rather than a stealthy MITM.\n[+] Sending forged replies to '+target+', claiming to be '+impersonate+' ...','term-line-warn');
+    } else {
+      printLine('linTerm','[+] Sending forged ARP replies to '+target+', claiming to be '+impersonate+' at '+NODE.atk.mac.toLowerCase()+' ...\n[+] Cache updated on '+target+'.','term-line-ok');
+    }
+    if(target==='192.168.1.20' && impersonate==='192.168.1.1'){
+      state.linPoisonStep = Math.max(state.linPoisonStep,1);
+    } else if(target==='192.168.1.1' && impersonate==='192.168.1.20'){
+      state.linPoisonStep = state.linPoisonStep>=1 ? 2 : 1;
+    } else {
+      printLine('linTerm','[!] Unreachable host. Valid hosts: 192.168.1.1 (gateway), 192.168.1.20 (victim).','term-line-err');
+      return;
+    }
+    if(state.linPoisonStep>=2){
+      markDone('linPoison');
+      printLine('linTerm','\n[!] Bidirectional poison complete. Run "tcpdump -i eth0 -n" to confirm the diverted traffic is now visible on your interface.','term-line-warn');
+    }
+    updateTopology();
+    return;
+  }
+
+  if(cmd==='tcpdump -i eth0 -n'){
+    if(state.linPoisonStep>=2 && state.ipForward){
+      printLine('linTerm',
+        'listening on eth0, link-type EN10MB\n'+
+        '12:04:31.118201 IP 192.168.1.20.51322 > 192.168.1.1.443: Flags [S]\n'+
+        '12:04:31.118340 IP 192.168.1.1.443 > 192.168.1.20.51322: Flags [S.]\n'+
+        '12:04:31.118902 IP 192.168.1.20.51322 > 192.168.1.1.443: Flags [.]\n'+
+        '3 packets captured — both hosts\' traffic is now transiting this interface.','term-line-ok');
+      markDone('linVerify');
+    } else if(state.linPoisonStep<2){
+      printLine('linTerm','listening on eth0, link-type EN10MB\n0 packets captured — no diverted traffic yet. Complete the bidirectional arpspoof first.', 'term-line-warn');
+    } else {
+      printLine('linTerm','listening on eth0, link-type EN10MB\n0 packets captured — ip_forward is 0, so relayed packets are being dropped rather than passed through. Enable forwarding, then re-run the spoof.', 'term-line-warn');
+    }
+    return;
+  }
+
+  printLine('linTerm', 'bash: '+raw+': command not found\nType "help" for the command list.', 'term-line-err');
+}
+
+/* ---------------- HINTS ---------------- */
+function currentIncompleteObjective(){
+  return state.objectives.find(o=>!o.done && o.id!=='quiz');
+}
+function showHint(){
+  const box = document.getElementById('hintBox');
+  const o = currentIncompleteObjective();
+  state.hintsUsed++;
+  if(!o){
+    box.innerHTML = 'All command objectives are complete — scroll down to the mitigation quiz.';
+  } else {
+    box.innerHTML = '<strong>Next step:</strong> '+o.hint+' <span style="color:var(--fg-dim);">(switch to the '+(o.os==='win'?'Windows':'Linux')+' tab if needed)</span>';
+  }
+  box.classList.add('show');
+}
+
+/* ---------------- QUIZ ---------------- */
+const QUIZ = [
+  {q:'Which switch/network feature validates ARP packets against a trusted IP–MAC binding table to block forged replies?',
+   opts:['Port Security','Dynamic ARP Inspection (DAI)','Spanning Tree Protocol','802.1Q Trunking'], correct:1},
+  {q:'Which MITRE ATT&CK sub-technique corresponds to ARP cache poisoning used for adversary-in-the-middle positioning?',
+   opts:['T1110 (Brute Force)','T1046 (Network Service Discovery)','T1557.002 (ARP Cache Poisoning)','T1003 (OS Credential Dumping)'], correct:2},
+  {q:'Besides Dynamic ARP Inspection, which control also helps stop ARP spoofing on a LAN?',
+   opts:['Disabling SSH access','Static ARP entries for critical hosts','Increasing DHCP lease time','Enabling ICMP redirects'], correct:1}
+];
+function renderQuiz(){
+  const body = document.getElementById('quizBody');
+  body.innerHTML='';
+  QUIZ.forEach((item,qi)=>{
+    const div = document.createElement('div');
+    div.className='quiz-q';
+    div.innerHTML = '<h3>Q'+(qi+1)+'. '+item.q+'</h3>';
+    item.opts.forEach((opt,oi)=>{
+      const label = document.createElement('label');
+      label.className='quiz-opt';
+      label.innerHTML = '<input type="radio" name="q'+qi+'" value="'+oi+'"> '+opt;
+      label.onclick=()=>{ setTimeout(()=>gradeQuizQuestion(qi,oi),10); };
+      div.appendChild(label);
+    });
+    body.appendChild(div);
+  });
+}
+function gradeQuizQuestion(qi, chosen){
+  const item = QUIZ[qi];
+  const options = document.querySelectorAll('input[name="q'+qi+'"]');
+  options.forEach((inp,oi)=>{
+    const label = inp.parentElement;
+    label.classList.remove('correct','incorrect');
+    if(oi===item.correct) label.classList.add('correct');
+    else if(oi===chosen) label.classList.add('incorrect');
+  });
+  state.quizAnswered[qi] = (chosen===item.correct);
+  if(state.quizAnswered.every(v=>v===true)){
+    markDone('quiz');
+  }
+}
+
+/* ---------------- GRADING MODAL ---------------- */
+function computeScore(){
+  let earned=0, total=0;
+  state.objectives.forEach(o=>{ total+=o.pts; if(o.done) earned+=o.pts; });
+  return {earned, total};
+}
+function letterFor(pct){
+  if(pct>=90) return 'A';
+  if(pct>=80) return 'B';
+  if(pct>=70) return 'C';
+  if(pct>=60) return 'D';
+  return 'F';
+}
+function openGrade(){
+  const {earned,total} = computeScore();
+  const pct = Math.round((earned/total)*100);
+  document.getElementById('gLetter').textContent = letterFor(pct);
+  document.getElementById('gPct').textContent = pct+'%';
+  document.getElementById('gTotal').textContent = earned+' / '+total;
+  document.getElementById('gTime').textContent = new Date().toLocaleString();
+  const bd = document.getElementById('gBreakdown');
+  bd.innerHTML='';
+  state.objectives.forEach(o=>{
+    const row = document.createElement('div');
+    row.className='summary-row';
+    row.innerHTML = '<span>'+o.label+'</span><span>'+(o.done? o.pts : 0)+' / '+o.pts+'</span>';
+    bd.appendChild(row);
+  });
+  const hintRow = document.createElement('div');
+  hintRow.className='summary-row';
+  hintRow.style.color='var(--fg-dim)';
+  hintRow.innerHTML = '<span>Hints requested</span><span>'+state.hintsUsed+'</span>';
+  bd.appendChild(hintRow);
+  document.getElementById('gradeModal').classList.add('show');
+}
+function closeGrade(){ document.getElementById('gradeModal').classList.remove('show'); }
+
+function downloadSummary(){
+  const {earned,total} = computeScore();
+  const pct = Math.round((earned/total)*100);
+  let text = 'ARP POISONING LAB — PERFORMANCE SUMMARY\n';
+  text += 'Generated: '+new Date().toLocaleString()+'\n';
+  text += 'Score: '+earned+' / '+total+' ('+pct+'%) — Grade: '+letterFor(pct)+'\n\n';
+  text += 'Objective breakdown:\n';
+  state.objectives.forEach(o=>{
+    text += '  ['+(o.done?'x':' ')+'] '+o.label.replace(/&amp;/g,'&')+' — '+(o.done?o.pts:0)+'/'+o.pts+' pts\n';
+  });
+  text += '\nHints requested: '+state.hintsUsed+'\n';
+  const blob = new Blob([text], {type:'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'arp-poisoning-lab-summary.txt';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/* ---------------- INIT ---------------- */
+document.getElementById('winInput').addEventListener('keydown', e=>{
+  if(e.key==='Enter' && e.target.value.trim()!==''){
+    handleWinCommand(e.target.value); e.target.value='';
+  }
+});
+document.getElementById('linInput').addEventListener('keydown', e=>{
+  if(e.key==='Enter' && e.target.value.trim()!==''){
+    handleLinCommand(e.target.value); e.target.value='';
+  }
+});
+
+printLine('winTerm','Microsoft Windows [Version 10.0.19045]\nAttacker lab workstation ready. Type "help" to see available commands.\n','');
+printLine('linTerm','Kali GNU/Linux — attacker lab workstation ready.\nType "help" to see available commands.\n','');
+renderObjectives();
+renderQuiz();
+updateTopology();
+</script>
 </body>
 </html>
