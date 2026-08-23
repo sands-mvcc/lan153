@@ -1,0 +1,587 @@
+
+<title>Packet Filter Field Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg:#eef3f6;
+    --surface:#ffffff;
+    --surface-2:#e4ebf0;
+    --ink:#132330;
+    --ink-dim:#4c606f;
+    --border:#d3dfe6;
+    --accent:#0e7490;
+    --accent-ink:#ffffff;
+    --accent-soft:#dcf0f5;
+    --alert:#a1550f;
+    --alert-ink:#ffffff;
+    --alert-bg:#fbeee0;
+    --alert-border:#e3b984;
+    --code-bg:#f4f7f9;
+
+    --c-arp-fg:#7a5c00; --c-arp-bg:#faf0cc;
+    --c-ip-fg:#3b4d5c;  --c-ip-bg:#e4eaee;
+    --c-tcp-fg:#0e5f82; --c-tcp-bg:#dcedf4;
+    --c-udp-fg:#146a4e; --c-udp-bg:#dcf2e7;
+    --c-icmp-fg:#5c4a44; --c-icmp-bg:#efe6e0;
+    --c-dns-fg:#5b3a9e; --c-dns-bg:#eee7fa;
+    --c-http-fg:#1c6b3a; --c-http-bg:#e3f5e9;
+    --c-ftp-fg:#a3441a; --c-ftp-bg:#fbe7dc;
+    --c-tls-fg:#1d4e89; --c-tls-bg:#e1eaf6;
+
+    color-scheme: light;
+  }
+
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0d151c;
+      --surface:#151f28;
+      --surface-2:#1b2731;
+      --ink:#e7eef2;
+      --ink-dim:#93a7b4;
+      --border:#283945;
+      --accent:#55c6e3;
+      --accent-ink:#052229;
+      --accent-soft:#123544;
+      --alert:#eba766;
+      --alert-ink:#2c1a04;
+      --alert-bg:#2f2213;
+      --alert-border:#5a4020;
+      --code-bg:#101a22;
+
+      --c-arp-fg:#e9c766; --c-arp-bg:#332a08;
+      --c-ip-fg:#b9c7d1;  --c-ip-bg:#212c34;
+      --c-tcp-fg:#8fd6ec; --c-tcp-bg:#0f2e3a;
+      --c-udp-fg:#8fe0b8; --c-udp-bg:#0f2a1e;
+      --c-icmp-fg:#d8c9c2; --c-icmp-bg:#2a211d;
+      --c-dns-fg:#cbb3f0; --c-dns-bg:#221a38;
+      --c-http-fg:#8fe0a8; --c-http-bg:#0f2a1a;
+      --c-ftp-fg:#f2a784; --c-ftp-bg:#33200f;
+      --c-tls-fg:#9cc3ee; --c-tls-bg:#132743;
+
+      color-scheme: dark;
+    }
+  }
+
+  :root[data-theme="dark"]{
+    --bg:#0d151c;
+    --surface:#151f28;
+    --surface-2:#1b2731;
+    --ink:#e7eef2;
+    --ink-dim:#93a7b4;
+    --border:#283945;
+    --accent:#55c6e3;
+    --accent-ink:#052229;
+    --accent-soft:#123544;
+    --alert:#eba766;
+    --alert-ink:#2c1a04;
+    --alert-bg:#2f2213;
+    --alert-border:#5a4020;
+    --code-bg:#101a22;
+
+    --c-arp-fg:#e9c766; --c-arp-bg:#332a08;
+    --c-ip-fg:#b9c7d1;  --c-ip-bg:#212c34;
+    --c-tcp-fg:#8fd6ec; --c-tcp-bg:#0f2e3a;
+    --c-udp-fg:#8fe0b8; --c-udp-bg:#0f2a1e;
+    --c-icmp-fg:#d8c9c2; --c-icmp-bg:#2a211d;
+    --c-dns-fg:#cbb3f0; --c-dns-bg:#221a38;
+    --c-http-fg:#8fe0a8; --c-http-bg:#0f2a1a;
+    --c-ftp-fg:#f2a784; --c-ftp-bg:#33200f;
+    --c-tls-fg:#9cc3ee; --c-tls-bg:#132743;
+
+    color-scheme: dark;
+  }
+
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:'Source Sans 3', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    line-height:1.55; font-size:16px;
+  }
+  ::selection{ background:var(--accent-soft); color:var(--ink); }
+  a{ color:var(--accent); }
+  code, .code{
+    font-family:'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  h1,h2,h3{ font-family:'Archivo', system-ui, sans-serif; text-wrap:balance; margin:0; }
+
+  .wrap{ max-width:1080px; margin:0 auto; padding:0 24px 80px; }
+
+  /* ---------- Masthead ---------- */
+  .masthead{
+    padding:44px 24px 30px; border-bottom:1px solid var(--border);
+    background:
+      linear-gradient(180deg, var(--surface-2) 0%, var(--bg) 100%);
+  }
+  .masthead-inner{ max-width:1080px; margin:0 auto; }
+  .eyebrow{
+    font-family:'Archivo', sans-serif; font-weight:700; font-size:.72rem;
+    letter-spacing:.14em; text-transform:uppercase; color:var(--accent); margin:0 0 10px;
+  }
+  h1.title{
+    font-weight:800; font-size:clamp(1.9rem, 4vw, 2.7rem); letter-spacing:-.01em;
+    color:var(--ink);
+  }
+  .dek{
+    max-width:62ch; color:var(--ink-dim); font-size:1.05rem; margin-top:10px;
+  }
+  .meta-row{
+    display:flex; gap:10px; flex-wrap:wrap; margin-top:20px;
+  }
+  .meta-chip{
+    font-family:'IBM Plex Mono'; font-size:.74rem; color:var(--ink-dim);
+    background:var(--surface); border:1px solid var(--border); border-radius:999px;
+    padding:5px 12px;
+  }
+
+  /* ---------- Jump nav ---------- */
+  .jumpnav{
+    position:sticky; top:0; z-index:10; background:var(--bg);
+    border-bottom:1px solid var(--border);
+  }
+  .jumpnav-inner{
+    max-width:1080px; margin:0 auto; padding:10px 24px; display:flex; gap:6px;
+    overflow-x:auto; scrollbar-width:thin;
+  }
+  .jumpnav a{
+    flex:0 0 auto; text-decoration:none; font-family:'Archivo'; font-weight:700;
+    font-size:.76rem; letter-spacing:.03em; text-transform:uppercase;
+    color:var(--ink-dim); padding:7px 13px; border-radius:7px; white-space:nowrap;
+  }
+  .jumpnav a:hover{ background:var(--surface-2); color:var(--ink); }
+
+  /* ---------- Section scaffolding ---------- */
+  section{ padding-top:52px; scroll-margin-top:56px; }
+  .sec-head{ display:flex; align-items:baseline; gap:14px; margin-bottom:20px; flex-wrap:wrap; }
+  .sec-num{
+    font-family:'IBM Plex Mono'; font-size:.8rem; color:var(--ink-dim);
+    border:1px solid var(--border); border-radius:6px; padding:2px 7px;
+  }
+  h2.sec-title{ font-size:1.5rem; font-weight:800; }
+  .sec-note{ color:var(--ink-dim); font-size:.95rem; max-width:68ch; margin:2px 0 24px; }
+
+  /* ---------- Capture vs Display ---------- */
+  .compare{
+    display:grid; grid-template-columns:1fr 1fr; gap:18px;
+  }
+  @media (max-width:720px){ .compare{ grid-template-columns:1fr; } }
+  .compare .panel{
+    background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:22px;
+  }
+  .panel h3{ font-size:1.05rem; font-weight:700; margin-bottom:6px; }
+  .panel .tagline{ color:var(--ink-dim); font-size:.88rem; margin-bottom:14px; }
+  .panel .example{
+    background:var(--code-bg); border:1px solid var(--border); border-radius:8px;
+    padding:10px 12px; font-size:.85rem; margin-top:8px; overflow-x:auto;
+  }
+  .panel ul{ margin:0; padding-left:1.1em; color:var(--ink); font-size:.92rem; }
+  .panel li{ margin-bottom:6px; }
+
+  /* ---------- Operator table ---------- */
+  .op-grid{
+    margin-top:22px; display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+    gap:1px; background:var(--border); border:1px solid var(--border); border-radius:12px; overflow:hidden;
+  }
+  .op-cell{ background:var(--surface); padding:13px 15px; }
+  .op-cell .sym{ font-size:.95rem; font-weight:600; }
+  .op-cell .desc{ color:var(--ink-dim); font-size:.82rem; margin-top:2px; }
+
+  /* ---------- Protocol cards ---------- */
+  .proto-grid{
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(300px,1fr)); gap:16px;
+  }
+  .proto-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:12px;
+    overflow:hidden; display:flex; flex-direction:column;
+  }
+  .proto-card-head{
+    display:flex; align-items:center; gap:9px; padding:12px 16px;
+    border-bottom:1px solid var(--border);
+  }
+  .chip{
+    font-family:'Archivo'; font-weight:700; font-size:.68rem; letter-spacing:.05em;
+    text-transform:uppercase; padding:3px 9px; border-radius:999px;
+  }
+  .proto-card-head .label{ font-weight:700; font-size:.95rem; }
+  .proto-rows{ padding:6px 0; }
+  .frow{
+    display:grid; grid-template-columns:minmax(140px,auto) 1fr; gap:4px 14px;
+    padding:9px 16px; border-top:1px solid var(--border);
+  }
+  .frow:first-child{ border-top:none; }
+  .frow code{ font-size:.82rem; font-weight:500; }
+  .frow .fdesc{ color:var(--ink-dim); font-size:.82rem; align-self:center; }
+  @media (max-width:480px){
+    .frow{ grid-template-columns:1fr; }
+  }
+
+  /* chip color bindings */
+  .chip[data-p="arp"], .proto-card[data-p="arp"] code{ color:var(--c-arp-fg); }
+  .chip[data-p="arp"]{ background:var(--c-arp-bg); }
+  .chip[data-p="ip"]{ background:var(--c-ip-bg); color:var(--c-ip-fg); }
+  .chip[data-p="tcp"]{ background:var(--c-tcp-bg); color:var(--c-tcp-fg); }
+  .chip[data-p="udp"]{ background:var(--c-udp-bg); color:var(--c-udp-fg); }
+  .chip[data-p="icmp"]{ background:var(--c-icmp-bg); color:var(--c-icmp-fg); }
+  .chip[data-p="dns"]{ background:var(--c-dns-bg); color:var(--c-dns-fg); }
+  .chip[data-p="http"]{ background:var(--c-http-bg); color:var(--c-http-fg); }
+  .chip[data-p="ftp"]{ background:var(--c-ftp-bg); color:var(--c-ftp-fg); }
+  .chip[data-p="tls"]{ background:var(--c-tls-bg); color:var(--c-tls-fg); }
+
+  /* ---------- TCP flags ---------- */
+  .flags-table{ width:100%; border-collapse:collapse; background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+  .flags-table th, .flags-table td{ padding:11px 16px; text-align:left; border-top:1px solid var(--border); font-size:.9rem; }
+  .flags-table thead th{
+    border-top:none; font-family:'Archivo'; text-transform:uppercase; letter-spacing:.04em;
+    font-size:.72rem; color:var(--ink-dim); background:var(--surface-2);
+  }
+  .flags-table td code{ font-size:.84rem; }
+  .table-wrap{ overflow-x:auto; }
+
+  /* ---------- Attack signature section ---------- */
+  .attack-band{
+    background:var(--alert-bg); border:1px solid var(--alert-border); border-radius:16px;
+    padding:26px;
+  }
+  .attack-band .sec-head .sec-num{ border-color:var(--alert-border); color:var(--alert); }
+  .attack-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(320px,1fr)); gap:14px; margin-top:6px; }
+  .attack-card{
+    background:var(--surface); border:1px solid var(--alert-border); border-radius:12px; padding:16px 18px;
+  }
+  .attack-card .aname{
+    font-family:'Archivo'; font-weight:700; font-size:.98rem; display:flex; align-items:center; gap:8px;
+  }
+  .attack-card .aidx{
+    font-family:'IBM Plex Mono'; font-size:.72rem; color:var(--alert); border:1px solid var(--alert-border);
+    background:var(--alert-bg); border-radius:6px; padding:1px 6px;
+  }
+  .attack-card .tell{ color:var(--ink-dim); font-size:.86rem; margin:8px 0 10px; }
+  .attack-card .filter-line{
+    background:var(--code-bg); border:1px solid var(--border); border-radius:8px;
+    padding:9px 11px; font-size:.82rem; overflow-x:auto; margin-bottom:6px;
+  }
+  .attack-card .filter-line:last-child{ margin-bottom:0; }
+  .attack-card .filter-line .fl-label{
+    display:block; font-family:'Source Sans 3'; color:var(--ink-dim); font-size:.72rem;
+    text-transform:uppercase; letter-spacing:.04em; margin-bottom:3px;
+  }
+
+  /* ---------- Capture filter examples ---------- */
+  .bpf-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:14px; }
+  .bpf-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px 16px;
+  }
+  .bpf-card code{ font-size:.86rem; display:block; margin-bottom:6px; }
+  .bpf-card .fdesc{ color:var(--ink-dim); font-size:.83rem; }
+
+  /* ---------- Tips ---------- */
+  .tips-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px; }
+  .tip{
+    background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:15px 17px;
+    font-size:.9rem;
+  }
+  .tip strong{ display:block; font-family:'Archivo'; font-size:.88rem; margin-bottom:4px; }
+
+  footer{
+    max-width:1080px; margin:56px auto 0; padding:20px 24px 0; border-top:1px solid var(--border);
+    color:var(--ink-dim); font-size:.8rem;
+  }
+
+  @media print{
+    .jumpnav{ display:none; }
+    body{ background:#fff; }
+    section{ padding-top:26px; }
+    .attack-band, .proto-card, .panel, .bpf-card, .tip, .flags-table{ break-inside:avoid; }
+  }
+</style>
+
+<div class="masthead">
+  <div class="masthead-inner">
+    <p class="eyebrow">Capturing Network Traffic &middot; Reference Card</p>
+    <h1 class="title">Packet Filter Field Guide</h1>
+    <p class="dek">The display-filter and capture-filter syntax you'll actually reach for in Wireshark — plus a quick-reference for the six attack signatures from the SOC Analyst Simulator.</p>
+    <div class="meta-row">
+      <span class="meta-chip">Display filters run in the filter bar, after capture</span>
+      <span class="meta-chip">Capture filters use BPF syntax, before capture</span>
+    </div>
+  </div>
+</div>
+
+<nav class="jumpnav" aria-label="Section navigation">
+  <div class="jumpnav-inner">
+    <a href="#basics">Filter Basics</a>
+    <a href="#protocols">By Protocol</a>
+    <a href="#flags">TCP Flags</a>
+    <a href="#attacks">Attack Signatures</a>
+    <a href="#capture">Capture Filters</a>
+    <a href="#tips">Tips</a>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <!-- ================= BASICS ================= -->
+  <section id="basics">
+    <div class="sec-head">
+      <span class="sec-num">01</span>
+      <h2 class="sec-title">Capture Filters vs. Display Filters</h2>
+    </div>
+    <p class="sec-note">Wireshark has two unrelated filter languages. Mixing up their syntax is the most common beginner error — a display filter typed into the capture-filter field will simply be rejected.</p>
+
+    <div class="compare">
+      <div class="panel">
+        <h3>Display Filters</h3>
+        <p class="tagline">Applied after the capture, in the filter bar. Narrow down what you're looking at — nothing is discarded.</p>
+        <ul>
+          <li>Field-based: <code>protocol.field</code></li>
+          <li>Can be changed anytime, as often as you like</li>
+          <li>Turns green when valid, red when invalid, yellow when unusual but technically legal</li>
+        </ul>
+        <div class="example"><code>tcp.port == 443 &amp;&amp; ip.addr == 10.10.5.20</code></div>
+      </div>
+      <div class="panel">
+        <h3>Capture Filters</h3>
+        <p class="tagline">Applied before you start capturing, using Berkeley Packet Filter (BPF) syntax. Packets that don't match are never recorded.</p>
+        <ul>
+          <li>Keyword-based: <code>host</code>, <code>port</code>, <code>net</code></li>
+          <li>Locked in once capture starts — set once, capture, then stop</li>
+          <li>Use when the capture would otherwise be too large to store</li>
+        </ul>
+        <div class="example"><code>tcp port 443 and host 10.10.5.20</code></div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:32px; font-size:1.05rem; font-weight:700;">Display Filter Operators</h3>
+    <div class="op-grid">
+      <div class="op-cell"><div class="sym"><code>==</code> or <code>eq</code></div><div class="desc">Equals</div></div>
+      <div class="op-cell"><div class="sym"><code>!=</code> or <code>ne</code></div><div class="desc">Not equal to</div></div>
+      <div class="op-cell"><div class="sym"><code>&gt;</code> <code>&lt;</code> <code>&gt;=</code> <code>&lt;=</code></div><div class="desc">Greater/less than (or equal)</div></div>
+      <div class="op-cell"><div class="sym"><code>&amp;&amp;</code> or <code>and</code></div><div class="desc">Both conditions must match</div></div>
+      <div class="op-cell"><div class="sym"><code>||</code> or <code>or</code></div><div class="desc">Either condition matches</div></div>
+      <div class="op-cell"><div class="sym"><code>!</code> or <code>not</code></div><div class="desc">Negates a condition</div></div>
+      <div class="op-cell"><div class="sym"><code>contains</code></div><div class="desc">Substring is present anywhere in the field</div></div>
+      <div class="op-cell"><div class="sym"><code>matches</code></div><div class="desc">Field matches a regular expression</div></div>
+      <div class="op-cell"><div class="sym"><code>in {a, b, c}</code></div><div class="desc">Field equals any value in the set</div></div>
+    </div>
+  </section>
+
+  <!-- ================= PROTOCOLS ================= -->
+  <section id="protocols">
+    <div class="sec-head">
+      <span class="sec-num">02</span>
+      <h2 class="sec-title">Filters by Protocol</h2>
+    </div>
+    <p class="sec-note">The fields you'll use in almost every investigation, grouped the way they show up in the packet list.</p>
+
+    <div class="proto-grid">
+
+      <div class="proto-card" data-p="ip">
+        <div class="proto-card-head"><span class="chip" data-p="ip">IP</span><span class="label">Addressing</span></div>
+        <div class="proto-rows">
+          <div class="frow"><code>ip.addr == 10.10.5.30</code><span class="fdesc">Either source or destination matches</span></div>
+          <div class="frow"><code>ip.src == 10.10.5.30</code><span class="fdesc">Source address only</span></div>
+          <div class="frow"><code>ip.dst == 10.10.5.30</code><span class="fdesc">Destination address only</span></div>
+          <div class="frow"><code>ip.addr == 10.10.10.0/24</code><span class="fdesc">Anything in a subnet</span></div>
+          <div class="frow"><code>eth.addr == aa:bb:cc:00:00:01</code><span class="fdesc">Filter on a MAC address</span></div>
+        </div>
+      </div>
+
+      <div class="proto-card" data-p="tcp">
+        <div class="proto-card-head"><span class="chip" data-p="tcp">TCP</span><span class="label">Sessions</span></div>
+        <div class="proto-rows">
+          <div class="frow"><code>tcp.port == 21</code><span class="fdesc">Either side using this port</span></div>
+          <div class="frow"><code>tcp.srcport</code> / <code>tcp.dstport</code><span class="fdesc">Source or destination port only</span></div>
+          <div class="frow"><code>tcp.stream eq 4</code><span class="fdesc">Follow one conversation only</span></div>
+          <div class="frow"><code>tcp.analysis.retransmission</code><span class="fdesc">Packets Wireshark flagged as resent</span></div>
+          <div class="frow"><code>tcp.analysis.zero_window</code><span class="fdesc">Receiver's buffer is full</span></div>
+        </div>
+      </div>
+
+      <div class="proto-card" data-p="udp">
+        <div class="proto-card-head"><span class="chip" data-p="udp">UDP</span><span class="label">Datagrams</span></div>
+        <div class="proto-rows">
+          <div class="frow"><code>udp.port == 53</code><span class="fdesc">Either side using this port</span></div>
+          <div class="frow"><code>udp.length &gt; 512</code><span class="fdesc">Unusually large UDP payload</span></div>
+        </div>
+      </div>
+
+      <div class="proto-card" data-p="arp">
+        <div class="proto-card-head"><span class="chip" data-p="arp">ARP</span><span class="label">Address Resolution</span></div>
+        <div class="proto-rows">
+          <div class="frow"><code>arp</code><span class="fdesc">All ARP traffic</span></div>
+          <div class="frow"><code>arp.opcode == 1</code><span class="fdesc">Requests only (2 = replies)</span></div>
+          <div class="frow"><code>arp.duplicate-address-detected</code><span class="fdesc">Wireshark's own conflict flag — huge time-saver</span></div>
+        </div>
+      </div>
+
+      <div class="proto-card" data-p="dns">
+        <div class="proto-card-head"><span class="chip" data-p="dns">DNS</span><span class="label">Name Resolution</span></div>
+        <div class="proto-rows">
+          <div class="frow"><code>dns</code><span class="fdesc">All DNS traffic</span></div>
+          <div class="frow"><code>dns.qry.name == "portal.local"</code><span class="fdesc">Queries for one name</span></div>
+          <div class="frow"><code>dns.flags.response == 1</code><span class="fdesc">Responses only</span></div>
+          <div class="frow"><code>dns.id == 0x4a2f</code><span class="fdesc">Isolate one transaction ID</span></div>
+        </div>
+      </div>
+
+      <div class="proto-card" data-p="http">
+        <div class="proto-card-head"><span class="chip" data-p="http">HTTP</span><span class="label">Web Traffic</span></div>
+        <div class="proto-rows">
+          <div class="frow"><code>http.request.method == "POST"</code><span class="fdesc">Form submissions / logins</span></div>
+          <div class="frow"><code>http.request.uri contains "login"</code><span class="fdesc">Requests to a specific path</span></div>
+          <div class="frow"><code>http.response.code == 200</code><span class="fdesc">Successful responses</span></div>
+          <div class="frow"><code>http contains "password"</code><span class="fdesc">Cleartext credential hunting</span></div>
+        </div>
+      </div>
+
+      <div class="proto-card" data-p="ftp">
+        <div class="proto-card-head"><span class="chip" data-p="ftp">FTP</span><span class="label">File Transfer</span></div>
+        <div class="proto-rows">
+          <div class="frow"><code>ftp.request.command == "USER"</code><span class="fdesc">Login attempts</span></div>
+          <div class="frow"><code>ftp.request.command == "PASS"</code><span class="fdesc">Password submissions</span></div>
+          <div class="frow"><code>ftp.response.code == 530</code><span class="fdesc">Failed logins</span></div>
+        </div>
+      </div>
+
+      <div class="proto-card" data-p="tls">
+        <div class="proto-card-head"><span class="chip" data-p="tls">TLS</span><span class="label">Encrypted Sessions</span></div>
+        <div class="proto-rows">
+          <div class="frow"><code>tls.handshake.type == 1</code><span class="fdesc">Client Hello</span></div>
+          <div class="frow"><code>tls.handshake.type == 2</code><span class="fdesc">Server Hello</span></div>
+          <div class="frow"><code>tls.record.content_type == 23</code><span class="fdesc">Encrypted application data</span></div>
+        </div>
+      </div>
+
+      <div class="proto-card" data-p="icmp">
+        <div class="proto-card-head"><span class="chip" data-p="icmp">ICMP</span><span class="label">Diagnostics</span></div>
+        <div class="proto-rows">
+          <div class="frow"><code>icmp.type == 8</code><span class="fdesc">Echo request (ping out)</span></div>
+          <div class="frow"><code>icmp.type == 0</code><span class="fdesc">Echo reply (ping back)</span></div>
+          <div class="frow"><code>icmp.type == 3</code><span class="fdesc">Destination unreachable</span></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= TCP FLAGS ================= -->
+  <section id="flags">
+    <div class="sec-head">
+      <span class="sec-num">03</span>
+      <h2 class="sec-title">TCP Flags at a Glance</h2>
+    </div>
+    <p class="sec-note">Most anomaly-hunting comes down to reading which flags are set — and which expected flags never show up.</p>
+    <div class="table-wrap">
+      <table class="flags-table">
+        <thead>
+          <tr><th>Flag</th><th>Meaning</th><th>Filter</th><th>Watch for</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>SYN</td><td>Start a new connection</td><td><code>tcp.flags.syn == 1</code></td><td>Many SYNs, few completed handshakes</td></tr>
+          <tr><td>ACK</td><td>Acknowledges received data</td><td><code>tcp.flags.ack == 1</code></td><td>SYN with no matching ACK follow-up</td></tr>
+          <tr><td>RST</td><td>Connection reset / refused</td><td><code>tcp.flags.rst == 1</code></td><td>Bursts of resets from one host — closed ports</td></tr>
+          <tr><td>FIN</td><td>Graceful close</td><td><code>tcp.flags.fin == 1</code></td><td>Missing on connections that just vanish</td></tr>
+          <tr><td>PSH</td><td>Push buffered data to the app now</td><td><code>tcp.flags.push == 1</code></td><td>Marks packets carrying real payload</td></tr>
+          <tr><td>SYN only (no ACK)</td><td>Classic half-open scan probe</td><td><code>tcp.flags.syn==1 &amp;&amp; tcp.flags.ack==0</code></td><td>One source, many destination ports, no data</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ================= ATTACK SIGNATURES ================= -->
+  <section id="attacks">
+    <div class="attack-band">
+      <div class="sec-head">
+        <span class="sec-num">04</span>
+        <h2 class="sec-title">Attack Signature Quick Reference</h2>
+      </div>
+      <p class="sec-note">The six incident types from the SOC Analyst Simulator, and the filter that isolates each one fastest.</p>
+
+      <div class="attack-grid">
+
+        <div class="attack-card">
+          <div class="aname"><span class="aidx">1</span> Port Scan / Recon</div>
+          <p class="tell">One source, many destination ports, each connection ending before real data ever moves.</p>
+          <div class="filter-line"><span class="fl-label">Isolate the probes</span><code>tcp.flags.syn==1 &amp;&amp; tcp.flags.ack==0</code></div>
+          <div class="filter-line"><span class="fl-label">Then narrow to one host</span><code>ip.src == 10.10.10.16</code></div>
+        </div>
+
+        <div class="attack-card">
+          <div class="aname"><span class="aidx">2</span> ARP Spoofing</div>
+          <p class="tell">The same IP address answered "is at" by two different MAC addresses — especially unsolicited replies.</p>
+          <div class="filter-line"><span class="fl-label">Wireshark's built-in check</span><code>arp.duplicate-address-detected</code></div>
+          <div class="filter-line"><span class="fl-label">Manual review</span><code>arp</code></div>
+        </div>
+
+        <div class="attack-card">
+          <div class="aname"><span class="aidx">3</span> Brute Force Login</div>
+          <p class="tell">Rapid-fire USER/PASS pairs from one source, mostly ending in a failure code.</p>
+          <div class="filter-line"><span class="fl-label">Every credential attempt</span><code>ftp.request.command == "PASS"</code></div>
+          <div class="filter-line"><span class="fl-label">Just the failures</span><code>ftp.response.code == 530</code></div>
+        </div>
+
+        <div class="attack-card">
+          <div class="aname"><span class="aidx">4</span> DNS Spoofing</div>
+          <p class="tell">Two answers for the same query and transaction ID, resolving to two different addresses.</p>
+          <div class="filter-line"><span class="fl-label">All name resolution</span><code>dns</code></div>
+          <div class="filter-line"><span class="fl-label">Isolate one transaction</span><code>dns.id == 0x4a2f</code></div>
+        </div>
+
+        <div class="attack-card">
+          <div class="aname"><span class="aidx">5</span> SYN Flood (DoS)</div>
+          <p class="tell">A single destination flooded with SYNs from many unrelated source addresses, none completing.</p>
+          <div class="filter-line"><span class="fl-label">Same base filter as a scan</span><code>tcp.flags.syn==1 &amp;&amp; tcp.flags.ack==0</code></div>
+          <div class="filter-line"><span class="fl-label">Pin it to the victim</span><code>ip.dst == 10.10.5.20</code></div>
+        </div>
+
+        <div class="attack-card">
+          <div class="aname"><span class="aidx">6</span> On-Path Credential Sniffing</div>
+          <p class="tell">A login submitted over plain HTTP — readable the moment traffic passes through an attacker's relay.</p>
+          <div class="filter-line"><span class="fl-label">Find the login POST</span><code>http.request.method == "POST"</code></div>
+          <div class="filter-line"><span class="fl-label">Confirm cleartext creds</span><code>http contains "password"</code></div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CAPTURE FILTERS ================= -->
+  <section id="capture">
+    <div class="sec-head">
+      <span class="sec-num">05</span>
+      <h2 class="sec-title">Capture Filter (BPF) Examples</h2>
+    </div>
+    <p class="sec-note">Set these in the capture options before you hit start — useful when you already know what you're hunting for and don't want to store everything else.</p>
+    <div class="bpf-grid">
+      <div class="bpf-card"><code>host 10.10.5.30</code><div class="fdesc">Only traffic to or from one address</div></div>
+      <div class="bpf-card"><code>tcp port 21</code><div class="fdesc">Only FTP control-channel traffic</div></div>
+      <div class="bpf-card"><code>net 10.10.20.0/24</code><div class="fdesc">Only traffic within a subnet</div></div>
+      <div class="bpf-card"><code>arp or icmp</code><div class="fdesc">Two protocols, combined with "or"</div></div>
+      <div class="bpf-card"><code>tcp[13] &amp; 2 != 0</code><div class="fdesc">Raw byte match for the SYN flag</div></div>
+      <div class="bpf-card"><code>not port 22</code><div class="fdesc">Exclude a noisy port, e.g. your own SSH session</div></div>
+    </div>
+  </section>
+
+  <!-- ================= TIPS ================= -->
+  <section id="tips">
+    <div class="sec-head">
+      <span class="sec-num">06</span>
+      <h2 class="sec-title">Field Notes</h2>
+    </div>
+    <div class="tips-grid">
+      <div class="tip"><strong>Green means valid, not "true"</strong>A green filter bar only means the syntax parses — it can still legitimately match zero packets.</div>
+      <div class="tip"><strong>Right-click, then "Apply as Filter"</strong>Faster and less error-prone than typing a field name from memory.</div>
+      <div class="tip"><strong>Build filters incrementally</strong>Start broad (<code>arp</code>), then add clauses with <code>&amp;&amp;</code> once you see what you're looking at.</div>
+      <div class="tip"><strong>Quotes matter for strings</strong><code>http.request.method == "POST"</code> needs the quotes; numeric and IP comparisons don't.</div>
+      <div class="tip"><strong>Save frequent filters</strong>The bookmark icon on the left of the filter bar stores one for reuse across captures.</div>
+      <div class="tip"><strong>A busy capture? Stack conditions</strong><code>ip.addr==X &amp;&amp; tcp.port==Y &amp;&amp; tcp.flags.syn==1</code> narrows fast.</div>
+    </div>
+  </section>
+
+  <footer>
+    Companion reference for the SOC Analyst Simulator &middot; "Capturing Network Traffic." Filter syntax reflects current Wireshark display-filter and BPF capture-filter conventions.
+  </footer>
+
+</div>
