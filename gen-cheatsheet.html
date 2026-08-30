@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generate Instructional Cheatsheets — LAN153 Prompt Builder</title>
+<style>
+  :root[data-theme="light"] {
+    --bg: #f7f8fa;
+    --surface: #ffffff;
+    --fg: #1b2430;
+    --muted: #5b6675;
+    --border: #dde2e8;
+    --accent: #0f6f6a;
+    --accent-fg: #ffffff;
+    --accent-soft: #e3f3f1;
+    --code-bg: #101820;
+    --code-fg: #dcecea;
+    --shadow: 0 1px 2px rgba(20,30,40,0.06), 0 4px 12px rgba(20,30,40,0.05);
+  }
+  :root[data-theme="dark"] {
+    --bg: #121820;
+    --surface: #1a222c;
+    --fg: #e8edf2;
+    --muted: #9aa7b5;
+    --border: #2b3542;
+    --accent: #4fd1c5;
+    --accent-fg: #0b1f1d;
+    --accent-soft: #16302d;
+    --code-bg: #0b1116;
+    --code-fg: #d7ece9;
+    --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 6px 16px rgba(0,0,0,0.35);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+  }
+  a { color: var(--accent); }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 24px 20px 90px; }
+
+  header.page-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 22px;
+  }
+  .breadcrumb { font-size: 0.85rem; color: var(--muted); text-decoration: none; }
+  .breadcrumb:hover { text-decoration: underline; }
+  h1 { font-size: 1.5rem; margin: 6px 0 4px; }
+  .subtitle { color: var(--muted); font-size: 0.95rem; margin: 0 0 4px; max-width: 68ch; }
+  .theme-toggle {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--fg);
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 380px); gap: 20px; align-items: start; }
+  @media (max-width: 860px) { .layout { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .card > summary, .card > .card-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    font-weight: 700;
+    cursor: pointer;
+    list-style: none;
+  }
+  .card > summary::-webkit-details-marker { display: none; }
+  .card > summary .num, .card-head .num {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--accent-soft); color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem; flex-shrink: 0;
+  }
+  .card-body { padding: 4px 18px 18px; border-top: 1px solid var(--border); }
+  .card[open] .chev { transform: rotate(180deg); }
+  .chev { margin-left: auto; color: var(--muted); transition: transform .15s ease; }
+
+  .field { margin: 14px 0; }
+  .field label, .field legend {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 5px;
+    padding: 0;
+  }
+  .field select, .field input[type="text"], .field input[type="number"] {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: var(--bg);
+    color: var(--fg);
+    font-size: 0.9rem;
+    font-family: inherit;
+  }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 560px) { .row2 { grid-template-columns: 1fr; } }
+  .hint { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+
+  .check-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 6px 14px;
+    margin-top: 4px;
+  }
+  .check-item { display: flex; align-items: flex-start; gap: 7px; font-size: 0.86rem; }
+  .check-item input { margin-top: 3px; flex-shrink: 0; }
+
+  .concepts-box {
+    background: var(--accent-soft);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 0.82rem;
+    color: var(--fg);
+    margin-top: 6px;
+    display: none;
+  }
+  .concepts-box.visible { display: block; }
+  .concepts-box strong { display: block; margin-bottom: 4px; }
+
+  fieldset { border: none; padding: 0; margin: 14px 0; }
+
+  .sticky-panel { position: sticky; top: 16px; }
+  .output-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 18px; font-weight: 700; border-bottom: 1px solid var(--border);
+  }
+  .output-body { padding: 14px 18px; }
+  #promptOutput {
+    width: 100%;
+    min-height: 340px;
+    background: var(--code-bg);
+    color: var(--code-fg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 0.8rem;
+    line-height: 1.45;
+    resize: vertical;
+  }
+  .btn-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .btn {
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--fg);
+    border-radius: 7px;
+    padding: 8px 12px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    cursor: pointer;
+    flex: 1;
+    min-width: 92px;
+  }
+  .btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+  .btn:hover { filter: brightness(0.97); }
+  .copy-flash { color: var(--accent); font-size: 0.8rem; margin-top: 6px; min-height: 1.1em; }
+  .safeguard-note {
+    font-size: 0.78rem;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+    margin-top: 10px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="page-head">
+    <div>
+      <a class="breadcrumb" href="index.html">← LAN153 Course Home</a>
+      <h1>📄 Generate Instructional Cheatsheets</h1>
+      <p class="subtitle">
+        Build a precise, ready-to-paste prompt for generating quick-reference handouts — protocol/algorithm
+        comparisons, framework crosswalks, acronym glossaries, and command/tool syntax cards — scoped to any
+        LAN153 lesson, then hand it to Claude, ChatGPT, Gemini, or Perplexity to draft it.
+      </p>
+    </div>
+    <button class="theme-toggle" id="themeToggle" type="button">🌙 Dark</button>
+  </header>
+
+  <div class="layout">
+    <div class="forms">
+
+      <!-- 1. CONTENT -->
+      <details class="card" open>
+        <summary><span class="num">1</span> Content <span class="chev">▾</span></summary>
+        <div class="card-body">
+          <div class="field">
+            <label for="lesson">Lesson</label>
+            <select id="lesson"></select>
+          </div>
+
+          <div class="row2">
+            <div class="field">
+              <label for="subjectArea">Subject Area / Domain</label>
+              <select id="subjectArea">
+                <option>General Security Concepts</option>
+                <option>Threats, Vulnerabilities &amp; Mitigations</option>
+                <option>Security Architecture</option>
+                <option>Security Operations</option>
+                <option>Governance &amp; Program Management</option>
+                <option>Capstone</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="gradeLevel">Grade / Skill Level</label>
+              <select id="gradeLevel">
+                <option>Community College / Undergraduate</option>
+                <option selected>Adult Workforce Training</option>
+                <option>CompTIA Security+ (SY0-701) Exam Prep</option>
+                <option>Graduate / Professional</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="customTopic">Custom Topic / Title Override <span style="font-weight:400;">(optional)</span></label>
+            <input type="text" id="customTopic" placeholder="Leave blank to use the selected lesson title">
+          </div>
+
+          <div class="concepts-box" id="conceptsBox">
+            <strong>Major concepts, terms &amp; commands for this lesson (for reference):</strong>
+            <span id="conceptsText"></span>
+          </div>
+
+          <fieldset class="field">
+            <legend>Learning Objective(s) to Support</legend>
+            <div class="check-grid" id="objectivesGrid"></div>
+            <div class="hint">Objectives update automatically based on the selected lesson. Check one or more.</div>
+          </fieldset>
+        </div>
+      </details>
+
+      <!-- 2. CHEATSHEET TYPE -->
+      <details class="card" open>
+        <summary><span class="num">2</span> Cheatsheet Type <span class="chev">▾</span></summary>
+        <div class="card-body">
+          <div class="field">
+            <label for="cheatsheetType">Cheatsheet Type</label>
+            <select id="cheatsheetType">
+              <option>Let the model choose based on content</option>
+              <option selected>Protocol / algorithm comparison table *</option>
+              <option>Framework / regulation crosswalk (NIST CSF, ISO 27001, PCI DSS, HIPAA, GDPR)</option>
+              <option>Acronym &amp; abbreviation glossary</option>
+              <option>Terminology quick-reference</option>
+              <option>Threat actor &amp; attack technique (TTP) reference card</option>
+              <option>Command-line / tool syntax quick-reference</option>
+              <option>Incident response &amp; forensics checklist</option>
+              <option>Access control model comparison (RBAC / ABAC / MAC / DAC)</option>
+            </select>
+          </div>
+        </div>
+      </details>
+
+      <!-- 3. FORMAT & LAYOUT -->
+      <details class="card" open>
+        <summary><span class="num">3</span> Format &amp; Layout <span class="chev">▾</span></summary>
+        <div class="card-body">
+          <div class="row2">
+            <div class="field">
+              <label for="layoutStyle">Layout Style</label>
+              <select id="layoutStyle">
+                <option selected>Table / grid *</option>
+                <option>Bulleted reference list</option>
+                <option>Two-column comparison</option>
+                <option>Flowchart / decision tree</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="pageSize">Page Size</label>
+              <select id="pageSize">
+                <option selected>Letter, portrait *</option>
+                <option>Letter, landscape</option>
+                <option>Half-page handout</option>
+                <option>Digital-only (no print constraints)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="density">Density</label>
+            <select id="density">
+              <option>Minimal — key terms only</option>
+              <option selected>Moderate — terms + short definitions *</option>
+              <option>Comprehensive — full reference detail</option>
+            </select>
+          </div>
+        </div>
+      </details>
+
+      <!-- 4. CONTENT DEPTH & STYLE -->
+      <details class="card">
+        <summary><span class="num">4</span> Content Depth &amp; Style <span class="chev">▾</span></summary>
+        <div class="card-body">
+          <div class="row2">
+            <div class="field">
+              <label for="detailLevel">Detail Level per Entry</label>
+              <select id="detailLevel">
+                <option selected>One-line definitions *</option>
+                <option>Short paragraph per entry</option>
+                <option>Include a worked example or sample syntax per entry</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="terminologyHandling">Terminology Handling</label>
+              <select id="terminologyHandling">
+                <option selected>Define every acronym on first use *</option>
+                <option>Include a pronunciation / expansion key</option>
+                <option>Assume audience already knows basic IT terms</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="sortOrder">Sorting / Organization</label>
+            <select id="sortOrder">
+              <option>Alphabetical</option>
+              <option selected>By category / cluster *</option>
+              <option>By day / lesson sequence</option>
+              <option>By SY0-701 exam domain (1.0–5.0)</option>
+            </select>
+          </div>
+        </div>
+      </details>
+
+      <!-- 5. OUTPUT SPECIFICATIONS -->
+      <details class="card">
+        <summary><span class="num">5</span> Output Specifications <span class="chev">▾</span></summary>
+        <div class="card-body">
+          <div class="field">
+            <label for="outputFormat">Output Format</label>
+            <select id="outputFormat">
+              <option selected>Markdown table *</option>
+              <option>Plain text list</option>
+              <option>LMS-ready HTML</option>
+              <option>CSV / spreadsheet-ready</option>
+            </select>
+          </div>
+          <fieldset class="field">
+            <legend>Options</legend>
+            <div class="check-grid">
+              <label class="check-item"><input type="checkbox" data-group="cheatOption" value="Include a title/header block" checked>Include a title/header block</label>
+              <label class="check-item"><input type="checkbox" data-group="cheatOption" value="Include a &quot;last updated&quot; / version footer">Include a "last updated" / version footer</label>
+              <label class="check-item"><input type="checkbox" data-group="cheatOption" value="Map each entry to its SY0-701 exam objective number" checked>Map each entry to its SY0-701 exam objective number</label>
+              <label class="check-item"><input type="checkbox" data-group="cheatOption" value="Leave blank space for handwritten notes">Leave blank space for handwritten notes</label>
+            </div>
+          </fieldset>
+        </div>
+      </details>
+
+      <!-- 6. PEDAGOGICAL CONSTRAINTS -->
+      <details class="card">
+        <summary><span class="num">6</span> Pedagogical Constraints <span class="chev">▾</span></summary>
+        <div class="card-body">
+          <div class="check-grid" style="grid-template-columns:1fr;">
+            <label class="check-item"><input type="checkbox" data-group="pedConstraint" value="Keep entries accurate and verifiable; do not invent CVE numbers, RFC numbers, or version numbers" checked>Keep entries accurate and verifiable; do not invent CVE numbers, RFC numbers, or version numbers</label>
+            <label class="check-item"><input type="checkbox" data-group="pedConstraint" value="Do not name real, identifiable organizations, breach victims, or individuals" checked>Do not name real, identifiable organizations, breach victims, or individuals</label>
+            <label class="check-item"><input type="checkbox" data-group="pedConstraint" value="Do not include exploit code, working attack instructions, or credentials — command syntax should be limited to legitimate diagnostic/administrative use" checked>Do not include exploit code, working attack instructions, or credentials — command syntax should be limited to legitimate diagnostic/administrative use</label>
+            <label class="check-item"><input type="checkbox" data-group="pedConstraint" value="Keep language classroom-appropriate and free of unnecessary jargon" checked>Keep language classroom-appropriate and free of unnecessary jargon</label>
+            <label class="check-item"><input type="checkbox" data-group="pedConstraint" value="Ensure content fits within the selected page size if a print format was chosen" checked>Ensure content fits within the selected page size if a print format was chosen</label>
+            <label class="check-item"><input type="checkbox" data-group="pedConstraint" value="Align terminology and scope with CompTIA Security+ SY0-701 exam objectives">Align terminology and scope with CompTIA Security+ SY0-701 exam objectives</label>
+            <label class="check-item"><input type="checkbox" data-group="pedConstraint" value="Match reading level to a community college / adult workforce audience">Match reading level to a community college / adult workforce audience</label>
+          </div>
+        </div>
+      </details>
+
+      <!-- TARGET MODEL -->
+      <details class="card" open>
+        <summary><span class="num">7</span> Target Model <span class="chev">▾</span></summary>
+        <div class="card-body">
+          <div class="field">
+            <label for="targetModel">Generate this prompt for</label>
+            <select id="targetModel">
+              <option selected>Claude *</option>
+              <option>ChatGPT</option>
+              <option>Gemini</option>
+              <option>Perplexity</option>
+            </select>
+            <div class="hint">Phrasing adjusts slightly depending on the target model's conventions.</div>
+          </div>
+        </div>
+      </details>
+
+    </div>
+
+    <!-- OUTPUT PANEL -->
+    <div class="sticky-panel">
+      <div class="card">
+        <div class="output-head">
+          <span>Generated Prompt</span>
+        </div>
+        <div class="output-body">
+          <textarea id="promptOutput" readonly></textarea>
+          <div class="btn-row">
+            <button class="btn primary" id="copyBtn" type="button">Copy</button>
+            <button class="btn" id="downloadBtn" type="button">⬇ Download .TXT</button>
+            <button class="btn" id="resetBtn" type="button">↺ Reset</button>
+          </div>
+          <div class="copy-flash" id="copyFlash"></div>
+          <div class="safeguard-note">
+            Built for the LAN153 CompTIA Security+ (SY0-701) course · Moraine Valley Community College.
+            Review generated cheatsheets against your institution's Safeguards &amp; Responsible Use policy before classroom use.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// =====================================================================
+// LAN153 LESSON DATA — title, cluster, major concepts/commands, learning objectives
+// Source: LAN153 course design (12 lessons, CompTIA Security+ SY0-701)
+// =====================================================================
+const LESSONS = [
+  {
+    title: "Security Controls & the CIA Triad",
+    day: "Day 1", cluster: "General Security Concepts",
+    concepts: [
+      "CIA triad: confidentiality, integrity, availability",
+      "Non-repudiation and the AAA framework (authentication, authorization, accounting)",
+      "Security control categories: technical, managerial, operational, physical",
+      "Security control types: preventive, deterrent, detective, corrective, compensating, directive",
+      "Gap analysis and control selection",
+      "Zero Trust foundational vocabulary (control plane vs. data plane)",
+      "Change management and change control basics"
+    ],
+    objectives: [
+      "Explain the CIA triad and how non-repudiation and AAA extend it.",
+      "Classify a given security control by both category (technical/managerial/operational/physical) and type (preventive/detective/corrective/deterrent/compensating/directive).",
+      "Identify gaps between current and desired security posture using a simple gap analysis.",
+      "Describe how Zero Trust reframes trust assumptions relative to traditional perimeter security.",
+      "Evaluate a described control set for redundancy or missing control types across a simple scenario."
+    ]
+  },
+  {
+    title: "Cryptographic Solutions & PKI",
+    day: "Day 1", cluster: "General Security Concepts",
+    concepts: [
+      "Symmetric vs. asymmetric encryption",
+      "Hashing algorithms (SHA-256, bcrypt) and salting",
+      "Digital signatures and non-repudiation",
+      "PKI components: CA, RA, CRL, OCSP, certificate chains",
+      "Certificate types and key escrow",
+      "Steganography and obfuscation",
+      "Key CLI/tool syntax: openssl genrsa, openssl req, openssl x509, openssl s_client, gpg"
+    ],
+    objectives: [
+      "Explain the difference between symmetric and asymmetric encryption and when each is used.",
+      "Describe how hashing and salting protect stored credentials, and why hashing is not encryption.",
+      "Identify the role of each PKI component (CA, RA, CRL, OCSP) in issuing and validating a certificate.",
+      "Configure, in simulation, a self-signed certificate and interpret its fields using openssl syntax.",
+      "Evaluate a certificate chain scenario and identify where trust would fail to validate."
+    ]
+  },
+  {
+    title: "Threat Actors & Attack Surfaces",
+    day: "Day 1", cluster: "Threats, Vulnerabilities & Mitigations",
+    concepts: [
+      "Threat actor types: nation-state, unskilled attacker, hacktivist, insider threat, organized crime, shadow IT",
+      "Threat actor attributes: internal/external, resources/funding, sophistication/capability, motivation",
+      "Attack surface vs. attack vector",
+      "Common vectors: email, image-based, file-based, voice call, removable media, unsecured network, supply chain, social media",
+      "OSINT reconnaissance concepts",
+      "Key CLI/tool syntax: whois, nslookup, dig"
+    ],
+    objectives: [
+      "Identify the primary categories of threat actors and the motivations that distinguish them.",
+      "Compare threat actor attributes (resources, sophistication, internal/external) across two contrasting actor types.",
+      "Distinguish an attack surface from an attack vector using a described network scenario.",
+      "Describe how OSINT reconnaissance tools (whois, nslookup, dig) surface information usable in a later attack stage.",
+      "Evaluate a scenario to identify which attack vector was most likely exploited."
+    ]
+  },
+  {
+    title: "Social Engineering & Human Vectors",
+    day: "Day 2", cluster: "Threats, Vulnerabilities & Mitigations",
+    concepts: [
+      "Phishing, vishing, smishing, and business email compromise",
+      "Pretexting, impersonation, and typosquatting",
+      "Watering hole attacks and brand impersonation",
+      "Principles of influence exploited by social engineering (authority, urgency, scarcity, trust)",
+      "Email authentication checks: SPF, DKIM, DMARC",
+      "Key CLI/tool syntax: dig txt (for SPF/DMARC record lookups)"
+    ],
+    objectives: [
+      "Distinguish phishing, vishing, smishing, and business email compromise by delivery channel and target.",
+      "Explain which principles of influence a given social engineering scenario relies on.",
+      "Identify how SPF, DKIM, and DMARC records help validate legitimate email senders.",
+      "Evaluate a sample email header or message for social engineering indicators.",
+      "Design a short awareness-training talking point addressing one social engineering vector."
+    ]
+  },
+  {
+    title: "Vulnerabilities & Vulnerability Management",
+    day: "Day 2", cluster: "Threats, Vulnerabilities & Mitigations",
+    concepts: [
+      "Vulnerability classes: memory injection, buffer overflow, race conditions (TOCTOU), misconfiguration, zero-day",
+      "Web-application vulnerabilities: SQL injection, cross-site scripting (XSS)",
+      "Cloud, virtualization, and supply-chain vulnerabilities",
+      "CVE identifiers and CVSS scoring",
+      "Vulnerability scanning vs. penetration testing vs. responsible disclosure",
+      "Key CLI/tool syntax: nmap (service/version scan), representative scanner names (Nessus, OpenVAS)"
+    ],
+    objectives: [
+      "Explain the difference between a vulnerability, a threat, and a risk.",
+      "Identify the components of a CVE identifier and a CVSS base score.",
+      "Compare vulnerability scanning and penetration testing in terms of goals, scope, and authorization.",
+      "Configure, in simulation, an nmap service/version scan and interpret its output fields.",
+      "Evaluate a scan result and prioritize remediation using CVSS severity and asset criticality."
+    ]
+  },
+  {
+    title: "Malware & Application Attacks",
+    day: "Day 3", cluster: "Threats, Vulnerabilities & Mitigations",
+    concepts: [
+      "Malware types: ransomware, trojan, worm, spyware, keylogger, logic bomb, rootkit, bloatware",
+      "Application attacks: injection, buffer overflow, replay, privilege escalation, forgery (CSRF), directory traversal",
+      "Password attacks: brute force, password spraying, credential stuffing",
+      "Indicators of compromise (IoCs)",
+      "Key CLI/tool syntax: representative password/brute-force tool names (ncrack, hashcat, John the Ripper) discussed conceptually — no working syntax or live targets"
+    ],
+    objectives: [
+      "Classify a described malware sample by its primary behavior (ransomware, worm, rootkit, etc.).",
+      "Explain how a buffer overflow or injection attack violates the intended boundaries of an application.",
+      "Distinguish brute-force, password-spraying, and credential-stuffing attacks by technique and detection signature.",
+      "Identify indicators of compromise associated with a described malware or application-attack scenario.",
+      "Evaluate a simulated SSH brute-force log excerpt and recommend an appropriate compensating control (e.g., rate limiting, account lockout, sshguard-style protection)."
+    ]
+  },
+  {
+    title: "Network Security Architecture & Segmentation",
+    day: "Day 3", cluster: "Security Architecture",
+    concepts: [
+      "Network architecture models: on-premises, cloud, hybrid, infrastructure as code (IaC)",
+      "Segmentation, VLANs, and screened subnets (DMZ)",
+      "Firewall types: packet-filtering, stateful, next-generation (NGFW), WAF",
+      "IDS vs. IPS placement",
+      "Port security and 802.1X",
+      "Key CLI/tool syntax: netstat, tcpdump, Wireshark display filters, traceroute"
+    ],
+    objectives: [
+      "Explain why network segmentation limits the blast radius of a compromise.",
+      "Compare packet-filtering, stateful, and next-generation firewalls by inspection capability.",
+      "Distinguish IDS from IPS in terms of placement and response action.",
+      "Configure, in simulation, a basic Wireshark or tcpdump filter to isolate traffic of interest.",
+      "Evaluate a simple network diagram and recommend where to place a screened subnet, firewall, and IDS/IPS sensor."
+    ]
+  },
+  {
+    title: "Zero Trust & Secure Infrastructure Design",
+    day: "Day 4", cluster: "Security Architecture",
+    concepts: [
+      "Zero Trust pillars: policy engine, policy administrator, policy enforcement point (control plane vs. data plane)",
+      "Secure infrastructure components: VPN, NAC, secure web gateway, CASB",
+      "High availability: load balancing, failover, geographic dispersion",
+      "Physical security controls: bollards, fencing, sensors, access badges",
+      "Key CLI/tool syntax: openssl s_client -connect (TLS handshake check), curl -I (header inspection)"
+    ],
+    objectives: [
+      "Explain the role of the policy engine, policy administrator, and policy enforcement point in a Zero Trust architecture.",
+      "Compare VPN, NAC, and CASB as secure-infrastructure controls and identify which addresses which risk.",
+      "Describe how load balancing and geographic dispersion contribute to high availability.",
+      "Configure, in simulation, a TLS handshake check using openssl s_client and interpret the certificate output.",
+      "Evaluate a described infrastructure scenario and recommend a Zero Trust control placement."
+    ]
+  },
+  {
+    title: "Identity & Access Management (IAM) and MFA",
+    day: "Day 4", cluster: "Security Operations",
+    concepts: [
+      "IAM concepts: identity provider, single sign-on (SSO), federation, SAML, OAuth",
+      "Access control models: RBAC, ABAC, MAC, DAC",
+      "MFA factors: something you know/have/are, and biometrics",
+      "Privileged access management (PAM) and just-in-time access",
+      "Password policies and password managers",
+      "Key CLI/tool syntax: ldapsearch (directory query, conceptual)"
+    ],
+    objectives: [
+      "Explain how SSO and federation reduce the number of credentials a user must manage.",
+      "Compare RBAC, ABAC, MAC, and DAC access control models and identify an appropriate use case for each.",
+      "Identify the three MFA factor categories and give an example of each.",
+      "Describe how PAM and just-in-time access reduce standing privileged-account risk.",
+      "Evaluate a described access scenario and recommend an access control model and MFA configuration."
+    ]
+  },
+  {
+    title: "Security Monitoring, Incident Response & Forensics",
+    day: "Day 5", cluster: "Security Operations",
+    concepts: [
+      "SIEM and SOAR: log aggregation, correlation, and automated response",
+      "Incident response lifecycle: preparation, detection, analysis, containment, eradication, recovery, lessons learned",
+      "Digital forensics: chain of custody, order of volatility, legal hold",
+      "ARP poisoning as a monitored network anomaly",
+      "Key CLI/tool syntax: arp -a, tcpdump, grep/awk on logs, journalctl"
+    ],
+    objectives: [
+      "Explain the difference between a SIEM and a SOAR platform in a security operations workflow.",
+      "Sequence the phases of the incident response lifecycle and describe the goal of each phase.",
+      "Identify the order-of-volatility principle and apply it to a described evidence-collection scenario.",
+      "Configure, in simulation, an arp -a check to identify a suspicious duplicate MAC-to-IP mapping consistent with ARP poisoning.",
+      "Evaluate a simulated alert queue and triage by asset criticality and confidence rather than volume alone."
+    ]
+  },
+  {
+    title: "Governance, Risk Management & Compliance",
+    day: "Day 5", cluster: "Governance & Program Management",
+    concepts: [
+      "Governance structures and policy hierarchy (policy, standard, procedure, guideline)",
+      "Risk management process: identification, assessment (qualitative/quantitative), analysis",
+      "Risk calculations: SLE, ARO, ALE",
+      "Risk treatment: accept, avoid, transfer, mitigate",
+      "Regulations and frameworks: GDPR, PCI DSS, HIPAA, NIST CSF, ISO/IEC 27001",
+      "Third-party and vendor risk management, audits and assessments"
+    ],
+    objectives: [
+      "Differentiate a policy, a standard, a procedure, and a guideline within a governance hierarchy.",
+      "Calculate SLE, ARO, and ALE from a described asset and threat scenario.",
+      "Compare the four risk treatment strategies (accept, avoid, transfer, mitigate) and select one for a given scenario with justification.",
+      "Identify the primary scope and applicability of GDPR, PCI DSS, HIPAA, NIST CSF, and ISO/IEC 27001.",
+      "Evaluate a third-party vendor scenario and recommend an appropriate risk assessment and contractual control."
+    ]
+  },
+  {
+    title: "Capstone: Build and Teach Your Own Security+ Module",
+    day: "Day 5", cluster: "Capstone",
+    concepts: [
+      "Learning objectives (self-authored, mapped to SY0-701 domains)",
+      "Lab or simulation design",
+      "Rubric design and assessment alignment",
+      "Peer review"
+    ],
+    objectives: [
+      "Author original learning objectives mapped to a chosen SY0-701 domain, a hands-on simulation, an assessment with rubric, and a safeguards statement for a self-selected Security+ topic.",
+      "Teach a segment of the module and incorporate peer and instructor feedback."
+    ]
+  }
+];
+
+// ---- Populate lesson dropdown ----
+const lessonSel = document.getElementById('lesson');
+LESSONS.forEach((l, i) => {
+  const opt = document.createElement('option');
+  opt.value = i;
+  opt.textContent = `${l.day} — ${l.title}`;
+  lessonSel.appendChild(opt);
+});
+
+const subjectAreaSel = document.getElementById('subjectArea');
+const conceptsBox = document.getElementById('conceptsBox');
+const conceptsText = document.getElementById('conceptsText');
+const objectivesGrid = document.getElementById('objectivesGrid');
+
+function renderLessonDetails() {
+  const lesson = LESSONS[lessonSel.value];
+  subjectAreaSel.value = lesson.cluster;
+  conceptsText.textContent = lesson.concepts.join(' • ');
+  conceptsBox.classList.add('visible');
+
+  objectivesGrid.innerHTML = '';
+  lesson.objectives.forEach((obj, idx) => {
+    const label = document.createElement('label');
+    label.className = 'check-item';
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    input.dataset.group = 'objectives';
+    input.value = obj;
+    if (idx === 0) input.checked = true;
+    label.appendChild(input);
+    label.appendChild(document.createTextNode(obj));
+    objectivesGrid.appendChild(label);
+    input.addEventListener('change', buildPrompt);
+  });
+  buildPrompt();
+}
+
+lessonSel.addEventListener('change', renderLessonDetails);
+
+// ---- Gather helpers ----
+function checkedValues(groupName) {
+  return Array.from(document.querySelectorAll(`input[data-group="${groupName}"]:checked`)).map(i => i.value);
+}
+function val(id) { return document.getElementById(id).value; }
+
+// ---- Build the prompt text ----
+function buildPrompt() {
+  const lesson = LESSONS[lessonSel.value];
+  const topic = val('customTopic').trim() || lesson.title;
+  const objectives = checkedValues('objectives');
+  const cheatOptions = checkedValues('cheatOption');
+  const pedConstraints = checkedValues('pedConstraint');
+  const model = val('targetModel').replace(' *', '');
+
+  const lines = [];
+
+  const modelIntros = {
+    Claude: "You are helping design a classroom quick-reference handout. Generate a cheatsheet with the following specifications:",
+    ChatGPT: "Generate a classroom quick-reference cheatsheet with the following specifications:",
+    Gemini: "Create an educational reference handout based on these specifications:",
+    Perplexity: "Produce an instructional quick-reference cheatsheet following these specifications:"
+  };
+  lines.push(modelIntros[model] || modelIntros.Claude);
+  lines.push('');
+
+  lines.push('CONTENT');
+  lines.push(`- Lesson: ${lesson.day} — ${topic} (LAN153: CompTIA Security+ SY0-701)`);
+  lines.push(`- Subject area / domain: ${val('subjectArea')}`);
+  lines.push(`- Audience / skill level: ${val('gradeLevel')}`);
+  if (objectives.length) {
+    lines.push('- Learning objective(s) this cheatsheet should support:');
+    objectives.forEach(o => lines.push(`  • ${o}`));
+  }
+  lines.push('');
+
+  lines.push('CHEATSHEET TYPE');
+  lines.push(`- ${val('cheatsheetType').replace(' *', '')}`);
+  lines.push('');
+
+  lines.push('FORMAT & LAYOUT');
+  lines.push(`- Layout style: ${val('layoutStyle').replace(' *', '')}`);
+  lines.push(`- Page size: ${val('pageSize').replace(' *', '')}`);
+  lines.push(`- Density: ${val('density').replace(' *', '')}`);
+  lines.push('');
+
+  lines.push('CONTENT DEPTH & STYLE');
+  lines.push(`- Detail level per entry: ${val('detailLevel').replace(' *', '')}`);
+  lines.push(`- Terminology handling: ${val('terminologyHandling').replace(' *', '')}`);
+  lines.push(`- Sorting / organization: ${val('sortOrder').replace(' *', '')}`);
+  lines.push('');
+
+  lines.push('OUTPUT SPECIFICATIONS');
+  lines.push(`- Output format: ${val('outputFormat').replace(' *', '')}`);
+  if (cheatOptions.length) {
+    cheatOptions.forEach(o => lines.push(`- ${o}`));
+  }
+  lines.push('');
+
+  if (pedConstraints.length) {
+    lines.push('PEDAGOGICAL & SAFEGUARD CONSTRAINTS');
+    pedConstraints.forEach(c => lines.push(`- ${c}`));
+    lines.push('');
+  }
+
+  lines.push('This cheatsheet is for classroom teaching use in a CompTIA Security+ (SY0-701) course for community college and workforce training students.');
+
+  document.getElementById('promptOutput').value = lines.join('\n');
+}
+
+// ---- Wire up every input to rebuild the prompt live ----
+document.querySelectorAll('select, input[type="text"], input[type="checkbox"], input[type="number"]').forEach(el => {
+  el.addEventListener('input', buildPrompt);
+  el.addEventListener('change', buildPrompt);
+});
+
+// ---- Copy / Download / Reset ----
+document.getElementById('copyBtn').addEventListener('click', function () {
+  const ta = document.getElementById('promptOutput');
+  ta.select();
+  document.execCommand('copy');
+  const flash = document.getElementById('copyFlash');
+  flash.textContent = 'Copied to clipboard.';
+  setTimeout(() => flash.textContent = '', 2000);
+});
+
+document.getElementById('downloadBtn').addEventListener('click', function () {
+  const text = document.getElementById('promptOutput').value;
+  const blob = new Blob([text], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'lan153-instructional-cheatsheet-prompt.txt';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById('resetBtn').addEventListener('click', function () {
+  document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
+  document.getElementById('customTopic').value = '';
+  lessonSel.value = 0;
+  document.querySelectorAll('input[data-group="cheatOption"]').forEach(c => {
+    if (c.value.startsWith('Include a title') || c.value.startsWith('Map each entry')) c.checked = true;
+  });
+  document.querySelectorAll('input[data-group="pedConstraint"]').forEach((c, i) => { if (i < 5) c.checked = true; });
+  renderLessonDetails();
+});
+
+// ---- Theme toggle ----
+document.getElementById('themeToggle').addEventListener('click', function () {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  this.textContent = isDark ? '🌙 Dark' : '☀️ Light';
+});
+
+// ---- Init ----
+lessonSel.value = 0;
+renderLessonDetails();
+</script>
+</body>
+</html>
