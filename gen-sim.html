@@ -1,571 +1,1920 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cybersecurity Simulator Prompt Studio</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts Inter & JetBrains Mono for Code -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-    <!-- FontAwesome for Cyber Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
-                    },
-                    colors: {
-                        cyber: {
-                            bg: '#0a0f1d',
-                            accent: '#10b981', // emerald-500
-                            darkAccent: '#047857', // emerald-700
-                            lightAccent: '#34d399', // emerald-400
-                            card: '#111827', // slate-900
-                            panel: '#1f2937', // slate-800
-                            border: '#374151' // slate-700
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #0f172a;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #1e293b;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #10b981;
-        }
-        .cyber-glow:hover {
-            box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
-            transition: all 0.3s ease;
-        }
-        .glow-accent {
-            text-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
-        }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Simulator Prompt Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,300..900,0..100&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f5efe4;
+    --paper-deep: #ebe3d3;
+    --ink: #1c1a17;
+    --ink-soft: #3d3832;
+    --rule: #c9bfa9;
+    --rule-soft: #ddd3bd;
+    --accent: #b8431f;
+    --accent-deep: #8a2f12;
+    --highlight: #f0c850;
+    --success: #2d6a3e;
+    --card-bg: #faf6ec;
+    --head-bg: #1c1a17;
+    --head-ink: #f5efe4;
+    --shadow: 0 1px 0 rgba(28,26,23,0.08), 0 8px 24px -12px rgba(28,26,23,0.18);
+    --select-arrow: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3e%3cpath d='M3 4.5l3 3 3-3' stroke='%231c1a17' fill='none' stroke-width='1.2'/%3e%3c/svg%3e");
+  }
+  [data-theme="dark"] {
+    --paper: #1d1b18;
+    --paper-deep: #26231f;
+    --ink: #ede6d8;
+    --ink-soft: #bdb4a4;
+    --rule: #4a443b;
+    --rule-soft: #38332c;
+    --accent: #e0754f;
+    --accent-deep: #c95a35;
+    --success: #5fae74;
+    --card-bg: #24211d;
+    --head-bg: #0f0e0c;
+    --head-ink: #ede6d8;
+    --shadow: 0 1px 0 rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.6);
+    --select-arrow: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3e%3cpath d='M3 4.5l3 3 3-3' stroke='%23ede6d8' fill='none' stroke-width='1.2'/%3e%3c/svg%3e");
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.55;
+    min-height: 100vh;
+  }
+
+  body {
+    background-image:
+      radial-gradient(circle at 10% 0%, rgba(184,67,31,0.04), transparent 40%),
+      radial-gradient(circle at 90% 100%, rgba(45,106,62,0.04), transparent 40%);
+  }
+
+  button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, .toggle:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+
+  /* ====== Masthead ====== */
+  .masthead {
+    border-bottom: 1px solid var(--ink);
+    padding: 28px 48px 20px;
+    background: var(--paper);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    backdrop-filter: blur(8px);
+  }
+  .masthead-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .title-block { flex: 1; min-width: 300px; }
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .eyebrow::after {
+    content: '';
+    flex: 1;
+    max-width: 140px;
+    height: 1px;
+    background: var(--accent);
+    opacity: 0.4;
+  }
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: clamp(32px, 4.5vw, 52px);
+    line-height: 1.0;
+    letter-spacing: -0.02em;
+    font-variation-settings: "SOFT" 30, "opsz" 144;
+  }
+  h1 em { font-style: italic; font-weight: 300; color: var(--accent); }
+  .subtitle {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: 17px;
+    color: var(--ink-soft);
+    margin-top: 8px;
+    max-width: 620px;
+  }
+  .masthead-actions { display: flex; gap: 8px; align-items: center; }
+  .pill {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    border: 1px solid var(--ink);
+    border-radius: 100px;
+    color: var(--ink);
+    background: transparent;
+  }
+  .pill.accent { background: var(--ink); color: var(--paper); }
+  button.pill, a.pill { cursor: pointer; text-decoration: none; }
+  button.pill:hover, a.pill:hover { background: var(--ink); color: var(--paper); }
+
+  /* ====== Main Layout ====== */
+  .canvas {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 32px 48px 80px;
+    display: grid;
+    grid-template-columns: 1fr 480px;
+    gap: 40px;
+    align-items: start;
+  }
+  @media (max-width: 1100px) {
+    .canvas { grid-template-columns: 1fr; }
+    .masthead, .canvas { padding-left: 24px; padding-right: 24px; }
+  }
+
+  /* ====== Section Styling ====== */
+  .section { margin-bottom: 44px; position: relative; }
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .section-number {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+  }
+  .section-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 24px;
+    letter-spacing: -0.01em;
+    font-variation-settings: "SOFT" 50;
+  }
+  .section-hint {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    color: var(--ink-soft);
+    font-size: 14px;
+    margin-left: auto;
+    text-align: right;
+  }
+
+  /* ====== Form Controls ====== */
+  .field-grid { display: grid; gap: 16px; }
+  .field-grid.two { grid-template-columns: 1fr 1fr; }
+  .field-grid.three { grid-template-columns: 1fr 1fr 1fr; }
+  @media (max-width: 700px) { .field-grid.two, .field-grid.three { grid-template-columns: 1fr; } }
+  label.field { display: block; }
+  .field-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+    display: block;
+  }
+  input[type="text"], textarea, select {
+    width: 100%;
+    background: var(--card-bg);
+    border: 1px solid var(--rule);
+    padding: 10px 14px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    transition: all 0.15s ease;
+    border-radius: 2px;
+  }
+  input[type="text"]:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--ink);
+    background: var(--paper);
+  }
+  textarea {
+    resize: vertical;
+    min-height: 70px;
+    font-family: 'Fraunces', serif;
+    font-size: 15px;
+    line-height: 1.45;
+  }
+  select {
+    appearance: none;
+    background-image: var(--select-arrow);
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+    cursor: pointer;
+  }
+  select:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* ====== Graphic Type & Persona Cards ====== */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+  }
+  .persona-grid { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+  .gcard {
+    background: var(--card-bg);
+    border: 1px solid var(--rule);
+    padding: 16px 16px 14px;
+    cursor: pointer;
+    transition: all 0.18s cubic-bezier(0.2, 0, 0.2, 1);
+    position: relative;
+    text-align: left;
+    font-family: inherit;
+    color: inherit;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .gcard:hover { border-color: var(--ink); transform: translateY(-1px); box-shadow: var(--shadow); }
+  .gcard.selected {
+    border-color: var(--accent);
+    background: var(--paper);
+    box-shadow: 0 0 0 1px var(--accent), var(--shadow);
+  }
+  .gcard.selected::after {
+    content: '✓';
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .gcard-name {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 17px;
+    margin-bottom: 4px;
+    font-variation-settings: "SOFT" 30;
+    padding-right: 18px;
+  }
+  .gcard-purpose {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .gcard-desc { font-size: 12.5px; color: var(--ink-soft); line-height: 1.45; }
+
+  .panel-summary {
+    margin-top: 14px;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--ink-soft);
+  }
+
+  /* ====== Fit note ====== */
+  .fit-note {
+    margin-top: 18px;
+    padding: 14px 18px;
+    background: var(--paper-deep);
+    border-left: 3px solid var(--accent);
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 14.5px;
+    color: var(--ink-soft);
+    border-radius: 0 2px 2px 0;
+    display: none;
+  }
+  .fit-note.visible { display: block; }
+  .fit-note strong {
+    font-style: normal;
+    color: var(--ink);
+    font-weight: 600;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  /* ====== Chip group ====== */
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    padding: 7px 13px;
+    border: 1px solid var(--rule);
+    background: var(--card-bg);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    border-radius: 100px;
+    transition: all 0.15s ease;
+    color: var(--ink);
+  }
+  .chip:hover { border-color: var(--ink); }
+  .chip.selected { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+
+  /* ====== Lesson loader ====== */
+  .lesson-empty {
+    margin-top: 16px;
+    padding: 18px;
+    border: 1px dashed var(--rule);
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    color: var(--ink-soft);
+    text-align: center;
+  }
+  .lesson-card {
+    margin-top: 16px;
+    background: var(--card-bg);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 18px 20px 14px;
+  }
+  .lesson-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .lesson-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 21px;
+    line-height: 1.2;
+  }
+  .lesson-domain {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin-top: 2px;
+  }
+  .badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 4px 9px;
+    border: 1px solid currentColor;
+    border-radius: 100px;
+    white-space: nowrap;
+  }
+  .badge.full { color: var(--success); }
+  .badge.nav { color: var(--accent); }
+  .lesson-note {
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+  .lesson-tools {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin: 14px 0 6px;
+    padding-top: 12px;
+    border-top: 1px solid var(--rule-soft);
+  }
+  .mini-btn {
+    padding: 6px 12px;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 12.5px;
+    cursor: pointer;
+    border-radius: 2px;
+    color: var(--ink);
+    transition: all 0.15s ease;
+  }
+  .mini-btn:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .scope-count {
+    margin-left: auto;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-soft);
+  }
+  .scope-warn {
+    margin: 8px 0 4px;
+    padding: 10px 14px;
+    background: var(--paper-deep);
+    border-left: 3px solid var(--highlight);
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+  .sec-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 16px;
+    margin-top: 16px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--rule-soft);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .sec-title .mini-btn { font-size: 11.5px; padding: 3px 9px; }
+  .topic { padding: 8px 0; border-bottom: 1px dashed var(--rule-soft); }
+  .topic:last-child { border-bottom: none; }
+  .topic-row { display: flex; align-items: center; gap: 10px; }
+  .topic-row input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--accent);
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+  .topic-row label { flex: 1; font-size: 14px; cursor: pointer; }
+  .topic-count {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    color: var(--ink-soft);
+  }
+  .expand-btn {
+    background: none;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    font-size: 11.5px;
+    padding: 3px 9px;
+    cursor: pointer;
+    color: var(--ink-soft);
+    font-family: 'IBM Plex Sans', sans-serif;
+  }
+  .expand-btn:hover { border-color: var(--ink); color: var(--ink); }
+  .concepts { margin: 8px 0 4px 26px; }
+  .concept-chip { font-size: 12px; padding: 5px 10px; }
+  .topic-note {
+    margin: 6px 0 0 26px;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+
+  /* ====== Model selector ====== */
+  .model-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  @media (max-width: 700px) { .model-grid { grid-template-columns: repeat(2, 1fr); } }
+  .mcard {
+    background: var(--card-bg);
+    border: 1px solid var(--rule);
+    padding: 14px 12px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s ease;
+    border-radius: 2px;
+    font-family: inherit;
+    color: inherit;
+  }
+  .mcard:hover { border-color: var(--ink); }
+  .mcard.selected { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .mcard-name { font-family: 'Fraunces', serif; font-weight: 500; font-size: 17px; margin-bottom: 2px; }
+  .mcard-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.7;
+  }
+
+  /* ====== Preset bar ====== */
+  .presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 14px 18px;
+    background: var(--paper-deep);
+    border: 1px dashed var(--rule);
+    border-radius: 2px;
+    align-items: center;
+    margin-bottom: 32px;
+  }
+  .preset-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-right: 4px;
+  }
+  .preset-btn {
+    padding: 6px 12px;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 13.5px;
+    cursor: pointer;
+    border-radius: 2px;
+    color: var(--ink);
+    transition: all 0.15s ease;
+  }
+  .preset-btn:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+  /* ====== Preview panel ====== */
+  .preview-panel {
+    position: sticky;
+    top: 140px;
+    background: var(--card-bg);
+    border: 1px solid var(--ink);
+    border-radius: 2px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    max-height: calc(100vh - 170px);
+    display: flex;
+    flex-direction: column;
+  }
+  @media (max-width: 1100px) { .preview-panel { position: static; max-height: none; } }
+  .preview-head {
+    padding: 18px 22px 14px;
+    background: var(--head-bg);
+    color: var(--head-ink);
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .preview-head h2 { font-family: 'Fraunces', serif; font-weight: 400; font-size: 20px; font-style: italic; }
+  .preview-model-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--highlight);
+  }
+  .preview-stats {
+    padding: 8px 22px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    color: var(--ink-soft);
+    border-bottom: 1px solid var(--rule-soft);
+    background: var(--paper);
+  }
+  .preview-body {
+    padding: 22px;
+    overflow-y: auto;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.65;
+    color: var(--ink);
+    flex: 1;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+  .preview-body::-webkit-scrollbar { width: 8px; }
+  .preview-body::-webkit-scrollbar-track { background: transparent; }
+  .preview-body::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 4px; }
+  .prompt-block-header {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-top: 14px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--rule-soft);
+  }
+  .prompt-block-header:first-child { margin-top: 0; }
+  .prompt-block-body {
+    margin-top: 6px;
+    margin-bottom: 4px;
+    color: var(--ink-soft);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 13.5px;
+    line-height: 1.55;
+    white-space: pre-wrap;
+  }
+  .placeholder-text {
+    color: var(--rule);
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 15px;
+    text-align: center;
+    padding: 40px 20px;
+  }
+  .preview-actions {
+    border-top: 1px solid var(--rule);
+    padding: 14px 18px;
+    display: flex;
+    gap: 8px;
+    background: var(--paper);
+  }
+  .btn {
+    flex: 1;
+    padding: 11px 12px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: 1px solid var(--ink);
+    background: var(--paper);
+    color: var(--ink);
+    border-radius: 2px;
+    transition: all 0.15s ease;
+  }
+  .btn:hover { background: var(--ink); color: var(--paper); }
+  .btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+  .btn.primary:hover { background: var(--accent-deep); border-color: var(--accent-deep); }
+
+  /* ====== Toggle row ====== */
+  .toggles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  @media (max-width: 600px) { .toggles { grid-template-columns: 1fr; } }
+  .toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--card-bg);
+    border: 1px solid var(--rule);
+    cursor: pointer;
+    border-radius: 2px;
+    font-size: 13px;
+    transition: all 0.15s ease;
+    user-select: none;
+  }
+  .toggle:hover { border-color: var(--ink); }
+  .toggle.on { background: var(--paper); border-color: var(--ink); }
+  .toggle-box {
+    width: 16px;
+    height: 16px;
+    border: 1px solid var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: var(--paper);
+    background: var(--paper);
+  }
+  .toggle.on .toggle-box { background: var(--accent); border-color: var(--accent); color: white; }
+
+  /* ====== Custom size group ====== */
+  .size-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 8px; align-items: end; }
+  @media (max-width: 600px) { .size-row { grid-template-columns: 1fr 1fr; } }
+
+  /* ====== Footer ====== */
+  .footer {
+    border-top: 1px solid var(--rule);
+    margin-top: 40px;
+    padding-top: 16px;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--ink-soft);
+    text-align: center;
+  }
+  .footer-mark {
+    font-family: 'IBM Plex Mono', monospace;
+    font-style: normal;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(120%);
+    background: var(--ink);
+    color: var(--paper);
+    padding: 12px 24px;
+    border-radius: 2px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: transform 0.3s cubic-bezier(0.2, 0, 0.2, 1);
+    z-index: 100;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  .toggles + .toggles { margin-top: 8px; }
+  .group-label { margin-top: 18px; }
+</style>
 </head>
-<body class="bg-[#050811] text-slate-200 font-sans min-h-screen selection:bg-cyber-accent selection:text-black">
+<body>
 
-    <header class="border-b border-cyber-border bg-cyber-bg/90 backdrop-blur sticky top-0 z-50 px-6 py-4">
-        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div class="flex items-center gap-3">
-                <div class="bg-cyber-accent/10 p-2.5 rounded-lg border border-cyber-accent/30 flex items-center justify-center">
-                    <i class="fa-solid fa-shield-halved text-cyber-accent text-xl animate-pulse"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
-                        CYBER<span class="text-cyber-accent glow-accent">PROMPT</span> STUDIO
-                    </h1>
-                    <p class="text-xs text-slate-400">Interactive Cybersecurity Simulator Prompt Generator</p>
-                </div>
-            </div>
-            <div class="flex items-center gap-3">
-                <span class="bg-cyber-accent/10 text-cyber-accent border border-cyber-accent/20 text-xs px-2.5 py-1 rounded-full font-mono">
-                    <i class="fa-solid fa-microchip mr-1.5"></i>META-PROMPT v2.1
-                </span>
-                <span class="bg-slate-800 text-slate-300 border border-slate-700 text-xs px-2.5 py-1 rounded-full font-mono">
-                    <i class="fa-solid fa-code mr-1.5"></i>Vanilla JS / CSS
-                </span>
-            </div>
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="title-block">
+      <div class="eyebrow">An instructional design tool · No. 02</div>
+      <h1>The Simulator <em>Prompt</em> Atelier</h1>
+      <div class="subtitle">A companion workbench for composing prompts that produce interactive, classroom-ready webpage simulators and labs.</div>
+    </div>
+    <div class="masthead-actions">
+      <a class="pill" href="gen-graphics.html">Graphic prompts</a>
+      <span class="pill">v1.0</span>
+      <button class="pill" id="themeBtn" type="button" aria-label="Toggle dark mode">Dark mode</button>
+      <span class="pill accent">For educators</span>
+    </div>
+  </div>
+</header>
+
+<main class="canvas">
+  <div class="builder-column">
+
+    <div class="presets">
+      <span class="preset-label">Quick start →</span>
+      <button class="preset-btn" data-preset="quick">Quick Lab</button>
+      <button class="preset-btn" data-preset="pbq">PBQ Practice</button>
+      <button class="preset-btn" data-preset="soc">SOC Shift</button>
+      <button class="preset-btn" data-preset="demo">Instructor Demo</button>
+    </div>
+
+    <!-- § 01 Course Lesson -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-number">§ 01</span>
+        <h2 class="section-title">Course Lesson</h2>
+        <span class="section-hint">select lesson, topics & concepts</span>
+      </div>
+      <div class="field-grid two">
+        <label class="field">
+          <span class="field-label">Course</span>
+          <select id="course">
+            <option value="">— none (free topic) —</option>
+            <option value="secplus">CompTIA Security+ SY0-701 (LAN153)</option>
+          </select>
+        </label>
+        <label class="field">
+          <span class="field-label">Lesson</span>
+          <select id="lesson" disabled>
+            <option value="">— select a course first —</option>
+          </select>
+        </label>
+      </div>
+      <div id="lessonPanel"></div>
+    </section>
+
+    <!-- § 02 Content -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-number">§ 02</span>
+        <h2 class="section-title">Content</h2>
+        <span class="section-hint">what the lab teaches</span>
+      </div>
+      <div class="field-grid">
+        <label class="field">
+          <span class="field-label">Simulator Title / Topic *</span>
+          <input type="text" id="topic" placeholder="e.g., Firewall Rule Builder, SIEM Brute-Force Hunt, TLS Handshake Walkthrough" autocomplete="off" />
+        </label>
+        <div class="field-grid three">
+          <label class="field">
+            <span class="field-label">Subject Area</span>
+            <select id="subject">
+              <option value="">— select —</option>
+              <option>Cybersecurity</option>
+              <option>Computer Science / Networking</option>
+              <option>Operational Technology / ICS</option>
+              <option>Engineering / Electronics</option>
+              <option>Artificial Intelligence</option>
+              <option>Workforce / Career Tech</option>
+            </select>
+          </label>
+          <label class="field">
+            <span class="field-label">Grade / Skill Level</span>
+            <select id="grade">
+              <option value="">— select —</option>
+              <option>High School (9–12)</option>
+              <option>Community College / Undergraduate</option>
+              <option>Graduate / Professional</option>
+              <option>Adult Workforce Training</option>
+              <option>Faculty Professional Development</option>
+            </select>
+          </label>
+          <label class="field">
+            <span class="field-label">Lab Duration</span>
+            <select id="duration">
+              <option>10–15 minutes</option>
+              <option selected>20–30 minutes</option>
+              <option>45–60 minutes</option>
+              <option>Multi-part lab (60+ minutes)</option>
+            </select>
+          </label>
         </div>
-    </header>
+        <label class="field">
+          <span class="field-label">Learning Objective</span>
+          <textarea id="objective" placeholder="By completing this simulator, the learner will be able to..."></textarea>
+        </label>
+      </div>
+    </section>
 
-    <main class="max-w-7xl mx-auto px-4 py-6 md:py-10">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            
-            <!-- Left Panel: Interactive Configurator (Col-5) -->
-            <section class="lg:col-span-5 space-y-6">
-                
-                <!-- Section Header -->
-                <div class="bg-cyber-card border border-cyber-border rounded-xl p-5 shadow-lg">
-                    <h2 class="text-lg font-bold text-white mb-2 flex items-center gap-2">
-                        <i class="fa-solid fa-sliders text-cyber-accent"></i> 1. Simulator Parameters
-                    </h2>
-                    <p class="text-xs text-slate-400 leading-relaxed">
-                        Select and tune parameters below. The meta-prompt engine dynamically integrates these into a rigorous system instructions package on the right.
-                    </p>
-                </div>
+    <!-- § 03 Expert Panel -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-number">§ 03</span>
+        <h2 class="section-title">Expert Panel</h2>
+        <span class="section-hint">personas built into the prompt</span>
+      </div>
+      <div class="card-grid persona-grid" id="personaGrid"></div>
+      <div class="panel-summary" id="panelSummary"></div>
+    </section>
 
-                <!-- Simulator Core Profile Card -->
-                <div class="bg-cyber-card border border-cyber-border rounded-xl p-6 space-y-5">
-                    
-                    <!-- Sim Type Selector -->
-                    <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
-                            Simulator Class
-                        </label>
-                        <div class="grid grid-cols-2 gap-2" id="simTypeGrid">
-                            <button onclick="selectSimType('firewall')" id="btn-firewall" class="flex flex-col items-center justify-center p-3 rounded-lg border transition-all text-center gap-1.5 bg-slate-800/50 border-cyber-border text-slate-300 hover:border-slate-500 hover:text-white">
-                                <i class="fa-solid fa-fire-burner text-base"></i>
-                                <span class="text-xs font-medium">Firewall Ops</span>
-                            </button>
-                            <button onclick="selectSimType('ids')" id="btn-ids" class="flex flex-col items-center justify-center p-3 rounded-lg border transition-all text-center gap-1.5 bg-slate-800/50 border-cyber-border text-slate-300 hover:border-slate-500 hover:text-white">
-                                <i class="fa-solid fa-circle-exclamation text-base"></i>
-                                <span class="text-xs font-medium">IDS/IPS Alerting</span>
-                            </button>
-                            <button onclick="selectSimType('sniffer')" id="btn-sniffer" class="flex flex-col items-center justify-center p-3 rounded-lg border transition-all text-center gap-1.5 bg-slate-800/50 border-cyber-border text-slate-300 hover:border-slate-500 hover:text-white">
-                                <i class="fa-solid fa-binoculars text-base"></i>
-                                <span class="text-xs font-medium">Packet Sniffer</span>
-                            </button>
-                            <button onclick="selectSimType('vuln')" id="btn-vuln" class="flex flex-col items-center justify-center p-3 rounded-lg border transition-all text-center gap-1.5 bg-slate-800/50 border-cyber-border text-slate-300 hover:border-slate-500 hover:text-white">
-                                <i class="fa-solid fa-bug-slash text-base"></i>
-                                <span class="text-xs font-medium">Vuln Scanner</span>
-                            </button>
-                        </div>
-                    </div>
+    <!-- § 04 Simulator Type -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-number">§ 04</span>
+        <h2 class="section-title">Simulator Type</h2>
+        <span class="section-hint">how the learner interacts</span>
+      </div>
+      <div class="card-grid" id="typeGrid"></div>
+      <div class="fit-note" id="fitNote">
+        <strong>Why this fits</strong>
+        <span id="fitText"></span>
+      </div>
+    </section>
 
-                    <!-- Scenario Selector (Fills dynamically on JS update) -->
-                    <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
-                            Scenario Directive / Mission
-                        </label>
-                        <select id="scenarioSelector" onchange="updateCustomScenario()" class="w-full bg-[#0d1321] border border-cyber-border text-slate-200 rounded-lg p-3 text-sm focus:outline-none focus:border-cyber-accent">
-                            <!-- Populated Dynamically -->
-                        </select>
-                    </div>
-
-                    <!-- Custom Scenario Field (Always Editable) -->
-                    <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
-                            Scenario Customization & Details
-                        </label>
-                        <textarea id="customScenarioDetails" rows="3" oninput="compilePrompt()" placeholder="Write custom scenario parameters..." class="w-full bg-[#0d1321] border border-cyber-border text-slate-200 rounded-lg p-3 text-sm focus:outline-none focus:border-cyber-accent font-sans leading-relaxed"></textarea>
-                    </div>
-
-                    <!-- Difficulty and Layout Metrics -->
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
-                                Skill Tier
-                            </label>
-                            <select id="difficultyLevel" onchange="compilePrompt()" class="w-full bg-[#0d1321] border border-cyber-border text-slate-200 rounded-lg p-2.5 text-sm focus:outline-none focus:border-cyber-accent">
-                                <option value="Beginner (Basic commands, step-by-step UI helper overlays)">Beginner (Guided)</option>
-                                <option value="Intermediate (Slightly vague hints, dynamic threat scaling)" selected>Intermediate</option>
-                                <option value="Advanced (Barebones tools, heavy terminal syntax, penalty timers)">Advanced (Hardcore)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
-                                Layout Scheme
-                            </label>
-                            <select id="layoutScheme" onchange="compilePrompt()" class="w-full bg-[#0d1321] border border-cyber-border text-slate-200 rounded-lg p-2.5 text-sm focus:outline-none focus:border-cyber-accent">
-                                <option value="Standard Split (Interactive controls on left, live canvas center, logs footer)" selected>Standard Split</option>
-                                <option value="Terminal Console Heavy (Monospace terminal left, diagram layout right)">Terminal Heavy</option>
-                                <option value="Visual Subnet Hub (Interactive SVG Topology map with live popup configs)">SVG Topology Map</option>
-                            </select>
-                        </div>
-                    </div>
-
-                </div>
-
-                <!-- Core Mechanism Control Checklist -->
-                <div class="bg-cyber-card border border-cyber-border rounded-xl p-6 space-y-4">
-                    <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                        <i class="fa-solid fa-circle-nodes text-cyber-accent"></i> Active Simulator Components
-                    </h3>
-                    <div class="space-y-3">
-                        <label class="flex items-center gap-3 cursor-pointer group">
-                            <input type="checkbox" id="featureInteractiveRules" checked onchange="compilePrompt()" class="w-4 h-4 rounded text-cyber-accent focus:ring-cyber-accent bg-[#0d1321] border-cyber-border">
-                            <span class="text-xs text-slate-300 group-hover:text-white transition-colors">Interactive Command Rules / Rule Builder Engine</span>
-                        </label>
-                        <label class="flex items-center gap-3 cursor-pointer group">
-                            <input type="checkbox" id="featureLiveLogger" checked onchange="compilePrompt()" class="w-4 h-4 rounded text-cyber-accent focus:ring-cyber-accent bg-[#0d1321] border-cyber-border">
-                            <span class="text-xs text-slate-300 group-hover:text-white transition-colors">Real-time Logging & Diagnostics Console</span>
-                        </label>
-                        <label class="flex items-center gap-3 cursor-pointer group">
-                            <input type="checkbox" id="featurePayloadInspector" checked onchange="compilePrompt()" class="w-4 h-4 rounded text-cyber-accent focus:ring-cyber-accent bg-[#0d1321] border-cyber-border">
-                            <span class="text-xs text-slate-300 group-hover:text-white transition-colors">Deep Packet / Vulnerability Payload Dissect Tool</span>
-                        </label>
-                        <label class="flex items-center gap-3 cursor-pointer group">
-                            <input type="checkbox" id="featureVisualGrading" checked onchange="compilePrompt()" class="w-4 h-4 rounded text-cyber-accent focus:ring-cyber-accent bg-[#0d1321] border-cyber-border">
-                            <span class="text-xs text-slate-300 group-hover:text-white transition-colors">Dynamic Feedback Loop (Score & Grading Engine)</span>
-                        </label>
-                        <label class="flex items-center gap-3 cursor-pointer group">
-                            <input type="checkbox" id="featureSoundSynthesis" onchange="compilePrompt()" class="w-4 h-4 rounded text-cyber-accent focus:ring-cyber-accent bg-[#0d1321] border-cyber-border">
-                            <span class="text-xs text-slate-300 group-hover:text-white transition-colors">Tone.js Synthetic Auditory Feedback (Alarms, success synth)</span>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Custom Simulator Name -->
-                <div class="bg-cyber-card border border-cyber-border rounded-xl p-6 space-y-3">
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300">
-                        Target Simulator Name
-                    </label>
-                    <input type="text" id="simTitleInput" oninput="compilePrompt()" value="Cyber Threat Shield" placeholder="e.g., Tactical Firewall Trainer" class="w-full bg-[#0d1321] border border-cyber-border text-slate-200 rounded-lg p-3 text-sm focus:outline-none focus:border-cyber-accent font-mono">
-                </div>
-
-            </section>
-            
-            <!-- Right Panel: Live Prompt Compiler Output (Col-7) -->
-            <section class="lg:col-span-7 flex flex-col space-y-4">
-                
-                <!-- Action Controls Bar -->
-                <div class="bg-cyber-card border border-cyber-border rounded-xl p-4 flex flex-wrap gap-3 items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-cyber-accent animate-ping"></span>
-                        <span class="text-xs font-bold text-slate-300 uppercase tracking-wide">Output Generator Terminal</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <!-- Copy Button -->
-                        <button onclick="copyToClipboard()" class="bg-cyber-accent hover:bg-cyber-darkAccent text-black font-semibold text-xs px-4 py-2 rounded-lg flex items-center gap-1.5 transition-all shadow-md cyber-glow">
-                            <i id="copyIcon" class="fa-solid fa-copy"></i>
-                            <span id="copyText">Copy Prompt</span>
-                        </button>
-                        <!-- Export Button -->
-                        <button onclick="downloadAsMarkdown()" class="bg-slate-800 hover:bg-slate-700 text-white font-medium text-xs px-4 py-2 rounded-lg flex items-center gap-1.5 transition-all border border-slate-700">
-                            <i class="fa-solid fa-file-arrow-down"></i>
-                            <span>Export (.md)</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Live Markdown Workspace Terminal -->
-                <div class="bg-cyber-card border border-cyber-border rounded-xl flex-1 flex flex-col min-h-[550px] overflow-hidden shadow-2xl">
-                    <div class="bg-slate-900 border-b border-cyber-border px-5 py-3.5 flex justify-between items-center">
-                        <div class="flex items-center gap-2">
-                            <i class="fa-solid fa-terminal text-cyber-accent text-sm"></i>
-                            <span class="text-xs font-mono text-slate-300">SYSTEM_PROMPT.md</span>
-                        </div>
-                        <div class="flex gap-1.5">
-                            <span class="w-3 h-3 rounded-full bg-red-500/30"></span>
-                            <span class="w-3 h-3 rounded-full bg-yellow-500/30"></span>
-                            <span class="w-3 h-3 rounded-full bg-cyber-accent/30"></span>
-                        </div>
-                    </div>
-                    
-                    <!-- Textarea Container for prompt markdown output -->
-                    <textarea id="promptCompilerOutput" readonly class="flex-1 w-full bg-[#050811] text-slate-300 p-6 text-xs sm:text-sm font-mono leading-relaxed focus:outline-none resize-none overflow-y-auto block whitespace-pre-wrap select-text"></textarea>
-                </div>
-
-                <!-- Informational footer warning regarding usage limits -->
-                <div class="bg-cyber-accent/5 border border-cyber-accent/20 rounded-lg p-4 flex items-start gap-3">
-                    <i class="fa-solid fa-circle-info text-cyber-accent text-lg mt-0.5"></i>
-                    <p class="text-xs text-slate-400 leading-relaxed">
-                        <strong class="text-white">How to use:</strong> Copy the output code from this console using the green button. Paste it directly into any cutting-edge Large Language Model (e.g., Gemini, Claude, GPT-4) to trigger the generator framework which will output the complete single-file interactive simulator application ready to run!
-                    </p>
-                </div>
-
-            </section>
+    <!-- § 05 Scenario -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-number">§ 05</span>
+        <h2 class="section-title">Scenario & Realism</h2>
+        <span class="section-hint">the world of the lab</span>
+      </div>
+      <div class="field-grid">
+        <div class="field-grid two">
+          <label class="field">
+            <span class="field-label">Fictional Organization</span>
+            <input type="text" id="org" placeholder="e.g., Riverbend Community Hospital" autocomplete="off" />
+          </label>
+          <label class="field">
+            <span class="field-label">Industry Context</span>
+            <select id="industry">
+              <option>Healthcare</option>
+              <option>Finance / Banking</option>
+              <option>Manufacturing / OT</option>
+              <option>Education</option>
+              <option>Retail / E-commerce</option>
+              <option>Government / Municipal</option>
+              <option>Small Business</option>
+              <option>Utilities / Critical Infrastructure</option>
+            </select>
+          </label>
         </div>
-    </main>
+        <div class="field-grid three">
+          <label class="field">
+            <span class="field-label">Environment</span>
+            <select id="environment">
+              <option>Windows enterprise / Active Directory</option>
+              <option>Linux servers</option>
+              <option>Hybrid on-prem + cloud</option>
+              <option>Public cloud (IaaS/PaaS/SaaS)</option>
+              <option>Network infrastructure (routers, switches, firewalls)</option>
+              <option>OT / ICS plant floor</option>
+              <option>Mixed enterprise</option>
+            </select>
+          </label>
+          <label class="field">
+            <span class="field-label">Learner Role</span>
+            <select id="learnerRole">
+              <option>SOC analyst (Tier 1)</option>
+              <option>Network administrator</option>
+              <option>Incident responder</option>
+              <option>Security engineer</option>
+              <option>Authorized penetration tester</option>
+              <option>GRC / risk analyst</option>
+              <option>Help desk / IT support</option>
+              <option>Cloud administrator</option>
+            </select>
+          </label>
+          <label class="field">
+            <span class="field-label">Fidelity</span>
+            <select id="fidelity">
+              <option>Conceptual — simplified, idea-first</option>
+              <option selected>Realistic — authentic look and outputs</option>
+              <option>High-fidelity — close replica of real tools</option>
+            </select>
+          </label>
+        </div>
+        <label class="field">
+          <span class="field-label">Scenario Narrative (optional)</span>
+          <textarea id="narrative" placeholder="e.g., Monday 8:05 a.m. The help desk reports account lockouts across the billing department..."></textarea>
+        </label>
+      </div>
+    </section>
 
-    <script>
-        // Set configuration options matching structural templates
-        const simulatorClasses = {
-            firewall: {
-                title: "Tactical Firewall Rule Governor",
-                scenarios: [
-                    {
-                        name: "Syn-Flood DDoS Defense Scenario",
-                        details: "Simulate a severe TCP Syn-Flood attack targeting an HTTP backend (Port 80) in the web server sub-segment. The user must configure structural rate-limiting parameters, ingress validation rules, and drop metrics for anomalous source IPs."
-                    },
-                    {
-                        name: "Exposed DB Port Ingress Protocol",
-                        details: "Prevent unauthorized administrative traversal into a production database cluster (Port 5432). The student must build rule lists dropping all traffic directed to the database subnet except from targeted bastion host routing endpoints."
-                    },
-                    {
-                        name: "Outbound Exfiltration Restriction",
-                        details: "Detect a compromised client inside the corporate LAN exfiltrating sensitive telemetry data outwards over port 4444. The user must draft strict egress controls targeting traffic traversing suspicious TCP tunnels."
-                    }
-                ],
-                coreLogic: "Array-based packet pipeline matching parameters (Protocol, Source IP/Subnet, Destination IP/Subnet, Port, Flags) in JavaScript. Incoming packet queues stream dynamically down the center pane, with immediate visual evaluation against active user rules.",
-                interactiveComponents: "Interactive 'Add/Modify Firewall Rule' modal matrix with drop-downs, packet generator panel to test malicious/legit flow states, visual IP blocklists, and dynamic latency chart."
-            },
-            ids: {
-                title: "Guardian IDS Signature Monitor",
-                scenarios: [
-                    {
-                        name: "Brute-Force Detection Sequence",
-                        details: "A malicious actor is executing massive administrative credential attacks against SSH portals (Port 22). The student must configure automated threat rules looking for high-frequency SSH connection events (5+ hits within 5 seconds)."
-                    },
-                    {
-                        name: "SQL Injection Payload Alarm",
-                        details: "Detect sophisticated payload injections against public APIs. The student must write strict regex intrusion profiles to target 'SELECT', 'UNION SELECT', 'OR 1=1', and inline comments inside target parameter queries."
-                    },
-                    {
-                        name: "Ransomware Encrypted Exfil Flag",
-                        details: "Spot anomalous SSL sessions attempting massive volume egress protocols over port 443 with anomalous packet sizes. Student creates automated flags highlighting rogue outbound payload tunnels."
-                    }
-                ],
-                coreLogic: "Real-time payload regex assessment parser inside an active packet thread. If any packet payload string matches user-configured PCRE regex signatures or automated threshold rates, trigger visual alerts, write telemetry warnings, and log block event lists.",
-                interactiveComponents: "Regular Expression Sandbox editor with inline live feedback (matching/no-match), interactive event lists highlighting CVE definitions, custom payload injector terminal, and active alarm sound effects.",
-            },
-            sniffer: {
-                title: "Specter Frame Analyzer",
-                scenarios: [
-                    {
-                        name: "Plain-text Password Leak Audit",
-                        details: "Analyze unsecured TCP frame parameters capturing telemetry packets containing plain-text administrative login patterns over unsecured HTTP/FTP sessions. Student isolates exact credential hashes."
-                    },
-                    {
-                        name: "Rogue Wi-Fi AP Beacon Survey",
-                        details: "Examine a packet dump stream looking for anomalous beacon parameters that do not conform to active infrastructure standards. Isolate unauthorized hardware vendors."
-                    },
-                    {
-                        name: "DNS Exfiltration Tunnel Hunt",
-                        details: "Isolate unusual TXT record queries of anomalous length sending base64 payloads to rogue external domain registrars. The student filters by frame parameters to spot the leaking nodes."
-                    }
-                ],
-                coreLogic: "Real-time packet ring buffer matching filters (BPF expressions like 'tcp and port 80' or 'udp'). Deep frame-dissection parser translating hex offsets, packet headers (Ethernet, IPv4, TCP, Application Layer) into human-readable telemetry panels.",
-                interactiveComponents: "Visual BPF parsing filter input bar, packet list display window with interactive toggle drop-downs, packet inspection hexadecimal panel with side-by-side UTF decoders, and data flow stats.",
-            },
-            vuln: {
-                title: "Valkyrie Host Vulnerability Auditor",
-                scenarios: [
-                    {
-                        name: "Web Server Shellshock Audit",
-                        details: "Evaluate multiple cloud host assets for critical unpatched bash shell vulnerabilities. The student must structure diagnostic requests looking for anomalous header sequences and parsing response alerts."
-                    },
-                    {
-                        name: "Outdated SSH Library Recon",
-                        details: "Audit an internal server range for outdated daemon variants vulnerable to remote code executions. The user parses service banners, identifies target version matches, and categorizes vulnerability severity."
-                    },
-                    {
-                        name: "Log4j Payload Verification",
-                        details: "Configure test probes to safely check internal target systems for JNDI LDAP lookup exploit triggers. Identify exactly which log assets are susceptible to remote exploitation."
-                    }
-                ],
-                coreLogic: "Subnet node simulation mapping device. Each node lists specific active service layers, banner strings, operating systems, and a CVE dictionary matching specific versions. Script maps scanning probes to node responses based on chosen techniques.",
-                interactiveComponents: "Visual interactive target map showing ping state, scanning engine profile builder with toggle configurations, dynamic service banner grid, vulnerabilities database dashboard, and auto-generated exploit report template.",
-            }
-        };
+    <!-- § 06 Interaction -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-number">§ 06</span>
+        <h2 class="section-title">Interaction Mechanics</h2>
+        <span class="section-hint">how practice and feedback work</span>
+      </div>
+      <div class="field-grid">
+        <div class="field-grid two">
+          <label class="field">
+            <span class="field-label">Feedback Mode</span>
+            <select id="feedback">
+              <option>Immediate — after every action</option>
+              <option>On check / submit — per task</option>
+              <option>End-of-lab debrief only</option>
+            </select>
+          </label>
+          <label class="field">
+            <span class="field-label">Hint System</span>
+            <select id="hints">
+              <option>Progressive tiered hints (nudge → clue → answer)</option>
+              <option>On-demand single hint per task</option>
+              <option>Faded scaffolding (guided first, independent later)</option>
+              <option>None — assessment mode</option>
+            </select>
+          </label>
+        </div>
+        <div class="field-grid two">
+          <label class="field">
+            <span class="field-label">Difficulty</span>
+            <select id="difficulty">
+              <option>Single level matched to audience</option>
+              <option>Selectable tiers: Beginner / Intermediate / Advanced</option>
+              <option>Adaptive — difficulty rises with success</option>
+            </select>
+          </label>
+          <label class="field">
+            <span class="field-label">Number of Tasks</span>
+            <select id="taskCount">
+              <option>3–5 tasks</option>
+              <option selected>6–10 tasks</option>
+              <option>10+ tasks across multiple stages</option>
+            </select>
+          </label>
+        </div>
+        <div class="toggles">
+          <div class="toggle" data-toggle="scoring" tabindex="0" role="switch"><div class="toggle-box">✓</div><span>Scoring & points</span></div>
+          <div class="toggle" data-toggle="progress" tabindex="0" role="switch"><div class="toggle-box">✓</div><span>Progress tracker</span></div>
+          <div class="toggle" data-toggle="timer" tabindex="0" role="switch"><div class="toggle-box">✓</div><span>Timer / countdown</span></div>
+          <div class="toggle" data-toggle="reset" tabindex="0" role="switch"><div class="toggle-box">✓</div><span>Reset & replay</span></div>
+          <div class="toggle" data-toggle="randomize" tabindex="0" role="switch"><div class="toggle-box">✓</div><span>Randomized scenarios per attempt</span></div>
+          <div class="toggle" data-toggle="badges" tabindex="0" role="switch"><div class="toggle-box">✓</div><span>Achievement badges</span></div>
+          <div class="toggle" data-toggle="walkthrough" tabindex="0" role="switch"><div class="toggle-box">✓</div><span>Guided walkthrough mode</span></div>
+          <div class="toggle" data-toggle="report" tabindex="0" role="switch"><div class="toggle-box">✓</div><span>Printable completion report</span></div>
+        </div>
+      </div>
+    </section>
 
-        let currentSimType = "firewall";
+    <!-- § 07 Visual -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-number">§ 07</span>
+        <h2 class="section-title">Visual & UI</h2>
+        <span class="section-hint">look, layout & motion</span>
+      </div>
+      <div class="field-grid">
+        <div class="field-grid two">
+          <label class="field">
+            <span class="field-label">Aesthetic</span>
+            <select id="aesthetic">
+              <option>Realistic tool replica (looks like the real console)</option>
+              <option>Modern SOC dashboard (cards, gauges, live feeds)</option>
+              <option>Terminal / HUD (glowing monospace, scanlines)</option>
+              <option>Clean light-mode lab notebook</option>
+              <option>Gamified arcade (levels, XP bars, bold color)</option>
+              <option>Institutional (navy #0047AB / green #00a86b)</option>
+            </select>
+          </label>
+          <label class="field">
+            <span class="field-label">Color Theme</span>
+            <select id="theme">
+              <option>Light by default with dark-mode toggle</option>
+              <option>Dark by default with light-mode toggle</option>
+              <option>Dark only</option>
+              <option>Light only</option>
+            </select>
+          </label>
+        </div>
+        <div class="field-grid two">
+          <label class="field">
+            <span class="field-label">Layout</span>
+            <select id="layout">
+              <option>Split view — instructions left, simulator right</option>
+              <option>Full-screen simulator with collapsible task drawer</option>
+              <option>Tabbed — Briefing / Lab / Debrief</option>
+              <option>Stepper wizard — one stage at a time</option>
+            </select>
+          </label>
+          <label class="field">
+            <span class="field-label">Animation Level</span>
+            <select id="animation">
+              <option>Subtle — state changes only</option>
+              <option selected>Moderate — animate cause and effect (packets, alerts)</option>
+              <option>Rich — cinematic transitions and live effects</option>
+            </select>
+          </label>
+        </div>
+        <div class="toggles">
+          <div class="toggle" data-toggle="sound" tabindex="0" role="switch"><div class="toggle-box">✓</div><span>Optional sound cues (muted by default)</span></div>
+          <div class="toggle" data-toggle="visibleObjective" tabindex="0" role="switch"><div class="toggle-box">✓</div><span>Objective visible on screen</span></div>
+        </div>
+      </div>
+    </section>
 
-        // Initialize App UI
-        window.onload = function() {
-            selectSimType('firewall');
-        };
+    <!-- § 08 Technical -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-number">§ 08</span>
+        <h2 class="section-title">Technical Build</h2>
+        <span class="section-hint">code deliverable</span>
+      </div>
+      <div class="field-grid">
+        <div class="field-grid two">
+          <label class="field">
+            <span class="field-label">Code Format</span>
+            <select id="codeFormat">
+              <option>Single self-contained HTML file (embedded CSS + JS)</option>
+              <option>HTML + separate CSS and JS files</option>
+              <option>React component (.jsx)</option>
+            </select>
+          </label>
+          <label class="field">
+            <span class="field-label">Progress Persistence</span>
+            <select id="persistence">
+              <option>Save progress and theme in localStorage</option>
+              <option>Session only — nothing saved</option>
+            </select>
+          </label>
+        </div>
+        <div class="field-grid two">
+          <label class="field">
+            <span class="field-label">Device Support</span>
+            <select id="devices">
+              <option>Desktop-first, fully usable on tablets and phones</option>
+              <option>Mobile-first</option>
+              <option>Desktop / lab workstation only</option>
+            </select>
+          </label>
+          <label class="field">
+            <span class="field-label">Deployment</span>
+            <select id="deployment">
+              <option>GitHub Pages (static hosting)</option>
+              <option>LMS embed (iframe in Canvas/Blackboard/Brightspace)</option>
+              <option>Both GitHub Pages and LMS embed</option>
+            </select>
+          </label>
+        </div>
+        <div class="toggles">
+          <div class="toggle" data-toggle="zeroDeps" tabindex="0" role="switch"><div class="toggle-box">✓</div><span>Zero external dependencies</span></div>
+          <div class="toggle" data-toggle="keyboard" tabindex="0" role="switch"><div class="toggle-box">✓</div><span>Full keyboard operation</span></div>
+          <div class="toggle" data-toggle="answerKey" tabindex="0" role="switch"><div class="toggle-box">✓</div><span>Instructor answer-key mode</span></div>
+          <div class="toggle" data-toggle="commented" tabindex="0" role="switch"><div class="toggle-box">✓</div><span>Commented, editable task data</span></div>
+        </div>
+      </div>
+    </section>
 
-        // Select the simulator class & update scenarios UI
-        function selectSimType(type) {
-            currentSimType = type;
-            
-            // Highlight selector buttons
-            const types = ['firewall', 'ids', 'sniffer', 'vuln'];
-            types.forEach(t => {
-                const btn = document.getElementById(`btn-${t}`);
-                if (t === type) {
-                    btn.className = "flex flex-col items-center justify-center p-3 rounded-lg border transition-all text-center gap-1.5 bg-cyber-accent/10 border-cyber-accent text-cyber-accent hover:bg-cyber-accent/20 font-semibold shadow-[0_0_10px_rgba(16,185,129,0.15)]";
-                } else {
-                    btn.className = "flex flex-col items-center justify-center p-3 rounded-lg border transition-all text-center gap-1.5 bg-slate-800/50 border-cyber-border text-slate-300 hover:border-slate-500 hover:text-white";
-                }
-            });
+    <!-- § 09 Pedagogy & Safety -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-number">§ 09</span>
+        <h2 class="section-title">Pedagogical & Safety Constraints</h2>
+        <span class="section-hint">accessibility, rigor & safe practice</span>
+      </div>
+      <div class="toggles">
+        <div class="toggle" data-toggle="accuracy" tabindex="0" role="switch"><div class="toggle-box">✓</div><span>Enforce technical accuracy</span></div>
+        <div class="toggle" data-toggle="wcag" tabindex="0" role="switch"><div class="toggle-box">✓</div><span>WCAG 2.2 AA accessibility</span></div>
+        <div class="toggle" data-toggle="colorblind" tabindex="0" role="switch"><div class="toggle-box">✓</div><span>Color-blind-safe status colors</span></div>
+        <div class="toggle" data-toggle="explain" tabindex="0" role="switch"><div class="toggle-box">✓</div><span>Explain why, not just right/wrong</span></div>
+        <div class="toggle" data-toggle="simulatedOnly" tabindex="0" role="switch"><div class="toggle-box">✓</div><span>Simulated only — no real network calls or live exploit code</span></div>
+        <div class="toggle" data-toggle="fictionalData" tabindex="0" role="switch"><div class="toggle-box">✓</div><span>Fictional data (documentation IPs, example domains)</span></div>
+        <div class="toggle" data-toggle="ethics" tabindex="0" role="switch"><div class="toggle-box">✓</div><span>Ethics & authorization reminder</span></div>
+        <div class="toggle" data-toggle="debrief" tabindex="0" role="switch"><div class="toggle-box">✓</div><span>Debrief & reflection at the end</span></div>
+      </div>
+    </section>
 
-            // Update scenario selector drop-downs
-            const selector = document.getElementById("scenarioSelector");
-            selector.innerHTML = "";
-            
-            const selectedConfig = simulatorClasses[type];
-            selectedConfig.scenarios.forEach((sc, idx) => {
-                const opt = document.createElement("option");
-                opt.value = idx;
-                opt.textContent = sc.name;
-                selector.appendChild(opt);
-            });
+    <!-- § 10 Target Model -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-number">§ 10</span>
+        <h2 class="section-title">Target Model</h2>
+        <span class="section-hint">tailored phrasing</span>
+      </div>
+      <div class="model-grid" id="modelGrid">
+        <button class="mcard selected" data-model="claude"><div class="mcard-name">Claude</div><div class="mcard-tag">Structured · Anthropic</div></button>
+        <button class="mcard" data-model="chatgpt"><div class="mcard-name">ChatGPT</div><div class="mcard-tag">Conversational · OpenAI</div></button>
+        <button class="mcard" data-model="gemini"><div class="mcard-name">Gemini</div><div class="mcard-tag">Multimodal · Google</div></button>
+        <button class="mcard" data-model="perplexity"><div class="mcard-name">Perplexity</div><div class="mcard-tag">Research-first</div></button>
+      </div>
+    </section>
 
-            // Add Custom Option
-            const customOpt = document.createElement("option");
-            customOpt.value = "custom";
-            customOpt.textContent = "Write Custom Scenario...";
-            selector.appendChild(customOpt);
+    <div class="footer">
+      <div class="footer-mark">— Compose, Simulate, Deploy —</div>
+      Companion to the Graphic Prompt Atelier. Every selection reshapes the prompt in real time.
+    </div>
+  </div>
 
-            // Populate current title
-            document.getElementById("simTitleInput").value = selectedConfig.title;
+  <aside class="preview-panel">
+    <div class="preview-head">
+      <h2>The Generated Prompt</h2>
+      <span class="preview-model-tag" id="modelTag">→ For Claude</span>
+    </div>
+    <div class="preview-stats" id="previewStats">0 words</div>
+    <div class="preview-body" id="preview"></div>
+    <div class="preview-actions">
+      <button class="btn primary" id="copyBtn">Copy</button>
+      <button class="btn" id="downloadBtn">Download .txt</button>
+      <button class="btn" id="resetBtn">Reset</button>
+    </div>
+  </aside>
+</main>
 
-            updateCustomScenario();
-        }
+<div class="toast" id="toast" role="status" aria-live="polite">Copied to clipboard</div>
 
-        // Handle dropdown changed
-        function updateCustomScenario() {
-            const selector = document.getElementById("scenarioSelector");
-            const selectedVal = selector.value;
-            const detailsTextarea = document.getElementById("customScenarioDetails");
+<script>
+const COURSES = {
+  secplus: {
+    name: 'CompTIA Security+ (SY0-701)',
+    short: 'Security+ SY0-701',
+    examStyle: 'CompTIA Security+ SY0-701',
+    lessons: [
+      {
+        n: 1, title: 'Security Fundamentals', domain: 'Domain 1 — General Security Concepts', coverage: 'nav',
+        sections: [{ title: null, topics: [
+          { t: 'Security objectives: the CIA triad', c: ['Confidentiality', 'Integrity', 'Availability', 'CIA triad as the organizing framework for security objectives'] },
+          { t: 'Identity and access foundations: AAA', c: ['Authentication', 'Authorization', 'Accounting', 'AAA as a foundational security concept'] },
+          { t: 'Security controls', c: ['Security control types', 'Relationship between security objectives and protective controls'], note: 'The lesson index does not enumerate the specific control categories taught.' },
+          { t: 'Zero trust', c: ['Introduction to the zero-trust security model', 'Zero trust as a foundation for later architecture and access-management lessons'] },
+          { t: 'Non-repudiation', c: ['Non-repudiation as a key term', 'Positioned alongside the CIA triad, AAA, and zero trust'] },
+          { t: 'Security+ exam orientation', c: ['SY0-701 exam structure', 'The five exam domains', 'How the 12 lessons map to the exam domains'] }
+        ]}]
+      },
+      {
+        n: 2, title: 'Cryptography & PKI', domain: 'Domain 1 — General Security Concepts', coverage: 'nav',
+        sections: [{ title: null, topics: [
+          { t: 'Encryption approaches', c: ['Symmetric encryption', 'Asymmetric encryption', 'Comparison of symmetric and asymmetric approaches'] },
+          { t: 'Hashing', c: ['Hashing as a distinct cryptographic concept', 'Relationship of hashing to broader cryptography'] },
+          { t: 'Digital signatures', c: ['Digital signatures'] },
+          { t: 'Digital certificates', c: ['Certificates', 'Certificate authorities (CA)', 'TLS certificate analysis'] },
+          { t: 'Public key infrastructure', c: ['PKI concepts', 'The PKI lifecycle', 'Relationships among certificates, CAs, and digital signatures'] },
+          { t: 'Obfuscation', c: ['Obfuscation as a key term'], note: 'The lesson index does not specify which obfuscation techniques are covered.' }
+        ]}]
+      },
+      {
+        n: 3, title: 'Threat Actors & Attack Surface', domain: 'Domain 2 — Threats, Vulnerabilities & Mitigations', coverage: 'nav',
+        sections: [{ title: null, topics: [
+          { t: 'Threat actors', c: ['Threat actor types', 'Threat actor motivations'] },
+          { t: 'Attack surface and attack vectors', c: ['Attack surface as the organizing theme', 'Attack vectors used to reach systems, users, or information'] },
+          { t: 'Social engineering', c: ['Social engineering tactics', 'Phishing'] },
+          { t: 'Malware', c: ['Malware categories', 'Ransomware'] },
+          { t: 'Password attacks', c: ['Password attacks as a distinct topic area'], note: 'The lesson index does not identify the individual password-attack techniques discussed.' },
+          { t: 'Supply-chain threats', c: ['Supply chain as a key term', 'Supply chain within the broader discussion of threat actors and attack paths'] }
+        ]}]
+      },
+      {
+        n: 4, title: 'Vulnerabilities & Mitigation', domain: 'Domain 2 — Threats, Vulnerabilities & Mitigations', coverage: 'nav',
+        sections: [{ title: null, topics: [
+          { t: 'Vulnerabilities across technology environments', c: ['Operating system vulnerabilities', 'Application vulnerabilities', 'Mobile vulnerabilities', 'Cloud vulnerabilities', 'Web vulnerabilities'] },
+          { t: 'Misconfiguration and exploitation', c: ['Misconfiguration', 'Exploits', 'Relationship between weaknesses and their exploitation'] },
+          { t: 'Patching', c: ['Patching as a mitigation strategy'] },
+          { t: 'Hardening', c: ['Hardening as a mitigation strategy'] },
+          { t: 'Segmentation and isolation', c: ['Segmentation', 'Isolation', 'Segmentation and isolation as mitigation approaches'] },
+          { t: 'Access controls', c: ['Access control as a mitigation', 'Selecting protective measures across technology environments'] }
+        ]}]
+      },
+      {
+        n: 5, title: 'Secure Architecture', domain: 'Domain 3 — Security Architecture', coverage: 'full',
+        sections: [
+          { title: '5.1 On-Premises, Cloud & Virtualization', topics: [
+            { t: 'Secure architecture principles', c: ['Defense in depth', 'Separation and segmentation', 'Least privilege', 'Zero trust: verify explicitly, use least privilege, assume breach'] },
+            { t: 'On-premises security design', c: ['Physical perimeter controls: badge readers, access-control vestibules, CCTV', 'Layered physical, network, and logical controls', 'DMZ and screened-subnet designs', 'Air-gapped networks', 'VLAN-based segmentation', 'Microsegmentation and east-west traffic restrictions', 'Jump servers and bastion hosts', 'Proxy servers and cloud access security brokers'] },
+            { t: 'Cloud architecture', c: ['Shared responsibility model', 'Responsibility differences across IaaS, PaaS, and SaaS', 'Private subnets', 'Security groups and network ACLs', 'VPC peering and private service endpoints', 'Encryption at rest and in transit', 'Cloud key management', 'Immutable infrastructure and replacement-based updates'] },
+            { t: 'Virtualization', c: ['Type 1 and Type 2 hypervisors', 'Hypervisor attack surface and patching', 'VM escape', 'VM sprawl and lifecycle management'] },
+            { t: 'Container security', c: ['Shared-kernel architecture and isolation limits', 'Avoiding root execution', 'Read-only filesystems', 'Container image vulnerability scanning', 'Namespaces and seccomp restrictions', 'Kubernetes role-based access control'] }
+          ]},
+          { title: '5.2 IoT, ICS & Infrastructure as Code', topics: [
+            { t: 'IoT security challenges', c: ['Default credentials', 'Limited processing resources', 'Inadequate patching mechanisms', 'Long device lifecycles', 'Persistent connectivity', 'Physical accessibility and tampering risks'] },
+            { t: 'IoT controls', c: ['Dedicated network segments', 'Changing default credentials', 'Firmware tracking and updates', 'Network access control', 'Traffic baselining and anomaly monitoring', 'Secure decommissioning'] },
+            { t: 'Industrial control systems and operational technology', c: ['ICS and SCADA', 'Physical safety and operational consequences of compromise', 'Availability priorities', 'Legacy systems', 'Industrial protocols: Modbus, DNP3, OPC', 'Real-time processing constraints'] },
+            { t: 'ICS protections', c: ['IT/OT separation', 'Unidirectional gateways and data diodes', 'Purdue Model and industrial security zoning', 'Testing patches before production deployment', 'Restricted, time-limited, monitored vendor access', 'Stuxnet case study'] },
+            { t: 'Infrastructure as Code', c: ['Declarative, machine-readable infrastructure configuration', 'Consistency and reduced configuration drift', 'Version control, auditability, and reversibility', 'Predeployment security scanning', 'Terraform, CloudFormation, Ansible, Kubernetes manifests', 'Secrets management and hardcoded-credential risks'] }
+          ]},
+          { title: '5.3 Data Classification & Resilience', topics: [
+            { t: 'Data classification', c: ['Government and corporate classification examples', 'Sensitivity, value, and disclosure impact', 'Classification-driven access, encryption, handling, retention, and destruction'] },
+            { t: 'Availability and resilience', c: ['Redundancy', 'High availability', 'Fault tolerance', 'Availability percentages and annual downtime'] },
+            { t: 'Redundancy patterns', c: ['Active-active and active-passive clustering', 'RAID examples', 'Redundant power, UPS systems, and generators', 'Geographic redundancy'] },
+            { t: 'Load balancing and failover', c: ['Layer 4 and Layer 7 load balancing', 'Health checks', 'Geographic load distribution', 'DNS-based failover', 'Anycast'] },
+            { t: 'Recovery and backups', c: ['Recovery time objective (RTO)', 'Recovery point objective (RPO)', 'Hot, warm, and cold recovery sites', 'The 3-2-1 backup rule', 'Immutable or offline copies and restore testing'] },
+            { t: 'Applied activities', c: ['Sorting controls into architecture environments', 'Selecting resilience designs for banking, healthcare, and e-commerce scenarios'] }
+          ]}
+        ]
+      },
+      {
+        n: 6, title: 'Network & Infrastructure Security', domain: 'Domains 3 & 4 — Security Architecture / Security Operations', coverage: 'full',
+        sections: [
+          { title: '6.1 Firewalls & IDS/IPS', topics: [
+            { t: 'Firewall types', c: ['Packet-filtering firewalls', 'Stateful inspection firewalls', 'Next-generation firewalls', 'Web application firewalls', 'Proxy firewalls', 'Capabilities, limitations, and scenario-based selection'] },
+            { t: 'Intrusion detection versus prevention', c: ['IDS: monitoring, logging, alerting', 'IPS: inline inspection and blocking', 'Out-of-band versus inline placement', 'Availability, latency, and false-positive tradeoffs'] },
+            { t: 'Detection approaches', c: ['Signature-based detection', 'Anomaly-based detection', 'Baseline dependence', 'Known versus previously unseen threats', 'Host-based versus network-based detection'] }
+          ]},
+          { title: '6.2 DNS Filtering, NAC & DLP', topics: [
+            { t: 'DNS filtering', c: ['Filtering resolvers and threat intelligence', 'Blocking malicious domains and C2 callbacks', 'Category-based acceptable-use filtering', 'Limitations: direct IP access, legitimate hosting platforms, resolver bypass'] },
+            { t: 'Network access control', c: ['Pre-admission and post-admission checks', 'Agent-based and agentless approaches', 'Device posture assessment', 'Patch, endpoint protection, firewall, encryption, and certificate checks', 'Quarantine and remediation VLANs'] },
+            { t: 'Data loss prevention', c: ['Data in motion: email, uploads, cloud sync', 'Data at rest: stored sensitive information', 'Data in use: clipboard, removable media, printing', 'Pattern matching and sensitivity labels', 'Blocking, quarantining, and alerting', 'Detection gaps and policy tuning'] }
+          ]},
+          { title: '6.3 Endpoint Security & Defense in Depth', topics: [
+            { t: 'Endpoint protection', c: ['Endpoint detection and response (EDR)', 'Behavioral telemetry', 'Automated containment', 'Process termination and file quarantine', 'Historical threat hunting', 'Application allowlisting and blocklisting', 'Host-based firewalls', 'Full-disk encryption', 'Endpoint patching'] },
+            { t: 'Layered enterprise defense', c: ['Perimeter firewalls', 'IDS/IPS', 'DNS and web filtering', 'Email security', 'NAC and segmentation', 'Endpoint controls', 'DLP, encryption, and access control'] },
+            { t: 'Control-to-threat matching', c: ['WAF for web application attacks', 'NAC for unauthorized or noncompliant devices', 'DNS filtering for malicious-domain access', 'DLP for sensitive-data exfiltration', 'EDR for suspicious endpoint behavior'] },
+            { t: 'Applied activities', c: ['Control-to-threat matching', 'Ransomware, insider exfiltration, and rogue-device scenarios'] }
+          ]}
+        ]
+      },
+      {
+        n: 7, title: 'Identity & Access Management', domain: 'Domain 4 — Security Operations', coverage: 'nav',
+        sections: [{ title: null, topics: [
+          { t: 'AAA', c: ['Authentication', 'Authorization', 'Accounting'] },
+          { t: 'Authentication and access technologies', c: ['Single sign-on (SSO)', 'Multifactor authentication (MFA)'] },
+          { t: 'Access control principles and models', c: ['Least privilege', 'Access control models', 'Role-based access control (RBAC)'] },
+          { t: 'Privileged access', c: ['Privileged access management (PAM)'] },
+          { t: 'Identity lifecycle', c: ['Provisioning', 'Deprovisioning', 'Managing access as identities enter and leave the environment'] }
+        ]}]
+      },
+      {
+        n: 8, title: 'Security Operations & Monitoring', domain: 'Domain 4 — Security Operations', coverage: 'full',
+        lessonNote: 'The course navigation also lists wireless security; the lesson body primarily develops the four areas below.',
+        sections: [
+          { title: '8.1 Baselines & Configuration Drift', topics: [
+            { t: 'Secure baseline documentation', c: ['Open ports', 'Running services', 'User accounts', 'Approved software and versions', 'Registry settings', 'File hashes'] },
+            { t: 'Configuration drift', c: ['Authorized drift', 'Unauthorized drift', 'Cumulative drift', 'Comparison with approved change records'] },
+            { t: 'Standards and monitoring', c: ['CIS Benchmarks', 'Security Technical Implementation Guides (STIGs)', 'File integrity monitoring', 'Configuration auditing'] },
+            { t: 'Interactive application', c: ['Identifying deviations between a secure baseline and a drifted production server'] }
+          ]},
+          { title: '8.2 Asset Inventory & Discovery', topics: [
+            { t: 'Asset management', c: ['Hardware, software, and data inventories', 'Configuration management database (CMDB)', 'Asset ownership and monitoring', 'Unknown and unauthorized assets'] },
+            { t: 'Active discovery', c: ['Nmap', 'Vulnerability scanners', 'Ping sweeps', 'Host, port, OS, and service discovery'] },
+            { t: 'Passive discovery', c: ['DHCP logs', 'ARP monitoring', 'Traffic-flow analysis'] },
+            { t: 'Network admission', c: ['802.1X', 'Supplicant, authenticator, and authentication server', 'RADIUS', 'NAC posture assessment', 'Quarantine VLANs'] },
+            { t: 'Interactive application', c: ['Classifying discovered devices as authorized assets or suspicious devices'] }
+          ]},
+          { title: '8.3 Log Management & SIEM', topics: [
+            { t: 'Log sources and categories', c: ['Event, system, security, and application logs', 'Agents, syslog forwarders, and API connectors'] },
+            { t: 'SIEM processing', c: ['Collection', 'Normalization', 'Correlation', 'Alerting'] },
+            { t: 'Windows security events', c: ['4624: successful logon', '4625: failed logon', '4648: explicit-credential logon', '4720: account creation', 'Correlating events to investigate suspicious activity'] },
+            { t: 'Alert engineering', c: ['Threshold selection', 'False positives and alert fatigue', 'Missed attacks', 'Brute-force detection', 'SOAR-based response automation'] },
+            { t: 'Interactive application', c: ['Configuring alert thresholds and observing a simulated attack'] }
+          ]},
+          { title: '8.4 Sandboxing & Malware Analysis', topics: [
+            { t: 'Static analysis', c: ['Hash comparison', 'String extraction', 'Portable Executable header analysis', 'Entropy indicators', 'Signature and YARA scanning'] },
+            { t: 'Dynamic analysis', c: ['Isolated execution', 'Network connections and DNS requests', 'Registry changes', 'File writes', 'Process creation and injection'] },
+            { t: 'Analysis environments', c: ['VM-based sandboxes', 'Cloud-based analysis services', 'Sample-sharing and confidentiality considerations'] },
+            { t: 'Evasion and triage', c: ['Detection of virtual-machine artifacts', 'Delayed or dormant malware behavior', 'Decisions to run, scan, or sandbox a file'] },
+            { t: 'Interactive application', c: ['Sorting files into appropriate investigation actions'] }
+          ]}
+        ]
+      },
+      {
+        n: 9, title: 'Vulnerability Management & Incident Response', domain: 'Domain 4 — Security Operations', coverage: 'nav',
+        sections: [{ title: null, topics: [
+          { t: 'Vulnerability management workflow', c: ['Vulnerability scanning', 'Analysis of findings', 'Remediation', 'Validation of corrective actions'] },
+          { t: 'Incident response', c: ['Incident response phases', 'IR as a key term'], note: 'The lesson index does not enumerate the IR phase names used in the lesson.' },
+          { t: 'Root cause analysis', c: ['Investigating the underlying cause of an incident'] },
+          { t: 'Digital forensics', c: ['Digital forensic concepts', 'Forensic evidence'], note: 'The lesson index does not specify the evidence-acquisition or handling procedures covered.' }
+        ]}]
+      },
+      {
+        n: 10, title: 'Security Governance & Policy', domain: 'Domain 5 — Security Program Management & Oversight', coverage: 'nav',
+        sections: [{ title: null, topics: [
+          { t: 'Security documentation', c: ['Policies', 'Standards', 'Procedures', 'Distinctions among these documentation categories'] },
+          { t: 'Governance', c: ['Governance roles', 'Security governance responsibilities'] },
+          { t: 'Compliance', c: ['Compliance obligations'] },
+          { t: 'Privacy', c: ['Privacy frameworks'] },
+          { t: 'Security awareness', c: ['Security awareness training', 'Awareness within security program management and oversight'] }
+        ]}]
+      },
+      {
+        n: 11, title: 'Risk, Third-Party & Assessment', domain: 'Domain 5 — Security Program Management & Oversight', coverage: 'nav',
+        sections: [{ title: null, topics: [
+          { t: 'Risk identification and assessment', c: ['Identifying risk', 'Assessing risk'] },
+          { t: 'Risk boundaries and documentation', c: ['Risk appetite', 'Risk tolerance', 'Risk register'] },
+          { t: 'Business impact analysis', c: ['Business impact analysis (BIA)'] },
+          { t: 'Third-party risk', c: ['Third-party risk management', 'Vendor risk'] },
+          { t: 'Assurance and assessment', c: ['Audits', 'Penetration testing', 'Attestation'], note: 'The lesson index does not identify specific audit types or penetration-testing methodologies.' }
+        ]}]
+      },
+      {
+        n: 12, title: 'Final Review & Exam Readiness', domain: 'All five SY0-701 domains', coverage: 'nav',
+        sections: [{ title: null, topics: [
+          { t: 'Cumulative domain review', c: ['General Security Concepts', 'Threats, Vulnerabilities & Mitigations', 'Security Architecture', 'Security Operations', 'Security Program Management & Oversight'] },
+          { t: 'Exam question interpretation', c: ['Common exam traps', 'Distractors', 'Domain weights'] },
+          { t: 'Performance-based questions', c: ['PBQ workshop', 'PBQ as a key term'] },
+          { t: 'Exam execution', c: ['Pacing strategy', 'Time management'] },
+          { t: 'Cumulative assessment', c: ['Practice assessment spanning the course', 'Integration of concepts across all five domains'] }
+        ]}]
+      }
+    ]
+  }
+};
 
-            if (selectedVal === "custom") {
-                detailsTextarea.value = "";
-                detailsTextarea.placeholder = "Describe the scenario mission, starting environment, objectives, and vulnerable assets the student must tackle...";
-                detailsTextarea.focus();
-            } else {
-                const scenario = simulatorClasses[currentSimType].scenarios[parseInt(selectedVal)];
-                detailsTextarea.value = scenario.details;
-            }
+/* ============================================================
+   Personas (retuned for simulator builds)
+============================================================ */
+const PERSONAS = [
+  {
+    id: 'sme', name: 'Cybersecurity SME', purpose: 'Owns technical realism',
+    desc: 'Authentic commands, outputs, logs, and attack chains, so the lab feels like the real job.',
+    role: ctx => `Cybersecurity Subject Matter Expert (SME): a seasoned, certified practitioner who ensures authentic tool behavior, correct command syntax and output, realistic log entries, plausible attack chains, and correct defensive responses, aligned with ${ctx.course ? ctx.course.name + ' exam objectives' : 'industry standards and frameworks'}.`,
+    deliverable: ctx => `SME Realism Review: list every command, output, log entry, event ID, and protocol behavior the simulator uses; confirm each is accurate${ctx.course ? ' for ' + ctx.course.short : ''}; note every simplification made for teaching and why it is acceptable.`
+  },
+  {
+    id: 'id', name: 'Instructional Designer', purpose: 'Designs the practice',
+    desc: 'Sequences tasks from guided to independent, with scaffolds that fade as skill grows.',
+    role: ctx => `Instructional Designer: structures the lab as a sequence of tasks that moves from guided to independent practice for ${ctx.grade}, applies cognitive-load and worked-example principles, fades scaffolding as competence grows, and ties every task to the learning objective.`,
+    deliverable: () => `Learning Design Map: a task-by-task table linking each task to the objective and its Bloom's level, the scaffolding provided, and the expected learner action; plus a short pre-lab briefing and the post-lab debrief prompts.`
+  },
+  {
+    id: 'assess', name: 'Assessment Expert', purpose: 'Measures performance',
+    desc: 'Success criteria, scoring, partial credit, and corrective feedback for every wrong move.',
+    role: () => `Assessment Expert: defines observable success criteria for each task, designs scoring that measures decisions and performance rather than clicks, and writes corrective feedback that diagnoses the specific misconception behind each wrong action.`,
+    deliverable: ctx => `Scoring & Feedback Logic: success criteria and point values per task, partial-credit rules, the corrective message for each common wrong action, and 3 debrief questions${ctx.course ? ' in ' + ctx.course.examStyle + ' style' : ''} that check transfer beyond the lab.`
+  },
+  {
+    id: 'gfx', name: 'Graphics Designer', purpose: 'Designs the interface',
+    desc: 'Layout, visual metaphors, state colors, and motion that make cause and effect visible.',
+    role: () => `Graphics Designer: designs the simulator interface (layout, visual metaphors for the tool being simulated, status colors for success, warning, and danger, iconography, and motion that makes cause and effect visible) so the lab is visually appealing without distracting from the task.`,
+    deliverable: () => `UI Specification: a layout wireframe (ASCII or described), component inventory, palette as hex values with contrast notes, type scale, interaction states (default, hover, focus, active, success, error), and animation cues for key events.`
+  },
+  {
+    id: 'web', name: 'Expert Webpage Developer', purpose: 'Builds a working lab',
+    desc: 'Clean state management, event-driven interactions, and complete, runnable code.',
+    role: () => `Expert Webpage Developer: builds the simulator with a single documented state object, pure render functions, and event-driven interactions; writes complete, runnable, standards-based code with no placeholders; and meets responsive and accessibility requirements.`,
+    deliverable: () => `Complete Implementation: the full, runnable code with the state model and task data documented in comments, no placeholders or TODOs, plus a short test checklist covering every task path, wrong-answer path, and reset.`
+  }
+];
 
-            compilePrompt();
-        }
+/* ============================================================
+   Simulator Types
+============================================================ */
+const SIM_TYPES = [
+  { id: 'terminal', name: 'Terminal / CLI', purpose: 'Practice commands', desc: 'Mock Linux or Windows shell with scripted, realistic command responses.', use: 'Use for nmap, netstat, ipconfig, openssl, ncrack, PowerShell, or log grepping where typing the command is the skill.', traits: 'a mock terminal with a blinking cursor, command history (up/down arrows), a help command, tab-style suggestions, and scripted realistic output for each accepted command; unknown commands return a helpful error; a side panel lists the current task' },
+  { id: 'topology', name: 'Network Topology & Packet Flow', purpose: 'See traffic move', desc: 'Drag-and-place devices and watch packets get allowed, dropped, or alerted.', use: 'Use for segmentation, DMZ design, firewall/IDS placement, VLANs, and east-west traffic.', traits: 'an interactive network canvas with draggable devices and links; animated packets that travel hop by hop and visibly pass, drop, or trigger alerts; a packet inspector showing headers at each hop' },
+  { id: 'config', name: 'Configuration Console', purpose: 'Configure controls', desc: 'Mock admin console for rules, ACLs, policies, or security groups that validates settings.', use: 'Use for firewall rules, security groups, NAC posture policy, Group Policy, MFA settings, or hardening baselines.', traits: 'a realistic admin console with forms, rule tables, and toggles; a validate/apply button that tests the configuration against scripted traffic or attack attempts and reports which succeed or fail and why' },
+  { id: 'siem', name: 'Log Analysis / SIEM', purpose: 'Hunt in the data', desc: 'Filter, search, and correlate realistic events to find the attack.', use: 'Use for Windows event IDs, authentication logs, firewall logs, threshold tuning, and correlation rules.', traits: 'a SIEM-style console with a searchable, filterable event table, a timeline histogram, field pivots, and saved queries; learners flag events and build a finding; alert thresholds are adjustable with live results' },
+  { id: 'soc', name: 'SOC Dashboard / Live Feed', purpose: 'Triage under pressure', desc: 'Timed alerts stream in for learners to triage, escalate, or close.', use: 'Use for alert triage, prioritization, false-positive handling, and escalation decisions.', traits: 'a live SOC dashboard where alerts arrive on a timer with severity, source, and enrichment; learners investigate, then close, escalate, or contain each alert; a shift scorecard tracks accuracy and mean time to respond' },
+  { id: 'branching', name: 'Branching Scenario / IR Tabletop', purpose: 'Decide and see consequences', desc: 'Each choice changes the outcome, shown on an incident timeline.', use: 'Use for incident response phases, ethics, communications, and judgment calls without one right command.', traits: 'a branching narrative with decision points, each showing 2–4 choices; consequences update an incident timeline, impact meters, and stakeholder reactions; multiple endings with a debrief comparing the learner path to the ideal path' },
+  { id: 'dragdrop', name: 'Drag-and-Drop Classification', purpose: 'Sort and match', desc: 'PBQ-style sorting: controls to threats, assets to categories, data to labels.', use: 'Use for control-to-threat matching, classifying devices or data, ordering steps, and placing controls in zones.', traits: 'draggable items and labeled drop zones with snap feedback; keyboard alternative for every drag; a check button that marks each placement and explains incorrect ones' },
+  { id: 'protocol', name: 'Protocol Step-Through', purpose: 'Watch a process unfold', desc: 'Animated, state-by-state walkthrough of a protocol or handshake.', use: 'Use for TLS handshakes, PKI chain validation, Kerberos, 802.1X/RADIUS, and DNS resolution.', traits: 'an animated sequence diagram between actors with play, pause, step-forward, and step-back controls; each step shows the message contents and state change; learners predict the next message before it is revealed' },
+  { id: 'crypto', name: 'Crypto Playground', purpose: 'Experiment with crypto', desc: 'Live hashing, encryption, signing, and verification, with tamper tests.', use: 'Use for hashing, symmetric vs. asymmetric encryption, digital signatures, and integrity checks.', traits: 'an interactive workbench where learners enter text, hash it, encrypt or sign it, then tamper with it and watch verification fail; side-by-side views show inputs, keys, and outputs with the avalanche effect highlighted' },
+  { id: 'phishing', name: 'Phishing / Inbox Triage', purpose: 'Spot the lure', desc: 'Inspect headers, links, and attachments, then report or release each message.', use: 'Use for social engineering, email security, SPF/DKIM/DMARC, and user awareness.', traits: 'a realistic mail client with an inbox of mixed legitimate and malicious messages; learners hover links, view headers, and inspect attachments, then report, release, or delete; each decision reveals the red flags present' },
+  { id: 'pcap', name: 'Packet Capture Analyzer', purpose: 'Read the wire', desc: 'Wireshark-style frame list with decoded protocol layers to investigate.', use: 'Use for protocol analysis, ARP poisoning, cleartext credentials, scans, and C2 beaconing.', traits: 'a three-pane capture analyzer (frame list, decoded protocol tree, hex view) with display filters and color rules; learners answer investigation questions by finding and flagging the right frames' },
+  { id: 'calculator', name: 'Calculator / Modeler', purpose: 'Quantify decisions', desc: 'Interactive model for risk, availability, entropy, or recovery planning.', use: 'Use for SLE/ARO/ALE, availability percentages and downtime, password entropy, RTO/RPO, and cost-benefit of controls.', traits: 'an interactive model with sliders and inputs that update charts and results live; worked examples learners can load; scenario cards that ask the learner to reach a target outcome' },
+  { id: 'desktop', name: 'Mock Desktop / GUI', purpose: 'Investigate a host', desc: 'Fake Event Viewer, file explorer, task manager, or EDR console.', use: 'Use for host investigation, malware triage, baseline drift, and endpoint response.', traits: 'a simulated desktop with draggable windows for tools such as Event Viewer, Task Manager, file explorer, and an EDR console; artifacts are planted for the learner to find; actions like kill process or quarantine produce visible results' },
+  { id: 'pbq', name: 'PBQ Exam Simulator', purpose: 'Rehearse the exam', desc: 'Timed, multi-part performance-based questions with scoring.', use: 'Use for certification exam readiness, especially Security+ performance-based questions.', traits: 'an exam-style interface with a countdown, question navigator, flag-for-review, and multi-part interactive PBQs; scoring is withheld until submission, then a review mode explains each part' },
+  { id: 'ctf', name: 'Gamified Challenge / Mini-CTF', purpose: 'Motivate through play', desc: 'Levels, points, flags, unlockable hints, and badges.', use: 'Use for engagement, review sessions, competitions, and cumulative skill practice.', traits: 'a challenge board of categorized puzzles with point values; learners submit flags, spend points to unlock hints, earn badges, and see a progress board; challenges are solvable entirely inside the page' }
+];
 
-        function compilePrompt() {
-            const simName = document.getElementById("simTitleInput").value || "Cyber Training Simulator";
-            const scenarioText = document.getElementById("customScenarioDetails").value || "Interactive exploration sandbox.";
-            const difficulty = document.getElementById("difficultyLevel").value;
-            const layout = document.getElementById("layoutScheme").value;
-            
-            // Features
-            const rulesBldr = document.getElementById("featureInteractiveRules").checked ? "Enabled - Include custom interactive configuration elements, inputs, rule metrics tables, or CLI controls." : "Disabled - Focus strictly on pre-defined diagnostic steps.";
-            const loggingConsole = document.getElementById("featureLiveLogger").checked ? "Enabled - Provide a real-time scrolling technical debug log terminal showing active system processing, ingress/egress drops, threat detections, or scan diagnostics." : "Disabled - Exclude granular debug output.";
-            const payloadInspector = document.getElementById("featurePayloadInspector").checked ? "Enabled - Embed detailed dissection tool enabling deep inspections of raw payloads, HEX frames, CVE references, or protocol headers." : "Disabled - Exclude granular dissection utilities.";
-            const gradingEngine = document.getElementById("featureVisualGrading").checked ? "Enabled - Build dynamic objective checklist that ticks off automatically in real-time as criteria are met, showing success scoring and mitigation telemetry." : "Disabled - Standard freeplay environment.";
-            const audioFeedback = document.getElementById("featureSoundSynthesis").checked ? "Enabled - Inject dynamic synthetic synth audio cues using Tone.js (alarm sirens, success sweeps, key presses). Ensure Tone.js loads safely asynchronously." : "Disabled - Standard quiet visual application.";
+/* ============================================================
+   State
+============================================================ */
+const TOGGLE_DEFAULTS = {
+  scoring: true, progress: true, timer: false, reset: true, randomize: false, badges: false,
+  walkthrough: true, report: false, sound: false, visibleObjective: true,
+  zeroDeps: true, keyboard: true, answerKey: true, commented: true,
+  accuracy: true, wcag: true, colorblind: true, explain: true,
+  simulatedOnly: true, fictionalData: true, ethics: true, debrief: true
+};
 
-            const activeClass = simulatorClasses[currentSimType];
+const SELECT_IDS = ['subject', 'grade', 'duration', 'industry', 'environment', 'learnerRole', 'fidelity',
+  'feedback', 'hints', 'difficulty', 'taskCount', 'aesthetic', 'theme', 'layout', 'animation',
+  'codeFormat', 'persistence', 'devices', 'deployment'];
 
-            // Generating system output prompt
-            const generatedPrompt = `# Role and Objective
-You are an expert Instructional Designer, Cybersecurity Subject Matter Expert, and Lead Front-End Developer. Your task is to generate a comprehensive, production-ready system prompt for an AI that will build interactive, single-file cybersecurity simulators. 
+const state = {
+  course: '', lessonIdx: -1,
+  selected: new Set(), expanded: new Set(), autoTopic: '',
+  personas: new Set(['sme', 'id', 'assess', 'gfx', 'web']),
+  topic: '', objective: '', org: '', narrative: '',
+  simType: null,
+  toggles: { ...TOGGLE_DEFAULTS },
+  model: 'claude'
+};
 
-The simulator you generate will be named: "${simName}"
-Simulator Category: ${currentSimType.toUpperCase()}
-Target Difficulty Rank: ${difficulty}
-
----
-
-# Core Principles for the Target Prompt
-
-The prompt you generate must instruct the AI to build a simulator that strictly adheres to the following architectural, instructional, and aesthetic pillars:
-
-## 1. UI/UX & Visual Theme
-* **Palette:** Pure white background with professional cyber emerald-green and dark slate accents. Highly professional technical aesthetic with strong visual hierarchies. High-contrast elements complying with WCAG 2.1 Level AA parameters.
-* **Layout Structure:** ${layout}
-* **Aesthetics:** Minimalist, dashboard design. Clean borders (1px solid slate), bold metrics boxes, with distinct card areas grouping actions. Zero visual clutter. No massive walls of blocky documentation.
-
-## 2. Technical Stack & Delivery
-* **Architecture:** Single, self-contained, fully complete HTML5 file.
-* **Dependencies:** Embedded, pure CSS classes and modular vanilla JavaScript (ES6+). No external CSS dependencies or third-party frameworks like Tailwind or Bootstrap are permitted to ensure perfect local-sandbox performance.
-* **Libraries Allowed:** Only ${document.getElementById("featureSoundSynthesis").checked ? "Tone.js CDN (https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js) for safe audio synthesis" : "none"}. All structures must render locally.
-* **Interactivity:** Dynamic state machines written in native JavaScript. Packet parsing, traffic simulations, scan lists, log engines, and status charts must load and update on the fly in real-time.
-
-## 3. Educational Design
-* **Scenario-Based Learning Directive:** The user is dropped directly into the following mission:
-  "${scenarioText}"
-* **Feedback Loops & Diagnostics:** Instant dynamic scoring. If the student enters a wrong rule, filter, or configuration, highlight the attack packets passing through security layers directly into terminal telemetry outputs.
-* **Scannability:** Clear headers, visual separation tags, colored badges (e.g., Red for Blocked, Green for Cleared), and clear instructional directives.
-
----
-
-# Required Output Structure for the Generated Prompt
-
-Your output must be a highly detailed, copy-pasteable system prompt that forces the AI to output simulators conforming to the requirements below. Format your generated prompt using these exact sections:
-
-### 1. Persona Activation
-Instruct the AI to stack three distinct personas: a Tier 3 Security Operations Center (SOC) Analyst, an Instructional Designer specializing in cybersecurity workforce training, and an Expert UI Engineer.
-
-### 2. Simulator Blueprinting Engine
-Direct the AI to construct the simulator using these customized configuration elements:
-* **Core Simulator Logic:** ${activeClass.coreLogic}
-* **Interactive Toolset & UI Controls:** ${activeClass.interactiveComponents}
-* **Key Visual Features:**
-  - Interactive Rules Module: ${rulesBldr}
-  - Real-time Diagnostics Terminal: ${loggingConsole}
-  - Deep Packet Inspection Details: ${payloadInspector}
-  - Objective Assessment Checklist: ${gradingEngine}
-  - Audio Alerts Synthesis: ${audioFeedback}
-
-### 3. Strict Coding Guardrails
-Force the AI to output **fully functional, complete code applications** without placeholders, \`// TODO\` comments, or omitted elements. CSS and JS must reside natively inside \`<style>\` and \`<script>\` elements inside the single-file HTML structure. Never use \`alert()\` or block modal prompts. Use an embedded HTML warning panel instead.
-
-### 4. Step-by-Step Simulation Flow
-Outline how the simulator must run for the student:
-1. **Scenario Briefing Panel:** Displays the specific mission, vulnerabilities, starting configurations, and clear checklist of success criteria.
-2. **Configuration Mode Sandbox:** Where the student enters custom operational rules, maps scans, modifies filters, or launches diagnostic probes.
-3. **Execution Phase Engine:** Displays a visual simulation showing traffic moving between hosts, scan bars filling, or packet flows evaluated in real-time.
-4. **Post-Incident Analysis Panel:** Evaluates the efficacy of the configurations, maps objective completion states, calculates telemetry scores, and issues instructional summaries.
-
----
-
-## 5. Implementation Standard Reference
-Include the following visual template reference inside your output prompt to ensure clean CSS output:
-\`\`\`css
-/* Clean White Cyber Theme Reference Code */
-body {
-    background-color: #ffffff;
-    color: #1e293b;
-    font-family: 'Inter', system-ui, sans-serif;
+const $ = id => document.getElementById(id);
+function escapeHTML(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
-.sidebar-panel {
-    background-color: #f8fafc;
-    border-right: 1px solid #e2e8f0;
+function readSelects() { SELECT_IDS.forEach(id => state[id] = $(id).value); }
+
+/* ============================================================
+   Lesson loader
+============================================================ */
+function getCourse() { return state.course ? COURSES[state.course] : null; }
+function getLesson() { const c = getCourse(); return c && state.lessonIdx >= 0 ? c.lessons[state.lessonIdx] : null; }
+
+function allConceptKeys(L, si, ti) {
+  const keys = [];
+  L.sections.forEach((sec, s) => {
+    if (si !== undefined && s !== si) return;
+    sec.topics.forEach((tp, t) => {
+      if (ti !== undefined && t !== ti) return;
+      tp.c.forEach((_, c) => keys.push(`${s}.${t}.${c}`));
+    });
+  });
+  return keys;
 }
-.terminal-console {
-    background-color: #0f172a;
-    color: #34d399;
-    font-family: 'Courier New', Courier, monospace;
+
+function selectionCounts(L) {
+  let topics = 0, concepts = 0, totalTopics = 0, totalConcepts = 0;
+  L.sections.forEach((sec, s) => sec.topics.forEach((tp, t) => {
+    totalTopics++; totalConcepts += tp.c.length;
+    const n = tp.c.filter((_, c) => state.selected.has(`${s}.${t}.${c}`)).length;
+    concepts += n; if (n) topics++;
+  }));
+  return { topics, concepts, totalTopics, totalConcepts };
 }
-.badge-alert {
-    background-color: #fee2e2;
-    color: #ef4444;
-    border: 1px solid #fca5a5;
+
+function selectedScope() {
+  const L = getLesson();
+  if (!L) return [];
+  const out = [];
+  L.sections.forEach((sec, s) => {
+    const topics = [];
+    sec.topics.forEach((tp, t) => {
+      const concepts = tp.c.filter((_, c) => state.selected.has(`${s}.${t}.${c}`));
+      if (concepts.length) topics.push({ t: tp.t, concepts, note: tp.note });
+    });
+    if (topics.length) out.push({ title: sec.title, topics });
+  });
+  return out;
 }
-.badge-secure {
-    background-color: #d1fae5;
-    color: #10b981;
-    border: 1px solid #6ee7b7;
+
+function populateLessons() {
+  const sel = $('lesson'), c = getCourse();
+  if (!c) { sel.innerHTML = '<option value="">— select a course first —</option>'; sel.disabled = true; return; }
+  sel.disabled = false;
+  sel.innerHTML = '<option value="">— select a lesson —</option>' +
+    c.lessons.map((L, i) => `<option value="${i}">Lesson ${L.n}: ${escapeHTML(L.title)}</option>`).join('');
+  sel.value = state.lessonIdx >= 0 ? String(state.lessonIdx) : '';
 }
-\`\`\`
 
-Now, act as the meta-prompt compiler and output the complete system prompt based on this request. Do not summarize or provide empty templates; output the complete markdown text block.`;
+function renderLesson() {
+  const wrap = $('lessonPanel'), L = getLesson();
+  if (!L) {
+    wrap.innerHTML = state.course ? '<p class="lesson-empty">Choose a lesson to load its major topics and concepts.</p>' : '';
+    return;
+  }
+  const k = selectionCounts(L), full = L.coverage === 'full';
+  let h = `<div class="lesson-card">
+    <div class="lesson-head">
+      <div>
+        <div class="lesson-title">Lesson ${L.n}: ${escapeHTML(L.title)}</div>
+        <div class="lesson-domain">${escapeHTML(L.domain)}</div>
+      </div>
+      <span class="badge ${full ? 'full' : 'nav'}">${full ? 'Full lesson content' : 'Navigation outline'}</span>
+    </div>`;
+  if (L.lessonNote) h += `<div class="lesson-note">${escapeHTML(L.lessonNote)}</div>`;
+  h += `<div class="lesson-tools">
+      <button type="button" class="mini-btn" data-action="all">Select all</button>
+      <button type="button" class="mini-btn" data-action="none">Clear</button>
+      <button type="button" class="mini-btn" data-action="expand">${state.expanded.size ? 'Collapse all' : 'Show all concepts'}</button>
+      <button type="button" class="mini-btn" data-action="objective">Draft objective from selection</button>
+      <span class="scope-count">${k.topics}/${k.totalTopics} topics · ${k.concepts}/${k.totalConcepts} concepts</span>
+    </div>`;
+  if (k.concepts === 0) h += `<div class="scope-warn">No concepts selected. Tick the topics this simulator should practice.</div>`;
+  else if (k.concepts > 20) h += `<div class="scope-warn">${k.concepts} concepts is a lot for one simulator. Most labs work best around one to three topics; consider building several focused simulators.</div>`;
 
-            document.getElementById("promptCompilerOutput").value = generatedPrompt;
-        }
+  L.sections.forEach((sec, s) => {
+    if (sec.title) h += `<div class="sec-title"><span>${escapeHTML(sec.title)}</span><button type="button" class="mini-btn" data-section="${s}">Only this section</button></div>`;
+    sec.topics.forEach((tp, t) => {
+      const tKey = `${s}.${t}`;
+      const n = tp.c.filter((_, c) => state.selected.has(`${s}.${t}.${c}`)).length;
+      const open = state.expanded.has(tKey);
+      h += `<div class="topic"><div class="topic-row">
+          <input type="checkbox" class="topic-check" id="tp-${s}-${t}" data-topic="${tKey}" ${n === tp.c.length ? 'checked' : ''} data-indeterminate="${n > 0 && n < tp.c.length}">
+          <label for="tp-${s}-${t}">${escapeHTML(tp.t)}</label>
+          <span class="topic-count">${n}/${tp.c.length}</span>
+          <button type="button" class="expand-btn" data-expand="${tKey}" aria-expanded="${open}">${open ? 'Hide' : 'Concepts'}</button>
+        </div>`;
+      if (open) {
+        h += `<div class="concepts chips">` + tp.c.map((cn, c) => {
+          const key = `${s}.${t}.${c}`, on = state.selected.has(key);
+          return `<button type="button" class="chip concept-chip${on ? ' selected' : ''}" data-key="${key}" aria-pressed="${on}">${escapeHTML(cn)}</button>`;
+        }).join('') + `</div>`;
+        if (tp.note) h += `<div class="topic-note">${escapeHTML(tp.note)}</div>`;
+      }
+      h += `</div>`;
+    });
+  });
+  wrap.innerHTML = h + `</div>`;
+  wrap.querySelectorAll('.topic-check').forEach(cb => cb.indeterminate = cb.dataset.indeterminate === 'true');
+}
 
-        function copyToClipboard() {
-            const promptOutput = document.getElementById("promptCompilerOutput");
-            promptOutput.select();
-            promptOutput.setSelectionRange(0, 99999); // For mobile devices
+function onLessonChosen() {
+  const L = getLesson();
+  state.selected = new Set(); state.expanded = new Set();
+  if (L) {
+    allConceptKeys(L).forEach(k => state.selected.add(k));
+    const label = `Lesson ${L.n}: ${L.title} Simulator`;
+    if (!state.topic.trim() || state.topic === state.autoTopic) { state.topic = label; $('topic').value = label; }
+    state.autoTopic = label;
+    if (!$('subject').value) $('subject').value = 'Cybersecurity';
+    if (!$('grade').value) $('grade').value = 'Community College / Undergraduate';
+    readSelects();
+  }
+  renderLesson(); updatePrompt();
+}
 
-            try {
-                // Using standard clipboard command for high-isolation environments
-                const success = document.execCommand('copy');
-                if (success) {
-                    const copyIcon = document.getElementById("copyIcon");
-                    const copyText = document.getElementById("copyText");
-                    
-                    // Visual confirmation state
-                    copyIcon.className = "fa-solid fa-check text-black";
-                    copyText.textContent = "Copied!";
-                    
-                    setTimeout(() => {
-                        copyIcon.className = "fa-solid fa-copy";
-                        copyText.textContent = "Copy Prompt";
-                    }, 2000);
-                }
-            } catch (err) {
-                console.error("Failed copying to clipboard:", err);
-            }
-        }
+function draftObjective() {
+  const titles = [];
+  selectedScope().forEach(sec => sec.topics.forEach(tp => titles.push(tp.t)));
+  if (!titles.length) { showToast('Select topics first'); return; }
+  const lc = s => (s[1] && s[1] === s[1].toLowerCase()) ? s[0].toLowerCase() + s.slice(1) : s;
+  const list = titles.slice(0, 3).map(lc);
+  const more = titles.length > 3 ? ', and related skills' : '';
+  const joined = list.length === 1 ? list[0] : list.length === 2 ? `${list[0]} and ${list[1]}` : `${list.slice(0, -1).join(', ')}, and ${list[list.length - 1]}`;
+  const role = $('learnerRole').value.toLowerCase();
+  state.objective = `By completing this simulator, the learner will be able to apply ${joined}${more} to realistic tasks in the role of a ${role}, and justify each decision.`;
+  $('objective').value = state.objective;
+  updatePrompt(); showToast('Objective drafted — edit as needed');
+}
 
-        function downloadAsMarkdown() {
-            const content = document.getElementById("promptCompilerOutput").value;
-            const simName = document.getElementById("simTitleInput").value.toLowerCase().replace(/[^a-z0-9]+/g, '_') || "cyber_simulator";
-            const filename = `generator_prompt_${simName}.md`;
+function wireLessonPanel() {
+  const wrap = $('lessonPanel');
+  wrap.addEventListener('click', e => {
+    const L = getLesson(); if (!L) return;
+    const act = e.target.closest('[data-action]'), exp = e.target.closest('[data-expand]');
+    const chip = e.target.closest('.concept-chip'), sec = e.target.closest('[data-section]');
+    if (act) {
+      const a = act.dataset.action;
+      if (a === 'all') allConceptKeys(L).forEach(k => state.selected.add(k));
+      if (a === 'none') state.selected.clear();
+      if (a === 'objective') { draftObjective(); return; }
+      if (a === 'expand') {
+        if (state.expanded.size) state.expanded.clear();
+        else L.sections.forEach((s, si) => s.topics.forEach((_, ti) => state.expanded.add(`${si}.${ti}`)));
+      }
+    } else if (sec) {
+      state.selected.clear();
+      allConceptKeys(L, Number(sec.dataset.section)).forEach(k => state.selected.add(k));
+    } else if (exp) {
+      const k = exp.dataset.expand; state.expanded.has(k) ? state.expanded.delete(k) : state.expanded.add(k);
+    } else if (chip) {
+      const k = chip.dataset.key; state.selected.has(k) ? state.selected.delete(k) : state.selected.add(k);
+    } else return;
+    renderLesson(); updatePrompt();
+  });
+  wrap.addEventListener('change', e => {
+    const cb = e.target.closest('.topic-check'); if (!cb) return;
+    const [s, t] = cb.dataset.topic.split('.').map(Number);
+    const keys = allConceptKeys(getLesson(), s, t);
+    keys.forEach(k => cb.checked ? state.selected.add(k) : state.selected.delete(k));
+    renderLesson(); updatePrompt();
+  });
+}
 
-            const blob = new Blob([content], { type: 'text/markdown;charset=utf-8;' });
-            const link = document.createElement("a");
-            
-            if (navigator.msSaveBlob) { // IE 10+
-                navigator.msSaveBlob(blob, filename);
-            } else {
-                link.href = URL.createObjectURL(blob);
-                link.setAttribute("download", filename);
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }
-        }
-    </script>
+/* ============================================================
+   Personas & simulator type cards
+============================================================ */
+function renderPersonas() {
+  const grid = $('personaGrid'); grid.innerHTML = '';
+  PERSONAS.forEach(p => {
+    const on = state.personas.has(p.id);
+    const btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'gcard' + (on ? ' selected' : ''); btn.setAttribute('aria-pressed', on);
+    btn.innerHTML = `<div class="gcard-name">${escapeHTML(p.name)}</div><div class="gcard-purpose">${escapeHTML(p.purpose)}</div><div class="gcard-desc">${escapeHTML(p.desc)}</div>`;
+    btn.addEventListener('click', () => { on ? state.personas.delete(p.id) : state.personas.add(p.id); renderPersonas(); updatePrompt(); });
+    grid.appendChild(btn);
+  });
+  const n = state.personas.size;
+  $('panelSummary').textContent = n === 0
+    ? 'No personas selected — the prompt uses a single developer-designer role.'
+    : `${n} persona${n > 1 ? 's' : ''} selected. Each adds a role to the panel and a labeled deliverable to the requested output.`;
+}
+
+function renderTypeCards() {
+  const grid = $('typeGrid'); grid.innerHTML = '';
+  SIM_TYPES.forEach(t => {
+    const btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'gcard' + (state.simType === t.id ? ' selected' : '');
+    btn.setAttribute('aria-pressed', state.simType === t.id);
+    btn.innerHTML = `<div class="gcard-name">${t.name}</div><div class="gcard-purpose">${t.purpose}</div><div class="gcard-desc">${t.desc}</div>`;
+    btn.addEventListener('click', () => { state.simType = t.id; renderTypeCards(); renderFitNote(); updatePrompt(); });
+    grid.appendChild(btn);
+  });
+}
+
+function renderFitNote() {
+  const note = $('fitNote');
+  if (!state.simType) { note.classList.remove('visible'); return; }
+  const t = SIM_TYPES.find(x => x.id === state.simType);
+  $('fitText').textContent = `${t.name} simulators help learners ${t.purpose.toLowerCase()}. ${t.use}`;
+  note.classList.add('visible');
+}
+
+/* ============================================================
+   Prompt builders
+============================================================ */
+const MODEL_NAMES = { claude: 'Claude', chatgpt: 'ChatGPT', gemini: 'Gemini', perplexity: 'Perplexity' };
+const MODEL_FLAVOR = {
+  claude: 'Plan the state model, task list, and feedback logic before writing any code.',
+  chatgpt: 'Favor engaging, polished interactions that feel like a real tool.',
+  gemini: 'Make the simulator work equally well on desktop and touch devices.',
+  perplexity: 'Verify command syntax, outputs, event IDs, and protocol behavior against current authoritative documentation.'
+};
+
+function ctx() {
+  return {
+    course: getLesson() ? getCourse() : null, lesson: getLesson(),
+    subject: state.subject || 'cybersecurity', grade: state.grade || 'general learners'
+  };
+}
+
+function buildRole(c) {
+  const ps = PERSONAS.filter(p => state.personas.has(p.id));
+  if (!ps.length) return `You are a senior instructional designer and front-end developer who builds interactive ${c.subject} simulators for ${c.grade}. ${MODEL_FLAVOR[state.model]}`;
+  return `You are a coordinated expert panel building an interactive ${c.subject} webpage simulator for ${c.grade}. Work as each of the following personas. Every persona contributes to the build and reviews it from its own perspective before the final version is delivered:\n`
+    + ps.map(p => '\n• ' + p.role(c)).join('')
+    + `\n\nWhere personas disagree, resolve the conflict in favor of technical accuracy first, then learning effectiveness, then visual polish, and note the trade-off. ${MODEL_FLAVOR[state.model]}`;
+}
+
+function buildTask() {
+  const t = SIM_TYPES.find(x => x.id === state.simType);
+  const typeName = t ? `${t.name.toLowerCase()} simulator` : 'interactive webpage simulator';
+  const topic = state.topic.trim() || '[TOPIC]';
+  const base = `Build a highly interactive, visually appealing ${typeName} titled "${topic}." Learners learn by doing: every meaningful action must produce immediate, visible change in the simulator, and the experience should feel like using a real tool rather than reading a page.`;
+  const extra = {
+    claude: ' Before writing code, briefly outline (1) the skills the learner practices, (2) the state model and task sequence, and (3) the feedback for correct and incorrect actions.',
+    chatgpt: '',
+    gemini: ' Design for mouse, keyboard, and touch input from the start.',
+    perplexity: ' Base every technical behavior on current, verifiable sources.'
+  };
+  return base + extra[state.model];
+}
+
+function buildLessonContext(c) {
+  const L = c.lesson; if (!L) return '';
+  let s = `Course: ${c.course.name}\nLesson: Lesson ${L.n}: ${L.title}\nExam domain alignment: ${L.domain}\nScope source: ${L.coverage === 'full' ? 'full lesson content' : 'lesson navigation outline (some sub-topics are not enumerated)'}`;
+  if (L.lessonNote) s += `\nNote: ${L.lessonNote}`;
+  return s;
+}
+
+function buildScope(c) {
+  const L = c.lesson; if (!L) return '';
+  const scope = selectedScope();
+  if (!scope.length) return 'No lesson topics selected. Use the title and objective above to define the scope.';
+  const lines = []; let hasNotes = false;
+  scope.forEach(sec => {
+    if (sec.title) lines.push(sec.title);
+    const ind = sec.title ? '  ' : '';
+    sec.topics.forEach(tp => {
+      lines.push(`${ind}- ${tp.t}: ${tp.concepts.join('; ')}`);
+      if (tp.note) { lines.push(`${ind}  (Index note: ${tp.note})`); hasNotes = true; }
+    });
+  });
+  lines.push('');
+  lines.push('Build the simulator tasks around these topics and concepts only. Every selected concept should be practiced or surfaced in at least one task or feedback message; if that would overload the lab, prioritize the concepts most central to the objective and state what was left out.');
+  if (L.coverage === 'nav' || hasNotes) lines.push(`Where a topic is listed without detail, use content consistent with the official ${c.course.short} exam objectives and flag those additions for instructor review.`);
+  return lines.join('\n');
+}
+
+function buildContent(c) {
+  let s = `Title / topic: ${state.topic.trim() || '[TOPIC]'}\nSubject area: ${c.subject}\nAudience: ${c.grade}\nTarget completion time: ${state.duration}`;
+  if (state.objective.trim()) s += `\nLearning objective: ${state.objective.trim()}`;
+  return s;
+}
+
+function buildSimDesign() {
+  const t = SIM_TYPES.find(x => x.id === state.simType);
+  if (!t) return 'Simulator type: choose the interaction model that best fits the objective and explain the choice.';
+  return `Simulator type: ${t.name}\nCore interface: ${t.traits}.`;
+}
+
+function buildScenario() {
+  const org = state.org.trim() || 'a fictional organization you name';
+  let s = `Organization: ${org} (${state.industry})\nEnvironment: ${state.environment}\nLearner plays: ${state.learnerRole}\nFidelity: ${state.fidelity}`;
+  if (state.narrative.trim()) s += `\nOpening narrative: ${state.narrative.trim()}`;
+  else s += '\nOpening narrative: write a short, realistic briefing that tells the learner who they are, what is happening, and what success looks like.';
+  return s;
+}
+
+function buildInteraction() {
+  const T = state.toggles;
+  const lines = [`Tasks: ${state.taskCount}, sequenced from guided to independent.`,
+    `Feedback: ${state.feedback}.`, `Hints: ${state.hints}.`, `Difficulty: ${state.difficulty}.`];
+  const feats = [];
+  if (T.scoring) feats.push('scoring with points per task');
+  if (T.progress) feats.push('a visible progress tracker');
+  if (T.timer) feats.push('a countdown timer with a pause option for accessibility');
+  if (T.reset) feats.push('reset and replay controls');
+  if (T.randomize) feats.push('randomized values or scenarios on each attempt');
+  if (T.badges) feats.push('achievement badges for milestones');
+  if (T.walkthrough) feats.push('an optional guided walkthrough mode that demonstrates the first task');
+  if (T.report) feats.push('a printable completion report with score, time, and task results');
+  if (feats.length) lines.push(`Include: ${feats.join('; ')}.`);
+  return lines.join('\n');
+}
+
+function buildVisual() {
+  const lines = [`Aesthetic: ${state.aesthetic}.`, `Theme: ${state.theme}.`, `Layout: ${state.layout}.`, `Animation: ${state.animation}; respect prefers-reduced-motion.`,
+    'Make it visually appealing: a clear focal area for the simulator, consistent spacing, polished controls, and distinct status colors for success, warning, and error.'];
+  if (state.toggles.sound) lines.push('Sound: optional subtle cues for success and error, muted by default with a visible toggle.');
+  if (state.toggles.visibleObjective) lines.push('Keep the learning objective and current task visible on screen at all times.');
+  return lines.join('\n');
+}
+
+function buildTechnical() {
+  const T = state.toggles;
+  const lines = [`Format: ${state.codeFormat}.`, `Persistence: ${state.persistence}.`, `Devices: ${state.devices}.`, `Deployment: ${state.deployment}.`];
+  if (T.zeroDeps) lines.push('No external libraries, CDNs, fonts, or images; everything is embedded (use inline SVG for graphics).');
+  if (T.keyboard) lines.push('Every interaction must be operable by keyboard, with visible focus states.');
+  if (T.answerKey) lines.push('Include an instructor answer-key mode (toggled by a discreet control) that reveals correct actions for each task.');
+  if (T.commented) lines.push('Keep tasks, expected answers, and feedback text in one clearly commented data object near the top of the script so instructors can edit the lab without touching logic.');
+  lines.push('Deliver complete, working code with no placeholders, ellipses, or TODOs.');
+  return lines.join('\n');
+}
+
+function buildConstraints() {
+  const T = state.toggles, out = [];
+  if (T.accuracy) out.push('All commands, outputs, logs, event IDs, and protocol behaviors must be technically accurate; note any deliberate simplifications.');
+  if (T.wcag) out.push('Meet WCAG 2.2 AA: sufficient contrast, labeled controls, ARIA live regions for feedback, and logical focus order.');
+  if (T.colorblind) out.push('Never rely on color alone for status; pair color with icons, text, or patterns.');
+  if (T.explain) out.push('Every feedback message explains why an action was right or wrong and points to the concept involved.');
+  if (T.simulatedOnly) out.push('Everything is simulated in the browser: no real network requests, scanning, or connections, and no functional exploit or malware code. Attack behavior is represented by scripted outputs only.');
+  if (T.fictionalData) out.push('Use only fictional data: documentation IP ranges (192.0.2.0/24, 198.51.100.0/24, 203.0.113.0/24), example.com-style domains, and invented names and accounts.');
+  if (T.ethics) out.push('Include a brief reminder that the techniques shown are practiced only on systems the learner is authorized to test.');
+  if (T.debrief) out.push('End with a debrief screen: summary of performance, key takeaways tied to the objective, and 2–3 reflection prompts.');
+  return out;
+}
+
+function buildDeliverables(c) {
+  const ps = PERSONAS.filter(p => state.personas.has(p.id));
+  if (!ps.length) return '';
+  return 'Along with the simulator, return each of the following as its own clearly labeled section:\n' + ps.map((p, i) => `\n${i + 1}. ${p.deliverable(c)}`).join('');
+}
+
+function buildModelNotes() {
+  return {
+    claude: 'If any requirement is ambiguous, ask a clarifying question before building. Deliver the simulator as a single runnable artifact or file, followed by the panel deliverables and a short instructor guide (setup, how to edit tasks, and suggested classroom use).',
+    chatgpt: 'Use Canvas if available. Return the complete runnable code in one block, then the panel deliverables. Do not summarize or abbreviate the code.',
+    gemini: 'Return the complete runnable code in one block, then explain how to test it in a browser and on a mobile device, followed by the panel deliverables.',
+    perplexity: 'First list the authoritative sources used to verify technical behavior, with citations. Then return the complete runnable code and the panel deliverables, flagging anything you could not verify.'
+  }[state.model];
+}
+
+function promptBlocks() {
+  readSelects();
+  const c = ctx(), blocks = [];
+  blocks.push([state.personas.size ? 'Expert Panel' : 'Role', buildRole(c)]);
+  blocks.push(['Task', buildTask()]);
+  const lc = buildLessonContext(c); if (lc) blocks.push(['Course & Lesson Context', lc]);
+  const sc = buildScope(c); if (sc) blocks.push(['Lesson Content Scope', sc]);
+  blocks.push(['Content', buildContent(c)]);
+  blocks.push(['Simulator Design', buildSimDesign()]);
+  blocks.push(['Scenario & Realism', buildScenario()]);
+  blocks.push(['Interaction Mechanics', buildInteraction()]);
+  blocks.push(['Visual & UI', buildVisual()]);
+  blocks.push(['Technical Build', buildTechnical()]);
+  const k = buildConstraints(); if (k.length) blocks.push(['Pedagogical & Safety Constraints', k.map(x => '• ' + x).join('\n')]);
+  const d = buildDeliverables(c); if (d) blocks.push(['Panel Deliverables', d]);
+  blocks.push([`Model-Specific Notes (${MODEL_NAMES[state.model]})`, buildModelNotes()]);
+  return blocks;
+}
+
+function hasContent() { return state.topic.trim() || state.simType || getLesson(); }
+
+function buildPlainTextPrompt() {
+  if (!hasContent()) return '';
+  let out = `# INTERACTIVE SIMULATOR PROMPT — for ${MODEL_NAMES[state.model]}\n\n`;
+  promptBlocks().forEach(([label, body]) => { out += `## ${label.toUpperCase()}\n${body.replace(/^• /gm, '- ')}\n\n`; });
+  return out.trim() + '\n';
+}
+
+function updatePrompt() {
+  $('modelTag').textContent = `→ For ${MODEL_NAMES[state.model]}`;
+  const preview = $('preview');
+  if (!hasContent()) {
+    preview.innerHTML = `<div class="placeholder-text">Choose a lesson or enter a title, then select a simulator type. Your prompt will compose itself here.</div>`;
+    $('previewStats').textContent = '0 words';
+    return;
+  }
+  preview.innerHTML = promptBlocks().map(([l, b]) =>
+    `<div class="prompt-block-header">${escapeHTML(l)}</div><div class="prompt-block-body">${escapeHTML(b)}</div>`).join('');
+  const words = buildPlainTextPrompt().split(/\s+/).filter(Boolean).length;
+  $('previewStats').textContent = `${words.toLocaleString()} words · ${state.personas.size} persona${state.personas.size === 1 ? '' : 's'}`;
+}
+
+/* ============================================================
+   Toggles, presets, wiring
+============================================================ */
+function syncToggles() {
+  document.querySelectorAll('.toggle').forEach(tog => {
+    const on = !!state.toggles[tog.dataset.toggle];
+    tog.classList.toggle('on', on);
+    tog.setAttribute('aria-checked', on);
+  });
+}
+
+const PRESETS = {
+  quick: { label: 'Quick Lab', selects: { duration: '10–15 minutes', taskCount: '3–5 tasks', feedback: 'Immediate — after every action', hints: 'On-demand single hint per task', difficulty: 'Single level matched to audience', layout: 'Split view — instructions left, simulator right' },
+    toggles: { timer: false, walkthrough: true, report: false, badges: false } },
+  pbq: { label: 'PBQ Practice', selects: { duration: '20–30 minutes', feedback: 'End-of-lab debrief only', hints: 'None — assessment mode', layout: 'Stepper wizard — one stage at a time', aesthetic: 'Clean light-mode lab notebook' },
+    toggles: { timer: true, scoring: true, walkthrough: false, report: true, randomize: true } },
+  soc: { label: 'SOC Shift', selects: { learnerRole: 'SOC analyst (Tier 1)', environment: 'Mixed enterprise', aesthetic: 'Modern SOC dashboard (cards, gauges, live feeds)', theme: 'Dark by default with light-mode toggle', feedback: 'On check / submit — per task', layout: 'Full-screen simulator with collapsible task drawer', animation: 'Moderate — animate cause and effect (packets, alerts)' },
+    toggles: { timer: true, randomize: true, badges: true, scoring: true } },
+  demo: { label: 'Instructor Demo', selects: { feedback: 'Immediate — after every action', hints: 'Progressive tiered hints (nudge → clue → answer)', animation: 'Rich — cinematic transitions and live effects', layout: 'Tabbed — Briefing / Lab / Debrief', difficulty: 'Selectable tiers: Beginner / Intermediate / Advanced' },
+    toggles: { walkthrough: true, answerKey: true, timer: false, report: false } }
+};
+
+function applyPreset(name) {
+  const p = PRESETS[name]; if (!p) return;
+  Object.entries(p.selects).forEach(([k, v]) => { $(k).value = v; });
+  Object.assign(state.toggles, p.toggles);
+  syncToggles(); readSelects(); updatePrompt();
+  showToast(`Applied: ${p.label} preset`);
+}
+
+function wireInputs() {
+  $('course').addEventListener('change', e => {
+    state.course = e.target.value; state.lessonIdx = -1; state.selected.clear(); state.expanded.clear();
+    populateLessons(); renderLesson(); updatePrompt();
+  });
+  $('lesson').addEventListener('change', e => { state.lessonIdx = e.target.value === '' ? -1 : Number(e.target.value); onLessonChosen(); });
+
+  ['topic', 'objective', 'org', 'narrative'].forEach(id =>
+    $(id).addEventListener('input', e => { state[id] = e.target.value; updatePrompt(); }));
+  SELECT_IDS.forEach(id => $(id).addEventListener('change', updatePrompt));
+
+  document.querySelectorAll('.toggle').forEach(tog => {
+    const flip = () => { const k = tog.dataset.toggle; state.toggles[k] = !state.toggles[k]; syncToggles(); updatePrompt(); };
+    tog.addEventListener('click', flip);
+    tog.addEventListener('keydown', e => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flip(); } });
+  });
+
+  $('modelGrid').querySelectorAll('.mcard').forEach(card => card.addEventListener('click', () => {
+    $('modelGrid').querySelectorAll('.mcard').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected'); state.model = card.dataset.model; updatePrompt();
+  }));
+
+  $('copyBtn').addEventListener('click', () => {
+    const txt = buildPlainTextPrompt();
+    if (!txt) { showToast('Nothing to copy yet'); return; }
+    navigator.clipboard.writeText(txt).then(() => showToast('Copied to clipboard')).catch(() => showToast('Copy blocked — select the text manually'));
+  });
+  $('downloadBtn').addEventListener('click', () => {
+    const txt = buildPlainTextPrompt();
+    if (!txt) { showToast('Nothing to download yet'); return; }
+    const url = URL.createObjectURL(new Blob([txt], { type: 'text/plain' }));
+    const a = document.createElement('a');
+    const slug = state.topic.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'simulator';
+    a.href = url; a.download = `sim-prompt-${slug}-${state.model}.txt`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+    showToast('Downloaded');
+  });
+  $('resetBtn').addEventListener('click', () => { if (confirm('Reset all fields?')) location.reload(); });
+  document.querySelectorAll('.preset-btn').forEach(b => b.addEventListener('click', () => applyPreset(b.dataset.preset)));
+  $('themeBtn').addEventListener('click', () => {
+    const dark = document.documentElement.getAttribute('data-theme') !== 'dark';
+    setTheme(dark ? 'dark' : 'light');
+    try { localStorage.setItem('gpa-theme', dark ? 'dark' : 'light'); } catch (e) {}
+  });
+}
+
+function setTheme(mode) {
+  if (mode === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+  else document.documentElement.removeAttribute('data-theme');
+  $('themeBtn').textContent = mode === 'dark' ? 'Light mode' : 'Dark mode';
+}
+
+function showToast(msg) {
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(window._toastT); window._toastT = setTimeout(() => t.classList.remove('show'), 1900);
+}
+
+(function init() {
+  let saved = null;
+  try { saved = localStorage.getItem('gpa-theme'); } catch (e) {}
+  setTheme(saved === 'dark' ? 'dark' : 'light');
+  readSelects(); syncToggles();
+  renderPersonas(); renderTypeCards(); renderLesson();
+  wireInputs(); wireLessonPanel(); updatePrompt();
+})();
+</script>
 </body>
 </html>
