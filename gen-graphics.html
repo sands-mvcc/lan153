@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,7 +20,26 @@
     --highlight: #f0c850;
     --success: #2d6a3e;
     --card-bg: #faf6ec;
+    --head-bg: #1c1a17;
+    --head-ink: #f5efe4;
     --shadow: 0 1px 0 rgba(28,26,23,0.08), 0 8px 24px -12px rgba(28,26,23,0.18);
+    --select-arrow: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3e%3cpath d='M3 4.5l3 3 3-3' stroke='%231c1a17' fill='none' stroke-width='1.2'/%3e%3c/svg%3e");
+  }
+  [data-theme="dark"] {
+    --paper: #1d1b18;
+    --paper-deep: #26231f;
+    --ink: #ede6d8;
+    --ink-soft: #bdb4a4;
+    --rule: #4a443b;
+    --rule-soft: #38332c;
+    --accent: #e0754f;
+    --accent-deep: #c95a35;
+    --success: #5fae74;
+    --card-bg: #24211d;
+    --head-bg: #0f0e0c;
+    --head-ink: #ede6d8;
+    --shadow: 0 1px 0 rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.6);
+    --select-arrow: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3e%3cpath d='M3 4.5l3 3 3-3' stroke='%23ede6d8' fill='none' stroke-width='1.2'/%3e%3c/svg%3e");
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -41,6 +59,15 @@
       radial-gradient(circle at 90% 100%, rgba(45,106,62,0.04), transparent 40%);
   }
 
+  button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, .toggle:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+
   /* ====== Masthead ====== */
   .masthead {
     border-bottom: 1px solid var(--ink);
@@ -51,7 +78,6 @@
     z-index: 10;
     backdrop-filter: blur(8px);
   }
-
   .masthead-inner {
     max-width: 1400px;
     margin: 0 auto;
@@ -61,9 +87,7 @@
     gap: 24px;
     flex-wrap: wrap;
   }
-
   .title-block { flex: 1; min-width: 300px; }
-
   .eyebrow {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
@@ -83,7 +107,6 @@
     background: var(--accent);
     opacity: 0.4;
   }
-
   h1 {
     font-family: 'Fraunces', serif;
     font-weight: 400;
@@ -92,12 +115,7 @@
     letter-spacing: -0.02em;
     font-variation-settings: "SOFT" 30, "opsz" 144;
   }
-  h1 em {
-    font-style: italic;
-    font-weight: 300;
-    color: var(--accent);
-  }
-
+  h1 em { font-style: italic; font-weight: 300; color: var(--accent); }
   .subtitle {
     font-family: 'Fraunces', serif;
     font-style: italic;
@@ -107,13 +125,7 @@
     margin-top: 8px;
     max-width: 620px;
   }
-
-  .masthead-actions {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-  }
-
+  .masthead-actions { display: flex; gap: 8px; align-items: center; }
   .pill {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
@@ -123,8 +135,11 @@
     border: 1px solid var(--ink);
     border-radius: 100px;
     color: var(--ink);
+    background: transparent;
   }
   .pill.accent { background: var(--ink); color: var(--paper); }
+  button.pill { cursor: pointer; }
+  button.pill:hover { background: var(--ink); color: var(--paper); }
 
   /* ====== Main Layout ====== */
   .canvas {
@@ -136,18 +151,13 @@
     gap: 40px;
     align-items: start;
   }
-
   @media (max-width: 1100px) {
     .canvas { grid-template-columns: 1fr; }
     .masthead, .canvas { padding-left: 24px; padding-right: 24px; }
   }
 
   /* ====== Section Styling ====== */
-  .section {
-    margin-bottom: 44px;
-    position: relative;
-  }
-
+  .section { margin-bottom: 44px; position: relative; }
   .section-header {
     display: flex;
     align-items: baseline;
@@ -156,14 +166,12 @@
     padding-bottom: 10px;
     border-bottom: 1px solid var(--rule);
   }
-
   .section-number {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
     letter-spacing: 0.15em;
     color: var(--accent);
   }
-
   .section-title {
     font-family: 'Fraunces', serif;
     font-weight: 500;
@@ -171,7 +179,6 @@
     letter-spacing: -0.01em;
     font-variation-settings: "SOFT" 50;
   }
-
   .section-hint {
     font-family: 'Fraunces', serif;
     font-style: italic;
@@ -182,18 +189,11 @@
   }
 
   /* ====== Form Controls ====== */
-  .field-grid {
-    display: grid;
-    gap: 16px;
-  }
+  .field-grid { display: grid; gap: 16px; }
   .field-grid.two { grid-template-columns: 1fr 1fr; }
   .field-grid.three { grid-template-columns: 1fr 1fr 1fr; }
   @media (max-width: 700px) { .field-grid.two, .field-grid.three { grid-template-columns: 1fr; } }
-
-  label.field {
-    display: block;
-  }
-
+  label.field { display: block; }
   .field-label {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
@@ -203,7 +203,6 @@
     margin-bottom: 6px;
     display: block;
   }
-
   input[type="text"], textarea, select {
     width: 100%;
     background: var(--card-bg);
@@ -215,13 +214,11 @@
     transition: all 0.15s ease;
     border-radius: 2px;
   }
-
   input[type="text"]:focus, textarea:focus, select:focus {
     outline: none;
     border-color: var(--ink);
     background: var(--paper);
   }
-
   textarea {
     resize: vertical;
     min-height: 70px;
@@ -229,23 +226,23 @@
     font-size: 15px;
     line-height: 1.45;
   }
-
   select {
     appearance: none;
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3e%3cpath d='M3 4.5l3 3 3-3' stroke='%231c1a17' fill='none' stroke-width='1.2'/%3e%3c/svg%3e");
+    background-image: var(--select-arrow);
     background-repeat: no-repeat;
     background-position: right 12px center;
     padding-right: 32px;
     cursor: pointer;
   }
+  select:disabled { opacity: 0.5; cursor: not-allowed; }
 
-  /* ====== Graphic Type Cards ====== */
+  /* ====== Graphic Type & Persona Cards ====== */
   .card-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 12px;
   }
-
+  .persona-grid { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
   .gcard {
     background: var(--card-bg);
     border: 1px solid var(--rule);
@@ -259,22 +256,7 @@
     border-radius: 2px;
     overflow: hidden;
   }
-  .gcard::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: var(--accent);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.25s cubic-bezier(0.2, 0, 0.2, 1);
-    z-index: 0;
-    opacity: 0;
-  }
-  .gcard:hover {
-    border-color: var(--ink);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow);
-  }
+  .gcard:hover { border-color: var(--ink); transform: translateY(-1px); box-shadow: var(--shadow); }
   .gcard.selected {
     border-color: var(--accent);
     background: var(--paper);
@@ -289,7 +271,6 @@
     font-weight: 600;
     font-size: 14px;
   }
-
   .gcard-name {
     font-family: 'Fraunces', serif;
     font-weight: 500;
@@ -306,13 +287,17 @@
     color: var(--accent);
     margin-bottom: 8px;
   }
-  .gcard-desc {
-    font-size: 12.5px;
+  .gcard-desc { font-size: 12.5px; color: var(--ink-soft); line-height: 1.45; }
+
+  .panel-summary {
+    margin-top: 14px;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 14px;
     color: var(--ink-soft);
-    line-height: 1.45;
   }
 
-  /* ====== Why this fits panel ====== */
+  /* ====== Fit note ====== */
   .fit-note {
     margin-top: 18px;
     padding: 14px 18px;
@@ -339,11 +324,7 @@
   }
 
   /* ====== Chip group ====== */
-  .chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
   .chip {
     padding: 7px 13px;
     border: 1px solid var(--rule);
@@ -356,20 +337,150 @@
     color: var(--ink);
   }
   .chip:hover { border-color: var(--ink); }
-  .chip.selected {
-    background: var(--ink);
-    border-color: var(--ink);
-    color: var(--paper);
+  .chip.selected { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+
+  /* ====== Lesson loader ====== */
+  .lesson-empty {
+    margin-top: 16px;
+    padding: 18px;
+    border: 1px dashed var(--rule);
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    color: var(--ink-soft);
+    text-align: center;
+  }
+  .lesson-card {
+    margin-top: 16px;
+    background: var(--card-bg);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 18px 20px 14px;
+  }
+  .lesson-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .lesson-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 21px;
+    line-height: 1.2;
+  }
+  .lesson-domain {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin-top: 2px;
+  }
+  .badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 4px 9px;
+    border: 1px solid currentColor;
+    border-radius: 100px;
+    white-space: nowrap;
+  }
+  .badge.full { color: var(--success); }
+  .badge.nav { color: var(--accent); }
+  .lesson-note {
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+  .lesson-tools {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin: 14px 0 6px;
+    padding-top: 12px;
+    border-top: 1px solid var(--rule-soft);
+  }
+  .mini-btn {
+    padding: 6px 12px;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 12.5px;
+    cursor: pointer;
+    border-radius: 2px;
+    color: var(--ink);
+    transition: all 0.15s ease;
+  }
+  .mini-btn:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .scope-count {
+    margin-left: auto;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-soft);
+  }
+  .scope-warn {
+    margin: 8px 0 4px;
+    padding: 10px 14px;
+    background: var(--paper-deep);
+    border-left: 3px solid var(--highlight);
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+  .sec-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 16px;
+    margin-top: 16px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--rule-soft);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .sec-title .mini-btn { font-size: 11.5px; padding: 3px 9px; }
+  .topic { padding: 8px 0; border-bottom: 1px dashed var(--rule-soft); }
+  .topic:last-child { border-bottom: none; }
+  .topic-row { display: flex; align-items: center; gap: 10px; }
+  .topic-row input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--accent);
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+  .topic-row label { flex: 1; font-size: 14px; cursor: pointer; }
+  .topic-count {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    color: var(--ink-soft);
+  }
+  .expand-btn {
+    background: none;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    font-size: 11.5px;
+    padding: 3px 9px;
+    cursor: pointer;
+    color: var(--ink-soft);
+    font-family: 'IBM Plex Sans', sans-serif;
+  }
+  .expand-btn:hover { border-color: var(--ink); color: var(--ink); }
+  .concepts { margin: 8px 0 4px 26px; }
+  .concept-chip { font-size: 12px; padding: 5px 10px; }
+  .topic-note {
+    margin: 6px 0 0 26px;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--ink-soft);
   }
 
   /* ====== Model selector ====== */
-  .model-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-  }
+  .model-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
   @media (max-width: 700px) { .model-grid { grid-template-columns: repeat(2, 1fr); } }
-
   .mcard {
     background: var(--card-bg);
     border: 1px solid var(--rule);
@@ -382,17 +493,8 @@
     color: inherit;
   }
   .mcard:hover { border-color: var(--ink); }
-  .mcard.selected {
-    background: var(--ink);
-    color: var(--paper);
-    border-color: var(--ink);
-  }
-  .mcard-name {
-    font-family: 'Fraunces', serif;
-    font-weight: 500;
-    font-size: 17px;
-    margin-bottom: 2px;
-  }
+  .mcard.selected { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .mcard-name { font-family: 'Fraunces', serif; font-weight: 500; font-size: 17px; margin-bottom: 2px; }
   .mcard-tag {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 9px;
@@ -448,23 +550,17 @@
     display: flex;
     flex-direction: column;
   }
-
+  @media (max-width: 1100px) { .preview-panel { position: static; max-height: none; } }
   .preview-head {
     padding: 18px 22px 14px;
-    background: var(--ink);
-    color: var(--paper);
-    border-bottom: 1px solid var(--ink);
+    background: var(--head-bg);
+    color: var(--head-ink);
     display: flex;
     align-items: baseline;
     justify-content: space-between;
     gap: 12px;
   }
-  .preview-head h2 {
-    font-family: 'Fraunces', serif;
-    font-weight: 400;
-    font-size: 20px;
-    font-style: italic;
-  }
+  .preview-head h2 { font-family: 'Fraunces', serif; font-weight: 400; font-size: 20px; font-style: italic; }
   .preview-model-tag {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
@@ -472,7 +568,14 @@
     text-transform: uppercase;
     color: var(--highlight);
   }
-
+  .preview-stats {
+    padding: 8px 22px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    color: var(--ink-soft);
+    border-bottom: 1px solid var(--rule-soft);
+    background: var(--paper);
+  }
   .preview-body {
     padding: 22px;
     overflow-y: auto;
@@ -487,7 +590,6 @@
   .preview-body::-webkit-scrollbar { width: 8px; }
   .preview-body::-webkit-scrollbar-track { background: transparent; }
   .preview-body::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 4px; }
-
   .prompt-block-header {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
@@ -517,7 +619,6 @@
     text-align: center;
     padding: 40px 20px;
   }
-
   .preview-actions {
     border-top: 1px solid var(--rule);
     padding: 14px 18px;
@@ -525,7 +626,6 @@
     gap: 8px;
     background: var(--paper);
   }
-
   .btn {
     flex: 1;
     padding: 11px 12px;
@@ -544,14 +644,9 @@
   .btn:hover { background: var(--ink); color: var(--paper); }
   .btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
   .btn.primary:hover { background: var(--accent-deep); border-color: var(--accent-deep); }
-  .btn.success { background: var(--success); color: white; border-color: var(--success); }
 
   /* ====== Toggle row ====== */
-  .toggles {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
+  .toggles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   @media (max-width: 600px) { .toggles { grid-template-columns: 1fr; } }
   .toggle {
     display: flex;
@@ -582,12 +677,7 @@
   .toggle.on .toggle-box { background: var(--accent); border-color: var(--accent); color: white; }
 
   /* ====== Custom size group ====== */
-  .size-row {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr;
-    gap: 8px;
-    align-items: end;
-  }
+  .size-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 8px; align-items: end; }
   @media (max-width: 600px) { .size-row { grid-template-columns: 1fr 1fr; } }
 
   /* ====== Footer ====== */
@@ -611,7 +701,7 @@
     margin-bottom: 4px;
   }
 
-  /* Toast for copy feedback */
+  /* Toast */
   .toast {
     position: fixed;
     bottom: 32px;
@@ -630,24 +720,6 @@
     box-shadow: 0 8px 32px rgba(0,0,0,0.2);
   }
   .toast.show { transform: translateX(-50%) translateY(0); }
-
-  /* Letterpress decoration */
-  .deco-rule {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 8px 0 20px;
-    color: var(--accent);
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.2em;
-  }
-  .deco-rule::before, .deco-rule::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--rule);
-  }
 </style>
 </head>
 <body>
@@ -660,7 +732,8 @@
       <div class="subtitle">A structured workbench for composing precise, model-aware prompts that produce classroom-ready instructional graphics.</div>
     </div>
     <div class="masthead-actions">
-      <span class="pill">v1.0</span>
+      <span class="pill">v2.0</span>
+      <button class="pill" id="themeBtn" type="button" aria-label="Toggle dark mode">Dark mode</button>
       <span class="pill accent">For educators</span>
     </div>
   </div>
@@ -678,10 +751,36 @@
       <button class="preset-btn" data-preset="exec">Learning Summary</button>
     </div>
 
-    <!-- Section 1: Content -->
+    <!-- Section 1: Course Lesson -->
     <section class="section">
       <div class="section-header">
         <span class="section-number">§ 01</span>
+        <h2 class="section-title">Course Lesson</h2>
+        <span class="section-hint">load topics & concepts</span>
+      </div>
+
+      <div class="field-grid two">
+        <label class="field">
+          <span class="field-label">Course</span>
+          <select id="course">
+            <option value="">— none (free topic) —</option>
+            <option value="secplus">CompTIA Security+ SY0-701 (LAN153)</option>
+          </select>
+        </label>
+        <label class="field">
+          <span class="field-label">Lesson</span>
+          <select id="lesson" disabled>
+            <option value="">— select a course first —</option>
+          </select>
+        </label>
+      </div>
+      <div id="lessonPanel"></div>
+    </section>
+
+    <!-- Section 2: Content -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-number">§ 02</span>
         <h2 class="section-title">Content</h2>
         <span class="section-hint">what is being taught</span>
       </div>
@@ -733,14 +832,24 @@
       </div>
     </section>
 
-    <!-- Section 2: Graphic Type -->
+    <!-- Section 3: Expert Panel -->
     <section class="section">
       <div class="section-header">
-        <span class="section-number">§ 02</span>
+        <span class="section-number">§ 03</span>
+        <h2 class="section-title">Expert Panel</h2>
+        <span class="section-hint">personas built into the prompt</span>
+      </div>
+      <div class="card-grid persona-grid" id="personaGrid"></div>
+      <div class="panel-summary" id="panelSummary"></div>
+    </section>
+
+    <!-- Section 4: Graphic Type -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-number">§ 04</span>
         <h2 class="section-title">Graphic Type</h2>
         <span class="section-hint">how the information is shaped</span>
       </div>
-
       <div class="card-grid" id="typeGrid"></div>
       <div class="fit-note" id="fitNote">
         <strong>Why this fits</strong>
@@ -748,10 +857,10 @@
       </div>
     </section>
 
-    <!-- Section 3: Visuals -->
+    <!-- Section 5: Visuals -->
     <section class="section">
       <div class="section-header">
-        <span class="section-number">§ 03</span>
+        <span class="section-number">§ 05</span>
         <h2 class="section-title">Visuals</h2>
         <span class="section-hint">aesthetic & tone</span>
       </div>
@@ -826,10 +935,10 @@
       </div>
     </section>
 
-    <!-- Section 4: Layout -->
+    <!-- Section 6: Layout -->
     <section class="section">
       <div class="section-header">
-        <span class="section-number">§ 04</span>
+        <span class="section-number">§ 06</span>
         <h2 class="section-title">Layout & Size</h2>
         <span class="section-hint">physical & spatial form</span>
       </div>
@@ -892,10 +1001,10 @@
       </div>
     </section>
 
-    <!-- Section 5: Output -->
+    <!-- Section 7: Output -->
     <section class="section">
       <div class="section-header">
-        <span class="section-number">§ 05</span>
+        <span class="section-number">§ 07</span>
         <h2 class="section-title">Output Specifications</h2>
         <span class="section-hint">technical deliverable</span>
       </div>
@@ -924,11 +1033,11 @@
         </div>
 
         <div class="toggles">
-          <div class="toggle" data-toggle="transparent">
+          <div class="toggle" data-toggle="transparent" tabindex="0" role="switch" aria-checked="false">
             <div class="toggle-box">✓</div>
             <span>Transparent background</span>
           </div>
-          <div class="toggle on" data-toggle="bleed">
+          <div class="toggle on" data-toggle="bleed" tabindex="0" role="switch" aria-checked="true">
             <div class="toggle-box">✓</div>
             <span>Include safe margins / bleed area</span>
           </div>
@@ -936,46 +1045,46 @@
       </div>
     </section>
 
-    <!-- Section 6: Pedagogical Constraints -->
+    <!-- Section 8: Pedagogical Constraints -->
     <section class="section">
       <div class="section-header">
-        <span class="section-number">§ 06</span>
+        <span class="section-number">§ 08</span>
         <h2 class="section-title">Pedagogical Constraints</h2>
         <span class="section-hint">accessibility & rigor</span>
       </div>
 
       <div class="toggles">
-        <div class="toggle on" data-toggle="readable">
+        <div class="toggle on" data-toggle="readable" tabindex="0" role="switch" aria-checked="true">
           <div class="toggle-box">✓</div>
           <span>Prioritize readability at distance</span>
         </div>
-        <div class="toggle on" data-toggle="colorblind">
+        <div class="toggle on" data-toggle="colorblind" tabindex="0" role="switch" aria-checked="true">
           <div class="toggle-box">✓</div>
           <span>Color-blind-safe palette</span>
         </div>
-        <div class="toggle on" data-toggle="accuracy">
+        <div class="toggle on" data-toggle="accuracy" tabindex="0" role="switch" aria-checked="true">
           <div class="toggle-box">✓</div>
           <span>Enforce factual & technical accuracy</span>
         </div>
-        <div class="toggle on" data-toggle="altText">
+        <div class="toggle on" data-toggle="altText" tabindex="0" role="switch" aria-checked="true">
           <div class="toggle-box">✓</div>
           <span>Include alt-text description</span>
         </div>
-        <div class="toggle on" data-toggle="hierarchy">
+        <div class="toggle on" data-toggle="hierarchy" tabindex="0" role="switch" aria-checked="true">
           <div class="toggle-box">✓</div>
           <span>Clear visual hierarchy</span>
         </div>
-        <div class="toggle" data-toggle="citations">
+        <div class="toggle" data-toggle="citations" tabindex="0" role="switch" aria-checked="false">
           <div class="toggle-box">✓</div>
           <span>Cite sources in caption</span>
         </div>
       </div>
     </section>
 
-    <!-- Section 7: Target Model -->
+    <!-- Section 9: Target Model -->
     <section class="section">
       <div class="section-header">
-        <span class="section-number">§ 07</span>
+        <span class="section-number">§ 09</span>
         <h2 class="section-title">Target Model</h2>
         <span class="section-hint">tailored phrasing</span>
       </div>
@@ -1002,7 +1111,7 @@
 
     <div class="footer">
       <div class="footer-mark">— Compose, Refine, Deploy —</div>
-      Built for instructional designers. Every selection reshapes the prompt below in real time.
+      Built for instructional designers. Every selection reshapes the prompt in real time.
     </div>
 
   </div>
@@ -1013,8 +1122,9 @@
       <h2>The Generated Prompt</h2>
       <span class="preview-model-tag" id="modelTag">→ For Claude</span>
     </div>
+    <div class="preview-stats" id="previewStats">0 words</div>
     <div class="preview-body" id="preview">
-      <div class="placeholder-text">Begin by entering a topic and selecting a graphic type. Your prompt will compose itself here.</div>
+      <div class="placeholder-text">Choose a lesson or enter a topic, then select a graphic type. Your prompt will compose itself here.</div>
     </div>
     <div class="preview-actions">
       <button class="btn primary" id="copyBtn">Copy</button>
@@ -1024,148 +1134,277 @@
   </aside>
 </main>
 
-<div class="toast" id="toast">Copied to clipboard</div>
+<div class="toast" id="toast" role="status" aria-live="polite">Copied to clipboard</div>
 
 <script>
 /* ============================================================
+   Data: Courses → Lessons → Sections → Topics → Concepts
+   coverage: 'full' = built from the full lesson page
+             'nav'  = built from the course navigation description
+   note on a topic = what the lesson index does not enumerate
+============================================================ */
+const COURSES = {
+  secplus: {
+    name: 'CompTIA Security+ (SY0-701)',
+    short: 'Security+ SY0-701',
+    examStyle: 'CompTIA Security+ SY0-701',
+    lessons: [
+      {
+        n: 1, title: 'Security Fundamentals', domain: 'Domain 1 — General Security Concepts', coverage: 'nav',
+        sections: [{ title: null, topics: [
+          { t: 'Security objectives: the CIA triad', c: ['Confidentiality', 'Integrity', 'Availability', 'CIA triad as the organizing framework for security objectives'] },
+          { t: 'Identity and access foundations: AAA', c: ['Authentication', 'Authorization', 'Accounting', 'AAA as a foundational security concept'] },
+          { t: 'Security controls', c: ['Security control types', 'Relationship between security objectives and protective controls'], note: 'The lesson index does not enumerate the specific control categories taught.' },
+          { t: 'Zero trust', c: ['Introduction to the zero-trust security model', 'Zero trust as a foundation for later architecture and access-management lessons'] },
+          { t: 'Non-repudiation', c: ['Non-repudiation as a key term', 'Positioned alongside the CIA triad, AAA, and zero trust'] },
+          { t: 'Security+ exam orientation', c: ['SY0-701 exam structure', 'The five exam domains', 'How the 12 lessons map to the exam domains'] }
+        ]}]
+      },
+      {
+        n: 2, title: 'Cryptography & PKI', domain: 'Domain 1 — General Security Concepts', coverage: 'nav',
+        sections: [{ title: null, topics: [
+          { t: 'Encryption approaches', c: ['Symmetric encryption', 'Asymmetric encryption', 'Comparison of symmetric and asymmetric approaches'] },
+          { t: 'Hashing', c: ['Hashing as a distinct cryptographic concept', 'Relationship of hashing to broader cryptography'] },
+          { t: 'Digital signatures', c: ['Digital signatures'] },
+          { t: 'Digital certificates', c: ['Certificates', 'Certificate authorities (CA)', 'TLS certificate analysis'] },
+          { t: 'Public key infrastructure', c: ['PKI concepts', 'The PKI lifecycle', 'Relationships among certificates, CAs, and digital signatures'] },
+          { t: 'Obfuscation', c: ['Obfuscation as a key term'], note: 'The lesson index does not specify which obfuscation techniques are covered.' }
+        ]}]
+      },
+      {
+        n: 3, title: 'Threat Actors & Attack Surface', domain: 'Domain 2 — Threats, Vulnerabilities & Mitigations', coverage: 'nav',
+        sections: [{ title: null, topics: [
+          { t: 'Threat actors', c: ['Threat actor types', 'Threat actor motivations'] },
+          { t: 'Attack surface and attack vectors', c: ['Attack surface as the organizing theme', 'Attack vectors used to reach systems, users, or information'] },
+          { t: 'Social engineering', c: ['Social engineering tactics', 'Phishing'] },
+          { t: 'Malware', c: ['Malware categories', 'Ransomware'] },
+          { t: 'Password attacks', c: ['Password attacks as a distinct topic area'], note: 'The lesson index does not identify the individual password-attack techniques discussed.' },
+          { t: 'Supply-chain threats', c: ['Supply chain as a key term', 'Supply chain within the broader discussion of threat actors and attack paths'] }
+        ]}]
+      },
+      {
+        n: 4, title: 'Vulnerabilities & Mitigation', domain: 'Domain 2 — Threats, Vulnerabilities & Mitigations', coverage: 'nav',
+        sections: [{ title: null, topics: [
+          { t: 'Vulnerabilities across technology environments', c: ['Operating system vulnerabilities', 'Application vulnerabilities', 'Mobile vulnerabilities', 'Cloud vulnerabilities', 'Web vulnerabilities'] },
+          { t: 'Misconfiguration and exploitation', c: ['Misconfiguration', 'Exploits', 'Relationship between weaknesses and their exploitation'] },
+          { t: 'Patching', c: ['Patching as a mitigation strategy'] },
+          { t: 'Hardening', c: ['Hardening as a mitigation strategy'] },
+          { t: 'Segmentation and isolation', c: ['Segmentation', 'Isolation', 'Segmentation and isolation as mitigation approaches'] },
+          { t: 'Access controls', c: ['Access control as a mitigation', 'Selecting protective measures across technology environments'] }
+        ]}]
+      },
+      {
+        n: 5, title: 'Secure Architecture', domain: 'Domain 3 — Security Architecture', coverage: 'full',
+        sections: [
+          { title: '5.1 On-Premises, Cloud & Virtualization', topics: [
+            { t: 'Secure architecture principles', c: ['Defense in depth', 'Separation and segmentation', 'Least privilege', 'Zero trust: verify explicitly, use least privilege, assume breach'] },
+            { t: 'On-premises security design', c: ['Physical perimeter controls: badge readers, access-control vestibules, CCTV', 'Layered physical, network, and logical controls', 'DMZ and screened-subnet designs', 'Air-gapped networks', 'VLAN-based segmentation', 'Microsegmentation and east-west traffic restrictions', 'Jump servers and bastion hosts', 'Proxy servers and cloud access security brokers'] },
+            { t: 'Cloud architecture', c: ['Shared responsibility model', 'Responsibility differences across IaaS, PaaS, and SaaS', 'Private subnets', 'Security groups and network ACLs', 'VPC peering and private service endpoints', 'Encryption at rest and in transit', 'Cloud key management', 'Immutable infrastructure and replacement-based updates'] },
+            { t: 'Virtualization', c: ['Type 1 and Type 2 hypervisors', 'Hypervisor attack surface and patching', 'VM escape', 'VM sprawl and lifecycle management'] },
+            { t: 'Container security', c: ['Shared-kernel architecture and isolation limits', 'Avoiding root execution', 'Read-only filesystems', 'Container image vulnerability scanning', 'Namespaces and seccomp restrictions', 'Kubernetes role-based access control'] }
+          ]},
+          { title: '5.2 IoT, ICS & Infrastructure as Code', topics: [
+            { t: 'IoT security challenges', c: ['Default credentials', 'Limited processing resources', 'Inadequate patching mechanisms', 'Long device lifecycles', 'Persistent connectivity', 'Physical accessibility and tampering risks'] },
+            { t: 'IoT controls', c: ['Dedicated network segments', 'Changing default credentials', 'Firmware tracking and updates', 'Network access control', 'Traffic baselining and anomaly monitoring', 'Secure decommissioning'] },
+            { t: 'Industrial control systems and operational technology', c: ['ICS and SCADA', 'Physical safety and operational consequences of compromise', 'Availability priorities', 'Legacy systems', 'Industrial protocols: Modbus, DNP3, OPC', 'Real-time processing constraints'] },
+            { t: 'ICS protections', c: ['IT/OT separation', 'Unidirectional gateways and data diodes', 'Purdue Model and industrial security zoning', 'Testing patches before production deployment', 'Restricted, time-limited, monitored vendor access', 'Stuxnet case study'] },
+            { t: 'Infrastructure as Code', c: ['Declarative, machine-readable infrastructure configuration', 'Consistency and reduced configuration drift', 'Version control, auditability, and reversibility', 'Predeployment security scanning', 'Terraform, CloudFormation, Ansible, Kubernetes manifests', 'Secrets management and hardcoded-credential risks'] }
+          ]},
+          { title: '5.3 Data Classification & Resilience', topics: [
+            { t: 'Data classification', c: ['Government and corporate classification examples', 'Sensitivity, value, and disclosure impact', 'Classification-driven access, encryption, handling, retention, and destruction'] },
+            { t: 'Availability and resilience', c: ['Redundancy', 'High availability', 'Fault tolerance', 'Availability percentages and annual downtime'] },
+            { t: 'Redundancy patterns', c: ['Active-active and active-passive clustering', 'RAID examples', 'Redundant power, UPS systems, and generators', 'Geographic redundancy'] },
+            { t: 'Load balancing and failover', c: ['Layer 4 and Layer 7 load balancing', 'Health checks', 'Geographic load distribution', 'DNS-based failover', 'Anycast'] },
+            { t: 'Recovery and backups', c: ['Recovery time objective (RTO)', 'Recovery point objective (RPO)', 'Hot, warm, and cold recovery sites', 'The 3-2-1 backup rule', 'Immutable or offline copies and restore testing'] },
+            { t: 'Applied activities', c: ['Sorting controls into architecture environments', 'Selecting resilience designs for banking, healthcare, and e-commerce scenarios'] }
+          ]}
+        ]
+      },
+      {
+        n: 6, title: 'Network & Infrastructure Security', domain: 'Domains 3 & 4 — Security Architecture / Security Operations', coverage: 'full',
+        sections: [
+          { title: '6.1 Firewalls & IDS/IPS', topics: [
+            { t: 'Firewall types', c: ['Packet-filtering firewalls', 'Stateful inspection firewalls', 'Next-generation firewalls', 'Web application firewalls', 'Proxy firewalls', 'Capabilities, limitations, and scenario-based selection'] },
+            { t: 'Intrusion detection versus prevention', c: ['IDS: monitoring, logging, alerting', 'IPS: inline inspection and blocking', 'Out-of-band versus inline placement', 'Availability, latency, and false-positive tradeoffs'] },
+            { t: 'Detection approaches', c: ['Signature-based detection', 'Anomaly-based detection', 'Baseline dependence', 'Known versus previously unseen threats', 'Host-based versus network-based detection'] }
+          ]},
+          { title: '6.2 DNS Filtering, NAC & DLP', topics: [
+            { t: 'DNS filtering', c: ['Filtering resolvers and threat intelligence', 'Blocking malicious domains and C2 callbacks', 'Category-based acceptable-use filtering', 'Limitations: direct IP access, legitimate hosting platforms, resolver bypass'] },
+            { t: 'Network access control', c: ['Pre-admission and post-admission checks', 'Agent-based and agentless approaches', 'Device posture assessment', 'Patch, endpoint protection, firewall, encryption, and certificate checks', 'Quarantine and remediation VLANs'] },
+            { t: 'Data loss prevention', c: ['Data in motion: email, uploads, cloud sync', 'Data at rest: stored sensitive information', 'Data in use: clipboard, removable media, printing', 'Pattern matching and sensitivity labels', 'Blocking, quarantining, and alerting', 'Detection gaps and policy tuning'] }
+          ]},
+          { title: '6.3 Endpoint Security & Defense in Depth', topics: [
+            { t: 'Endpoint protection', c: ['Endpoint detection and response (EDR)', 'Behavioral telemetry', 'Automated containment', 'Process termination and file quarantine', 'Historical threat hunting', 'Application allowlisting and blocklisting', 'Host-based firewalls', 'Full-disk encryption', 'Endpoint patching'] },
+            { t: 'Layered enterprise defense', c: ['Perimeter firewalls', 'IDS/IPS', 'DNS and web filtering', 'Email security', 'NAC and segmentation', 'Endpoint controls', 'DLP, encryption, and access control'] },
+            { t: 'Control-to-threat matching', c: ['WAF for web application attacks', 'NAC for unauthorized or noncompliant devices', 'DNS filtering for malicious-domain access', 'DLP for sensitive-data exfiltration', 'EDR for suspicious endpoint behavior'] },
+            { t: 'Applied activities', c: ['Control-to-threat matching', 'Ransomware, insider exfiltration, and rogue-device scenarios'] }
+          ]}
+        ]
+      },
+      {
+        n: 7, title: 'Identity & Access Management', domain: 'Domain 4 — Security Operations', coverage: 'nav',
+        sections: [{ title: null, topics: [
+          { t: 'AAA', c: ['Authentication', 'Authorization', 'Accounting'] },
+          { t: 'Authentication and access technologies', c: ['Single sign-on (SSO)', 'Multifactor authentication (MFA)'] },
+          { t: 'Access control principles and models', c: ['Least privilege', 'Access control models', 'Role-based access control (RBAC)'] },
+          { t: 'Privileged access', c: ['Privileged access management (PAM)'] },
+          { t: 'Identity lifecycle', c: ['Provisioning', 'Deprovisioning', 'Managing access as identities enter and leave the environment'] }
+        ]}]
+      },
+      {
+        n: 8, title: 'Security Operations & Monitoring', domain: 'Domain 4 — Security Operations', coverage: 'full',
+        lessonNote: 'The course navigation also lists wireless security; the lesson body primarily develops the four areas below.',
+        sections: [
+          { title: '8.1 Baselines & Configuration Drift', topics: [
+            { t: 'Secure baseline documentation', c: ['Open ports', 'Running services', 'User accounts', 'Approved software and versions', 'Registry settings', 'File hashes'] },
+            { t: 'Configuration drift', c: ['Authorized drift', 'Unauthorized drift', 'Cumulative drift', 'Comparison with approved change records'] },
+            { t: 'Standards and monitoring', c: ['CIS Benchmarks', 'Security Technical Implementation Guides (STIGs)', 'File integrity monitoring', 'Configuration auditing'] },
+            { t: 'Interactive application', c: ['Identifying deviations between a secure baseline and a drifted production server'] }
+          ]},
+          { title: '8.2 Asset Inventory & Discovery', topics: [
+            { t: 'Asset management', c: ['Hardware, software, and data inventories', 'Configuration management database (CMDB)', 'Asset ownership and monitoring', 'Unknown and unauthorized assets'] },
+            { t: 'Active discovery', c: ['Nmap', 'Vulnerability scanners', 'Ping sweeps', 'Host, port, OS, and service discovery'] },
+            { t: 'Passive discovery', c: ['DHCP logs', 'ARP monitoring', 'Traffic-flow analysis'] },
+            { t: 'Network admission', c: ['802.1X', 'Supplicant, authenticator, and authentication server', 'RADIUS', 'NAC posture assessment', 'Quarantine VLANs'] },
+            { t: 'Interactive application', c: ['Classifying discovered devices as authorized assets or suspicious devices'] }
+          ]},
+          { title: '8.3 Log Management & SIEM', topics: [
+            { t: 'Log sources and categories', c: ['Event, system, security, and application logs', 'Agents, syslog forwarders, and API connectors'] },
+            { t: 'SIEM processing', c: ['Collection', 'Normalization', 'Correlation', 'Alerting'] },
+            { t: 'Windows security events', c: ['4624: successful logon', '4625: failed logon', '4648: explicit-credential logon', '4720: account creation', 'Correlating events to investigate suspicious activity'] },
+            { t: 'Alert engineering', c: ['Threshold selection', 'False positives and alert fatigue', 'Missed attacks', 'Brute-force detection', 'SOAR-based response automation'] },
+            { t: 'Interactive application', c: ['Configuring alert thresholds and observing a simulated attack'] }
+          ]},
+          { title: '8.4 Sandboxing & Malware Analysis', topics: [
+            { t: 'Static analysis', c: ['Hash comparison', 'String extraction', 'Portable Executable header analysis', 'Entropy indicators', 'Signature and YARA scanning'] },
+            { t: 'Dynamic analysis', c: ['Isolated execution', 'Network connections and DNS requests', 'Registry changes', 'File writes', 'Process creation and injection'] },
+            { t: 'Analysis environments', c: ['VM-based sandboxes', 'Cloud-based analysis services', 'Sample-sharing and confidentiality considerations'] },
+            { t: 'Evasion and triage', c: ['Detection of virtual-machine artifacts', 'Delayed or dormant malware behavior', 'Decisions to run, scan, or sandbox a file'] },
+            { t: 'Interactive application', c: ['Sorting files into appropriate investigation actions'] }
+          ]}
+        ]
+      },
+      {
+        n: 9, title: 'Vulnerability Management & Incident Response', domain: 'Domain 4 — Security Operations', coverage: 'nav',
+        sections: [{ title: null, topics: [
+          { t: 'Vulnerability management workflow', c: ['Vulnerability scanning', 'Analysis of findings', 'Remediation', 'Validation of corrective actions'] },
+          { t: 'Incident response', c: ['Incident response phases', 'IR as a key term'], note: 'The lesson index does not enumerate the IR phase names used in the lesson.' },
+          { t: 'Root cause analysis', c: ['Investigating the underlying cause of an incident'] },
+          { t: 'Digital forensics', c: ['Digital forensic concepts', 'Forensic evidence'], note: 'The lesson index does not specify the evidence-acquisition or handling procedures covered.' }
+        ]}]
+      },
+      {
+        n: 10, title: 'Security Governance & Policy', domain: 'Domain 5 — Security Program Management & Oversight', coverage: 'nav',
+        sections: [{ title: null, topics: [
+          { t: 'Security documentation', c: ['Policies', 'Standards', 'Procedures', 'Distinctions among these documentation categories'] },
+          { t: 'Governance', c: ['Governance roles', 'Security governance responsibilities'] },
+          { t: 'Compliance', c: ['Compliance obligations'] },
+          { t: 'Privacy', c: ['Privacy frameworks'] },
+          { t: 'Security awareness', c: ['Security awareness training', 'Awareness within security program management and oversight'] }
+        ]}]
+      },
+      {
+        n: 11, title: 'Risk, Third-Party & Assessment', domain: 'Domain 5 — Security Program Management & Oversight', coverage: 'nav',
+        sections: [{ title: null, topics: [
+          { t: 'Risk identification and assessment', c: ['Identifying risk', 'Assessing risk'] },
+          { t: 'Risk boundaries and documentation', c: ['Risk appetite', 'Risk tolerance', 'Risk register'] },
+          { t: 'Business impact analysis', c: ['Business impact analysis (BIA)'] },
+          { t: 'Third-party risk', c: ['Third-party risk management', 'Vendor risk'] },
+          { t: 'Assurance and assessment', c: ['Audits', 'Penetration testing', 'Attestation'], note: 'The lesson index does not identify specific audit types or penetration-testing methodologies.' }
+        ]}]
+      },
+      {
+        n: 12, title: 'Final Review & Exam Readiness', domain: 'All five SY0-701 domains', coverage: 'nav',
+        sections: [{ title: null, topics: [
+          { t: 'Cumulative domain review', c: ['General Security Concepts', 'Threats, Vulnerabilities & Mitigations', 'Security Architecture', 'Security Operations', 'Security Program Management & Oversight'] },
+          { t: 'Exam question interpretation', c: ['Common exam traps', 'Distractors', 'Domain weights'] },
+          { t: 'Performance-based questions', c: ['PBQ workshop', 'PBQ as a key term'] },
+          { t: 'Exam execution', c: ['Pacing strategy', 'Time management'] },
+          { t: 'Cumulative assessment', c: ['Practice assessment spanning the course', 'Integration of concepts across all five domains'] }
+        ]}]
+      }
+    ]
+  }
+};
+
+/* ============================================================
+   Data: Personas
+============================================================ */
+const PERSONAS = [
+  {
+    id: 'sme',
+    name: 'Cybersecurity SME',
+    purpose: 'Owns technical accuracy',
+    desc: 'Verifies terms, acronyms, and relationships; catches oversimplifications and misconceptions.',
+    role: ctx => `Cybersecurity Subject Matter Expert (SME): a seasoned, certified practitioner who owns technical accuracy, current terminology, and alignment with ${ctx.course ? ctx.course.name + ' exam objectives' : 'industry standards and frameworks'}. Catches oversimplifications and misconceptions before they reach learners.`,
+    deliverable: ctx => `SME Accuracy Review: verify every term, acronym, and relationship shown in the graphic${ctx.course ? ' against the lesson scope and ' + ctx.course.short + ' objectives' : ''}; list any corrections made; name 2–3 common learner misconceptions the graphic should pre-empt.`
+  },
+  {
+    id: 'id',
+    name: 'Instructional Designer',
+    purpose: 'Aligns visuals to objectives',
+    desc: "Applies backward design, Bloom's taxonomy, and multimedia principles to manage cognitive load.",
+    role: ctx => `Instructional Designer: applies backward design, Bloom's taxonomy, and Mayer's multimedia principles (coherence, signaling, spatial contiguity) so every visual element serves the learning objective for ${ctx.grade}, content is chunked to manage cognitive load, and information appears in the order a learner needs it.`,
+    deliverable: () => `Instructional Design Rationale: restate the objective in measurable terms with its Bloom's level; map each major visual element to that objective; explain the chunking and what was deliberately left out; suggest where the graphic fits in the lesson (pre-teach, during instruction, or review).`
+  },
+  {
+    id: 'assess',
+    name: 'Assessment Expert',
+    purpose: 'Checks for understanding',
+    desc: 'Writes aligned, scenario-based items and turns the graphic into a retrieval-practice tool.',
+    role: () => `Assessment Expert: designs checks for understanding aligned to the objective, ensures the graphic supports retrieval practice and transfer to realistic scenarios, and writes items in the style of the target course or certification assessments.`,
+    deliverable: ctx => `Aligned Assessment: 3 check-for-understanding items tied to the objective (at least one scenario-based${ctx.course ? ', in ' + ctx.course.examStyle + ' style' : ''}), each with an answer key and a one-sentence rationale per option; plus one idea for using the graphic in an interactive or performance-based activity.`
+  },
+  {
+    id: 'gfx',
+    name: 'Graphics Designer',
+    purpose: 'Owns the visual system',
+    desc: 'Composition, grid, typographic hierarchy, color, and iconography, specified precisely enough to build.',
+    role: () => `Graphics Designer: owns composition, grid, typographic hierarchy, color, and iconography, and translates the panel's content decisions into a precise, buildable visual specification that stays legible and accessible.`,
+    deliverable: () => `Visual Specification: canvas grid and margins, focal point, type scale (font roles and sizes), palette as hex values with contrast notes, iconography, and an element-by-element layout description; finish with a ready-to-paste prompt for an image-generation model.`
+  },
+  {
+    id: 'web',
+    name: 'Expert Webpage Developer',
+    purpose: 'Ships it to the web',
+    desc: 'Builds a self-contained, responsive, accessible HTML/SVG version ready for static hosting.',
+    role: () => `Expert Webpage Developer: implements the graphic as clean, standards-based, self-contained HTML/CSS/SVG that is responsive, keyboard- and screen-reader-accessible (WCAG 2.2 AA), and deployable to static hosting such as GitHub Pages.`,
+    deliverable: () => `Web Implementation: a single self-contained HTML file (embedded CSS, inline SVG, no external dependencies) that renders the graphic responsively, uses semantic markup with ARIA labels, includes the alt-text, and meets WCAG 2.2 AA contrast.`
+  }
+];
+
+/* ============================================================
    Data: Graphic Types
-   Each card carries: name, purpose, classroom use, prompt-translation
 ============================================================ */
 const GRAPHIC_TYPES = [
-  {
-    id: 'concept-map',
-    name: 'Concept Map',
-    purpose: 'Show relationships',
-    desc: 'Connects ideas with labeled links to reveal how concepts interrelate.',
-    use: 'Use for vocabulary networks, theory frameworks, or showing how subtopics connect to a central idea.',
-    promptTraits: 'emphasize labeled relationships between concepts; use connecting lines with relationship verbs; arrange the central idea prominently with branching subtopics'
-  },
-  {
-    id: 'flowchart',
-    name: 'Flowchart',
-    purpose: 'Clarify process steps',
-    desc: 'Sequential decision-based steps showing how a process unfolds.',
-    use: 'Use for procedures, troubleshooting paths, algorithms, or decision-making workflows.',
-    promptTraits: 'show clear sequential process steps; use standard flowchart shapes (rectangles for processes, diamonds for decisions); include directional arrows; mark start and end points clearly'
-  },
-  {
-    id: 'infographic',
-    name: 'Infographic',
-    purpose: 'Combine data & narrative',
-    desc: 'Mixes statistics, illustrations, and short text into a scannable visual story.',
-    use: 'Use as a takeaway handout, social-media teaser, or summary of a unit.',
-    promptTraits: 'combine data visualizations, illustrations, and short narrative text; create a scannable top-to-bottom or grid composition; use bold headings to chunk content'
-  },
-  {
-    id: 'timeline',
-    name: 'Timeline',
-    purpose: 'Show chronology',
-    desc: 'Plots events along a horizontal or vertical axis to reveal order and pacing.',
-    use: 'Use for historical events, project phases, software versioning, or biological/physical processes over time.',
-    promptTraits: 'arrange events along a chronological axis; mark dates clearly; use proportional spacing where possible; include short event descriptions'
-  },
-  {
-    id: 'comparison',
-    name: 'Comparison Chart',
-    purpose: 'Emphasize differences',
-    desc: 'Side-by-side or matrix layout that contrasts two or more items across attributes.',
-    use: 'Use to compare protocols, models, theories, frameworks, or product/method alternatives.',
-    promptTraits: 'emphasize side-by-side comparison; use a matrix or split layout with shared rows of attributes; visually highlight key differences with color or weight'
-  },
-  {
-    id: 'diagram',
-    name: 'Labeled Diagram',
-    purpose: 'Identify parts',
-    desc: 'A clear illustration with callout labels pointing to each component.',
-    use: 'Use for anatomy, equipment, network topology, electronic circuits, or system architecture.',
-    promptTraits: 'create a clearly illustrated subject with callout labels pointing to each significant part; use thin leader lines; keep label typography crisp and consistent'
-  },
-  {
-    id: 'cycle',
-    name: 'Cycle Diagram',
-    purpose: 'Show repeating processes',
-    desc: 'Circular arrangement of stages that loop back to the beginning.',
-    use: 'Use for biological cycles, business processes, project lifecycles, or feedback loops.',
-    promptTraits: 'arrange stages in a continuous circular flow with directional arrows returning to the start; equally space the stages; emphasize the cyclical, repeating nature'
-  },
-  {
-    id: 'hierarchy',
-    name: 'Hierarchy / Org Chart',
-    purpose: 'Show structure',
-    desc: 'Tree-like arrangement showing levels of authority, taxonomy, or containment.',
-    use: 'Use for organizational structures, taxonomies, class inheritance, or governance frameworks.',
-    promptTraits: 'arrange items in a top-down tree hierarchy; show parent–child relationships with connecting lines; group related branches with consistent styling at each level'
-  },
-  {
-    id: 'venn',
-    name: 'Venn Diagram',
-    purpose: 'Show overlap & intersection',
-    desc: 'Overlapping circles that reveal shared and distinct attributes.',
-    use: 'Use for set theory, comparing concepts with shared traits, or analyzing overlap of disciplines.',
-    promptTraits: 'use overlapping circles to show set relationships; label both unique regions and intersecting regions clearly; use transparency or color blending in overlaps'
-  },
-  {
-    id: 'matrix',
-    name: '2×2 Matrix',
-    purpose: 'Categorize by two axes',
-    desc: 'Quadrant grid that classifies items along two intersecting dimensions.',
-    use: 'Use for prioritization (urgent/important), SWOT, threat modeling, or risk assessment.',
-    promptTraits: 'create a 2×2 quadrant matrix with two labeled axes representing opposing dimensions; place items within the appropriate quadrant; label each quadrant'
-  },
-  {
-    id: 'mindmap',
-    name: 'Mind Map',
-    purpose: 'Brainstorm & explore',
-    desc: 'Radial branching from a central topic, capturing free associations.',
-    use: 'Use to explore a topic, plan a lesson, or scaffold student-generated ideas.',
-    promptTraits: 'use a radial branching layout from a central topic; allow organic curves rather than rigid lines; vary branch thickness to show importance'
-  },
-  {
-    id: 'sequence',
-    name: 'Sequence / Step-by-Step',
-    purpose: 'Demonstrate procedure',
-    desc: 'Numbered panels that show a linear how-to procedure.',
-    use: 'Use for lab protocols, software tutorials, configuration steps, or kinesthetic instructions.',
-    promptTraits: 'show numbered sequential panels demonstrating a procedure; use consistent panel sizes; include a clear visual for each step alongside a short instruction'
-  },
-  {
-    id: 'anatomy',
-    name: 'Anatomy / Cross-Section',
-    purpose: 'Reveal internal structure',
-    desc: 'Cutaway view exposing the internal workings of a subject.',
-    use: 'Use for biological organs, machinery internals, geological strata, or building cross-sections.',
-    promptTraits: 'use a cutaway or cross-sectional view exposing internal structure; label internal components with leader lines; differentiate layers or systems with color'
-  },
-  {
-    id: 'data-viz',
-    name: 'Data Visualization',
-    purpose: 'Display quantitative evidence',
-    desc: 'Charts, graphs, or plots conveying numeric information clearly.',
-    use: 'Use to support claims with evidence, teach data literacy, or show trends over time.',
-    promptTraits: 'use precise chart types (bar, line, scatter, etc.) appropriate to the data; label axes clearly; emphasize the key insight visually; minimize chart-junk'
-  },
-  {
-    id: 'analogy',
-    name: 'Visual Analogy',
-    purpose: 'Bridge unfamiliar to familiar',
-    desc: 'Pairs an abstract concept with a concrete, everyday metaphor.',
-    use: 'Use when introducing complex or abstract ideas — networks as highways, encryption as locked boxes.',
-    promptTraits: 'pair the abstract concept with a concrete familiar metaphor side-by-side; visually map analogous parts; use a clear "this is like that" composition'
-  },
-  {
-    id: 'poster',
-    name: 'Reference Poster',
-    purpose: 'At-a-glance teaching wall piece',
-    desc: 'Dense, visually rich poster designed to live on a classroom wall.',
-    use: 'Use for periodic tables, command-line references, OSI model wall charts, or vocabulary posters.',
-    promptTraits: 'design as a high-density classroom wall poster; balance rich information with strong visual hierarchy; ensure legibility from across a room for the largest headings'
-  }
+  { id: 'concept-map', name: 'Concept Map', purpose: 'Show relationships', desc: 'Connects ideas with labeled links to reveal how concepts interrelate.', use: 'Use for vocabulary networks, theory frameworks, or showing how subtopics connect to a central idea.', promptTraits: 'emphasize labeled relationships between concepts; use connecting lines with relationship verbs; arrange the central idea prominently with branching subtopics' },
+  { id: 'flowchart', name: 'Flowchart', purpose: 'Clarify process steps', desc: 'Sequential decision-based steps showing how a process unfolds.', use: 'Use for procedures, troubleshooting paths, algorithms, or decision-making workflows.', promptTraits: 'show clear sequential process steps; use standard flowchart shapes (rectangles for processes, diamonds for decisions); include directional arrows; mark start and end points clearly' },
+  { id: 'infographic', name: 'Infographic', purpose: 'Combine data & narrative', desc: 'Mixes statistics, illustrations, and short text into a scannable visual story.', use: 'Use as a takeaway handout, social-media teaser, or summary of a unit.', promptTraits: 'combine data visualizations, illustrations, and short narrative text; create a scannable top-to-bottom or grid composition; use bold headings to chunk content' },
+  { id: 'timeline', name: 'Timeline', purpose: 'Show chronology', desc: 'Plots events along a horizontal or vertical axis to reveal order and pacing.', use: 'Use for historical events, project phases, software versioning, or biological/physical processes over time.', promptTraits: 'arrange events along a chronological axis; mark dates clearly; use proportional spacing where possible; include short event descriptions' },
+  { id: 'comparison', name: 'Comparison Chart', purpose: 'Emphasize differences', desc: 'Side-by-side or matrix layout that contrasts two or more items across attributes.', use: 'Use to compare protocols, models, theories, frameworks, or product/method alternatives.', promptTraits: 'emphasize side-by-side comparison; use a matrix or split layout with shared rows of attributes; visually highlight key differences with color or weight' },
+  { id: 'diagram', name: 'Labeled Diagram', purpose: 'Identify parts', desc: 'A clear illustration with callout labels pointing to each component.', use: 'Use for anatomy, equipment, network topology, electronic circuits, or system architecture.', promptTraits: 'create a clearly illustrated subject with callout labels pointing to each significant part; use thin leader lines; keep label typography crisp and consistent' },
+  { id: 'cycle', name: 'Cycle Diagram', purpose: 'Show repeating processes', desc: 'Circular arrangement of stages that loop back to the beginning.', use: 'Use for biological cycles, business processes, project lifecycles, or feedback loops.', promptTraits: 'arrange stages in a continuous circular flow with directional arrows returning to the start; equally space the stages; emphasize the cyclical, repeating nature' },
+  { id: 'hierarchy', name: 'Hierarchy / Org Chart', purpose: 'Show structure', desc: 'Tree-like arrangement showing levels of authority, taxonomy, or containment.', use: 'Use for organizational structures, taxonomies, class inheritance, or governance frameworks.', promptTraits: 'arrange items in a top-down tree hierarchy; show parent–child relationships with connecting lines; group related branches with consistent styling at each level' },
+  { id: 'venn', name: 'Venn Diagram', purpose: 'Show overlap & intersection', desc: 'Overlapping circles that reveal shared and distinct attributes.', use: 'Use for set theory, comparing concepts with shared traits, or analyzing overlap of disciplines.', promptTraits: 'use overlapping circles to show set relationships; label both unique regions and intersecting regions clearly; use transparency or color blending in overlaps' },
+  { id: 'matrix', name: '2×2 Matrix', purpose: 'Categorize by two axes', desc: 'Quadrant grid that classifies items along two intersecting dimensions.', use: 'Use for prioritization (urgent/important), SWOT, threat modeling, or risk assessment.', promptTraits: 'create a 2×2 quadrant matrix with two labeled axes representing opposing dimensions; place items within the appropriate quadrant; label each quadrant' },
+  { id: 'mindmap', name: 'Mind Map', purpose: 'Brainstorm & explore', desc: 'Radial branching from a central topic, capturing free associations.', use: 'Use to explore a topic, plan a lesson, or scaffold student-generated ideas.', promptTraits: 'use a radial branching layout from a central topic; allow organic curves rather than rigid lines; vary branch thickness to show importance' },
+  { id: 'sequence', name: 'Sequence / Step-by-Step', purpose: 'Demonstrate procedure', desc: 'Numbered panels that show a linear how-to procedure.', use: 'Use for lab protocols, software tutorials, configuration steps, or kinesthetic instructions.', promptTraits: 'show numbered sequential panels demonstrating a procedure; use consistent panel sizes; include a clear visual for each step alongside a short instruction' },
+  { id: 'anatomy', name: 'Anatomy / Cross-Section', purpose: 'Reveal internal structure', desc: 'Cutaway view exposing the internal workings of a subject.', use: 'Use for biological organs, machinery internals, geological strata, or building cross-sections.', promptTraits: 'use a cutaway or cross-sectional view exposing internal structure; label internal components with leader lines; differentiate layers or systems with color' },
+  { id: 'data-viz', name: 'Data Visualization', purpose: 'Display quantitative evidence', desc: 'Charts, graphs, or plots conveying numeric information clearly.', use: 'Use to support claims with evidence, teach data literacy, or show trends over time.', promptTraits: 'use precise chart types (bar, line, scatter, etc.) appropriate to the data; label axes clearly; emphasize the key insight visually; minimize chart-junk' },
+  { id: 'analogy', name: 'Visual Analogy', purpose: 'Bridge unfamiliar to familiar', desc: 'Pairs an abstract concept with a concrete, everyday metaphor.', use: 'Use when introducing complex or abstract ideas — networks as highways, encryption as locked boxes.', promptTraits: 'pair the abstract concept with a concrete familiar metaphor side-by-side; visually map analogous parts; use a clear "this is like that" composition' },
+  { id: 'poster', name: 'Reference Poster', purpose: 'At-a-glance teaching wall piece', desc: 'Dense, visually rich poster designed to live on a classroom wall.', use: 'Use for periodic tables, command-line references, OSI model wall charts, or vocabulary posters.', promptTraits: 'design as a high-density classroom wall poster; balance rich information with strong visual hierarchy; ensure legibility from across a room for the largest headings' }
 ];
 
 /* ============================================================
    State
 ============================================================ */
 const state = {
+  course: '',
+  lessonIdx: -1,
+  selected: new Set(),   // concept keys "s.t.c"
+  expanded: new Set(),   // topic keys "s.t"
+  autoTopic: '',         // last topic text filled automatically
+  personas: new Set(['sme', 'id', 'gfx']),
   topic: '',
   subject: '',
   grade: '',
@@ -1185,14 +1424,8 @@ const state = {
   format: 'png|Best for screen display and presentations with transparency support',
   resolution: '300 DPI (print quality)',
   toggles: {
-    transparent: false,
-    bleed: true,
-    readable: true,
-    colorblind: true,
-    accuracy: true,
-    altText: true,
-    hierarchy: true,
-    citations: false
+    transparent: false, bleed: true, readable: true, colorblind: true,
+    accuracy: true, altText: true, hierarchy: true, citations: false
   },
   model: 'claude'
 };
@@ -1209,21 +1442,275 @@ const SIZE_PRESETS = {
   'square': { w: '1080', h: '1080', unit: 'px', orient: 'square' }
 };
 
+const $ = id => document.getElementById(id);
+
+function escapeHTML(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+/* ============================================================
+   Lesson helpers
+============================================================ */
+function getCourse() { return state.course ? COURSES[state.course] : null; }
+function getLesson() {
+  const c = getCourse();
+  return c && state.lessonIdx >= 0 ? c.lessons[state.lessonIdx] : null;
+}
+
+function allConceptKeys(L, si, ti) {
+  const keys = [];
+  L.sections.forEach((sec, s) => {
+    if (si !== undefined && s !== si) return;
+    sec.topics.forEach((tp, t) => {
+      if (ti !== undefined && t !== ti) return;
+      tp.c.forEach((_, c) => keys.push(`${s}.${t}.${c}`));
+    });
+  });
+  return keys;
+}
+
+function selectionCounts(L) {
+  let topics = 0, concepts = 0, totalTopics = 0, totalConcepts = 0;
+  L.sections.forEach((sec, s) => sec.topics.forEach((tp, t) => {
+    totalTopics++;
+    totalConcepts += tp.c.length;
+    const n = tp.c.filter((_, c) => state.selected.has(`${s}.${t}.${c}`)).length;
+    concepts += n;
+    if (n) topics++;
+  }));
+  return { topics, concepts, totalTopics, totalConcepts };
+}
+
+function selectedScope() {
+  const L = getLesson();
+  if (!L) return [];
+  const out = [];
+  L.sections.forEach((sec, s) => {
+    const topics = [];
+    sec.topics.forEach((tp, t) => {
+      const concepts = tp.c.filter((_, c) => state.selected.has(`${s}.${t}.${c}`));
+      if (concepts.length) topics.push({ t: tp.t, concepts, note: tp.note });
+    });
+    if (topics.length) out.push({ title: sec.title, topics });
+  });
+  return out;
+}
+
+/* ============================================================
+   Render: course / lesson
+============================================================ */
+function populateLessons() {
+  const sel = $('lesson');
+  const c = getCourse();
+  if (!c) {
+    sel.innerHTML = '<option value="">— select a course first —</option>';
+    sel.disabled = true;
+    return;
+  }
+  sel.disabled = false;
+  sel.innerHTML = '<option value="">— select a lesson —</option>' +
+    c.lessons.map((L, i) => `<option value="${i}">Lesson ${L.n}: ${escapeHTML(L.title)}</option>`).join('');
+  sel.value = state.lessonIdx >= 0 ? String(state.lessonIdx) : '';
+}
+
+function renderLesson() {
+  const wrap = $('lessonPanel');
+  const L = getLesson();
+  if (!L) {
+    wrap.innerHTML = state.course
+      ? '<p class="lesson-empty">Choose a lesson to load its major topics and concepts.</p>'
+      : '';
+    return;
+  }
+  const k = selectionCounts(L);
+  const full = L.coverage === 'full';
+  let h = `<div class="lesson-card">
+    <div class="lesson-head">
+      <div>
+        <div class="lesson-title">Lesson ${L.n}: ${escapeHTML(L.title)}</div>
+        <div class="lesson-domain">${escapeHTML(L.domain)}</div>
+      </div>
+      <span class="badge ${full ? 'full' : 'nav'}" title="${full ? 'Built from the full lesson page' : 'Built from the course navigation description; some sub-topics are not enumerated'}">${full ? 'Full lesson content' : 'Navigation outline'}</span>
+    </div>`;
+  if (L.lessonNote) h += `<div class="lesson-note">${escapeHTML(L.lessonNote)}</div>`;
+  h += `<div class="lesson-tools">
+      <button type="button" class="mini-btn" data-action="all">Select all</button>
+      <button type="button" class="mini-btn" data-action="none">Clear</button>
+      <button type="button" class="mini-btn" data-action="expand">${state.expanded.size ? 'Collapse all' : 'Show all concepts'}</button>
+      <button type="button" class="mini-btn" data-action="objective">Draft objective from selection</button>
+      <span class="scope-count">${k.topics}/${k.totalTopics} topics · ${k.concepts}/${k.totalConcepts} concepts</span>
+    </div>`;
+  if (k.concepts > 25) {
+    h += `<div class="scope-warn">${k.concepts} concepts is a lot for one graphic. Narrow to the topics this graphic must teach, or pair a large scope with a Reference Poster and rich density.</div>`;
+  } else if (k.concepts === 0) {
+    h += `<div class="scope-warn">No concepts selected. Tick the topics this graphic should teach.</div>`;
+  }
+
+  L.sections.forEach((sec, s) => {
+    if (sec.title) {
+      h += `<div class="sec-title"><span>${escapeHTML(sec.title)}</span><button type="button" class="mini-btn" data-section="${s}">Only this section</button></div>`;
+    }
+    sec.topics.forEach((tp, t) => {
+      const tKey = `${s}.${t}`;
+      const n = tp.c.filter((_, c) => state.selected.has(`${s}.${t}.${c}`)).length;
+      const open = state.expanded.has(tKey);
+      h += `<div class="topic">
+        <div class="topic-row">
+          <input type="checkbox" class="topic-check" id="tp-${s}-${t}" data-topic="${tKey}" ${n === tp.c.length ? 'checked' : ''} data-indeterminate="${n > 0 && n < tp.c.length}">
+          <label for="tp-${s}-${t}">${escapeHTML(tp.t)}</label>
+          <span class="topic-count">${n}/${tp.c.length}</span>
+          <button type="button" class="expand-btn" data-expand="${tKey}" aria-expanded="${open}">${open ? 'Hide' : 'Concepts'}</button>
+        </div>`;
+      if (open) {
+        h += `<div class="concepts chips">` + tp.c.map((cn, c) => {
+          const key = `${s}.${t}.${c}`;
+          const on = state.selected.has(key);
+          return `<button type="button" class="chip concept-chip${on ? ' selected' : ''}" data-key="${key}" aria-pressed="${on}">${escapeHTML(cn)}</button>`;
+        }).join('') + `</div>`;
+        if (tp.note) h += `<div class="topic-note">${escapeHTML(tp.note)}</div>`;
+      }
+      h += `</div>`;
+    });
+  });
+  h += `</div>`;
+  wrap.innerHTML = h;
+  wrap.querySelectorAll('.topic-check').forEach(cb => {
+    cb.indeterminate = cb.dataset.indeterminate === 'true';
+  });
+}
+
+function onLessonChosen() {
+  const L = getLesson();
+  state.selected = new Set();
+  state.expanded = new Set();
+  if (L) {
+    allConceptKeys(L).forEach(k => state.selected.add(k));
+    const label = `Lesson ${L.n}: ${L.title}`;
+    if (!state.topic.trim() || state.topic === state.autoTopic) {
+      state.topic = label;
+      $('topic').value = label;
+    }
+    state.autoTopic = label;
+    if (!state.subject) { state.subject = 'Cybersecurity'; $('subject').value = 'Cybersecurity'; }
+    if (!state.grade) { state.grade = 'Community College / Undergraduate'; $('grade').value = state.grade; }
+  }
+  renderLesson();
+  updatePrompt();
+}
+
+function draftObjective() {
+  const scope = selectedScope();
+  const titles = [];
+  scope.forEach(sec => sec.topics.forEach(tp => titles.push(tp.t)));
+  if (!titles.length) { showToast('Select topics first'); return; }
+  const lc = s => (s[1] && s[1] === s[1].toLowerCase()) ? s[0].toLowerCase() + s.slice(1) : s;
+  const list = titles.slice(0, 4).map(lc);
+  const more = titles.length > 4 ? ', and related concepts' : '';
+  const joined = list.length === 1 ? list[0]
+    : list.length === 2 ? `${list[0]} and ${list[1]}`
+    : `${list.slice(0, -1).join(', ')}, and ${list[list.length - 1]}`;
+  const c = getCourse();
+  const obj = `By the end of viewing this graphic, the learner will be able to explain ${joined}${more}, and apply them to ${c ? c.short + ' ' : ''}scenarios.`;
+  state.objective = obj;
+  $('objective').value = obj;
+  updatePrompt();
+  showToast('Objective drafted — edit as needed');
+}
+
+function wireLessonPanel() {
+  const wrap = $('lessonPanel');
+  wrap.addEventListener('click', e => {
+    const L = getLesson();
+    if (!L) return;
+    const act = e.target.closest('[data-action]');
+    const exp = e.target.closest('[data-expand]');
+    const chip = e.target.closest('.concept-chip');
+    const sec = e.target.closest('[data-section]');
+    if (act) {
+      const a = act.dataset.action;
+      if (a === 'all') allConceptKeys(L).forEach(k => state.selected.add(k));
+      if (a === 'none') state.selected.clear();
+      if (a === 'objective') { draftObjective(); return; }
+      if (a === 'expand') {
+        if (state.expanded.size) state.expanded.clear();
+        else L.sections.forEach((s, si) => s.topics.forEach((_, ti) => state.expanded.add(`${si}.${ti}`)));
+      }
+    } else if (sec) {
+      state.selected.clear();
+      allConceptKeys(L, Number(sec.dataset.section)).forEach(k => state.selected.add(k));
+    } else if (exp) {
+      const k = exp.dataset.expand;
+      state.expanded.has(k) ? state.expanded.delete(k) : state.expanded.add(k);
+    } else if (chip) {
+      const k = chip.dataset.key;
+      state.selected.has(k) ? state.selected.delete(k) : state.selected.add(k);
+    } else {
+      return;
+    }
+    renderLesson();
+    updatePrompt();
+  });
+  wrap.addEventListener('change', e => {
+    const cb = e.target.closest('.topic-check');
+    if (!cb) return;
+    const L = getLesson();
+    const [s, t] = cb.dataset.topic.split('.').map(Number);
+    const keys = allConceptKeys(L, s, t);
+    if (cb.checked) keys.forEach(k => state.selected.add(k));
+    else keys.forEach(k => state.selected.delete(k));
+    renderLesson();
+    updatePrompt();
+  });
+}
+
+/* ============================================================
+   Render: personas
+============================================================ */
+function renderPersonas() {
+  const grid = $('personaGrid');
+  grid.innerHTML = '';
+  PERSONAS.forEach(p => {
+    const on = state.personas.has(p.id);
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'gcard' + (on ? ' selected' : '');
+    btn.setAttribute('aria-pressed', on);
+    btn.innerHTML = `
+      <div class="gcard-name">${escapeHTML(p.name)}</div>
+      <div class="gcard-purpose">${escapeHTML(p.purpose)}</div>
+      <div class="gcard-desc">${escapeHTML(p.desc)}</div>`;
+    btn.addEventListener('click', () => {
+      on ? state.personas.delete(p.id) : state.personas.add(p.id);
+      renderPersonas();
+      updatePrompt();
+    });
+    grid.appendChild(btn);
+  });
+  const n = state.personas.size;
+  $('panelSummary').textContent = n === 0
+    ? 'No personas selected — the prompt uses a single instructional-designer role.'
+    : `${n} persona${n > 1 ? 's' : ''} selected. Each adds a role to the panel and a labeled deliverable to the requested output.`;
+}
+
 /* ============================================================
    Render: graphic type cards
 ============================================================ */
 function renderTypeCards() {
-  const grid = document.getElementById('typeGrid');
+  const grid = $('typeGrid');
   grid.innerHTML = '';
   GRAPHIC_TYPES.forEach(t => {
     const btn = document.createElement('button');
+    btn.type = 'button';
     btn.className = 'gcard' + (state.graphicType === t.id ? ' selected' : '');
-    btn.dataset.id = t.id;
+    btn.setAttribute('aria-pressed', state.graphicType === t.id);
     btn.innerHTML = `
       <div class="gcard-name">${t.name}</div>
       <div class="gcard-purpose">${t.purpose}</div>
-      <div class="gcard-desc">${t.desc}</div>
-    `;
+      <div class="gcard-desc">${t.desc}</div>`;
     btn.addEventListener('click', () => {
       state.graphicType = t.id;
       renderTypeCards();
@@ -1235,19 +1722,15 @@ function renderTypeCards() {
 }
 
 function renderFitNote() {
-  const note = document.getElementById('fitNote');
-  const text = document.getElementById('fitText');
-  if (!state.graphicType) {
-    note.classList.remove('visible');
-    return;
-  }
+  const note = $('fitNote');
+  if (!state.graphicType) { note.classList.remove('visible'); return; }
   const t = GRAPHIC_TYPES.find(x => x.id === state.graphicType);
-  text.textContent = `${t.name}s ${t.purpose.toLowerCase()}. ${t.use}`;
+  $('fitText').textContent = `${t.name}s ${t.purpose.toLowerCase()}. ${t.use}`;
   note.classList.add('visible');
 }
 
 /* ============================================================
-   Model-specific prompt generators
+   Prompt builders
 ============================================================ */
 function buildPromptParts() {
   const t = GRAPHIC_TYPES.find(x => x.id === state.graphicType);
@@ -1255,13 +1738,11 @@ function buildPromptParts() {
   const subject = state.subject || 'general education';
   const grade = state.grade || 'general learners';
   const objective = state.objective.trim();
+  const ctx = { course: getLesson() ? getCourse() : null, lesson: getLesson(), subject, grade };
 
-  // Size resolution
   let sizeStr;
   if (state.sizePreset === 'custom') {
-    const w = state.customW || '?';
-    const h = state.customH || '?';
-    sizeStr = `${w} × ${h} ${state.customUnit}`;
+    sizeStr = `${state.customW || '?'} × ${state.customH || '?'} ${state.customUnit}`;
   } else {
     const p = SIZE_PRESETS[state.sizePreset];
     sizeStr = `${p.w} × ${p.h} ${p.unit}`;
@@ -1269,10 +1750,8 @@ function buildPromptParts() {
   const orient = state.orientation === 'As specified by size preset'
     ? (SIZE_PRESETS[state.sizePreset]?.orient || 'portrait')
     : state.orientation.toLowerCase();
-
   const [fmt, fmtNote] = state.format.split('|');
 
-  // Pedagogical constraints
   const constraints = [];
   if (state.toggles.readable) constraints.push('Type sizes must remain legible at standard classroom viewing distance; minimum body text equivalent to 12pt at final output size.');
   if (state.toggles.colorblind) constraints.push('Use a color-blind-safe palette (avoid red/green-only distinctions); rely on shape, position, and label as well as color to differentiate elements.');
@@ -1282,36 +1761,81 @@ function buildPromptParts() {
   if (state.toggles.citations) constraints.push('Cite primary sources or authoritative references in a small caption at the bottom of the graphic.');
 
   return {
-    role: buildRole(state.model, subject, grade),
+    role: buildRole(state.model, ctx),
     task: buildTask(state.model, t, topic),
+    lessonContext: buildLessonContext(ctx),
+    scope: buildScope(ctx),
     content: buildContent(t, topic, subject, grade, objective),
-    design: buildDesign(t),
+    design: buildDesign(),
     output: buildOutput(sizeStr, orient, fmt, fmtNote),
     constraints,
+    deliverables: buildDeliverables(ctx),
     modelNotes: buildModelNotes(state.model)
   };
 }
 
-function buildRole(model, subject, grade) {
-  const base = `You are a senior instructional designer and visual communicator specializing in ${subject} for ${grade}.`;
-  const variants = {
-    claude: `${base} You think carefully about how a learner will encounter this graphic, and you reason about visual hierarchy, cognitive load, and accessibility before producing your output.`,
-    chatgpt: `${base} You craft engaging, classroom-ready visuals that balance clarity, accuracy, and visual appeal.`,
-    gemini: `${base} You combine pedagogical research with strong multimodal visual design to produce graphics that work across print and screen contexts.`,
-    perplexity: `${base} You ground every visual claim in verifiable, well-sourced information and prioritize factual rigor alongside clarity.`
-  };
-  return variants[model];
+const MODEL_FLAVOR = {
+  claude: 'Reason carefully about how a learner will encounter this graphic (visual hierarchy, cognitive load, and accessibility) before producing output.',
+  chatgpt: 'Produce engaging, classroom-ready work that balances clarity, accuracy, and visual appeal.',
+  gemini: 'Combine pedagogical research with strong multimodal design so the graphic works in both print and screen contexts.',
+  perplexity: 'Ground every visual claim in verifiable, well-sourced information and prioritize factual rigor alongside clarity.'
+};
+
+function activePersonas() {
+  return PERSONAS.filter(p => state.personas.has(p.id));
+}
+
+function buildRole(model, ctx) {
+  const ps = activePersonas();
+  if (!ps.length) {
+    return `You are a senior instructional designer and visual communicator specializing in ${ctx.subject} for ${ctx.grade}. ${MODEL_FLAVOR[model]}`;
+  }
+  let s = `You are a coordinated expert panel producing an instructional graphic on ${ctx.subject} for ${ctx.grade}. Work as each of the following personas. Every persona contributes its expertise to the design and reviews the draft from its own perspective before the final version is assembled:\n`;
+  s += ps.map(p => '\n• ' + p.role(ctx)).join('');
+  s += `\n\nWhere personas disagree, resolve the conflict in favor of technical accuracy first, then learning effectiveness, then visual polish, and note the trade-off. ${MODEL_FLAVOR[model]}`;
+  return s;
 }
 
 function buildTask(model, t, topic) {
   const typeName = t ? t.name.toLowerCase() : 'instructional graphic';
   const variants = {
-    claude: `Design a ${typeName} that teaches the concept of "${topic}." Before producing the final design specification, briefly think through (1) what the learner needs to walk away knowing, (2) how this graphic type best supports that goal, and (3) what to leave out.`,
+    claude: `Design a ${typeName} that teaches "${topic}." Before producing the final design specification, briefly think through (1) what the learner needs to walk away knowing, (2) how this graphic type best supports that goal, and (3) what to leave out.`,
     chatgpt: `Create a ${typeName} that teaches "${topic}" in a way that is visually engaging and immediately understandable to its intended audience.`,
     gemini: `Generate a detailed design specification for a ${typeName} on "${topic}." Where relevant, suggest how the same content could be adapted for both print and digital contexts.`,
     perplexity: `Design a ${typeName} on "${topic}" grounded in current, accurate, well-sourced information. Where the content involves data, terminology, or factual claims, verify and cite sources.`
   };
   return variants[model];
+}
+
+function buildLessonContext(ctx) {
+  const L = ctx.lesson;
+  if (!L) return '';
+  let s = `Course: ${ctx.course.name}\nLesson: Lesson ${L.n}: ${L.title}\nExam domain alignment: ${L.domain}\nScope source: ${L.coverage === 'full' ? 'full lesson content' : 'lesson navigation outline (some sub-topics are not enumerated)'}`;
+  if (L.lessonNote) s += `\nNote: ${L.lessonNote}`;
+  return s;
+}
+
+function buildScope(ctx) {
+  const L = ctx.lesson;
+  if (!L) return '';
+  const scope = selectedScope();
+  if (!scope.length) return 'No lesson topics selected. Use the topic and objective above to define the scope.';
+  const lines = [];
+  let hasNotes = false;
+  scope.forEach(sec => {
+    if (sec.title) lines.push(sec.title);
+    const ind = sec.title ? '  ' : '';
+    sec.topics.forEach(tp => {
+      lines.push(`${ind}- ${tp.t}: ${tp.concepts.join('; ')}`);
+      if (tp.note) { lines.push(`${ind}  (Index note: ${tp.note})`); hasNotes = true; }
+    });
+  });
+  lines.push('');
+  lines.push('Treat this list as the authoritative scope. Do not add topics beyond it. If the chosen density cannot hold every concept, prioritize those most central to the learning objective and state what was omitted.');
+  if (L.coverage === 'nav' || hasNotes) {
+    lines.push(`Where a topic is listed without detail, use content consistent with the official ${ctx.course.short} exam objectives and flag those additions for instructor review rather than presenting them as lesson content.`);
+  }
+  return lines.join('\n');
 }
 
 function buildContent(t, topic, subject, grade, objective) {
@@ -1321,12 +1845,13 @@ function buildContent(t, topic, subject, grade, objective) {
   return s;
 }
 
-function buildDesign(t) {
-  const lines = [];
-  lines.push(`Visual style: ${state.style}.`);
-  lines.push(`Tone: ${state.tone}.`);
-  lines.push(`Color scheme: ${state.color}.`);
-  lines.push(`Visual density: ${state.density}.`);
+function buildDesign() {
+  const lines = [
+    `Visual style: ${state.style}.`,
+    `Tone: ${state.tone}.`,
+    `Color scheme: ${state.color}.`,
+    `Visual density: ${state.density}.`
+  ];
   if (state.iconPref) lines.push(`Imagery approach: ${state.iconPref}.`);
   lines.push(`Amount of on-graphic text: ${state.textAmount}.`);
   return lines.join('\n');
@@ -1350,9 +1875,17 @@ function buildOutput(sizeStr, orient, fmt, fmtNote) {
   return lines.join('\n');
 }
 
+function buildDeliverables(ctx) {
+  const ps = activePersonas();
+  if (!ps.length) return '';
+  let s = 'After the main design, return each of the following as its own clearly labeled section:\n';
+  s += ps.map((p, i) => `\n${i + 1}. ${p.deliverable(ctx)}`).join('');
+  return s;
+}
+
 function buildModelNotes(model) {
   const notes = {
-    claude: 'If any selection above is ambiguous, ask a clarifying question before producing the final design. Return your output in clearly labeled sections (Concept, Layout, Typography, Color, Element-by-Element Description, Alt-Text).',
+    claude: 'If any selection above is ambiguous, ask a clarifying question before producing the final design. Return the main design in clearly labeled sections (Concept, Layout, Typography, Color, Element-by-Element Description, Alt-Text).',
     chatgpt: 'Return your output as a step-by-step design brief, followed by a complete prompt suitable for an image-generation model (DALL·E or similar). Keep the language vivid and concrete.',
     gemini: 'Where appropriate, suggest both a static-graphic version and an interactive or animated adaptation. If you can generate the image directly, do so; otherwise produce a complete design specification.',
     perplexity: 'For every factual claim, statistic, or technical detail included in the graphic, cite a current, authoritative source. Flag any information that could not be verified.'
@@ -1361,142 +1894,133 @@ function buildModelNotes(model) {
 }
 
 /* ============================================================
-   Render preview
+   Render preview + plain text
 ============================================================ */
-function updatePrompt() {
-  const preview = document.getElementById('preview');
-  const modelTag = document.getElementById('modelTag');
-  const modelDisplayName = { claude: 'Claude', chatgpt: 'ChatGPT', gemini: 'Gemini', perplexity: 'Perplexity' }[state.model];
-  modelTag.textContent = `→ For ${modelDisplayName}`;
+const MODEL_NAMES = { claude: 'Claude', chatgpt: 'ChatGPT', gemini: 'Gemini', perplexity: 'Perplexity' };
 
-  if (!state.topic.trim() && !state.graphicType) {
-    preview.innerHTML = `<div class="placeholder-text">Begin by entering a topic and selecting a graphic type. Your prompt will compose itself here.</div>`;
+function promptBlocks() {
+  const parts = buildPromptParts();
+  const blocks = [];
+  blocks.push([state.personas.size ? 'Expert Panel' : 'Role', parts.role]);
+  blocks.push(['Task', parts.task]);
+  if (parts.lessonContext) blocks.push(['Course & Lesson Context', parts.lessonContext]);
+  if (parts.scope) blocks.push(['Lesson Content Scope', parts.scope]);
+  blocks.push(['Content', parts.content]);
+  blocks.push(['Design Requirements', parts.design]);
+  blocks.push(['Technical Output', parts.output]);
+  if (parts.constraints.length) blocks.push(['Pedagogical Constraints', parts.constraints.map(c => '• ' + c).join('\n')]);
+  if (parts.deliverables) blocks.push(['Panel Deliverables', parts.deliverables]);
+  blocks.push([`Model-Specific Notes (${MODEL_NAMES[state.model]})`, parts.modelNotes]);
+  return blocks;
+}
+
+function hasContent() {
+  return state.topic.trim() || state.graphicType || getLesson();
+}
+
+function updatePrompt() {
+  $('modelTag').textContent = `→ For ${MODEL_NAMES[state.model]}`;
+  const preview = $('preview');
+  if (!hasContent()) {
+    preview.innerHTML = `<div class="placeholder-text">Choose a lesson or enter a topic, then select a graphic type. Your prompt will compose itself here.</div>`;
+    $('previewStats').textContent = '0 words';
     return;
   }
-
-  const parts = buildPromptParts();
-  let html = '';
-  html += blockHTML('Role', parts.role);
-  html += blockHTML('Task', parts.task);
-  html += blockHTML('Content', parts.content);
-  html += blockHTML('Design Requirements', parts.design);
-  html += blockHTML('Technical Output', parts.output);
-  if (parts.constraints.length) {
-    html += blockHTML('Pedagogical Constraints', parts.constraints.map(c => '• ' + c).join('\n'));
-  }
-  html += blockHTML(`Model-Specific Notes (${modelDisplayName})`, parts.modelNotes);
-
-  preview.innerHTML = html;
+  const blocks = promptBlocks();
+  preview.innerHTML = blocks.map(([label, body]) =>
+    `<div class="prompt-block-header">${escapeHTML(label)}</div><div class="prompt-block-body">${escapeHTML(body)}</div>`
+  ).join('');
+  const words = buildPlainTextPrompt().split(/\s+/).filter(Boolean).length;
+  $('previewStats').textContent = `${words.toLocaleString()} words · ${state.personas.size} persona${state.personas.size === 1 ? '' : 's'}`;
 }
 
-function blockHTML(label, body) {
-  return `<div class="prompt-block-header">${label}</div><div class="prompt-block-body">${escapeHTML(body)}</div>`;
-}
-
-function escapeHTML(s) {
-  return String(s)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-}
-
-/* ============================================================
-   Plain-text export
-============================================================ */
 function buildPlainTextPrompt() {
-  if (!state.topic.trim() && !state.graphicType) return '';
-  const parts = buildPromptParts();
-  const modelDisplayName = { claude: 'Claude', chatgpt: 'ChatGPT', gemini: 'Gemini', perplexity: 'Perplexity' }[state.model];
-  let out = '';
-  out += `# INSTRUCTIONAL GRAPHIC PROMPT — for ${modelDisplayName}\n\n`;
-  out += `## ROLE\n${parts.role}\n\n`;
-  out += `## TASK\n${parts.task}\n\n`;
-  out += `## CONTENT\n${parts.content}\n\n`;
-  out += `## DESIGN REQUIREMENTS\n${parts.design}\n\n`;
-  out += `## TECHNICAL OUTPUT\n${parts.output}\n\n`;
-  if (parts.constraints.length) {
-    out += `## PEDAGOGICAL CONSTRAINTS\n${parts.constraints.map(c => '- ' + c).join('\n')}\n\n`;
-  }
-  out += `## MODEL-SPECIFIC NOTES (${modelDisplayName})\n${parts.modelNotes}\n`;
-  return out;
+  if (!hasContent()) return '';
+  let out = `# INSTRUCTIONAL GRAPHIC PROMPT — for ${MODEL_NAMES[state.model]}\n\n`;
+  promptBlocks().forEach(([label, body]) => {
+    out += `## ${label.toUpperCase()}\n${body.replace(/^• /gm, '- ')}\n\n`;
+  });
+  return out.trim() + '\n';
 }
 
 /* ============================================================
    Wire up inputs
 ============================================================ */
 function wireInputs() {
-  document.getElementById('topic').addEventListener('input', e => { state.topic = e.target.value; updatePrompt(); });
-  document.getElementById('subject').addEventListener('change', e => { state.subject = e.target.value; updatePrompt(); });
-  document.getElementById('grade').addEventListener('change', e => { state.grade = e.target.value; updatePrompt(); });
-  document.getElementById('objective').addEventListener('input', e => { state.objective = e.target.value; updatePrompt(); });
+  $('course').addEventListener('change', e => {
+    state.course = e.target.value;
+    state.lessonIdx = -1;
+    state.selected.clear();
+    state.expanded.clear();
+    populateLessons();
+    renderLesson();
+    updatePrompt();
+  });
+  $('lesson').addEventListener('change', e => {
+    state.lessonIdx = e.target.value === '' ? -1 : Number(e.target.value);
+    onLessonChosen();
+  });
 
-  document.getElementById('style').addEventListener('change', e => { state.style = e.target.value; updatePrompt(); });
-  document.getElementById('tone').addEventListener('change', e => { state.tone = e.target.value; updatePrompt(); });
-  document.getElementById('color').addEventListener('change', e => { state.color = e.target.value; updatePrompt(); });
-  document.getElementById('density').addEventListener('change', e => { state.density = e.target.value; updatePrompt(); });
+  $('topic').addEventListener('input', e => { state.topic = e.target.value; updatePrompt(); });
+  $('subject').addEventListener('change', e => { state.subject = e.target.value; updatePrompt(); });
+  $('grade').addEventListener('change', e => { state.grade = e.target.value; updatePrompt(); });
+  $('objective').addEventListener('input', e => { state.objective = e.target.value; updatePrompt(); });
 
-  // Icon chips
-  document.getElementById('iconChips').querySelectorAll('.chip').forEach(chip => {
+  ['style', 'tone', 'color', 'density', 'orientation', 'textAmount', 'format', 'resolution'].forEach(id => {
+    $(id).addEventListener('change', e => { state[id] = e.target.value; updatePrompt(); });
+  });
+
+  $('iconChips').querySelectorAll('.chip').forEach(chip => {
     chip.addEventListener('click', () => {
       const v = chip.dataset.val;
-      if (state.iconPref === v) {
-        state.iconPref = '';
-        chip.classList.remove('selected');
-      } else {
-        state.iconPref = v;
-        document.getElementById('iconChips').querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
-        chip.classList.add('selected');
-      }
+      state.iconPref = state.iconPref === v ? '' : v;
+      $('iconChips').querySelectorAll('.chip').forEach(c => c.classList.toggle('selected', c.dataset.val === state.iconPref));
       updatePrompt();
     });
   });
 
-  // Size preset
-  document.getElementById('sizePreset').addEventListener('change', e => {
+  $('sizePreset').addEventListener('change', e => {
     state.sizePreset = e.target.value;
     const custom = state.sizePreset === 'custom';
-    document.getElementById('customWGroup').style.display = custom ? '' : 'none';
-    document.getElementById('customHGroup').style.display = custom ? '' : 'none';
-    document.getElementById('customUnitGroup').style.display = custom ? '' : 'none';
+    ['customWGroup', 'customHGroup', 'customUnitGroup'].forEach(id => $(id).style.display = custom ? '' : 'none');
     updatePrompt();
   });
-  document.getElementById('customW').addEventListener('input', e => { state.customW = e.target.value; updatePrompt(); });
-  document.getElementById('customH').addEventListener('input', e => { state.customH = e.target.value; updatePrompt(); });
-  document.getElementById('customUnit').addEventListener('change', e => { state.customUnit = e.target.value; updatePrompt(); });
+  $('customW').addEventListener('input', e => { state.customW = e.target.value; updatePrompt(); });
+  $('customH').addEventListener('input', e => { state.customH = e.target.value; updatePrompt(); });
+  $('customUnit').addEventListener('change', e => { state.customUnit = e.target.value; updatePrompt(); });
 
-  document.getElementById('orientation').addEventListener('change', e => { state.orientation = e.target.value; updatePrompt(); });
-  document.getElementById('textAmount').addEventListener('change', e => { state.textAmount = e.target.value; updatePrompt(); });
-  document.getElementById('format').addEventListener('change', e => { state.format = e.target.value; updatePrompt(); });
-  document.getElementById('resolution').addEventListener('change', e => { state.resolution = e.target.value; updatePrompt(); });
-
-  // Toggles
   document.querySelectorAll('.toggle').forEach(tog => {
-    tog.addEventListener('click', () => {
+    const flip = () => {
       const key = tog.dataset.toggle;
       state.toggles[key] = !state.toggles[key];
       tog.classList.toggle('on', state.toggles[key]);
+      tog.setAttribute('aria-checked', state.toggles[key]);
       updatePrompt();
+    };
+    tog.addEventListener('click', flip);
+    tog.addEventListener('keydown', e => {
+      if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flip(); }
     });
   });
 
-  // Model
-  document.getElementById('modelGrid').querySelectorAll('.mcard').forEach(card => {
+  $('modelGrid').querySelectorAll('.mcard').forEach(card => {
     card.addEventListener('click', () => {
-      document.getElementById('modelGrid').querySelectorAll('.mcard').forEach(c => c.classList.remove('selected'));
+      $('modelGrid').querySelectorAll('.mcard').forEach(c => c.classList.remove('selected'));
       card.classList.add('selected');
       state.model = card.dataset.model;
       updatePrompt();
     });
   });
 
-  // Actions
-  document.getElementById('copyBtn').addEventListener('click', () => {
+  $('copyBtn').addEventListener('click', () => {
     const txt = buildPlainTextPrompt();
     if (!txt) { showToast('Nothing to copy yet'); return; }
-    navigator.clipboard.writeText(txt).then(() => showToast('Copied to clipboard'));
+    navigator.clipboard.writeText(txt)
+      .then(() => showToast('Copied to clipboard'))
+      .catch(() => showToast('Copy blocked — select the text manually'));
   });
 
-  document.getElementById('downloadBtn').addEventListener('click', () => {
+  $('downloadBtn').addEventListener('click', () => {
     const txt = buildPlainTextPrompt();
     if (!txt) { showToast('Nothing to download yet'); return; }
     const blob = new Blob([txt], { type: 'text/plain' });
@@ -1512,15 +2036,26 @@ function wireInputs() {
     showToast('Downloaded');
   });
 
-  document.getElementById('resetBtn').addEventListener('click', () => {
+  $('resetBtn').addEventListener('click', () => {
     if (!confirm('Reset all fields?')) return;
     location.reload();
   });
 
-  // Presets
   document.querySelectorAll('.preset-btn').forEach(btn => {
     btn.addEventListener('click', () => applyPreset(btn.dataset.preset));
   });
+
+  $('themeBtn').addEventListener('click', () => {
+    const dark = document.documentElement.getAttribute('data-theme') !== 'dark';
+    setTheme(dark ? 'dark' : 'light');
+    try { localStorage.setItem('gpa-theme', dark ? 'dark' : 'light'); } catch (e) {}
+  });
+}
+
+function setTheme(mode) {
+  if (mode === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+  else document.documentElement.removeAttribute('data-theme');
+  $('themeBtn').textContent = mode === 'dark' ? 'Light mode' : 'Dark mode';
 }
 
 /* ============================================================
@@ -1528,68 +2063,29 @@ function wireInputs() {
 ============================================================ */
 function applyPreset(name) {
   const presets = {
-    k12: {
-      grade: 'Elementary (K–5)',
-      style: 'Flat vector illustration',
-      tone: 'Friendly / approachable',
-      color: 'Vibrant primary (bold red, blue, yellow)',
-      density: 'Minimal — single concept, sparse',
-      iconPref: 'Illustrations of people',
-      textAmount: 'Minimal labels — title + key terms only'
-    },
-    college: {
-      grade: 'Community College / Undergraduate',
-      style: 'Editorial / textbook diagram',
-      tone: 'Authoritative / technical',
-      color: 'Classic academic (navy, gold, white)',
-      density: 'Moderate — balanced detail',
-      iconPref: 'Diagrams with labeled parts',
-      textAmount: 'Moderate explanation — short captions per section'
-    },
-    cyber: {
-      subject: 'Cybersecurity',
-      grade: 'Adult Workforce Training',
-      style: 'Cybersecurity / HUD aesthetic',
-      tone: 'Authoritative / technical',
-      color: 'Cybersecurity (dark teal, cyan, amber)',
-      density: 'Rich — comprehensive reference',
-      iconPref: 'Mix of icons and illustrations',
-      textAmount: 'Full teaching graphic — self-contained learning resource'
-    },
-    exec: {
-      grade: 'Executive / Industry Audience',
-      style: 'Infographic with data viz',
-      tone: 'Professional / formal',
-      color: 'Cool & analytical (slate blue, charcoal, white)',
-      density: 'Minimal — single concept, sparse',
-      iconPref: 'Icons only',
-      textAmount: 'Minimal labels — title + key terms only'
-    }
+    k12: { grade: 'Elementary (K–5)', style: 'Flat vector illustration', tone: 'Friendly / approachable', color: 'Vibrant primary (bold red, blue, yellow)', density: 'Minimal — single concept, sparse', iconPref: 'Illustrations of people', textAmount: 'Minimal labels — title + key terms only' },
+    college: { grade: 'Community College / Undergraduate', style: 'Editorial / textbook diagram', tone: 'Authoritative / technical', color: 'Classic academic (navy, gold, white)', density: 'Moderate — balanced detail', iconPref: 'Diagrams with labeled parts', textAmount: 'Moderate explanation — short captions per section' },
+    cyber: { subject: 'Cybersecurity', grade: 'Adult Workforce Training', style: 'Cybersecurity / HUD aesthetic', tone: 'Authoritative / technical', color: 'Cybersecurity (dark teal, cyan, amber)', density: 'Rich — comprehensive reference', iconPref: 'Mix of icons and illustrations', textAmount: 'Full teaching graphic — self-contained learning resource' },
+    exec: { grade: 'Executive / Industry Audience', style: 'Infographic with data viz', tone: 'Professional / formal', color: 'Cool & analytical (slate blue, charcoal, white)', density: 'Minimal — single concept, sparse', iconPref: 'Icons only', textAmount: 'Minimal labels — title + key terms only' }
   };
-
+  const labels = { k12: 'Classroom Activity', college: 'Lecture', cyber: 'Training', exec: 'Learning Summary' };
   const p = presets[name];
   if (!p) return;
-
   Object.entries(p).forEach(([k, v]) => {
     state[k] = v;
-    const el = document.getElementById(k);
+    const el = $(k);
     if (el) el.value = v;
   });
-
-  // Reset icon chips and set selection
-  document.querySelectorAll('#iconChips .chip').forEach(c => {
-    c.classList.toggle('selected', c.dataset.val === state.iconPref);
-  });
-
+  document.querySelectorAll('#iconChips .chip').forEach(c => c.classList.toggle('selected', c.dataset.val === state.iconPref));
   updatePrompt();
-  showToast(`Applied: ${name.toUpperCase()} preset`);
+  showToast(`Applied: ${labels[name]} preset`);
 }
 
 /* ============================================================
    Toast
 ============================================================ */
 function showToast(msg) {
-  const t = document.getElementById('toast');
+  const t = $('toast');
   t.textContent = msg;
   t.classList.add('show');
   clearTimeout(window._toastT);
@@ -1599,9 +2095,17 @@ function showToast(msg) {
 /* ============================================================
    Init
 ============================================================ */
-renderTypeCards();
-wireInputs();
-updatePrompt();
+(function init() {
+  let saved = null;
+  try { saved = localStorage.getItem('gpa-theme'); } catch (e) {}
+  setTheme(saved === 'dark' ? 'dark' : 'light');
+  renderPersonas();
+  renderTypeCards();
+  renderLesson();
+  wireInputs();
+  wireLessonPanel();
+  updatePrompt();
+})();
 </script>
 
 </body>
