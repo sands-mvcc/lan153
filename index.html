@@ -30,6 +30,7 @@
     --tag-exam: #00695c;
     --tag-lab: #0277bd;
     --tag-tools: #5c6bc0;
+    --tag-act: #2e7d32;
     --tag-exam-bg: #e0f2f1;
     --tag-threat-bg: #fdecea;
     --tag-arch-bg: #e3f0fd;
@@ -38,6 +39,7 @@
     --tag-gen-bg: #fff3e0;
     --tag-lab-bg: #e1f0fa;
     --tag-tools-bg: #ede7f6;
+    --tag-act-bg: #e8f5e9;
   }
   [data-theme="dark"] {
     --bg: #0f1117;
@@ -64,6 +66,7 @@
     --tag-exam: #80cbc4;
     --tag-lab: #4fc3f7;
     --tag-tools: #9fa8da;
+    --tag-act: #81c784;
     --tag-exam-bg: #0d2520;
     --tag-threat-bg: #2a1010;
     --tag-arch-bg: #0d1f35;
@@ -72,6 +75,7 @@
     --tag-gen-bg: #2a1a00;
     --tag-lab-bg: #0a1f30;
     --tag-tools-bg: #1a1a35;
+    --tag-act-bg: #0d2010;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -217,6 +221,52 @@
     border-bottom: 1px solid var(--border);
   }
 
+  /* LEARNING OBJECTIVES */
+  .objectives-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 5px solid var(--accent);
+    border-radius: 14px;
+    padding: 24px 28px;
+    box-shadow: var(--shadow);
+    margin-bottom: 40px;
+  }
+  .objectives-intro {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+  .objectives-list {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px 36px;
+  }
+  .objectives-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 0.86rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+  }
+  .obj-num {
+    flex-shrink: 0;
+    min-width: 26px;
+    height: 26px;
+    border-radius: 13px;
+    background: var(--accent-light);
+    color: var(--accent);
+    font-size: 0.72rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 6px;
+  }
+  .obj-text { padding-top: 3px; }
+
   /* CARD GRID */
   .card-grid {
     display: grid;
@@ -254,6 +304,7 @@
   .card.domain-exam    .card-accent-bar { background: var(--tag-exam); }
   .card.domain-lab     .card-accent-bar { background: var(--tag-lab); }
   .card.domain-tools   .card-accent-bar { background: var(--tag-tools); }
+  .card.domain-act     .card-accent-bar { background: var(--tag-act); }
   .card.domain-special .card-accent-bar { background: linear-gradient(90deg, var(--accent), #ff9a00); }
 
   .card-body {
@@ -295,6 +346,7 @@
   .tag-exam    { color: var(--tag-exam);   background: var(--tag-exam-bg); }
   .tag-lab     { color: var(--tag-lab);    background: var(--tag-lab-bg); }
   .tag-tools   { color: var(--tag-tools);  background: var(--tag-tools-bg); }
+  .tag-act     { color: var(--tag-act);    background: var(--tag-act-bg); }
   .tag-special { color: var(--accent);     background: var(--accent-light); }
 
   .card-title {
@@ -390,6 +442,12 @@
     border-top: 1px solid var(--border);
     margin-top: 8px;
   }
+
+  /* RESPONSIVE */
+  @media (max-width: 760px) {
+    .objectives-list { grid-template-columns: 1fr; }
+    .objectives-box { padding: 20px; }
+  }
 </style>
 </head>
 <body>
@@ -423,6 +481,39 @@
 </div>
 
 <main>
+
+  <!-- COURSE LEARNING OBJECTIVES -->
+  <div class="section-label">🎓 Course Learning Objectives</div>
+  <div class="objectives-box">
+    <p class="objectives-intro">Upon successful completion of this course, students will be able to:</p>
+    <ol class="objectives-list" style="list-style:none;">
+      <li><span class="obj-num">1</span><span class="obj-text">Understand computer, network, and information security and why it is important.</span></li>
+      <li><span class="obj-num">2</span><span class="obj-text">Define and explain the concepts of network confidentiality, integrity, availability, and non-repudiation.</span></li>
+      <li><span class="obj-num">3</span><span class="obj-text">Demonstrate the management’s role in the development, implementation, and maintenance of the network security.</span></li>
+      <li><span class="obj-num">4</span><span class="obj-text">Understand the value of education, training, and awareness programs to the organization.</span></li>
+      <li><span class="obj-num">5</span><span class="obj-text">Define risk management and its role in security policy and security architecture.</span></li>
+      <li><span class="obj-num">6</span><span class="obj-text">Understand the relationship between risk, threats, vulnerabilities, and countermeasures.</span></li>
+      <li><span class="obj-num">7</span><span class="obj-text">Identify and describe risk mitigation strategies.</span></li>
+      <li><span class="obj-num">8</span><span class="obj-text">Define and describe disaster recovery plans and an incident response plan.</span></li>
+      <li><span class="obj-num">9</span><span class="obj-text">Define and describe a business continuity plan.</span></li>
+      <li><span class="obj-num">10</span><span class="obj-text">Describe the various functions related to database security.</span></li>
+      <li><span class="obj-num">11</span><span class="obj-text">Describe and understand a feasibility study.</span></li>
+      <li><span class="obj-num">12</span><span class="obj-text">Understand the difference between policies, procedures, standards, and guidelines.</span></li>
+      <li><span class="obj-num">13</span><span class="obj-text">Understand the process of encryption and define the key cryptography terms.</span></li>
+      <li><span class="obj-num">14</span><span class="obj-text">Understand the difference between asymmetric and symmetric encryption.</span></li>
+      <li><span class="obj-num">15</span><span class="obj-text">Discuss scanning and analysis tools.</span></li>
+      <li><span class="obj-num">16</span><span class="obj-text">Describe the various types of firewalls and the various types of intrusion detection systems.</span></li>
+      <li><span class="obj-num">17</span><span class="obj-text">Describe the operation of Virtual Private Networks.</span></li>
+      <li><span class="obj-num">18</span><span class="obj-text">Understand the importance of authentication and the characteristics of a good password.</span></li>
+      <li><span class="obj-num">19</span><span class="obj-text">Describe the various approaches to biometrics access control.</span></li>
+      <li><span class="obj-num">20</span><span class="obj-text">Understand the position of the network security element within the organization.</span></li>
+      <li><span class="obj-num">21</span><span class="obj-text">Understand the relationship between an organization's employment practices and policies and the network security function.</span></li>
+      <li><span class="obj-num">22</span><span class="obj-text">Understand the position of the CIRT element within the security function.</span></li>
+      <li><span class="obj-num">23</span><span class="obj-text">Explain the various credentials that can be acquired by the security professional and their value.</span></li>
+      <li><span class="obj-num">24</span><span class="obj-text">Identify and explain the major laws relating to network security.</span></li>
+      <li><span class="obj-num">25</span><span class="obj-text">Understand the issue of privacy and its impact upon the network security function.</span></li>
+    </ol>
+  </div>
 
   <div class="section-label">📚 Course Lessons — 12 Days</div>
 
@@ -644,6 +735,306 @@
       </div>
       <div class="card-footer">
         <span class="card-terms"><strong>Key terms:</strong> PBQ, Domain Weight, Distractor, Exam Pacing</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- LEARNING ACTIVITIES -->
+  <div class="section-label">🧩 Learning Activities — 10 Activities</div>
+  <div class="card-grid">
+
+    <a class="card domain-act" href="activity01.htm">
+      <div class="card-accent-bar"></div>
+      <div class="card-body">
+        <div class="card-header-row">
+          <span class="lesson-num">Activity 1</span>
+          <span class="domain-tag tag-act">Learning Activity</span>
+        </div>
+        <div class="card-title">Cybersecurity Principles and Controls</div>
+        <div class="card-desc">Apply the CIA triad, non-repudiation, and defense in depth to classify security controls and match them to the risks they address.</div>
+      </div>
+      <div class="card-footer">
+        <span class="card-terms"><strong>Covers:</strong> CIA · Control Types · Defense in Depth</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="card domain-act" href="activity02.htm">
+      <div class="card-accent-bar"></div>
+      <div class="card-body">
+        <div class="card-header-row">
+          <span class="lesson-num">Activity 2</span>
+          <span class="domain-tag tag-act">Learning Activity</span>
+        </div>
+        <div class="card-title">Cryptography</div>
+        <div class="card-desc">Explore the encryption process and key terminology, and compare symmetric and asymmetric encryption in practical scenarios.</div>
+      </div>
+      <div class="card-footer">
+        <span class="card-terms"><strong>Covers:</strong> Encryption · Keys · Symmetric · Asymmetric</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="card domain-act" href="activity03.htm">
+      <div class="card-accent-bar"></div>
+      <div class="card-body">
+        <div class="card-header-row">
+          <span class="lesson-num">Activity 3</span>
+          <span class="domain-tag tag-act">Learning Activity</span>
+        </div>
+        <div class="card-title">Hashing</div>
+        <div class="card-desc">Generate and compare hash values to verify data integrity, and see why small changes to input produce completely different outputs.</div>
+      </div>
+      <div class="card-footer">
+        <span class="card-terms"><strong>Covers:</strong> Hash Functions · Integrity · Collisions</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="card domain-act" href="activity04.htm">
+      <div class="card-accent-bar"></div>
+      <div class="card-body">
+        <div class="card-header-row">
+          <span class="lesson-num">Activity 4</span>
+          <span class="domain-tag tag-act">Learning Activity</span>
+        </div>
+        <div class="card-title">Cyber Security Frameworks (NIST 171)</div>
+        <div class="card-desc">Examine NIST SP 800-171 requirements for protecting controlled unclassified information and map them to organizational practices.</div>
+      </div>
+      <div class="card-footer">
+        <span class="card-terms"><strong>Covers:</strong> NIST 800-171 · CUI · Control Families</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="card domain-act" href="activity05.htm">
+      <div class="card-accent-bar"></div>
+      <div class="card-body">
+        <div class="card-header-row">
+          <span class="lesson-num">Activity 5</span>
+          <span class="domain-tag tag-act">Learning Activity</span>
+        </div>
+        <div class="card-title">Authentication</div>
+        <div class="card-desc">Evaluate authentication factors, the characteristics of a strong password, multifactor authentication, and biometric approaches.</div>
+      </div>
+      <div class="card-footer">
+        <span class="card-terms"><strong>Covers:</strong> Factors · MFA · Passwords · Biometrics</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="card domain-act" href="activity06.htm">
+      <div class="card-accent-bar"></div>
+      <div class="card-body">
+        <div class="card-header-row">
+          <span class="lesson-num">Activity 6</span>
+          <span class="domain-tag tag-act">Learning Activity</span>
+        </div>
+        <div class="card-title">Identity Management and Access Control</div>
+        <div class="card-desc">Work through the identity lifecycle and compare access control models, applying least privilege to provisioning and deprovisioning decisions.</div>
+      </div>
+      <div class="card-footer">
+        <span class="card-terms"><strong>Covers:</strong> Identity Lifecycle · SSO · RBAC · Least Privilege</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="card domain-act" href="activity07.htm">
+      <div class="card-accent-bar"></div>
+      <div class="card-body">
+        <div class="card-header-row">
+          <span class="lesson-num">Activity 7</span>
+          <span class="domain-tag tag-act">Learning Activity</span>
+        </div>
+        <div class="card-title">Access Control Matrix</div>
+        <div class="card-desc">Build and interpret an access control matrix that defines which subjects may perform which actions on which objects.</div>
+      </div>
+      <div class="card-footer">
+        <span class="card-terms"><strong>Covers:</strong> Subjects · Objects · Permissions · ACLs</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="card domain-act" href="activity08.htm">
+      <div class="card-accent-bar"></div>
+      <div class="card-body">
+        <div class="card-header-row">
+          <span class="lesson-num">Activity 8</span>
+          <span class="domain-tag tag-act">Learning Activity</span>
+        </div>
+        <div class="card-title">Vulnerability Scanning and SIEMs</div>
+        <div class="card-desc">Interpret vulnerability scan results and SIEM alerts, correlate log events, and prioritize findings for remediation.</div>
+      </div>
+      <div class="card-footer">
+        <span class="card-terms"><strong>Covers:</strong> Scanning · Log Correlation · Alert Triage</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="card domain-act" href="activity09.htm">
+      <div class="card-accent-bar"></div>
+      <div class="card-body">
+        <div class="card-header-row">
+          <span class="lesson-num">Activity 9</span>
+          <span class="domain-tag tag-act">Learning Activity</span>
+        </div>
+        <div class="card-title">Incident Response</div>
+        <div class="card-desc">Respond to a simulated security incident, applying the incident response phases and the role of the CIRT within the security function.</div>
+      </div>
+      <div class="card-footer">
+        <span class="card-terms"><strong>Covers:</strong> IR Phases · CIRT · Evidence · Recovery</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="card domain-act" href="activity10.htm">
+      <div class="card-accent-bar"></div>
+      <div class="card-body">
+        <div class="card-header-row">
+          <span class="lesson-num">Activity 10</span>
+          <span class="domain-tag tag-act">Learning Activity</span>
+        </div>
+        <div class="card-title">Risk Management</div>
+        <div class="card-desc">Analyze the relationship between risk, threats, vulnerabilities, and countermeasures, then select appropriate risk mitigation strategies.</div>
+      </div>
+      <div class="card-footer">
+        <span class="card-terms"><strong>Covers:</strong> Risk Analysis · Countermeasures · Mitigation</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- LAB ACTIVITIES -->
+  <div class="section-label">🔬 Lab Activities — 8 Labs</div>
+  <div class="card-grid">
+
+    <a class="card domain-lab" href="lab01.htm">
+      <div class="card-accent-bar"></div>
+      <div class="card-body">
+        <div class="card-header-row">
+          <span class="lesson-num">Lab 1</span>
+          <span class="domain-tag tag-lab">Hands-On Lab</span>
+        </div>
+        <div class="card-title">Malware Analysis</div>
+        <div class="card-desc">Examine suspicious files using static and dynamic analysis techniques to identify behavior and indicators of compromise.</div>
+      </div>
+      <div class="card-footer">
+        <span class="card-terms"><strong>Covers:</strong> Static Analysis · Dynamic Analysis · IOCs</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="card domain-lab" href="lab02.htm">
+      <div class="card-accent-bar"></div>
+      <div class="card-body">
+        <div class="card-header-row">
+          <span class="lesson-num">Lab 2</span>
+          <span class="domain-tag tag-lab">Hands-On Lab</span>
+        </div>
+        <div class="card-title">ARP Attack</div>
+        <div class="card-desc">Perform and observe an ARP poisoning attack, then apply detection and mitigation techniques to protect the local network.</div>
+      </div>
+      <div class="card-footer">
+        <span class="card-terms"><strong>Covers:</strong> ARP Spoofing · Man-in-the-Middle · Mitigation</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="card domain-lab" href="lab03.htm">
+      <div class="card-accent-bar"></div>
+      <div class="card-body">
+        <div class="card-header-row">
+          <span class="lesson-num">Lab 3</span>
+          <span class="domain-tag tag-lab">Hands-On Lab</span>
+        </div>
+        <div class="card-title">Cypher Ledger</div>
+        <div class="card-desc">Apply cipher techniques to encode, decode, and verify protected records in a hands-on ledger exercise.</div>
+      </div>
+      <div class="card-footer">
+        <span class="card-terms"><strong>Covers:</strong> Ciphers · Encoding · Verification</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="card domain-lab" href="lab04.htm">
+      <div class="card-accent-bar"></div>
+      <div class="card-body">
+        <div class="card-header-row">
+          <span class="lesson-num">Lab 4</span>
+          <span class="domain-tag tag-lab">Hands-On Lab</span>
+        </div>
+        <div class="card-title">Configuring a Network Firewall</div>
+        <div class="card-desc">Design and configure firewall rules that enforce a security policy, then test that permitted and blocked traffic behave as intended.</div>
+      </div>
+      <div class="card-footer">
+        <span class="card-terms"><strong>Covers:</strong> Rule Sets · Default Deny · Testing</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="card domain-lab" href="lab05.htm">
+      <div class="card-accent-bar"></div>
+      <div class="card-body">
+        <div class="card-header-row">
+          <span class="lesson-num">Lab 5</span>
+          <span class="domain-tag tag-lab">Hands-On Lab</span>
+        </div>
+        <div class="card-title">Pentesting</div>
+        <div class="card-desc">Follow the penetration testing process from reconnaissance through exploitation and reporting within defined rules of engagement.</div>
+      </div>
+      <div class="card-footer">
+        <span class="card-terms"><strong>Covers:</strong> Recon · Exploitation · Reporting</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="card domain-lab" href="lab06.htm">
+      <div class="card-accent-bar"></div>
+      <div class="card-body">
+        <div class="card-header-row">
+          <span class="lesson-num">Lab 6</span>
+          <span class="domain-tag tag-lab">Hands-On Lab</span>
+        </div>
+        <div class="card-title">Packet Capturing and Analysis</div>
+        <div class="card-desc">Capture live network traffic, apply filters, and analyze protocol behavior to spot suspicious or unencrypted communications.</div>
+      </div>
+      <div class="card-footer">
+        <span class="card-terms"><strong>Covers:</strong> Capture · Filters · Protocol Analysis</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="card domain-lab" href="lab07.htm">
+      <div class="card-accent-bar"></div>
+      <div class="card-body">
+        <div class="card-header-row">
+          <span class="lesson-num">Lab 7</span>
+          <span class="domain-tag tag-lab">Hands-On Lab</span>
+        </div>
+        <div class="card-title">Intrusion Detection Systems</div>
+        <div class="card-desc">Deploy an intrusion detection system, generate test attacks, and review the alerts it produces to evaluate detection effectiveness.</div>
+      </div>
+      <div class="card-footer">
+        <span class="card-terms"><strong>Covers:</strong> Signatures · Alerts · Tuning</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="card domain-lab" href="lab08.htm">
+      <div class="card-accent-bar"></div>
+      <div class="card-body">
+        <div class="card-header-row">
+          <span class="lesson-num">Lab 8</span>
+          <span class="domain-tag tag-lab">Hands-On Lab</span>
+        </div>
+        <div class="card-title">Configuring VPNs</div>
+        <div class="card-desc">Configure and verify a virtual private network tunnel to protect data in transit between remote users or sites.</div>
+      </div>
+      <div class="card-footer">
+        <span class="card-terms"><strong>Covers:</strong> Tunneling · Encryption · Remote Access</span>
         <span class="card-arrow">→</span>
       </div>
     </a>
