@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Identity and Access Lab: Lakeshore Health Partners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<script>
+(function(){try{var t=localStorage.getItem('iam-lab-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
+</script>
+<style>
+:root{
+  --bg:#F4F7FC;--surface:#FFFFFF;--surface-2:#EAF0FA;--ink:#13203B;--ink-2:#4B5875;--line:#D3DCEB;
+  --navy:#0047AB;--navy-ink:#0047AB;--band:#0047AB;--green:#00a86b;--green-ink:#00754B;--green-soft:#E2F6EE;
+  --red:#B3261E;--red-soft:#FCE9E7;--amber:#8F5400;--amber-soft:#FFF1D6;--focus:#0047AB;
+  --shadow:0 12px 26px -18px rgba(10,40,100,.55);
+  --display:"Bricolage Grotesque","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,-apple-system,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,"SF Mono",Consolas,monospace;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0C1423;--surface:#142038;--surface-2:#1A2946;--ink:#E6ECF7;--ink-2:#A9B5CC;--line:#2A3B5C;
+    --navy:#7AA7FF;--navy-ink:#8FB5FF;--band:#1D4FAE;--green:#2BD69B;--green-ink:#4FE0AE;--green-soft:#0F3A2D;
+    --red:#FF8A7E;--red-soft:#3D1A1A;--amber:#F2B451;--amber-soft:#3A2A0E;--focus:#8FB5FF;
+    --shadow:0 12px 26px -18px rgba(0,0,0,.9);color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0C1423;--surface:#142038;--surface-2:#1A2946;--ink:#E6ECF7;--ink-2:#A9B5CC;--line:#2A3B5C;
+  --navy:#7AA7FF;--navy-ink:#8FB5FF;--band:#1D4FAE;--green:#2BD69B;--green-ink:#4FE0AE;--green-soft:#0F3A2D;
+  --red:#FF8A7E;--red-soft:#3D1A1A;--amber:#F2B451;--amber-soft:#3A2A0E;--focus:#8FB5FF;
+  --shadow:0 12px 26px -18px rgba(0,0,0,.9);color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 84px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:1.0625rem;line-height:1.55}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+h1,h2,h3{font-family:var(--display);line-height:1.15;margin:0 0 .5em;letter-spacing:-.01em}
+h1{font-size:clamp(2rem,4.2vw,3.1rem);font-weight:800}
+h2{font-size:clamp(1.55rem,2.6vw,2rem);font-weight:700}
+h3{font-size:1.2rem;font-weight:700}
+p{margin:0 0 .8em}
+a{color:var(--navy-ink)}
+code,.mono{font-family:var(--mono);font-size:.92em}
+img{max-width:100%}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:6px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.muted,.hint{color:var(--ink-2)}
+.hint{font-size:.88rem;display:block;margin-top:.25rem}
+.print-only{display:none}
+
+/* header */
+.site-header{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
+.site-header .inner{max-width:1440px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:18px}
+.mark{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;min-width:0}
+.mark svg{flex:none}
+.mark b{font-family:var(--display);font-size:1.15rem;display:block;line-height:1.1}
+.mark small{color:var(--ink-2);font-size:.85rem}
+.meter{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:.9rem;color:var(--ink-2)}
+.meter .track{width:120px;height:8px;border-radius:99px;background:var(--surface-2);overflow:hidden}
+.meter .fill{height:100%;background:var(--green);width:0;transition:width .5s ease}
+.btn{font:inherit;font-weight:700;cursor:pointer;border-radius:10px;padding:.6rem 1rem;border:1px solid var(--line);background:var(--surface);color:var(--ink);display:inline-flex;align-items:center;gap:.5rem;text-decoration:none}
+.btn:hover{border-color:var(--navy)}
+.btn.primary{background:var(--band);border-color:var(--band);color:#fff}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.small{padding:.4rem .75rem;font-size:.9rem}
+.ticon{font-size:1.05em;line-height:1}
+
+/* layout */
+.layout{display:grid;grid-template-columns:220px minmax(0,1fr) 290px;gap:28px;max-width:1440px;margin:0 auto;padding:24px}
+.rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 84px);align-self:start}
+.rail ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.rail button{width:100%;text-align:left;font:inherit;background:none;border:1px solid transparent;color:var(--ink);padding:.6rem .7rem;border-radius:10px;cursor:pointer;display:grid;grid-template-columns:28px 1fr;gap:8px;align-items:start}
+.rail button:hover{background:var(--surface-2)}
+.rail button[aria-current="page"]{background:var(--surface);border-color:var(--line);box-shadow:var(--shadow)}
+.rail .n{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:.85rem;color:var(--ink-2)}
+.rail .n.done{background:var(--green);border-color:var(--green);color:#04241A}
+.rail .n.part{border-color:var(--amber);color:var(--amber)}
+.rail .t{font-weight:700;line-height:1.25}
+.rail .s{display:block;font-size:.82rem;color:var(--ink-2);font-weight:400}
+.rail .reset{margin-top:14px}
+main{min-width:0}
+.view{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:clamp(20px,3vw,40px);box-shadow:var(--shadow)}
+.view > *{max-width:860px}
+.lead{font-size:1.15rem;color:var(--ink-2);max-width:68ch}
+.mnum{font-family:var(--display);font-weight:700;color:var(--navy-ink);margin-bottom:.3em}
+.part{margin-top:2.2rem;padding-top:1.6rem;border-top:1px solid var(--line)}
+.part > p{max-width:70ch}
+
+/* directory */
+.dir{position:sticky;top:calc(env(safe-area-inset-top,0px) + 84px);align-self:start;max-height:calc(100vh - 110px);overflow:auto;padding-right:4px}
+.dir h2{font-size:1.25rem;margin-bottom:.2em}
+.dir > p{font-size:.92rem}
+#badges{display:grid;gap:14px;margin-top:12px}
+
+/* badge */
+.badge{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+.badge .band{background:var(--band);color:#fff;font-size:.78rem;padding:16px 14px 7px;position:relative;font-weight:700;letter-spacing:.01em}
+.badge .band::before{content:"";position:absolute;top:6px;left:50%;width:34px;height:6px;margin-left:-17px;border-radius:4px;background:var(--surface)}
+.badge.priv .band{background:repeating-linear-gradient(135deg,#00754B 0 10px,#00865a 10px 20px)}
+.badge.alert{border-color:var(--red)}
+.badge.alert .band{background:var(--red);color:#fff}
+.badge.pending{opacity:.62}
+.badge.pending .b-user{font-style:italic}
+.b-body{display:grid;grid-template-columns:48px 1fr;gap:12px;padding:12px 14px 6px;align-items:center}
+.avatar{width:48px;height:56px;border-radius:8px;background:var(--surface-2);border:1px solid var(--line);display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:1.15rem;color:var(--navy-ink)}
+.b-name{font-weight:700;margin:0;line-height:1.2}
+.b-title{margin:0;font-size:.85rem;color:var(--ink-2)}
+.b-user{margin:.15rem 0 0;font-family:var(--mono);font-size:.85rem;color:var(--navy-ink)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;padding:6px 14px 14px}
+.chip{display:inline-block;font-size:.78rem;padding:.15rem .55rem;border-radius:99px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);line-height:1.5}
+.chip.good{background:var(--green-soft);border-color:transparent;color:var(--green-ink)}
+.chip.warn{background:var(--amber-soft);border-color:transparent;color:var(--amber)}
+.chip.bad{background:var(--red-soft);border-color:transparent;color:var(--red)}
+.chip.dim{color:var(--ink-2);background:transparent;border-style:dashed}
+@keyframes stamp{0%{transform:scale(.96);opacity:.4}100%{transform:none;opacity:1}}
+.badge.fresh{animation:stamp .35s ease-out}
+
+/* briefing */
+.brief-hero{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(220px,.8fr);gap:36px;align-items:center;max-width:none}
+.brief-hero h1{max-width:15ch}
+.hero-badge{transform:rotate(2.5deg);max-width:300px;justify-self:center;width:100%}
+.hero-badge .badge{box-shadow:0 30px 50px -28px rgba(0,40,110,.6)}
+.hero-badge .b-body{grid-template-columns:72px 1fr;padding:18px}
+.hero-badge .avatar{width:72px;height:86px;font-size:1.6rem}
+.hero-badge .b-name{font-size:1.2rem}
+.lanyard{width:10px;height:44px;margin:0 auto -6px;background:var(--navy);border-radius:4px 4px 0 0;opacity:.85}
+.name-field{display:flex;flex-wrap:wrap;gap:12px;align-items:end;margin:1.2rem 0}
+.name-field label{flex:1 1 240px}
+.how{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:1rem 0 0;padding:0;list-style:none;max-width:none}
+.how li{background:var(--surface-2);border-radius:12px;padding:14px 16px}
+.how b{display:block;font-family:var(--display);margin-bottom:.2em}
+details.ksa{margin-top:1.6rem;border:1px solid var(--line);border-radius:14px;max-width:none}
+details.ksa summary{cursor:pointer;padding:14px 18px;font-weight:700;font-family:var(--display);font-size:1.1rem}
+.ksa-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;padding:0 18px 18px}
+.ksa-grid h3{font-size:1rem;color:var(--navy-ink)}
+.ksa-grid ul{margin:0;padding-left:1.1rem;font-size:.95rem}
+.ksa-grid li{margin-bottom:.45rem}
+.ksa-grid .code{font-family:var(--mono);font-size:.8rem;color:var(--ink-2)}
+
+/* forms */
+label{display:block;font-weight:700;font-size:.95rem}
+.lbl{display:block;margin-bottom:.3rem}
+input[type="text"],input[type="date"],select,textarea{font:inherit;font-weight:400;width:100%;padding:.55rem .7rem;border-radius:9px;border:1px solid var(--line);background:var(--bg);color:var(--ink);margin-top:.3rem}
+textarea{min-height:110px;resize:vertical}
+select{cursor:pointer}
+fieldset{border:0;padding:0;margin:0 0 .9rem}
+legend{font-weight:700;font-size:.95rem;margin-bottom:.35rem;padding:0}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opts.stack{flex-direction:column}
+.opt{font-weight:400;display:flex;gap:.55rem;align-items:flex-start;cursor:pointer;padding:.5rem .75rem;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.opt input{margin:.3rem 0 0;accent-color:var(--navy)}
+.opt:has(input:checked){border-color:var(--navy);background:var(--surface-2)}
+.opts.seg .opt{padding:.4rem .8rem}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.card{border:1px solid var(--line);border-radius:14px;padding:18px 20px;background:var(--surface)}
+.standard{background:var(--surface-2);border:0}
+.standard ul{margin:0;padding-left:1.1rem}
+.standard li{margin-bottom:.35rem}
+details.existing{margin-top:12px}
+details.existing summary{cursor:pointer;font-weight:700;color:var(--navy-ink)}
+.scroll{overflow-x:auto;max-width:100%}
+table{border-collapse:collapse;width:100%;font-size:.95rem}
+th,td{padding:.5rem .6rem;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.tickets{display:grid;gap:16px;margin-top:1.4rem}
+.ticket{border:1px solid var(--line);border-radius:14px;padding:18px 20px;border-left:5px solid var(--navy)}
+.ticket.shared{border-left-color:var(--amber)}
+.t-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px}
+.t-head h3{margin:0}
+.req{font-family:var(--mono);font-size:.8rem;color:var(--ink-2)}
+.t-meta{flex-basis:100%;margin:.2rem 0 .3rem;color:var(--ink-2)}
+.t-detail{margin-bottom:.9rem}
+blockquote{margin:.4rem 0 1rem;padding:.6rem 1rem;border-left:3px solid var(--amber);background:var(--amber-soft);border-radius:0 10px 10px 0}
+.ticket .when-provision,.ticket .when-reject,.req-card .when-jit{display:none}
+.ticket[data-decision="provision"] .when-provision{display:grid}
+.ticket[data-decision="reject"] .when-reject{display:block}
+.req-card[data-decision="jit"] .when-jit{display:block}
+
+/* factor sort */
+.sorter{display:grid;gap:14px}
+.pool{border:2px dashed var(--line);border-radius:14px;padding:12px}
+.buckets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.bucket{border:1px solid var(--line);border-radius:14px;padding:10px;background:var(--surface-2);min-height:110px}
+.bucket-btn{font:inherit;font-weight:700;font-family:var(--display);width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:.5rem .7rem;cursor:pointer;color:var(--ink)}
+.bucket-btn:hover{border-color:var(--navy)}
+.sorter.armed .bucket-btn{border-color:var(--navy);box-shadow:0 0 0 3px color-mix(in srgb,var(--navy) 25%,transparent)}
+.bucket-items,.pool-items{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.fchip{font:inherit;font-size:.92rem;cursor:pointer;padding:.4rem .75rem;border-radius:99px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.fchip[aria-pressed="true"]{background:var(--band);border-color:var(--band);color:#fff}
+.empty{margin:0;font-size:.88rem;color:var(--ink-2)}
+#factor-hint{min-height:1.4em;font-size:.92rem;color:var(--amber);margin:0}
+
+.row{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(200px,1fr);gap:12px 20px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.row:last-of-type{border-bottom:0}
+.row p{margin:0}
+.row .fb{grid-column:1/-1}
+
+/* matrix */
+.matrix th[scope="col"]{font-size:.82rem;font-weight:700;vertical-align:bottom;min-width:92px}
+.matrix th[scope="row"]{min-width:180px}
+.matrix th[scope="row"] .hint{font-weight:400}
+.matrix td{text-align:center;vertical-align:middle}
+.cell{display:grid;place-items:center;min-height:36px;cursor:pointer}
+.cell input{width:22px;height:22px;accent-color:var(--navy);cursor:pointer}
+.matrix tbody tr:hover{background:var(--surface-2)}
+
+.req-card{border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-top:14px}
+.req-card h4{margin:0 0 .25rem;font-family:var(--display);font-size:1.05rem}
+.req-card .when-jit{margin-top:10px;max-width:260px}
+
+.accts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.acct{border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.acct header{display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}
+.acct code{font-size:1rem;color:var(--navy-ink);font-weight:700}
+.acct p{margin:0;font-size:.93rem}
+.acct .hr{color:var(--ink-2)}
+.acct select{margin-top:6px}
+.log{border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin-top:10px;display:grid;grid-template-columns:120px minmax(0,1fr) auto;gap:6px 16px;align-items:center}
+.log time{font-family:var(--mono);font-size:.82rem;color:var(--ink-2)}
+.log p{margin:0}
+.log .fb{grid-column:1/-1}
+
+/* feedback */
+.fb{margin-top:10px;padding:.6rem .85rem;border-radius:10px;font-size:.95rem;border-left:4px solid}
+.fb.ok{background:var(--green-soft);border-color:var(--green)}
+.fb.bad{background:var(--red-soft);border-color:var(--red)}
+.fb strong{margin-right:.3rem}
+.fb.ok strong{color:var(--green-ink)}
+.fb.bad strong{color:var(--red)}
+.checkbar{margin-top:2.4rem;padding-top:1.4rem;border-top:2px solid var(--line);display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+.result{flex-basis:100%;border-radius:14px;padding:16px 18px;background:var(--surface-2);display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center}
+.result .score{font-family:var(--display);font-size:1.6rem;font-weight:800}
+.result.perfect{background:var(--green-soft)}
+.result p{margin:0}
+@keyframes rise{from{transform:translateY(6px);opacity:0}to{transform:none;opacity:1}}
+.result.new{animation:rise .4s ease-out}
+
+/* summary */
+.sum-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;align-items:flex-start;max-width:none}
+.big-scores{display:flex;gap:14px;flex-wrap:wrap;margin:1.2rem 0;max-width:none}
+.big-scores div{background:var(--surface-2);border-radius:14px;padding:14px 18px;min-width:170px}
+.big-scores b{display:block;font-family:var(--display);font-size:2.1rem;line-height:1.1}
+.big-scores span{font-size:.9rem;color:var(--ink-2)}
+.bar{height:8px;border-radius:99px;background:var(--surface-2);overflow:hidden;min-width:80px}
+.bar i{display:block;height:100%;background:var(--navy)}
+.bar i.good{background:var(--green)}
+.bar i.warn{background:var(--amber)}
+.ksa-table td:nth-child(3){width:30%}
+.revisit li{margin-bottom:.6rem}
+.sum-actions{display:flex;gap:10px;flex-wrap:wrap}
+
+@media (max-width:1180px){
+  .layout{grid-template-columns:200px minmax(0,1fr)}
+  .rail{grid-row:span 2}
+  .dir{position:static;max-height:none;grid-column:2}
+  #badges{grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+}
+@media (max-width:820px){
+  .layout{grid-template-columns:minmax(0,1fr);padding:14px;gap:18px}
+  .rail{position:static;grid-row:auto}
+  .rail ol{flex-direction:row;overflow-x:auto;padding-bottom:6px}
+  .rail li{flex:none}
+  .rail button{grid-template-columns:26px auto;white-space:nowrap}
+  .rail .s{display:none}
+  .dir{grid-column:1}
+  .brief-hero,.how,.ksa-grid,.form-grid,.buckets,.accts{grid-template-columns:minmax(0,1fr)}
+  .hero-badge{max-width:260px}
+  .row{grid-template-columns:minmax(0,1fr)}
+  .log{grid-template-columns:minmax(0,1fr)}
+  .meter .track,.meter .mtext{display:none}
+  .site-header .inner{padding:10px 14px}
+  .mark small{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media print{
+  :root,:root[data-theme="dark"]{--bg:#fff;--surface:#fff;--surface-2:#F1F4F9;--ink:#000;--ink-2:#333;--line:#bbb;--navy:#0047AB;--navy-ink:#0047AB;--green-soft:#E6F6EE;--red-soft:#FBEAEA;--amber-soft:#FFF4DD;color-scheme:light;padding:0}
+  body{background:#fff;font-size:11pt}
+  body::before,.site-header,.rail,.dir,.view:not(#v-summary),.no-print{display:none!important}
+  .layout{display:block;padding:0}
+  #v-summary{display:block!important;border:0;box-shadow:none;padding:0}
+  .view > *{max-width:none}
+  .print-only{display:block}
+  .big-scores div,.result{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .bar,.bar i{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  tr,li{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="inner">
+    <a class="mark" href="#brief" data-go="brief" aria-label="Identity and Access Lab, briefing">
+      <svg width="34" height="40" viewBox="0 0 34 40" aria-hidden="true"><rect x="1" y="4" width="32" height="35" rx="6" fill="#0047AB"/><rect x="12" y="1" width="10" height="7" rx="3" fill="#00a86b"/><circle cx="17" cy="19" r="6" fill="#fff"/><rect x="8" y="29" width="18" height="4" rx="2" fill="#fff" opacity=".85"/></svg>
+      <span><b>Identity and Access Lab</b><small>Lakeshore Health Partners</small></span>
+    </a>
+    <div class="meter" aria-live="polite"><span class="mtext" id="meter-text">0 of 5 missions checked</span><span class="track"><span class="fill" id="meter-fill"></span></span></div>
+    <button class="btn small" id="theme-btn" type="button" aria-pressed="false"><span class="ticon" aria-hidden="true">☾</span><span class="tlabel">Dark mode</span></button>
+  </div>
+</header>
+
+<div class="layout">
+  <nav class="rail" aria-label="Missions">
+    <ol id="rail-list"></ol>
+    <button class="btn small reset" type="button" data-reset>Reset activity</button>
+  </nav>
+  <main id="main">
+    <section class="view" id="v-brief" hidden></section>
+    <section class="view" id="v-m1" hidden></section>
+    <section class="view" id="v-m2" hidden></section>
+    <section class="view" id="v-m3" hidden></section>
+    <section class="view" id="v-m4" hidden></section>
+    <section class="view" id="v-m5" hidden></section>
+    <section class="view" id="v-summary" hidden></section>
+  </main>
+  <aside class="dir" aria-labelledby="dir-h">
+    <h2 id="dir-h">Issued badges</h2>
+    <p class="muted" id="dir-count">Your provisioning, MFA, and role decisions appear here as you work.</p>
+    <div id="badges"></div>
+  </aside>
+</div>
+
+<script>
+/* ---------- state ---------- */
+var KEY='iam-lab-v1';
+var S={a:{},res:{},first:{},view:'brief'};
+try{var raw=localStorage.getItem(KEY);if(raw){var p=JSON.parse(raw);if(p&&p.a)S=Object.assign(S,p);}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+function A(k){return S.a[k];}
+function $(s){return document.querySelector(s);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function pct(a,b){return b?Math.round(a/b*100):0;}
+function fmtDate(s){if(!s)return'';var d=new Date(s+'T00:00:00');return isNaN(d)?s:d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
+function initials(n){return n.split(/\s+/).filter(Boolean).slice(0,2).map(function(w){return w[0];}).join('').toUpperCase();}
+var selFactor=null;
+
+/* ---------- content ---------- */
+var VIEWS=[
+ {id:'brief',label:'Briefing',sub:'Scenario and goals'},
+ {id:'m1',label:'Create identities',sub:'Provisioning',n:1},
+ {id:'m2',label:'Configure MFA and SSO',sub:'Authentication',n:2},
+ {id:'m3',label:'Build role-based access',sub:'Authorization',n:3},
+ {id:'m4',label:'Assign privileges',sub:'Privileged access',n:4},
+ {id:'m5',label:'Audit access',sub:'Review and deprovision',n:5},
+ {id:'summary',label:'Summary',sub:'Save or print'}
+];
+var MISSIONS=['m1','m2','m3','m4','m5'];
+
+var KSA=[
+ {code:'K1',type:'Knowledge',text:'Identity lifecycle: joiner, mover, and leaver processes for provisioning and deprovisioning'},
+ {code:'K2',type:'Knowledge',text:'Authentication factor types and the relative strength of MFA methods, including phishing resistance'},
+ {code:'K3',type:'Knowledge',text:'Federation and SSO protocols: SAML 2.0, OpenID Connect, Kerberos, TACACS+, LDAP'},
+ {code:'K4',type:'Knowledge',text:'Access control models: DAC, MAC, RBAC, ABAC, and rule-based'},
+ {code:'K5',type:'Knowledge',text:'Least privilege, need-to-know, and separation of duties'},
+ {code:'K6',type:'Knowledge',text:'Privileged access management: separate admin accounts, just-in-time elevation, vaulting, session recording'},
+ {code:'S1',type:'Skill',text:'Provision accounts that meet naming, expiration, and initial-credential standards'},
+ {code:'S2',type:'Skill',text:'Configure MFA policy by risk tier'},
+ {code:'S3',type:'Skill',text:'Build a role-permission matrix and assign roles to users'},
+ {code:'S4',type:'Skill',text:'Grant time-bound privileged access and configure PAM controls'},
+ {code:'S5',type:'Skill',text:'Conduct an access review and analyze privileged session logs'},
+ {code:'A1',type:'Ability',text:'Recognize and refuse requests that break accountability'},
+ {code:'A2',type:'Ability',text:'Balance usability and security when choosing controls'},
+ {code:'A3',type:'Ability',text:'Detect privilege creep and orphaned, dormant, or unprotected accounts'},
+ {code:'A4',type:'Ability',text:'Justify access decisions with security principles'}
+];
+
+var TICKETS=[
+ {id:'t1',req:'REQ-1041',name:'Maria Alvarez',title:'Registered Nurse',dept:'Clinical Services',kind:'Employee, full-time',detail:'Reports to Dr. Kwame Osei, Nursing.',user:'malvarez',type:'employee',group:'workforce',role:'nurse'},
+ {id:'t2',req:'REQ-1042',name:'Devon Price',title:'Billing Specialist',dept:'Patient Financial Services',kind:'Employee, full-time',detail:'Replaces Jordan Walsh, who left in October.',user:'dprice2',taken:'dprice',type:'employee',group:'workforce',role:'billing'},
+ {id:'t3',req:'REQ-1043',name:'Priya Natarajan',title:'Systems Administrator',dept:'Information Technology',kind:'Employee, full-time',detail:'Will manage servers, firewalls, and patching.',user:'pnatarajan',type:'employee',group:'priv',role:'sysadmin'},
+ {id:'t4',req:'REQ-1044',name:'Sam Okafor',title:'Help Desk Technician',dept:'Information Technology',kind:'Contractor through TechBridge Staffing',detail:'Contract runs through Mar 31, 2027.',user:'sokafor',type:'contractor',exp:'2027-03-31',group:'contract',role:'helpdesk'},
+ {id:'t5',req:'REQ-1045',shared:true,name:'Front desk login',title:'Submitted by the front desk manager',detail:'“Please create one login, frontdesk, that our three receptionists can share on the check-in PC. It would save everyone time.”'},
+ {id:'t6',req:'REQ-1046',name:'Lena Fischer',title:'Compliance Auditor',dept:'Compliance and Privacy',kind:'Employee, full-time',detail:'Will run the quarterly access reviews.',user:'lfischer',type:'employee',group:'workforce',role:'auditor'}
+];
+var PEOPLE=TICKETS.filter(function(t){return !t.shared;});
+var EXISTING=[['ajohnson','Alicia Johnson','Clinical Services'],['adm-rgarcia','Rafael Garcia (admin account)','Information Technology'],['dprice','Dana Price','Radiology'],['jwalsh','Jordan Walsh','Patient Financial Services'],['kbrooks','Kevin Brooks','IT contractor'],['kosei','Kwame Osei','Clinical Services'],['mfoster','Mia Foster','Clinical Services'],['rgarcia','Rafael Garcia','Information Technology'],['svc-backup','Backup service account','Information Technology'],['svc-report','Reporting service account','Information Technology'],['tchen','Tara Chen','Clinical Services']];
+
+var BUCKETS=[{id:'know',label:'Something you know'},{id:'have',label:'Something you have'},{id:'are',label:'Something you are'},{id:'where',label:'Somewhere you are'}];
+var FACTORS=[
+ {id:'pin',label:'PIN',ans:'know',why:'it’s recalled from memory.'},
+ {id:'fido',label:'FIDO2 security key',ans:'have',why:'it’s a physical authenticator, and a phishing-resistant one.'},
+ {id:'finger',label:'Fingerprint',ans:'are',why:'it’s a biometric, a physical trait.'},
+ {id:'password',label:'Password',ans:'know',why:'it’s a secret you remember.'},
+ {id:'geo',label:'Signing in from the clinic network',ans:'where',why:'it’s location context, usually a policy condition rather than a standalone factor.'},
+ {id:'totp',label:'Authenticator app code (TOTP)',ans:'have',why:'the code proves you hold the enrolled device.'},
+ {id:'face',label:'Face recognition',ans:'are',why:'it’s a biometric.'},
+ {id:'secq',label:'Security question answer',ans:'know',why:'it’s a knowledge factor, and often guessable from social media.'},
+ {id:'card',label:'Smart card',ans:'have',why:'it’s a physical token holding a certificate.'}
+];
+var METHODS=[['none','Password only'],['sms','Password + SMS code'],['push','Password + push approval with number matching'],['totp','Password + authenticator app code (TOTP)'],['fido','Phishing-resistant: FIDO2 key or passkey']];
+var MSHORT={none:'password only',sms:'SMS code',push:'push + number match',totp:'authenticator app',fido:'FIDO2 / passkey'};
+var GROUPS=[
+ {id:'workforce',label:'Workforce',note:'Clinical, billing, and compliance staff signing in to everyday apps.',accept:['push','totp','fido'],ok:'App-based or phishing-resistant MFA balances security and usability for everyday staff.'},
+ {id:'priv',label:'IT administrators and privileged accounts',note:'Anyone who can change servers, the directory, or security settings.',accept:['fido'],ok:'Privileged accounts get phishing-resistant MFA because adversary-in-the-middle kits can relay push approvals and TOTP codes.'},
+ {id:'contract',label:'Contractors and vendors',note:'Third parties with Lakeshore accounts.',accept:['push','totp','fido'],ok:'Contractors meet the same MFA bar as staff; third-party access is a frequent breach path.'}
+];
+var TOGGLES2=[
+ {id:'numMatch',label:'Require number matching on push approvals',ans:'on',why:'Number matching defeats MFA-fatigue (push bombing) attacks because the user must enter the number shown on the sign-in screen.'},
+ {id:'smsFallback',label:'Allow SMS as a fallback method for administrators',ans:'off',why:'A weak fallback becomes the attacker’s path. A policy is only as strong as the weakest method it allows.'},
+ {id:'remember',label:'Remember trusted devices for 90 days on admin accounts',ans:'off',why:'Skipping MFA on admin accounts for 90 days lets a stolen device or session bypass your strongest control.'},
+ {id:'lockout',label:'Lock the account and alert the SOC after 5 failed MFA attempts',ans:'on',why:'Repeated MFA failures are an attack signal; locking and alerting turns them into a detection.'}
+];
+var PROTOCOLS=[['saml','SAML 2.0'],['oidc','OpenID Connect'],['kerberos','Kerberos'],['tacacs','TACACS+'],['ldap','LDAP over TLS (LDAPS)']];
+var APPS=[
+ {id:'ehr',label:'Cloud EHR portal from a SaaS vendor, signing staff in through the browser with Lakeshore as the identity provider',ans:'saml',why:'SAML 2.0 is the established standard for browser-based SSO to SaaS apps; the IdP sends a signed XML assertion.'},
+ {id:'mobile',label:'Patient mobile app offering “Sign in with Lakeshore,” using ID tokens and a UserInfo endpoint',ans:'oidc',why:'OpenID Connect adds an identity layer (ID tokens, UserInfo) on top of OAuth 2.0 and fits mobile and modern apps.'},
+ {id:'win',label:'Windows workstation sign-in to the on-premises Active Directory domain, using ticket-granting tickets',ans:'kerberos',why:'Active Directory domain sign-on uses Kerberos tickets issued by the key distribution center.'},
+ {id:'switch',label:'Network engineers signing in to switches and routers with per-command authorization and accounting',ans:'tacacs',why:'TACACS+ separates authentication, authorization, and accounting and supports per-command authorization on network devices.'},
+ {id:'clock',label:'Legacy timeclock app that queries the directory to look up users and group membership',ans:'ldap',why:'LDAP is a directory query protocol; LDAPS encrypts binds and lookups so credentials don’t cross the network in clear text.'}
+];
+var MODELS=[['dac','Discretionary (DAC)'],['mac','Mandatory (MAC)'],['rbac','Role-based (RBAC)'],['abac','Attribute-based (ABAC)'],['rule','Rule-based']];
+var MODEL_Q=[
+ {id:'q1',text:'Research files carry labels such as Confidential and Restricted. Only users with a matching clearance can open them, and file owners can’t change the labels.',ans:'mac',why:'Labels and clearances enforced by the system, not the owner, define mandatory access control.'},
+ {id:'q2',text:'A department lead creates a shared folder and decides who else can open it.',ans:'dac',why:'The owner decides who gets access, which is discretionary access control.'},
+ {id:'q3',text:'Every nurse receives the same set of permissions because of the job they hold.',ans:'rbac',why:'Permissions attached to a job function make this role-based access control.'},
+ {id:'q4',text:'A clinician can open a chart only if they’re on that patient’s care team, currently on shift, and connected from a clinic network.',ans:'abac',why:'The decision combines attributes of the user, resource, and environment, which is attribute-based access control.'},
+ {id:'q5',text:'No one, whatever their role, can sign in to the billing system between 10 p.m. and 5 a.m.',ans:'rule',why:'A global rule applied to everyone regardless of identity is rule-based access control.'}
+];
+var PERMS=[
+ {id:'p1',label:'View patient records'},{id:'p2',label:'Update patient charts'},{id:'p3',label:'View billing and insurance'},{id:'p4',label:'Process payments and refunds'},
+ {id:'p5',label:'Reset passwords and unlock accounts'},{id:'p6',label:'Administer servers and firewall'},{id:'p7',label:'View audit logs'},{id:'p8',label:'Edit or delete audit logs'}
+];
+var PERM_WHY={
+ p1:'Viewing patient records is need-to-know for people who treat patients.',
+ p2:'Only clinical staff update charts.',
+ p3:'Billing and insurance data is need-to-know for the billing team.',
+ p4:'Payments and refunds belong to the billing team.',
+ p5:'Password resets belong to the help desk, with administrators as an optional backup.',
+ p6:'Server and firewall administration is reserved for systems administrators.',
+ p7:'Audit log access is for the people who review or troubleshoot activity.',
+ p8:'No role should be able to alter audit logs. Logs must be tamper-evident, and anyone who can edit them can erase evidence of their own actions (separation of duties).'
+};
+var ROLES=[
+ {id:'nurse',label:'Nurse',desc:'Treats patients and documents care.',req:['p1','p2'],opt:[]},
+ {id:'billing',label:'Billing Specialist',desc:'Bills insurers and posts patient payments.',req:['p3','p4'],opt:[]},
+ {id:'helpdesk',label:'Help Desk Technician',desc:'Helps users with sign-in and device problems.',req:['p5'],opt:[]},
+ {id:'sysadmin',label:'Systems Administrator',desc:'Runs servers, network security, and patching.',req:['p6'],opt:['p5','p7']},
+ {id:'auditor',label:'Compliance Auditor',desc:'Reviews who accessed what, and whether it was appropriate.',req:['p7'],opt:[]}
+];
+var ROLE_LABEL={};ROLES.forEach(function(r){ROLE_LABEL[r.id]=r.label;});
+var DURS=[['1h','1 hour'],['4h','4 hours'],['24h','24 hours'],['7d','7 days'],['30d','30 days']];
+var DUR_ORDER=['1h','4h','24h','7d','30d'];
+var REQUESTS=[
+ {id:'r1',who:'Priya Natarajan, Systems Administrator',ask:'Domain Admin on SRV-EHR01 to apply security patches during tonight’s 2-hour maintenance window. Change ticket CHG-4471.',ans:'jit',dur:'4h',
+  ok:'Time-bound elevation through the vault covers the 2-hour window with a buffer, then expires on its own.',
+  wrong:{standing:'Standing Domain Admin is exactly what attackers hunt for. Grant it just in time for the window.',deny:'This is a legitimate, ticketed change. Denying it blocks patching; approve it just in time.'}},
+ {id:'r2',who:'Sam Okafor, Help Desk Technician (contractor)',ask:'Permanent Domain Admin “so I can reset passwords faster.”',ans:'deny',
+  ok:'His Help Desk role already includes password resets. Domain Admin for a contractor would be massive over-privilege.',
+  wrong:{standing:'His role already covers password resets, so there’s no business need. Domain Admin “to go faster” violates least privilege.',jit:'Even time-bound, Domain Admin isn’t needed: his role already covers password resets. Deny it.'}},
+ {id:'r3',who:'Devon Price, Billing Specialist',ask:'Read access to the payroll system “to compare salaries.”',ans:'deny',
+  ok:'Curiosity isn’t a business need, and payroll data is need-to-know.',
+  wrong:{standing:'Curiosity isn’t a business need. Payroll is need-to-know; deny it.',jit:'Making it time-bound doesn’t create a business need. Deny it.'}},
+ {id:'r4',who:'MedChart vendor support engineer',ask:'Remote access to the EHR application server for Thursday’s version upgrade, about 6 hours. Approved by the EHR system owner.',ans:'jit',dur:'24h',
+  ok:'Vendor access should be brokered, time-bound, and recorded. 24 hours covers a 6-hour upgrade with room for overruns.',
+  wrong:{standing:'Standing vendor access is a common breach path. Make it time-bound and recorded.',deny:'The system owner approved a real business need; denying it stalls the upgrade. Approve it just in time and record the session.'}},
+ {id:'r5',who:'Lena Fischer, Compliance Auditor',ask:'Read-only access to privileged session recordings for the quarterly access review, which runs all of her first week.',ans:'jit',dur:'7d',
+  ok:'Read-only, time-bound access for exactly the length of the review.',
+  wrong:{standing:'Grant it for the review period only; standing access to recordings widens exposure.',deny:'Auditors need evidence to do their job. Approve read-only access for the review period.'}}
+];
+var TOGGLES4=[
+ {id:'vault',label:'Vault privileged credentials and rotate them after each checkout',ans:'on',why:'Vaulting with rotation means no one knows a standing admin password, and a stolen one expires quickly.'},
+ {id:'record',label:'Record privileged sessions',ans:'on',why:'Recordings give auditors evidence and deter misuse.'},
+ {id:'ticket',label:'Require an approved ticket number for every elevation',ans:'on',why:'Tying elevation to a ticket proves a business need and creates an audit trail.'},
+ {id:'sheet',label:'Keep the Domain Admin password in an encrypted spreadsheet the whole IT team can open',ans:'off',why:'A shared password destroys accountability and can’t be rotated per use; that’s what the vault is for.'}
+];
+var ACTIONS=[['keep','Keep, no change'],['disable','Disable the account'],['remove','Remove the excess role'],['mfa','Enforce MFA enrollment']];
+var ACCOUNTS=[
+ {id:'jwalsh',name:'Jordan Walsh',info:'Patient Financial Services. Role: Billing Specialist. MFA: push.',last:'Oct 30, 2026',hr:'HR record: terminated Oct 15, 2026.',ans:'disable',why:'A leaver who was never deprovisioned, with a sign-in two weeks after termination. Disable now and hand the activity to incident response.'},
+ {id:'mfoster',name:'Mia Foster',info:'Clinical Services. Role: Nurse. MFA: push.',last:'Nov 3, 2026',hr:'Current employee; role matches the job.',ans:'keep',why:'Role matches the job, MFA is on, and she’s actively signing in. Not every account is a finding.'},
+ {id:'tchen',name:'Tara Chen',info:'Clinical Services. Roles: Nurse, Billing Specialist. MFA: push.',last:'Nov 3, 2026',hr:'HR record: transferred from Billing to Nursing in August 2026.',ans:'remove',why:'Classic privilege creep from a mover. She keeps her account and the Nurse role; the Billing Specialist role comes off.'},
+ {id:'adm-rgarcia',name:'Rafael Garcia, admin account',info:'Information Technology. Group: Domain Admins. MFA: not enrolled.',last:'Nov 4, 2026',hr:'Current employee and active systems administrator.',ans:'mfa',why:'A legitimate admin account with no MFA. Require phishing-resistant MFA enrollment before its next sign-in.'},
+ {id:'svc-report',name:'Reporting service account',info:'Information Technology. Group: Domain Admins. Owner: none listed.',last:'Feb 11, 2025',hr:'No owner and no change record for the Domain Admin grant.',ans:'disable',why:'Orphaned, dormant, and privileged: exactly what attackers look for. Disable it; if something breaks, rebuild it with an owner and least privilege.'},
+ {id:'dprice',name:'Dana Price',info:'Radiology. Roles: Radiology Technologist, Systems Administrator. MFA: push.',last:'Nov 2, 2026',hr:'Ticket note: Systems Administrator “granted temporarily” in March for a printer install.',ans:'remove',why:'A temporary grant that became permanent. Remove the Systems Administrator role; next time, use just-in-time access that expires on its own.'},
+ {id:'kbrooks',name:'Kevin Brooks',info:'IT contractor. Role: Help Desk Technician. MFA: authenticator app.',last:'Sep 29, 2026',hr:'Contract ended Sep 30, 2026. No expiration date was set on the account.',ans:'disable',why:'The contract is over, so access ends. This is why contractor accounts need expiration dates at provisioning.'},
+ {id:'ajohnson',name:'Alicia Johnson',info:'Clinical Services. Role: Nurse. MFA: FIDO2 passkey.',last:'Nov 4, 2026',hr:'Current employee; role matches the job.',ans:'keep',why:'Correct role, strong MFA, active use. Keep it.'}
+];
+var LOGS=[
+ {id:'l1',time:'Nov 2, 09:02',actor:'adm-rgarcia',event:'Checked out a vaulted Domain Admin credential under ticket CHG-4466, patched SRV-FILE02, session recorded.',sus:false,why:'Ticketed, vaulted, recorded, inside a maintenance window. The missing MFA on this account is an account finding, not evidence that this activity was malicious.'},
+ {id:'l2',time:'Oct 30, 23:58',actor:'jwalsh',event:'Signed in remotely and exported 4,200 billing records to a USB drive.',sus:true,why:'A terminated user exporting bulk patient financial data near midnight: possible exfiltration and a reportable privacy incident.'},
+ {id:'l3',time:'Nov 3, 02:13',actor:'svc-backup',event:'Cleared the Security event log on DC01. No change ticket.',sus:true,why:'Service accounts shouldn’t clear logs, and log clearing is a classic anti-forensics step (MITRE ATT&CK T1070).'},
+ {id:'l4',time:'Nov 3, 14:30',actor:'kosei',event:'Opened charts for 12 patients on his scheduled clinic list.',sus:false,why:'A physician viewing his own patients’ charts during clinic hours is need-to-know access working as designed.'},
+ {id:'l5',time:'Nov 1, 16:20',actor:'tchen',event:'Opened 37 patient billing statements from a nursing station.',sus:true,why:'She’s using billing access she no longer needs. Privilege creep has become a potential privacy violation; investigate and remove the role.'},
+ {id:'l6',time:'Nov 2, 11:15',actor:'rgarcia',event:'Reset the password for mfoster under ticket INC-2210 after a callback identity check.',sus:false,why:'Ticketed, identity verified, done from his standard account with delegated help desk rights. Routine.'}
+];
+
+/* ---------- ui helpers ---------- */
+function radios(k,opts,cls,vis){
+ return '<div class="opts '+(cls||'')+'">'+opts.map(function(o){
+  return '<label class="opt"><input type="radio" name="'+k+'" value="'+o[0]+'" data-k="'+k+'"'+(vis?' data-vis="1"':'')+(A(k)===o[0]?' checked':'')+'><span>'+o[1]+'</span></label>';
+ }).join('')+'</div>';
+}
+function sel(k,opts,ph,aria){
+ return '<select data-k="'+k+'"'+(aria?' aria-label="'+esc(aria)+'"':'')+'><option value="">'+(ph||'Choose…')+'</option>'+opts.map(function(o){
+  return '<option value="'+o[0]+'"'+(A(k)===o[0]?' selected':'')+'>'+o[1]+'</option>';
+ }).join('')+'</select>';
+}
+function onoff(k,label){return '<div class="row"><p>'+label+'</p>'+radios(k,[['on','On'],['off','Off']],'seg')+fb(k.split('.')[0]==='tg'?'m2':'m4',k)+'</div>';}
+function findItem(mid,id){var r=S.res[mid];if(!r)return null;for(var i=0;i<r.items.length;i++)if(r.items[i].id===id)return r.items[i];return null;}
+function fb(mid,id){var it=findItem(mid,id);if(!it)return '';return '<div class="fb '+(it.ok?'ok':'bad')+'" role="status"><strong>'+(it.ok?'Correct.':'Not yet.')+'</strong>'+it.fb+'</div>';}
+function shell(mid,title,lead,body){
+ var v=VIEWS.filter(function(x){return x.id===mid;})[0];
+ return '<p class="mnum">Mission '+v.n+' of 5</p><h2 tabindex="-1">'+title+'</h2><p class="lead">'+lead+'</p>'+body+checkbar(mid);
+}
+function checkbar(mid){
+ var r=S.res[mid],f=S.first[mid],i=MISSIONS.indexOf(mid),next=i<4?MISSIONS[i+1]:'summary';
+ var res='';
+ if(r){
+  var perfect=r.score===r.total;
+  res='<div class="result'+(perfect?' perfect':'')+(S._fresh===mid?' new':'')+'" id="result-'+mid+'" tabindex="-1"><span class="score">'+r.score+' of '+r.total+'</span><p>'+(perfect?'Every item is correct. Mission complete.':'Fix the items marked “Not yet,” then check again.')+'<br><span class="muted">First attempt, recorded for your summary: '+f.score+' of '+f.total+' ('+pct(f.score,f.total)+'%).</span></p></div>';
+ }
+ return '<div class="checkbar no-print">'+res+'<button class="btn primary" type="button" data-check="'+mid+'">Check my work</button><button class="btn" type="button" data-go="'+next+'">'+(next==='summary'?'Go to summary':'Next mission')+'</button></div>';
+}
+
+/* ---------- views ---------- */
+function renderBrief(){
+ var nm=A('name')||'';
+ var groups=['Knowledge','Skill','Ability'].map(function(t){
+  return '<div><h3>'+(t==='Ability'?'Abilities':t==='Skill'?'Skills':'Knowledge')+'</h3><ul>'+KSA.filter(function(k){return k.type===t;}).map(function(k){return '<li><span class="code">'+k.code+'</span> '+k.text+'</li>';}).join('')+'</ul></div>';
+ }).join('');
+ return '<div class="brief-hero"><div>'+
+  '<h1 tabindex="-1">Five people start Monday. The auditors arrive Friday.</h1>'+
+  '<p class="lead">You’re the new identity and access administrator for Lakeshore Health Partners, a regional clinic network. Onboard new staff, lock down sign-in, design roles, control privileged access, and clean up what last year’s admin left behind.</p>'+
+  '<div class="name-field"><label><span class="lbl">Your name, for your badge and summary</span><input type="text" data-k="name" value="'+esc(nm)+'" autocomplete="name" placeholder="First and last name"></label><button class="btn primary" type="button" data-go="m1">Start mission 1</button></div>'+
+ '</div><div class="hero-badge" aria-hidden="true"><div class="lanyard"></div>'+
+  '<div class="badge"><div class="band">Lakeshore Health Partners</div><div class="b-body"><div class="avatar you-init">'+(nm?initials(nm):'IA')+'</div><div><p class="b-name you-name">'+(esc(nm)||'Your name here')+'</p><p class="b-title">Identity and Access Administrator</p><p class="b-user">adm-you</p></div></div><div class="chips"><span class="chip good">MFA: FIDO2</span><span class="chip">Just-in-time only</span></div></div>'+
+ '</div></div>'+
+ '<div class="part"><h2>How this activity works</h2><ul class="how">'+
+  '<li><b>Work the missions in order</b>Each one builds on the last. The people you provision in mission 1 get MFA, roles, and privileges later.</li>'+
+  '<li><b>Check your work</b>Your first check in each mission is recorded as your assessment score. Fix anything flagged and check again as often as you like.</li>'+
+  '<li><b>Watch the badges</b>The issued-badges panel shows your decisions as they take effect. Weak choices show up there too.</li>'+
+ '</ul>'+
+ '<details class="ksa"><summary>Knowledge, skills, and abilities this activity assesses</summary><div class="ksa-grid">'+groups+'</div></details></div>';
+}
+
+function renderM1(){
+ var ex=EXISTING.map(function(e){return '<tr><td><code>'+e[0]+'</code></td><td>'+e[1]+'</td><td>'+e[2]+'</td></tr>';}).join('');
+ var tickets=TICKETS.map(function(t){
+  var dec=A(t.id+'.decision')||'';
+  var head=t.shared
+   ?'<div class="t-head"><span class="req">'+t.req+'</span><h3>'+t.name+'</h3><p class="t-meta">'+t.title+'</p></div><blockquote>'+t.detail+'</blockquote>'
+   :'<div class="t-head"><span class="req">'+t.req+'</span><h3>'+t.name+'</h3><p class="t-meta">'+t.title+', '+t.dept+'. '+t.kind+'. Starts Monday, Nov 9.</p></div><p class="t-detail">'+t.detail+'</p>';
+  return '<article class="ticket'+(t.shared?' shared':'')+'" data-decision="'+dec+'">'+head+
+   '<fieldset><legend>Decision</legend>'+radios(t.id+'.decision',[['provision','Provision account'],['reject','Reject request']],'seg',true)+'</fieldset>'+
+   '<div class="when-provision form-grid">'+
+    '<label><span class="lbl">Username</span><input type="text" class="mono" data-k="'+t.id+'.user" value="'+esc(A(t.id+'.user'))+'" autocomplete="off" autocapitalize="off" spellcheck="false"></label>'+
+    '<label><span class="lbl">Account type</span>'+sel(t.id+'.type',[['employee','Employee'],['contractor','Contractor']])+'</label>'+
+    '<label><span class="lbl">Account expires</span><input type="date" data-k="'+t.id+'.exp" value="'+esc(A(t.id+'.exp'))+'"><span class="hint">Leave blank for no expiration.</span></label>'+
+    '<label><span class="lbl">Initial credential</span>'+sel(t.id+'.pw',[['default','Standard default password (Welcome2026!)'],['temp','Unique temporary password, change required at first sign-in'],['empid','Employee ID number as the password']])+'</label>'+
+   '</div>'+
+   '<div class="when-reject"><label><span class="lbl">Reason sent to the requester</span>'+sel(t.id+'.reason',[['license','Licensing costs are too high this quarter'],['individual','Shared accounts break accountability; each person gets an individual account'],['later','Resubmit after the new check-in PC arrives']])+'</label></div>'+
+   fb('m1',t.id)+'</article>';
+ }).join('');
+ return shell('m1','Create user identities','HR’s onboarding queue has six requests. Provision each valid request according to Lakeshore’s account standard, and reject anything that breaks it.',
+  '<div class="card standard"><h3>Lakeshore account standard</h3><ul>'+
+  '<li>Username: first initial plus last name, lowercase, no spaces or punctuation. Maria Alvarez becomes <code>malvarez</code>.</li>'+
+  '<li>If the username is already taken, add the next number: <code>jsmith</code> becomes <code>jsmith2</code>.</li>'+
+  '<li>Contractors: the account expires on the contract end date. Employees: no expiration; HR’s leaver process triggers deprovisioning.</li>'+
+  '<li>Initial credential: a unique temporary password the user must change at first sign-in.</li>'+
+  '<li>One person, one account.</li></ul>'+
+  '<details class="existing"><summary>Search existing directory accounts</summary><div class="scroll"><table><thead><tr><th>Username</th><th>Name</th><th>Department</th></tr></thead><tbody>'+ex+'</tbody></table></div></details></div>'+
+  '<div class="tickets">'+tickets+'</div>');
+}
+
+function renderM2(){
+ function chip(f){return '<button type="button" class="fchip" data-factor="'+f.id+'" aria-pressed="'+(selFactor===f.id)+'">'+f.label+'</button>';}
+ var pool=FACTORS.filter(function(f){return !A('f.'+f.id);});
+ var buckets=BUCKETS.map(function(b){
+  var fs=FACTORS.filter(function(f){return A('f.'+f.id)===b.id;});
+  return '<div class="bucket"><button type="button" class="bucket-btn" data-bucket="'+b.id+'">'+b.label+'<span class="sr">, place the selected factor here</span></button><div class="bucket-items">'+(fs.map(chip).join('')||'<p class="empty">Nothing here yet</p>')+'</div></div>';
+ }).join('');
+ var factorFb=FACTORS.map(function(f){return fb('m2','f.'+f.id);}).join('');
+ var groups=GROUPS.map(function(g){return '<div class="row"><p><strong>'+g.label+'</strong><span class="hint">'+g.note+'</span></p>'+sel('mfa.'+g.id,METHODS,'Choose a method',g.label+' MFA method')+fb('m2','mfa.'+g.id)+'</div>';}).join('');
+ var toggles=TOGGLES2.map(function(t){return onoff('tg.'+t.id,t.label);}).join('');
+ var apps=APPS.map(function(a){return '<div class="row"><p>'+a.label+'</p>'+sel('sso.'+a.id,PROTOCOLS,'Choose a protocol',a.label)+fb('m2','sso.'+a.id)+'</div>';}).join('');
+ return shell('m2','Configure MFA and SSO','Lakeshore is moving every workforce app behind one identity provider. Classify the factors, set MFA by risk tier, harden the policy, and pick the right protocol for each app.',
+  '<section class="part"><h3>Sort the authentication factors</h3><p>Select a factor, then select the category it belongs to. Select a placed factor to move it again.</p>'+
+  '<div class="sorter'+(selFactor?' armed':'')+'"><div class="pool"><button type="button" class="bucket-btn" data-bucket="">Unsorted<span class="sr">, move the selected factor back here</span></button><div class="pool-items">'+(pool.map(chip).join('')||'<p class="empty">All factors are sorted.</p>')+'</div></div>'+
+  '<p id="factor-hint" aria-live="polite"></p><div class="buckets">'+buckets+'</div></div>'+factorFb+'</section>'+
+  '<section class="part"><h3>Set MFA requirements by risk tier</h3><p>Choose the minimum sign-in method each group must use.</p>'+groups+'</section>'+
+  '<section class="part"><h3>Harden the MFA policy</h3>'+toggles+'</section>'+
+  '<section class="part"><h3>Choose a federation or SSO protocol for each app</h3>'+apps+
+  '<fieldset style="margin-top:1.4rem"><legend>Putting every app behind one identity provider makes that provider…</legend>'+
+  radios('sso.risk',[['a','a single point of compromise, so it needs phishing-resistant MFA and close monitoring'],['b','unnecessary to protect, because each app still has its own password'],['c','immune to phishing, because users type fewer passwords']],'stack')+fb('m2','sso.risk')+'</fieldset></section>');
+}
+
+function renderM3(){
+ var models=MODEL_Q.map(function(q){return '<div class="row"><p>'+q.text+'</p>'+sel('mdl.'+q.id,MODELS,'Choose a model','Access control model')+fb('m3','mdl.'+q.id)+'</div>';}).join('');
+ var thead='<tr><th scope="col">Role</th>'+PERMS.map(function(p){return '<th scope="col">'+p.label+'</th>';}).join('')+'</tr>';
+ var tbody=ROLES.map(function(r){
+  return '<tr><th scope="row">'+r.label+'<span class="hint">'+r.desc+'</span></th>'+PERMS.map(function(p){
+   var k='rb.'+r.id+'.'+p.id;
+   return '<td><label class="cell"><input type="checkbox" data-k="'+k+'"'+(A(k)?' checked':'')+' aria-label="'+r.label+': '+p.label+'"></label></td>';
+  }).join('')+'</tr>';
+ }).join('');
+ var roleFb=ROLES.map(function(r){return fb('m3','role.'+r.id);}).join('');
+ var roleOpts=ROLES.map(function(r){return [r.id,r.label];});
+ var assign=PEOPLE.map(function(t){var u=(A(t.id+'.user')||t.user);return '<div class="row"><p><strong>'+t.name+'</strong> <code>'+esc(u)+'</code><span class="hint">'+t.title+', '+t.dept+'</span></p>'+sel('assign.'+t.id,roleOpts,'Choose a role','Role for '+t.name)+fb('m3','assign.'+t.id)+'</div>';}).join('');
+ return shell('m3','Build role-based access','Identify the access control model in each scenario, build the role-permission matrix with least privilege and separation of duties, then assign roles to your new hires.',
+  '<section class="part"><h3>Name the access control model</h3>'+models+'</section>'+
+  '<section class="part"><h3>Build the role-permission matrix</h3><p>Check each permission a role needs to do its job, and nothing more.</p><div class="scroll"><table class="matrix"><thead>'+thead+'</thead><tbody>'+tbody+'</tbody></table></div>'+roleFb+'</section>'+
+  '<section class="part"><h3>Assign roles</h3>'+assign+
+  '<fieldset style="margin-top:1.4rem"><legend>Priya asks for the Billing Specialist role too, “just in case I need to troubleshoot billing someday.”</legend>'+
+  radios('rb.priya',[['grant','Grant it; she’s an administrator anyway'],['decline','Decline; she can request time-bound access if a real need comes up']],'stack')+fb('m3','rb.priya')+'</fieldset></section>');
+}
+
+function renderM4(){
+ var reqs=REQUESTS.map(function(r){
+  var d=A('rq.'+r.id)||'';
+  return '<article class="req-card" data-decision="'+d+'"><h4>'+r.who+'</h4><p>'+r.ask+'</p>'+
+   radios('rq.'+r.id,[['standing','Approve as standing access'],['jit','Approve just in time'],['deny','Deny']],'seg',true)+
+   '<div class="when-jit"><label><span class="lbl">Access expires after</span>'+sel('rq.'+r.id+'.dur',DURS,'Choose a duration')+'</label></div>'+fb('m4','rq.'+r.id)+'</article>';
+ }).join('');
+ var toggles=TOGGLES4.map(function(t){return onoff('pt.'+t.id,t.label);}).join('');
+ return shell('m4','Assign privileges','Privileged access is where a breach becomes a disaster. Set up Priya’s admin access, work the elevation queue, and configure the privileged access management (PAM) vault.',
+  '<section class="part"><h3>Set up Priya’s administrator access</h3><fieldset><legend>Priya needs Domain Admin rights for her job. How should you provide them?</legend>'+
+  radios('pam.sep',[['same','Add Domain Admin to her standard pnatarajan account so she has a single login'],['sep','Create a separate privileged account, adm-pnatarajan, used only for admin tasks; her standard account handles email and web'],['shared','Give her the existing shared Administrator password the team already uses']],'stack')+fb('m4','pam.sep')+'</fieldset></section>'+
+  '<section class="part"><h3>Work the elevation queue</h3><p>Approve, time-limit, or deny each request.</p>'+reqs+'</section>'+
+  '<section class="part"><h3>Configure the PAM vault</h3>'+toggles+'</section>');
+}
+
+function renderM5(){
+ var accts=ACCOUNTS.map(function(a){
+  return '<div class="acct"><header><code>'+a.id+'</code><span class="chip">Last sign-in '+a.last+'</span></header><p><strong>'+a.name+'</strong></p><p>'+a.info+'</p><p class="hr">'+a.hr+'</p>'+
+   sel('acct.'+a.id,ACTIONS,'Choose an action','Action for '+a.id)+fb('m5','acct.'+a.id)+'</div>';
+ }).join('');
+ var logs=LOGS.map(function(l){
+  return '<div class="log"><time>'+l.time+'</time><p><code>'+l.actor+'</code> '+l.event+'</p>'+radios('log.'+l.id,[['normal','Normal'],['sus','Suspicious']],'seg')+fb('m5','log.'+l.id)+'</div>';
+ }).join('');
+ return shell('m5','Audit access','Last year’s admin left a mess, and the auditors arrive Friday. Choose a remediation for each account, then review last week’s privileged and sensitive activity.',
+  '<section class="part"><h3>Quarterly access review</h3><p>Compare each account with its HR record and recent use.</p><div class="accts">'+accts+'</div></section>'+
+  '<section class="part"><h3>Review the activity log</h3><p>Mark each entry normal or suspicious.</p>'+logs+'</section>'+
+  '<section class="part"><h3>Fix the root cause</h3><fieldset><legend>Which change would best prevent findings like <code>jwalsh</code> and <code>kbrooks</code> from happening again?</legend>'+
+  radios('aud.prevent',[['annual','Run the access review once a year instead of quarterly'],['auto','Drive deprovisioning automatically from the HR system of record, and set expiration dates on every contractor account'],['length','Require longer passwords for billing and help desk staff']],'stack')+fb('m5','aud.prevent')+'</fieldset></section>');
+}
+
+function renderSummary(){
+ var fS=0,fT=0,cS=0,cT=0,n=0;
+ var rows=MISSIONS.map(function(m,i){
+  var f=S.first[m],r=S.res[m],v=VIEWS[i+1];
+  if(f){fS+=f.score;fT+=f.total;} if(r){cS+=r.score;cT+=r.total;n++;}
+  var status=r?(r.score===r.total?'<span class="chip good">Complete</span>':'<span class="chip warn">Items to revisit</span>'):'<span class="chip dim">Not checked</span>';
+  return '<tr><th scope="row">'+v.n+'. '+v.label+'</th><td>'+(f?f.score+' of '+f.total+' ('+pct(f.score,f.total)+'%)':'—')+'</td><td>'+(r?r.score+' of '+r.total+' ('+pct(r.score,r.total)+'%)':'—')+'</td><td>'+status+'</td></tr>';
+ }).join('');
+ var ksaRows=KSA.map(function(k){
+  var ok=0,tot=0;
+  MISSIONS.forEach(function(m){var r=S.res[m];if(!r)return;r.items.forEach(function(it){if(it.ksa.indexOf(k.code)>-1){tot++;if(it.ok)ok++;}});});
+  var p=pct(ok,tot),lvl=!tot?'Not assessed':p>=85?'Strong':p>=60?'Developing':'Review';
+  var cls=p>=85?'good':p>=60?'':'warn';
+  return '<tr><td><span class="code mono">'+k.code+'</span></td><td>'+k.text+'</td><td>'+(tot?'<div class="bar"><i class="'+cls+'" style="width:'+p+'%"></i></div>':'')+'</td><td>'+(tot?p+'% ':'')+lvl+'</td></tr>';
+ }).join('');
+ var revisit='';
+ MISSIONS.forEach(function(m,i){var r=S.res[m];if(!r)return;var miss=r.items.filter(function(it){return !it.ok;});if(!miss.length)return;
+  revisit+='<h3>'+VIEWS[i+1].n+'. '+VIEWS[i+1].label+'</h3><ul class="revisit">'+miss.map(function(it){return '<li><strong>'+it.label+'.</strong> '+it.fb+'</li>';}).join('')+'</ul>';});
+ if(!revisit)revisit=n?'<p>Nothing to revisit. Every checked item is correct.</p>':'<p class="muted">Check at least one mission to see items to revisit.</p>';
+ var nm=A('name')||'';
+ return '<div class="sum-head"><div><h2 tabindex="-1">Activity summary</h2><p class="lead">Identity and access management lab, Lakeshore Health Partners scenario.</p></div><div class="sum-actions no-print"><button class="btn primary" type="button" data-print>Print or save as PDF</button></div></div>'+
+  '<p><strong>Student:</strong> <span class="you-name">'+(esc(nm)||'Name not entered')+'</span><br><strong>Generated:</strong> '+new Date().toLocaleString('en-US',{dateStyle:'long',timeStyle:'short'})+'<br><strong>Missions checked:</strong> '+n+' of 5</p>'+
+  '<label class="no-print" style="max-width:420px"><span class="lbl">Name on this summary</span><input type="text" data-k="name" value="'+esc(nm)+'" autocomplete="name"></label>'+
+  '<div class="big-scores"><div><b>'+(fT?pct(fS,fT)+'%':'—')+'</b><span>First-attempt score'+(fT?', '+fS+' of '+fT:'')+'</span></div><div><b>'+(cT?pct(cS,cT)+'%':'—')+'</b><span>Score after revisions'+(cT?', '+cS+' of '+cT:'')+'</span></div></div>'+
+  '<div class="scroll"><table><thead><tr><th>Mission</th><th>First attempt</th><th>After revisions</th><th>Status</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+  '<div class="part"><h2>Knowledge, skills, and abilities</h2><p class="muted">Based on your latest check in each mission. Strong is 85% or higher; developing is 60 to 84%.</p><div class="scroll"><table class="ksa-table"><thead><tr><th>Code</th><th>Description</th><th>Result</th><th>Level</th></tr></thead><tbody>'+ksaRows+'</tbody></table></div></div>'+
+  '<div class="part"><h2>Items to revisit</h2>'+revisit+'</div>'+
+  '<div class="part"><h2>Reflection</h2><label><span class="lbl">Pick one access decision you made today and explain how you’d justify it to the auditors.</span><textarea class="no-print" data-k="reflect">'+esc(A('reflect'))+'</textarea></label><p class="print-only" id="reflect-print">'+(esc(A('reflect'))||'No reflection entered.')+'</p></div>';
+}
+
+var RENDER={brief:renderBrief,m1:renderM1,m2:renderM2,m3:renderM3,m4:renderM4,m5:renderM5,summary:renderSummary};
+
+/* ---------- grading ---------- */
+function item(id,label,ok,okText,badText,ksa){return {id:id,label:label,ok:ok,fb:ok?okText:badText,ksa:ksa};}
+function gradeM1(){
+ return TICKETS.map(function(t){
+  var d=A(t.id+'.decision'),errs=[];
+  if(t.shared){
+   if(d!=='reject')errs.push(d?'A shared login means no one is individually accountable for what happens under it, and you can’t remove one receptionist without locking out the others. Reject it.':'Make a decision: provision or reject.');
+   else if(A(t.id+'.reason')!=='individual')errs.push('Choose the reason that names the real problem: shared accounts break accountability and non-repudiation.');
+   return item(t.id,t.req+' shared front desk login',!errs.length,'Rejected for the right reason. Each receptionist gets an individual account; a shared check-in PC can use fast user switching or badge tap sign-in instead.',errs.join(' '),['K1','A1','A4']);
+  }
+  if(d!=='provision')errs.push(d?'This is a legitimate joiner request from HR, so provision it.':'Make a decision: provision or reject.');
+  else{
+   var u=(A(t.id+'.user')||'').trim();
+   if(u!==t.user){
+    if(t.taken&&u===t.taken)errs.push(t.taken+' already belongs to Dana Price in Radiology. Apply the collision rule: '+t.user+'.');
+    else if(u.toLowerCase()===t.user)errs.push('Usernames are all lowercase.');
+    else errs.push('The username should follow first initial plus last name: '+t.user+'.');
+   }
+   if(A(t.id+'.type')!==t.type)errs.push('Set the account type to '+(t.type==='contractor'?'Contractor':'Employee')+' to match HR’s record.');
+   var x=A(t.id+'.exp')||'';
+   if(t.type==='contractor'){if(!x)errs.push('Contractor accounts need an expiration date so access ends automatically with the contract.');else if(x!==t.exp)errs.push('Set the expiration to the contract end date, Mar 31, 2027.');}
+   else if(x)errs.push('Employee accounts don’t get an arbitrary expiration; HR’s leaver process triggers deprovisioning.');
+   var pw=A(t.id+'.pw');
+   if(pw!=='temp')errs.push(pw==='default'?'A standard default password is known to everyone who has ever been onboarded.':pw==='empid'?'Employee IDs appear on badges and paperwork, so they make predictable passwords.':'Choose an initial credential.');
+  }
+  var okText='Provisioned to standard'+(t.taken?', including the collision rule':'')+(t.type==='contractor'?', with an expiration matching the contract':'')+'.';
+  return item(t.id,t.req+' '+t.name,!errs.length,okText,errs.join(' '),['K1','S1']);
+ });
+}
+function gradeM2(){
+ var out=[];
+ FACTORS.forEach(function(f){
+  var v=A('f.'+f.id),b=BUCKETS.filter(function(x){return x.id===f.ans;})[0].label.toLowerCase();
+  out.push(item('f.'+f.id,'Factor: '+f.label,v===f.ans,f.label+' is '+b+': '+f.why,v?f.label+' is '+b+': '+f.why:f.label+' hasn’t been sorted yet.',['K2']));
+ });
+ GROUPS.forEach(function(g){
+  var v=A('mfa.'+g.id),bad;
+  if(!v)bad='Choose a method for this group.';
+  else if(v==='none')bad='Password-only sign-in doesn’t meet Lakeshore’s MFA requirement.';
+  else if(v==='sms')bad='SMS codes are vulnerable to SIM swapping and interception, and NIST treats SMS as a restricted authenticator. Choose an app-based or phishing-resistant method.';
+  else bad='Privileged accounts are the top phishing target. Push approvals and TOTP codes can be relayed by adversary-in-the-middle sites; require FIDO2 keys or passkeys.';
+  out.push(item('mfa.'+g.id,'MFA for '+g.label.toLowerCase(),g.accept.indexOf(v)>-1,g.ok,bad,['K2','S2','A2']));
+ });
+ TOGGLES2.forEach(function(t){var v=A('tg.'+t.id);out.push(item('tg.'+t.id,t.label,v===t.ans,t.why,v?'This should be '+t.ans+'. '+t.why:'Choose on or off.',['K2','S2','A2']));});
+ APPS.forEach(function(a){var v=A('sso.'+a.id),name=PROTOCOLS.filter(function(p){return p[0]===a.ans;})[0][1];out.push(item('sso.'+a.id,'Protocol for: '+a.label,v===a.ans,a.why,v?'Use '+name+'. '+a.why:'Choose a protocol.',['K3']));});
+ var r=A('sso.risk');
+ out.push(item('sso.risk','SSO risk',r==='a','SSO concentrates risk in the identity provider. That’s why the IdP gets the strongest MFA, conditional access, and monitoring.',r?'SSO makes the identity provider a single point of compromise: one stolen IdP session can open every connected app.':'Choose an answer.',['K3','A2']));
+ return out;
+}
+function gradeM3(){
+ var out=[];
+ MODEL_Q.forEach(function(q,i){var v=A('mdl.'+q.id),name=MODELS.filter(function(m){return m[0]===q.ans;})[0][1];out.push(item('mdl.'+q.id,'Model scenario '+(i+1),v===q.ans,q.why,v?'This is '+name+'. '+q.why:'Choose a model.',['K4']));});
+ ROLES.forEach(function(r){
+  var missing=[],extra=[];
+  PERMS.forEach(function(p){var on=!!A('rb.'+r.id+'.'+p.id);if(r.req.indexOf(p.id)>-1&&!on)missing.push(p);else if(on&&r.req.indexOf(p.id)<0&&r.opt.indexOf(p.id)<0)extra.push(p);});
+  var bad=[];
+  if(missing.length)bad.push('Missing '+missing.map(function(p){return '“'+p.label+'”';}).join(' and ')+', so the role can’t do its job.');
+  extra.forEach(function(p){bad.push('Remove “'+p.label+'.” '+PERM_WHY[p.id]);});
+  var okt=r.label+' has what the job needs and nothing more.'+(r.opt.length?' (Password resets and viewing logs are acceptable extras for administrators; editing logs never is.)':'');
+  out.push(item('role.'+r.id,'Role permissions: '+r.label,!bad.length,okt,bad.join(' '),['K5','S3']));
+ });
+ PEOPLE.forEach(function(t){var v=A('assign.'+t.id);out.push(item('assign.'+t.id,'Role assignment: '+t.name,v===t.role,t.name+' gets the '+ROLE_LABEL[t.role]+' role, matching the job.',v?'A '+t.title+' maps to the '+ROLE_LABEL[t.role]+' role. Assigning by job function keeps access predictable.':'Choose a role.',['S3','K1']));});
+ var pv=A('rb.priya');
+ out.push(item('rb.priya','Priya’s “just in case” request',pv==='decline','“Just in case” isn’t a business need. If a real need appears, she requests time-bound access.',pv?'Being an administrator doesn’t justify extra standing roles. Least privilege means access for a current business need only.':'Choose an answer.',['K5','A4']));
+ return out;
+}
+function gradeM4(){
+ var out=[],s=A('pam.sep');
+ out.push(item('pam.sep','Separate admin account',s==='sep','A separate privileged account keeps admin rights out of email and web browsing, where phishing and drive-by malware land.',s==='same'?'If her everyday account is a Domain Admin, one phishing email compromises the domain. Separate the privileged account.':s==='shared'?'Shared admin passwords destroy accountability and can’t be revoked for one person. Create an individual privileged account.':'Choose an answer.',['K6','K5']));
+ REQUESTS.forEach(function(r){
+  var d=A('rq.'+r.id),dur=A('rq.'+r.id+'.dur'),ok=false,bad;
+  if(!d)bad='Choose a decision.';
+  else if(d!==r.ans)bad=r.wrong[d];
+  else if(d==='jit'&&dur!==r.dur){bad=!dur?'Choose how long the access lasts.':DUR_ORDER.indexOf(dur)<DUR_ORDER.indexOf(r.dur)?'Right decision, but that window is too short for the work. Choose a window that covers the task with a small buffer.':'Right decision, but that window is longer than the work needs. Shorter windows shrink exposure.';}
+  else ok=true;
+  out.push(item('rq.'+r.id,'Elevation request: '+r.who,ok,r.ok,bad,['K6','S4','A4']));
+ });
+ TOGGLES4.forEach(function(t){var v=A('pt.'+t.id);out.push(item('pt.'+t.id,t.label,v===t.ans,t.why,v?'This should be '+t.ans+'. '+t.why:'Choose on or off.',['K6','S4']));});
+ return out;
+}
+function gradeM5(){
+ var out=[];
+ ACCOUNTS.forEach(function(a){var v=A('acct.'+a.id),name=ACTIONS.filter(function(x){return x[0]===a.ans;})[0][1];out.push(item('acct.'+a.id,'Access review: '+a.id,v===a.ans,a.why,v?'The right action is “'+name+'.” '+a.why:'Choose an action.',['S5','A3','K1']));});
+ LOGS.forEach(function(l){var v=A('log.'+l.id),want=l.sus?'sus':'normal';out.push(item('log.'+l.id,'Log entry: '+l.actor+', '+l.time,v===want,l.why,v?'This entry is '+(l.sus?'suspicious':'normal')+'. '+l.why:'Mark it normal or suspicious.',['S5','A3']));});
+ var p=A('aud.prevent');
+ out.push(item('aud.prevent','Root-cause fix',p==='auto','Automated leaver deprovisioning from HR, plus contractor expirations, removes the human delay that left both accounts active.',p?'Both findings came from deprovisioning that depended on someone remembering. Automate it from the HR system of record and set contractor expirations.':'Choose an answer.',['K1','A4']));
+ return out;
+}
+var GRADERS={m1:gradeM1,m2:gradeM2,m3:gradeM3,m4:gradeM4,m5:gradeM5};
+
+/* ---------- directory ---------- */
+var issuedBefore={};
+function badgeHTML(o){
+ var fresh=!o.pending&&!issuedBefore[o.key];
+ if(!o.pending)issuedBefore[o.key]=true; else delete issuedBefore[o.key];
+ return '<div class="badge'+(o.pending?' pending':'')+(o.alert?' alert':'')+(o.priv?' priv':'')+(fresh&&dirReady?' fresh':'')+'"><div class="band">'+(o.alert?'Shared account':o.priv?'Privileged account':'Lakeshore Health Partners')+'</div><div class="b-body"><div class="avatar" aria-hidden="true">'+initials(o.name)+'</div><div><p class="b-name">'+o.name+'</p><p class="b-title">'+o.title+'</p><p class="b-user">'+esc(o.user)+'</p></div></div><div class="chips">'+o.chips.join('')+'</div></div>';
+}
+var dirReady=false;
+function renderDirectory(){
+ var issued=0;
+ var html=PEOPLE.map(function(t){
+  var prov=A(t.id+'.decision')==='provision',u=(A(t.id+'.user')||'').trim(),m=A('mfa.'+t.group),role=A('assign.'+t.id),chips=[];
+  if(prov){issued++;var ct=A(t.id+'.type');chips.push('<span class="chip">'+(ct==='contractor'?'Contractor'+(A(t.id+'.exp')?', expires '+fmtDate(A(t.id+'.exp')):', no expiration set'):ct==='employee'?'Employee':'Type not set')+'</span>');}
+  chips.push(m?'<span class="chip '+(m==='none'||m==='sms'?'warn':'good')+'">MFA: '+MSHORT[m]+'</span>':'<span class="chip dim">MFA not set</span>');
+  chips.push(role?'<span class="chip">'+ROLE_LABEL[role]+'</span>':'<span class="chip dim">No role</span>');
+  return badgeHTML({key:t.id,name:t.name,title:t.title,user:prov?(u||'username not set'):'not provisioned',pending:!prov,chips:chips});
+ });
+ if(A('t5.decision')==='provision')html.push(badgeHTML({key:'t5',name:'Front desk',title:'Shared by three receptionists',user:(A('t5.user')||'frontdesk'),alert:true,chips:['<span class="chip bad">No accountable owner</span>']}));
+ if(A('pam.sep')==='sep'){var pm=A('mfa.priv');html.push(badgeHTML({key:'adm',name:'Priya Natarajan',title:'Admin tasks only',user:'adm-pnatarajan',priv:true,chips:['<span class="chip '+(pm==='fido'?'good':'warn')+'">MFA: '+(pm?MSHORT[pm]:'not set')+'</span>','<span class="chip">Just-in-time elevation</span>']}));}
+ $('#badges').innerHTML=html.join('');
+ $('#dir-count').textContent=issued+' of 5 new hires provisioned. Your MFA and role decisions appear on each badge.';
+ dirReady=true;
+}
+
+/* ---------- navigation ---------- */
+function renderRail(){
+ $('#rail-list').innerHTML=VIEWS.map(function(v){
+  var r=S.res[v.id],n,s=v.sub;
+  if(v.n){var cls=r?(r.score===r.total?'done':'part'):'';n='<span class="n '+cls+'" aria-hidden="true">'+(r&&r.score===r.total?'✓':v.n)+'</span>';if(r)s=r.score+' of '+r.total+' correct';}
+  else n='<span class="n" aria-hidden="true">'+(v.id==='brief'?'i':'Σ')+'</span>';
+  return '<li><button type="button" data-go="'+v.id+'"'+(S.view===v.id?' aria-current="page"':'')+'>'+n+'<span class="t">'+v.label+'<span class="s">'+s+'</span></span></button></li>';
+ }).join('');
+ var checked=MISSIONS.filter(function(m){return S.res[m];}).length;
+ $('#meter-text').textContent=checked+' of 5 missions checked';
+ $('#meter-fill').style.width=(checked/5*100)+'%';
+}
+function renderView(id){document.getElementById('v-'+id).innerHTML=RENDER[id]();}
+function go(id,noFocus){
+ if(!RENDER[id])id='brief';
+ S.view=id;save();
+ VIEWS.forEach(function(v){document.getElementById('v-'+v.id).hidden=v.id!==id;});
+ if(id==='summary')renderView('summary');
+ renderRail();
+ if(!noFocus){
+  var h=document.querySelector('#v-'+id+' [tabindex="-1"]');
+  var top=$('#main').getBoundingClientRect().top+window.scrollY-90;
+  if(window.scrollY>top)window.scrollTo({top:Math.max(0,top)});
+  if(h)h.focus({preventScroll:true});
+ }
+ try{history.replaceState(null,'','#'+id);}catch(e){}
+}
+function check(mid){
+ var items=GRADERS[mid](),score=items.filter(function(i){return i.ok;}).length;
+ S.res[mid]={items:items,score:score,total:items.length,ts:Date.now()};
+ if(!S.first[mid])S.first[mid]={score:score,total:items.length,ts:Date.now()};
+ S._fresh=mid;save();
+ renderView(mid);S._fresh=null;
+ renderRail();
+ var el=document.getElementById('result-'+mid);
+ if(el){el.scrollIntoView({block:'center',behavior:(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)?'auto':'smooth'});el.focus({preventScroll:true});}
+}
+function updateName(){
+ var nm=A('name')||'';
+ document.querySelectorAll('.you-name').forEach(function(e){e.textContent=nm||(e.closest('#v-summary')?'Name not entered':'Your name here');});
+ document.querySelectorAll('.you-init').forEach(function(e){e.textContent=nm?initials(nm):'IA';});
+}
+function updateThemeBtn(){
+ var d=document.documentElement.getAttribute('data-theme')==='dark',b=$('#theme-btn');
+ b.setAttribute('aria-pressed',String(d));
+ b.querySelector('.tlabel').textContent=d?'Light mode':'Dark mode';
+ b.querySelector('.ticon').textContent=d?'☀':'☾';
+}
+
+/* ---------- events ---------- */
+document.addEventListener('change',function(e){
+ var t=e.target,k=t.dataset&&t.dataset.k;if(!k)return;
+ if(t.type==='checkbox')S.a[k]=t.checked;
+ else if(t.type==='radio'||t.tagName==='SELECT')S.a[k]=t.value;
+ else return;
+ if(t.dataset.vis){var c=t.closest('[data-decision]');if(c)c.setAttribute('data-decision',t.value);}
+ save();renderDirectory();
+});
+document.addEventListener('input',function(e){
+ var t=e.target,k=t.dataset&&t.dataset.k;if(!k)return;
+ if(t.type==='checkbox'||t.type==='radio'||t.tagName==='SELECT')return;
+ S.a[k]=t.value;save();
+ if(k==='name'){updateName();document.querySelectorAll('[data-k="name"]').forEach(function(x){if(x!==t)x.value=t.value;});}
+ if(k==='reflect'){var p=document.getElementById('reflect-print');if(p)p.textContent=t.value||'No reflection entered.';}
+ renderDirectory();
+});
+document.addEventListener('click',function(e){
+ var g=e.target.closest('[data-go]');if(g){e.preventDefault();go(g.getAttribute('data-go'));return;}
+ var c=e.target.closest('[data-check]');if(c){check(c.getAttribute('data-check'));return;}
+ var f=e.target.closest('[data-factor]');
+ if(f){var id=f.getAttribute('data-factor');selFactor=selFactor===id?null:id;renderView('m2');var el=document.querySelector('[data-factor="'+id+'"]');if(el)el.focus();if(selFactor){var h=$('#factor-hint');h.style.color='var(--ink-2)';h.textContent='Now select a category for “'+FACTORS.filter(function(x){return x.id===id;})[0].label+'.”';}return;}
+ var b=e.target.closest('[data-bucket]');
+ if(b){var bk=b.getAttribute('data-bucket');
+  if(!selFactor){var hh=$('#factor-hint');hh.style.color='';hh.textContent='Select a factor first, then select its category.';return;}
+  if(bk)S.a['f.'+selFactor]=bk;else delete S.a['f.'+selFactor];
+  selFactor=null;save();renderView('m2');var be=document.querySelector('[data-bucket="'+bk+'"]');if(be)be.focus();return;}
+ if(e.target.closest('#theme-btn')){var r=document.documentElement,nt=r.getAttribute('data-theme')==='dark'?'light':'dark';r.setAttribute('data-theme',nt);try{localStorage.setItem('iam-lab-theme',nt);}catch(err){}updateThemeBtn();return;}
+ if(e.target.closest('[data-print]')){renderView('summary');setTimeout(function(){window.print();},50);return;}
+ if(e.target.closest('[data-reset]')){if(confirm('Clear all answers and scores and start over?')){S={a:{},res:{},first:{},view:'brief'};selFactor=null;issuedBefore={};dirReady=false;save();renderAll();go('brief');}}
+});
+window.addEventListener('beforeprint',function(){renderView('summary');});
+window.addEventListener('hashchange',function(){var h=location.hash.slice(1);if(h&&h!==S.view&&RENDER[h])go(h);});
+
+function renderAll(){VIEWS.forEach(function(v){renderView(v.id);});renderDirectory();renderRail();}
+renderAll();updateThemeBtn();
+(function(){var h=location.hash.slice(1);go(RENDER[h]?h:(S.view||'brief'),true);})();
+</script>
+</body>
+</html>
