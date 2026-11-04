@@ -1,910 +1,1144 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MFA Lab: Prove It’s You</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FFSI Readiness Review: NIST SP 800-171 and CMMC Level 2 Learning Activity</title>
 <style>
 :root{
-  --bg:#f2f5fa; --surface:#ffffff; --surface-2:#e9eff8; --ink:#13213b; --ink-2:#4b5a78; --line:#d3dcea;
-  --navy:#0047AB; --navy-2:#0a3a85; --on-navy:#ffffff; --navy-soft:#e3ecfa;
-  --green:#00a86b; --green-ink:#007a4e; --green-soft:#ddf5ea;
-  --red:#b42318; --red-soft:#fdeceb; --amber:#985a06; --amber-soft:#fff2dc;
-  --bezel:#1d2638; --screen:#f7f9fc; --screen-ink:#13213b; --term:#0f1a2c; --term-ink:#cfe3ff;
-  --shadow:0 1px 2px rgba(19,33,59,.06),0 8px 24px rgba(19,33,59,.07);
-  --font:"Public Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
-  --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
-  color-scheme:light;
-  box-sizing:border-box;
-  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  --navy:#0047AB; --navy-deep:#06306F; --green:#00a86b;
+  --ink:#14213D; --muted:#55627A; --paper:#F3F6FB; --surface:#FFFFFF; --surface-2:#F8FAFD;
+  --line:#D5DCE8; --navy-soft:#E6EEFA; --green-soft:#E2F5EC; --red:#B8322A; --red-soft:#FBEAE8;
+  --amber:#9A6200; --amber-soft:#FFF4DD; --legacy:#764ba2;
+  --shadow:0 1px 2px rgba(20,33,61,.06), 0 6px 18px rgba(20,33,61,.06);
+  --serif:"Iowan Old Style","Charter","Palatino Linotype","Book Antiqua",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace;
 }
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg:#0c1525; --surface:#14213a; --surface-2:#1b2b48; --ink:#e6edf8; --ink-2:#a9b7d0; --line:#2a3b5c;
-    --navy:#5b8ff0; --navy-2:#7aa5f5; --on-navy:#07152c; --navy-soft:#1c2f55;
-    --green:#2bd49a; --green-ink:#5fe3b3; --green-soft:#123a30;
-    --red:#ff7b6e; --red-soft:#3d1c1d; --amber:#f2b552; --amber-soft:#3a2b12;
-    --bezel:#050a14; --screen:#101a2d; --screen-ink:#e6edf8; --term:#060c18; --term-ink:#cfe3ff;
-    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35); color-scheme:dark;
-  }
+[data-theme="dark"]{
+  --navy:#6EA0F5; --navy-deep:#A9C6F8; --green:#34D29A;
+  --ink:#E7ECF5; --muted:#9FADC3; --paper:#0D1729; --surface:#15233B; --surface-2:#1A2A45;
+  --line:#2B3D5C; --navy-soft:#1C3158; --green-soft:#113A2D; --red:#F2776C; --red-soft:#3D1F22;
+  --amber:#F0B44C; --amber-soft:#3A2D12; --legacy:#B48BE0;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 6px 18px rgba(0,0,0,.25);
 }
-:root[data-theme="dark"]{
-  --bg:#0c1525; --surface:#14213a; --surface-2:#1b2b48; --ink:#e6edf8; --ink-2:#a9b7d0; --line:#2a3b5c;
-  --navy:#5b8ff0; --navy-2:#7aa5f5; --on-navy:#07152c; --navy-soft:#1c2f55;
-  --green:#2bd49a; --green-ink:#5fe3b3; --green-soft:#123a30;
-  --red:#ff7b6e; --red-soft:#3d1c1d; --amber:#f2b552; --amber-soft:#3a2b12;
-  --bezel:#050a14; --screen:#101a2d; --screen-ink:#e6edf8; --term:#060c18; --term-ink:#cfe3ff;
-  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35); color-scheme:dark;
-}
-*,*::before,*::after{box-sizing:inherit}
-html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 90px)}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
-body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
-h1,h2,h3{line-height:1.2;margin:0}
-p{margin:0 0 .8em}
-button,input,select{font:inherit;color:inherit}
-button{cursor:pointer}
-:focus-visible{outline:3px solid var(--navy);outline-offset:2px}
-code,.mono{font-family:var(--mono)}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);line-height:1.55;font-size:16px;min-height:100vh}
+h1,h2,h3{font-family:var(--serif);font-weight:600;line-height:1.2;letter-spacing:-.005em}
+h2{font-size:1.85rem;margin-bottom:.35rem}
+h3{font-size:1.2rem;margin-bottom:.4rem}
+p{max-width:72ch}
+a{color:var(--navy)}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--green);outline-offset:2px;border-radius:4px}
+.mono{font-family:var(--mono);font-size:.88em}
 
-/* ---------- top bar ---------- */
-.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line);
-  display:flex;align-items:center;gap:20px;padding:12px 24px;flex-wrap:wrap}
-.brand{display:flex;align-items:center;gap:12px;margin-right:auto}
-.brand svg{width:40px;height:40px;flex:none}
-.brand h1{font-size:1.25rem;font-weight:800;letter-spacing:-.01em}
-.brand p{margin:0;font-size:.85rem;color:var(--ink-2)}
-.meter{display:flex;flex-direction:column;gap:4px;min-width:200px}
-.meter span{font-size:.8rem;color:var(--ink-2);font-weight:600}
-.segs{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
-.segs i{height:6px;border-radius:3px;background:var(--surface-2);border:1px solid var(--line)}
-.segs i.part{background:var(--navy-soft);border-color:var(--navy)}
-.segs i.done{background:var(--green);border-color:var(--green)}
-.btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 14px;font-weight:600;font-size:.9rem;display:inline-flex;align-items:center;gap:8px}
-.btn:hover{background:var(--surface-2)}
-.btn.primary{background:var(--navy);border-color:var(--navy);color:var(--on-navy)}
-.btn.primary:hover{background:var(--navy-2)}
-.btn.good{background:var(--green);border-color:var(--green);color:#fff}
-.btn.danger{color:var(--red);border-color:var(--red)}
-.btn.danger-solid{background:var(--red);border-color:var(--red);color:#fff}
-.btn.sm{padding:5px 11px;font-size:.82rem}
-.btn[disabled]{opacity:.45;cursor:not-allowed}
-.badge{background:var(--navy);color:var(--on-navy);border-radius:999px;font-size:.72rem;padding:1px 7px;min-width:22px;text-align:center}
+/* Top bar */
+.topbar{position:sticky;top:0;z-index:20;background:var(--navy-deep);color:#fff;display:flex;align-items:center;gap:1rem;padding:.7rem 1.2rem;flex-wrap:wrap}
+[data-theme="dark"] .topbar{background:#08111F;border-bottom:1px solid var(--line)}
+.brand{display:flex;flex-direction:column;line-height:1.15}
+.brand strong{font-family:var(--serif);font-size:1.15rem}
+.brand span{font-size:.82rem;opacity:.8}
+.progress-wrap{flex:1;min-width:180px;display:flex;align-items:center;gap:.6rem}
+.progress{flex:1;height:8px;background:rgba(255,255,255,.18);border-radius:99px;overflow:hidden}
+.progress > i{display:block;height:100%;width:0;background:var(--green);transition:width .4s}
+.progress-label{font-size:.85rem;white-space:nowrap}
+.theme-btn{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.45);border-radius:99px;padding:.35rem .9rem;font-size:.88rem}
+.theme-btn:hover{background:rgba(255,255,255,.1)}
 
-/* ---------- shell ---------- */
-.shell{display:grid;grid-template-columns:260px minmax(0,1fr);gap:28px;max-width:1320px;margin:0 auto;padding:24px}
-nav ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 96px)}
-nav button{width:100%;text-align:left;border:0;background:none;border-radius:10px;padding:10px 12px;display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:center;color:var(--ink-2);font-weight:500}
-nav button:hover{background:var(--surface-2);color:var(--ink)}
-nav button[aria-current="step"]{background:var(--surface);color:var(--ink);font-weight:700;box-shadow:var(--shadow)}
-.dot{width:28px;height:28px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-size:.8rem;font-weight:700;color:var(--ink-2);background:var(--surface)}
-.dot.part{border-color:var(--navy);color:var(--navy)}
-.dot.done{border-color:var(--green);background:var(--green);color:#fff}
-nav small{display:block;font-size:.75rem;color:var(--ink-2);font-weight:500}
+/* Layout */
+.shell{display:grid;grid-template-columns:270px 1fr;max-width:1380px;margin:0 auto}
+.rail{position:sticky;top:58px;align-self:start;height:calc(100vh - 58px);overflow:auto;padding:1.2rem .9rem;border-right:1px solid var(--line)}
+.rail h4{font-size:.8rem;color:var(--muted);font-weight:600;margin:.9rem .6rem .4rem}
+.rail button{display:flex;align-items:center;gap:.6rem;width:100%;text-align:left;background:none;border:none;color:var(--ink);padding:.55rem .6rem;border-radius:8px;font-size:.94rem}
+.rail button:hover{background:var(--navy-soft)}
+.rail button[aria-current="page"]{background:var(--navy);color:#fff}
+[data-theme="dark"] .rail button[aria-current="page"]{color:#08111F}
+.rail .num{flex:none;width:1.6rem;height:1.6rem;border-radius:50%;display:grid;place-items:center;font-size:.8rem;font-weight:700;border:2px solid currentColor}
+.rail .num.done{background:var(--green);border-color:var(--green);color:#fff}
+.rail .sub{display:block;font-size:.75rem;opacity:.75}
+main{padding:2rem 2.2rem 4rem;min-width:0}
+.view{display:none}
+.view.active{display:block}
+.lead{color:var(--muted);font-size:1.05rem;margin-bottom:1.4rem}
+.role-tag{display:inline-block;font-size:.8rem;font-weight:600;padding:.15rem .6rem;border-radius:99px;margin-bottom:.6rem}
+.role-tag.assoc{background:var(--green-soft);color:var(--green)}
+[data-theme="light"] .role-tag.assoc{color:#00754A}
+.role-tag.audit{background:var(--navy-soft);color:var(--navy)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:1.3rem 1.4rem;box-shadow:var(--shadow);margin-bottom:1.2rem}
+.panel.flat{box-shadow:none}
+.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.2rem}
+.nav-row{display:flex;justify-content:space-between;gap:1rem;margin-top:2rem;flex-wrap:wrap}
+.btn{border:1px solid var(--navy);background:var(--navy);color:#fff;padding:.6rem 1.15rem;border-radius:8px;font-weight:600;font-size:.95rem}
+[data-theme="dark"] .btn{color:#08111F}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--navy)}
+.btn.green{background:var(--green);border-color:var(--green)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.score-chip{display:inline-flex;gap:.4rem;align-items:center;font-size:.88rem;font-weight:600;background:var(--surface-2);border:1px solid var(--line);border-radius:99px;padding:.25rem .8rem}
 
-main{min-width:0;outline:none}
-.mission-head{max-width:72ch;margin-bottom:20px}
-.mission-head .step{color:var(--navy);font-weight:700;font-size:.9rem;margin-bottom:6px}
-.mhead-row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px}
-.mhead-row .step{margin-bottom:0}
-.mission-head h2{font-size:clamp(1.6rem,2.6vw,2.2rem);font-weight:800;letter-spacing:-.02em;margin-bottom:10px}
-.mission-head p{color:var(--ink-2);font-size:1.05rem}
-.goal{display:flex;gap:10px;align-items:flex-start;background:var(--navy-soft);border-left:4px solid var(--navy);padding:10px 14px;border-radius:0 10px 10px 0;color:var(--ink);font-size:.95rem;max-width:72ch}
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow)}
-.panel h3{font-size:1.1rem;margin-bottom:8px}
-.stack{display:flex;flex-direction:column;gap:18px}
-.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
-.muted{color:var(--ink-2)}
-.small{font-size:.88rem}
+/* Briefing */
+.letter{background:var(--surface);border:1px solid var(--line);border-radius:4px 14px 14px 4px;border-left:6px solid var(--navy);padding:1.8rem 2rem;box-shadow:var(--shadow);margin-bottom:1.4rem}
+.letter h1{font-size:clamp(1.8rem,3.4vw,2.6rem);margin-bottom:.6rem}
+.letter .meta{display:grid;grid-template-columns:auto 1fr;gap:.25rem 1rem;font-size:.92rem;margin:1rem 0 1.2rem;color:var(--muted)}
+.letter .meta b{color:var(--ink);font-weight:600}
+.name-field{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;margin-top:1rem}
+input[type=text],input[type=number],input[type=date],select,textarea{font:inherit;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:.55rem .7rem}
+textarea{width:100%;min-height:90px;resize:vertical}
+input[type=text]{min-width:240px}
+.ksa-table{width:100%;border-collapse:collapse;font-size:.93rem}
+.ksa-table th,.ksa-table td{text-align:left;padding:.55rem .6rem;border-bottom:1px solid var(--line);vertical-align:top}
+.ksa-table th{font-weight:600;color:var(--muted);font-size:.85rem}
+.ksa-code{font-family:var(--mono);font-weight:700;color:var(--navy);white-space:nowrap}
+.mission-map{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.8rem}
+.mission-map div{border:1px solid var(--line);border-radius:10px;padding:.8rem;background:var(--surface-2);font-size:.9rem}
+.mission-map b{display:block;font-family:var(--serif);font-size:1rem;margin-bottom:.2rem}
 
-/* feedback */
-.fb{border-radius:12px;padding:12px 14px;font-size:.95rem;border:1px solid}
-.fb.ok{background:var(--green-soft);border-color:var(--green);color:var(--ink)}
-.fb.bad{background:var(--red-soft);border-color:var(--red);color:var(--ink)}
-.fb.warn{background:var(--amber-soft);border-color:var(--amber);color:var(--ink)}
-.fb strong{display:block;margin-bottom:2px}
-.shake{animation:shake .35s}
-@keyframes shake{25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-3px)}}
+/* Explorer */
+.toolbar{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin-bottom:1rem}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{background:var(--surface);border:none;padding:.5rem .9rem;color:var(--ink);font-size:.9rem;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:none}
+.seg button[aria-pressed="true"]{background:var(--navy);color:#fff}
+[data-theme="dark"] .seg button[aria-pressed="true"]{color:#08111F}
+.search{flex:1;min-width:220px}
+.fam{border:1px solid var(--line);border-radius:10px;background:var(--surface);margin-bottom:.6rem;overflow:hidden}
+.fam summary{list-style:none;display:flex;align-items:center;gap:.8rem;padding:.8rem 1rem;cursor:pointer}
+.fam summary::-webkit-details-marker{display:none}
+.fam summary::after{content:"+";margin-left:auto;font-size:1.3rem;color:var(--muted)}
+.fam[open] summary::after{content:"\2212"}
+.fam-code{font-family:var(--mono);font-weight:700;background:var(--navy-soft);color:var(--navy);padding:.15rem .5rem;border-radius:6px}
+.fam-count{font-size:.85rem;color:var(--muted)}
+.req{display:grid;grid-template-columns:150px 1fr auto;gap:.8rem;padding:.6rem 1rem;border-top:1px solid var(--line);font-size:.93rem;align-items:start}
+.req .rid{font-family:var(--mono);font-size:.85rem;font-weight:600}
+.lvl{font-size:.75rem;font-weight:700;padding:.12rem .5rem;border-radius:99px;white-space:nowrap}
+.lvl.l1{background:var(--green-soft);color:var(--green)}
+[data-theme="light"] .lvl.l1{color:#00754A}
+.lvl.l2{background:var(--navy-soft);color:var(--navy)}
+.note{border-left:4px solid var(--amber);background:var(--amber-soft);padding:.8rem 1rem;border-radius:0 8px 8px 0;font-size:.93rem;margin-bottom:1rem}
+.compare{width:100%;border-collapse:collapse;font-size:.92rem}
+.compare th,.compare td{border-bottom:1px solid var(--line);padding:.5rem .6rem;text-align:left;vertical-align:top}
+.compare th{color:var(--muted);font-weight:600}
 
-/* ---------- devices ---------- */
-.lab{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:28px;align-items:start}
-.browser{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
-.urlbar{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface-2);border-bottom:1px solid var(--line)}
-.url{flex:1;display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-family:var(--mono);font-size:.85rem;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-.url svg{flex:none;width:14px;height:14px}
-.url .host{font-weight:600}
-.url.evil .host{color:var(--red)}
-.page{padding:28px;min-height:360px}
-.sso{max-width:380px;margin:0 auto}
-.sso-logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.1rem;margin-bottom:18px}
-.sso-logo b{width:34px;height:34px;border-radius:8px;background:var(--navy);color:var(--on-navy);display:grid;place-items:center;font-size:.9rem}
-.field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
-.field label{font-weight:600;font-size:.9rem}
-.field input{border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--surface);font-size:1rem}
-.field input:focus{border-color:var(--navy);outline:none;box-shadow:0 0 0 3px var(--navy-soft)}
-.field .hint{font-size:.8rem;color:var(--ink-2)}
-input.code{font-family:var(--mono);font-size:1.5rem;letter-spacing:.35em;text-align:center}
-
-.phone-wrap{position:sticky;top:calc(env(safe-area-inset-top,0px) + 100px)}
-.phone{width:280px;margin:0 auto;background:var(--bezel);border-radius:42px;padding:12px;box-shadow:0 20px 50px rgba(10,25,50,.28)}
-.screen{background:var(--screen);color:var(--screen-ink);border-radius:32px;min-height:540px;overflow:hidden;position:relative;display:flex;flex-direction:column}
-.sbar{display:flex;justify-content:space-between;align-items:center;padding:12px 26px 6px;font-size:.78rem;font-weight:700}
-.notch{position:absolute;top:8px;left:50%;transform:translateX(-50%);width:72px;height:22px;border-radius:12px;background:var(--bezel)}
-.app-title{padding:10px 18px 6px;font-weight:800;font-size:1.15rem;display:flex;align-items:center;justify-content:space-between}
-.app-body{padding:6px 14px 18px;display:flex;flex-direction:column;gap:10px;flex:1}
-.otp-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px}
-.otp-acct{font-size:.85rem;font-weight:700}
-.otp-acct small{display:block;font-weight:500;color:var(--ink-2)}
-.otp-row{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
-.otp-code{font-family:var(--mono);font-size:2rem;font-weight:600;letter-spacing:.06em;color:var(--navy)}
-.otp-code.low{color:var(--red)}
-.ring{width:34px;height:34px;transform:rotate(-90deg)}
-.ring circle{fill:none;stroke-width:4}
-.ring .bg{stroke:var(--line)}
-.ring .fg{stroke:var(--navy);stroke-linecap:round;transition:stroke-dashoffset 1s linear}
-.push{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px;box-shadow:var(--shadow);animation:drop .35s ease-out}
-@keyframes drop{from{transform:translateY(-16px);opacity:0}}
-.push h4{margin:0 0 4px;font-size:.95rem}
-.push dl{display:grid;grid-template-columns:auto 1fr;gap:2px 8px;margin:8px 0;font-size:.8rem}
-.push dt{color:var(--ink-2)}
-.push dd{margin:0;font-weight:600}
-.push .acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
-.push .acts button{border-radius:10px;padding:9px;font-weight:700;border:1px solid var(--line);background:var(--surface-2)}
-.push .acts .ap{background:var(--green);border-color:var(--green);color:#fff}
-.push .acts .dn{color:var(--red);border-color:var(--red);background:var(--surface)}
-.push.mini{padding:10px 12px;opacity:.95}
-.nums{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
-.nums button{font-family:var(--mono);font-size:1.4rem;font-weight:600;padding:12px 0;border-radius:12px;border:1.5px solid var(--navy);background:var(--surface);color:var(--navy)}
-.nums button:hover{background:var(--navy);color:var(--on-navy)}
-.sms{background:var(--surface-2);border-radius:16px 16px 16px 4px;padding:10px 12px;font-size:.84rem;animation:drop .35s ease-out}
-.sms b{display:block;font-size:.75rem;color:var(--ink-2)}
-.lock-time{text-align:center;padding:12px 0 4px;font-size:3rem;font-weight:300;letter-spacing:-.02em}
-.lock-date{text-align:center;font-size:.85rem;color:var(--ink-2);margin-bottom:6px}
-.big-number{font-family:var(--mono);font-size:4rem;font-weight:600;color:var(--navy);text-align:center;letter-spacing:.06em;margin:12px 0}
-
-/* sort game */
-.pool{display:flex;flex-wrap:wrap;gap:10px;min-height:56px;padding:14px;border:2px dashed var(--line);border-radius:14px;background:var(--surface)}
-.chip{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;font-weight:600;font-size:.92rem;box-shadow:var(--shadow)}
-.chip:hover{border-color:var(--navy)}
-.chip.sel{background:var(--navy);border-color:var(--navy);color:var(--on-navy);transform:translateY(-2px)}
-.chip.placed{box-shadow:none;cursor:default;border-color:var(--green);background:var(--green-soft);font-size:.85rem;padding:5px 11px}
-.bins{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
-.bin{border:2px solid var(--line);border-radius:16px;background:var(--surface);padding:14px;min-height:180px;text-align:left;display:flex;flex-direction:column;gap:8px;transition:border-color .15s,background .15s}
-.bin:hover,.bin.over{border-color:var(--navy);background:var(--navy-soft)}
-.bin .ico{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:var(--navy-soft);color:var(--navy)}
-.bin .ico svg{width:22px;height:22px}
-.bin h4{margin:0;font-size:1rem}
-.bin .eg{font-size:.8rem;color:var(--ink-2);font-weight:500}
-.bin .got{display:flex;flex-wrap:wrap;gap:6px}
-.combo{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
-.combo:first-of-type{border-top:0}
-.yn{display:flex;gap:8px}
-
-/* choices */
-.choices{display:flex;flex-direction:column;gap:8px}
-.choice{text-align:left;border:1.5px solid var(--line);background:var(--surface);border-radius:12px;padding:11px 14px;font-weight:500;display:flex;gap:10px;align-items:flex-start}
-.choice:hover:not([disabled]){border-color:var(--navy)}
-.choice .k{flex:none;width:24px;height:24px;border-radius:6px;background:var(--surface-2);display:grid;place-items:center;font-size:.8rem;font-weight:700}
+/* Mission 1 */
+.claim{border:1px solid var(--line);border-radius:12px;background:var(--surface);margin-bottom:1rem;overflow:hidden}
+.legacy-strip{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;font-size:.8rem;padding:.35rem 1rem;font-weight:600}
+.claim-body{padding:1rem 1.2rem}
+.claim q{display:block;font-family:var(--serif);font-size:1.08rem;quotes:"\201C" "\201D";margin-bottom:.8rem}
+.choice-row{display:flex;gap:.5rem;flex-wrap:wrap}
+.choice{border:1.5px solid var(--line);background:var(--surface-2);color:var(--ink);border-radius:8px;padding:.45rem .95rem;font-size:.92rem}
+.choice:hover:not(:disabled){border-color:var(--navy)}
 .choice.right{border-color:var(--green);background:var(--green-soft)}
 .choice.wrong{border-color:var(--red);background:var(--red-soft)}
-.choice[disabled]{cursor:default}
+.choice:disabled{cursor:default}
+.feedback{margin-top:.8rem;font-size:.93rem;padding:.7rem .9rem;border-radius:8px;display:none}
+.feedback.show{display:block}
+.feedback.ok{background:var(--green-soft)}
+.feedback.no{background:var(--red-soft)}
+.feedback b{display:block;margin-bottom:.15rem}
 
-/* terminal */
-.term{background:var(--term);color:var(--term-ink);border-radius:12px;padding:14px 16px;font-family:var(--mono);font-size:.82rem;line-height:1.7;min-height:120px;overflow-x:auto}
-.term .r{color:#ff8f86}.term .g{color:#5fe3b3}.term .y{color:#f2c46b}.term .d{color:#7f93b5}
-.term div{animation:fade .3s}
-@keyframes fade{from{opacity:0}}
+/* Mission 2 */
+.m2-wrap{display:grid;grid-template-columns:minmax(260px,1fr) minmax(320px,1.4fr);gap:1.2rem;align-items:start}
+.evidence-pile{display:flex;flex-direction:column;gap:.6rem}
+.ev-card{text-align:left;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:.75rem .9rem;font-size:.92rem;box-shadow:var(--shadow)}
+.ev-card[aria-pressed="true"]{border-color:var(--navy);outline:3px solid var(--navy-soft)}
+.ev-card .ev-kind{display:block;font-size:.76rem;color:var(--muted);font-weight:600;margin-bottom:.15rem}
+.bins{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.6rem;position:sticky;top:76px}
+.bin{border:1.5px dashed var(--line);background:var(--surface-2);color:var(--ink);border-radius:10px;padding:.6rem;min-height:84px;text-align:left;font-size:.82rem;transition:border-color .2s,background .2s}
+.bin b{font-family:var(--mono);font-size:.95rem;display:block;color:var(--navy)}
+.bin.hot{border-color:var(--navy);background:var(--navy-soft)}
+.bin.miss{animation:shake .35s;border-color:var(--red);background:var(--red-soft)}
+.bin.filled{border-style:solid;border-color:var(--green);background:var(--green-soft)}
+.bin .placed{display:block;margin-top:.35rem;font-size:.78rem;color:var(--ink)}
+@keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.m2-log{font-size:.9rem;margin-top:.8rem;min-height:1.5em}
 
-/* security key */
-.key{display:flex;align-items:center;gap:0;margin:16px auto 6px;width:max-content;border:0;background:none;padding:0}
-.key .body{width:120px;height:44px;background:#1f2a3d;border:1px solid #4a5b7c;border-radius:10px 6px 6px 10px;display:flex;align-items:center;justify-content:center;position:relative}
-.key .pad{width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#ffd77a,#d49a17);box-shadow:0 0 0 3px rgba(255,215,122,.25)}
-.key.blink .pad{animation:pulse 1s infinite}
-@keyframes pulse{50%{box-shadow:0 0 0 10px rgba(255,215,122,.0),0 0 18px 4px rgba(255,200,80,.7)}}
-.key .usb{width:30px;height:24px;background:linear-gradient(#c9d2df,#9aa6b8);border-radius:0 3px 3px 0}
-.key-cap{text-align:center;font-size:.85rem;color:var(--ink-2)}
+/* Mission 3 */
+.asset{display:grid;grid-template-columns:1fr;gap:.6rem;border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:1rem 1.2rem;margin-bottom:.9rem}
+.asset-head{display:flex;gap:.8rem;align-items:flex-start}
+.asset-icon{flex:none;width:2.4rem;height:2.4rem;border-radius:8px;display:grid;place-items:center;background:var(--navy-soft);font-size:1.25rem}
+.cat-key{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:.6rem;margin-bottom:1.2rem}
+.cat-key div{border:1px solid var(--line);border-radius:10px;padding:.7rem .8rem;font-size:.86rem;background:var(--surface)}
+.cat-key b{display:block;font-size:.92rem}
 
-/* hood */
-details.hood{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:0 16px}
-details.hood summary{padding:14px 0;font-weight:700;cursor:pointer}
-.hood-grid{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:.88rem;padding-bottom:16px;align-items:baseline}
-.hood-grid dt{color:var(--ink-2)}
-.hood-grid dd{margin:0;font-family:var(--mono);word-break:break-all}
-.hood-grid mark{background:var(--amber-soft);color:var(--amber);border-radius:3px;padding:0 2px;font-weight:700}
-.qr{width:132px;height:132px;background:#fff;padding:8px;border-radius:8px;border:1px solid var(--line)}
-.secret{font-family:var(--mono);font-size:1.05rem;letter-spacing:.08em;background:var(--surface-2);padding:6px 10px;border-radius:8px;display:inline-block}
+/* Mission 4 */
+.case-tabs{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1rem}
+.case-tab{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:.45rem .8rem;font-family:var(--mono);font-size:.85rem}
+.case-tab[aria-selected="true"]{background:var(--navy);color:#fff;border-color:var(--navy)}
+[data-theme="dark"] .case-tab[aria-selected="true"]{color:#08111F}
+.case-tab .dot{display:inline-block;width:.55rem;height:.55rem;border-radius:50%;margin-left:.35rem;background:var(--line)}
+.case-tab .dot.ok{background:var(--green)}
+.case-tab .dot.no{background:var(--red)}
+.workpaper{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:6px;box-shadow:var(--shadow);padding:1.5rem 1.6rem;overflow:hidden}
+.workpaper::before{content:"";position:absolute;inset:0 auto 0 0;width:5px;background:repeating-linear-gradient(180deg,var(--navy) 0 14px,transparent 14px 22px);opacity:.35}
+.wp-head{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:.8rem;margin-bottom:1rem}
+.wp-head .rid{font-family:var(--mono);font-weight:700;color:var(--navy);font-size:1.05rem}
+.ev-list{list-style:none;display:flex;flex-direction:column;gap:.55rem;margin:.6rem 0 1.2rem}
+.ev-list li{display:grid;grid-template-columns:86px 1fr;gap:.7rem;font-size:.93rem;align-items:start}
+.method{font-size:.74rem;font-weight:700;padding:.15rem .45rem;border-radius:5px;text-align:center}
+.method.Examine{background:var(--navy-soft);color:var(--navy)}
+.method.Interview{background:var(--amber-soft);color:var(--amber)}
+.method.Test{background:var(--green-soft);color:var(--green)}
+[data-theme="light"] .method.Test{color:#00754A}
+.obj{display:flex;gap:.6rem;align-items:flex-start;padding:.45rem .5rem;border-radius:6px;font-size:.93rem}
+.obj:hover{background:var(--surface-2)}
+.obj input{margin-top:.3rem;width:1.05rem;height:1.05rem;accent-color:var(--navy)}
+.obj.mark-ok{background:var(--green-soft)}
+.obj.mark-no{background:var(--red-soft)}
+.det-row{display:flex;gap:.7rem;flex-wrap:wrap;margin-top:1rem;align-items:center}
+.det{border:2px solid var(--line);background:var(--surface-2);color:var(--ink);border-radius:8px;padding:.55rem 1.2rem;font-weight:700;letter-spacing:.02em}
+.det[aria-pressed="true"].met{border-color:var(--green);color:var(--green)}
+.det[aria-pressed="true"].notmet{border-color:var(--red);color:var(--red)}
+.stamp{position:absolute;right:1.6rem;top:4.5rem;font-family:var(--serif);font-weight:700;font-size:2.2rem;padding:.2rem 1rem;border:4px double currentColor;border-radius:8px;transform:rotate(-12deg);opacity:0;pointer-events:none;letter-spacing:.04em}
+.stamp.met{color:var(--green)}
+.stamp.notmet{color:var(--red)}
+.stamp.on{animation:stamp .45s cubic-bezier(.2,.9,.3,1.3) forwards}
+@keyframes stamp{0%{opacity:0;transform:rotate(-12deg) scale(1.8)}100%{opacity:.82;transform:rotate(-12deg) scale(1)}}
 
-/* policy console */
-.scenario{border:1px solid var(--line);border-radius:14px;padding:16px;background:var(--surface)}
-.scenario h4{margin:0 0 6px;font-size:1rem}
-.tag{display:inline-block;font-size:.75rem;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--surface-2);color:var(--ink-2);margin-bottom:8px}
+/* Mission 5 */
+.findings{width:100%;border-collapse:collapse;font-size:.92rem}
+.findings th,.findings td{padding:.55rem .6rem;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.findings th{color:var(--muted);font-weight:600}
+.q-block{margin-top:1.3rem}
+.q-block > p{font-weight:600;margin-bottom:.5rem}
+.check-list label{display:flex;gap:.55rem;align-items:flex-start;padding:.35rem 0;font-size:.94rem}
+.check-list input{margin-top:.3rem;accent-color:var(--navy)}
 
-/* drawer */
-#scrim{position:fixed;inset:0;background:rgba(8,16,32,.45);opacity:0;pointer-events:none;transition:opacity .2s;z-index:40}
-#scrim.on{opacity:1;pointer-events:auto}
-#drawer{position:fixed;top:0;right:0;bottom:0;width:min(460px,100%);background:var(--surface);border-left:1px solid var(--line);z-index:50;transform:translateX(100%);transition:transform .25s ease;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-#drawer.on{transform:none}
-.dhead{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
-.dbody{padding:16px 20px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:16px}
-.scores{width:100%;border-collapse:collapse;font-size:.88rem}
-.scores td,.scores th{padding:6px 4px;border-bottom:1px solid var(--line);text-align:left}
-.scores td:last-child,.scores th:last-child{text-align:right;font-variant-numeric:tabular-nums}
-.loglist{list-style:none;margin:0;padding:0;font-size:.84rem}
-.loglist li{display:grid;grid-template-columns:76px 1fr;gap:8px;padding:7px 0;border-bottom:1px solid var(--line)}
-.loglist time{color:var(--ink-2);font-variant-numeric:tabular-nums;white-space:nowrap}
-.loglist .ok{color:var(--green-ink);font-weight:700}
-.loglist .no{color:var(--red);font-weight:700}
-textarea.dump{width:100%;min-height:140px;font-family:var(--mono);font-size:.75rem;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);color:var(--ink);padding:10px}
+/* Mission 6 */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.form-grid .full{grid-column:1/-1}
+.form-grid label{display:block;font-weight:600;font-size:.9rem;margin-bottom:.3rem}
+.form-grid .hint{font-weight:400;color:var(--muted);font-size:.82rem}
+.model{display:none;margin-top:1rem;border-left:4px solid var(--navy);background:var(--navy-soft);padding:1rem 1.2rem;border-radius:0 8px 8px 0;font-size:.93rem}
+.model.show{display:block}
+.model dt{font-weight:700;margin-top:.5rem}
 
-/* start-over dialog */
-#resetScrim{position:fixed;inset:0;background:rgba(8,16,32,.5);display:none;align-items:center;justify-content:center;z-index:70;padding:16px}
-#resetScrim.on{display:flex}
-.rdlg{background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);width:min(520px,100%);max-height:90vh;overflow-y:auto;padding:22px}
-.rdlg h2{font-size:1.25rem;margin-bottom:6px}
-.ropt{border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:12px;display:flex;flex-direction:column;gap:10px}
-.ropt[hidden]{display:none}
-.ropt h3{font-size:1rem;margin:0}
-.ropt p{margin:0}
-.chk{display:flex;gap:8px;align-items:center;font-size:.9rem}
-.chk input{width:18px;height:18px;accent-color:var(--navy)}
+/* Summary */
+.sum-head{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;align-items:flex-end;margin-bottom:1.2rem}
+.big-score{font-family:var(--serif);font-size:3.2rem;font-weight:700;color:var(--navy);line-height:1}
+.bar{height:10px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:.25rem}
+.bar i{display:block;height:100%;background:var(--navy)}
+.bar i.hi{background:var(--green)}
+.bar i.lo{background:var(--red)}
+.sum-table{width:100%;border-collapse:collapse;font-size:.93rem}
+.sum-table td,.sum-table th{padding:.5rem .4rem;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+.sum-table th{color:var(--muted);font-weight:600}
+.actions{display:flex;gap:.6rem;flex-wrap:wrap}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 
-#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,40px);background:var(--ink);color:var(--surface);padding:10px 18px;border-radius:12px;font-weight:600;font-size:.9rem;opacity:0;transition:.25s;z-index:80;pointer-events:none;max-width:90vw}
-#toast.on{opacity:1;transform:translate(-50%,0)}
-
-.cert{border:2px solid var(--green);border-radius:18px;padding:24px;background:var(--surface);text-align:center}
-.cert h3{font-size:1.5rem;margin-bottom:6px}
-.objectives{margin:0;padding-left:1.2em}
-.objectives li{margin-bottom:6px}
-
-@media (max-width:1020px){
-  .lab{grid-template-columns:1fr}
-  .phone-wrap{position:static}
-  .bins{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:900px){
+  .shell{grid-template-columns:1fr}
+  .rail{position:static;height:auto;border-right:none;border-bottom:1px solid var(--line);display:flex;overflow-x:auto;gap:.3rem;padding:.6rem}
+  .rail h4{display:none}
+  .rail button{flex:none;width:auto;white-space:nowrap}
+  .rail .sub{display:none}
+  main{padding:1.4rem 1rem 3rem}
+  .m2-wrap{grid-template-columns:1fr}
+  .bins{position:static}
+  .req{grid-template-columns:1fr}
+  .form-grid{grid-template-columns:1fr}
+  .stamp{font-size:1.5rem;top:1rem;right:1rem}
+  .ev-list li{grid-template-columns:1fr}
+  .method{justify-self:start}
 }
-@media (max-width:760px){
-  .shell{grid-template-columns:1fr;padding:16px;gap:16px}
-  nav ol{position:static;flex-direction:row;overflow-x:auto;padding-bottom:6px}
-  nav button{grid-template-columns:28px auto;white-space:nowrap}
-  nav small{display:none}
-  .top{padding:10px 16px;gap:10px}
-  .meter{min-width:0;flex:1}
-  .page{padding:18px}
-  .bins{grid-template-columns:1fr}
-  .combo{grid-template-columns:1fr}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+  .stamp.on{opacity:.82}
 }
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media print{
+  body{background:#fff;color:#000}
+  .topbar,.rail,.view:not(#v-summary),.no-print{display:none!important}
+  .shell{display:block}
+  main{padding:0}
+  #v-summary{display:block!important}
+  .panel{box-shadow:none;border-color:#bbb;break-inside:avoid}
+  .bar{border:1px solid #999}
+}
 </style>
 </head>
 <body>
-<header class="top">
-  <div class="brand">
-    <svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3 6 8v10c0 9 6 16 14 19 8-3 14-10 14-19V8L20 3z" fill="#0047AB"/><circle cx="17" cy="19" r="5" fill="none" stroke="#fff" stroke-width="2.5"/><path d="M21 21h9v3M27 21v3" stroke="#00a86b" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg>
-    <div><h1>MFA Lab</h1><p>Multi-factor authentication, hands on</p></div>
+
+<header class="topbar">
+  <div class="brand"><strong>FFSI Readiness Review</strong><span>NIST SP 800-171 Rev 2 and CMMC Level 2 learning activity</span></div>
+  <div class="progress-wrap" aria-label="Activity progress">
+    <div class="progress"><i id="progBar"></i></div>
+    <span class="progress-label" id="progLabel">0% complete</span>
   </div>
-  <div class="meter"><span id="meterText">0 of 7 missions complete</span><div class="segs" id="segs"></div></div>
-  <button class="btn" id="resetBtn" aria-haspopup="dialog" aria-controls="resetScrim"><span aria-hidden="true">↺</span> Start over</button>
-  <button class="btn" id="themeBtn" aria-pressed="false">Dark mode</button>
-  <button class="btn" id="logBtn" aria-controls="drawer">Progress log <span class="badge" id="logCount">0</span></button>
+  <button class="theme-btn" id="topResetBtn" title="Clear all answers and start over">Start over</button>
+  <button class="theme-btn" id="themeBtn" aria-pressed="false">Dark mode</button>
 </header>
 
 <div class="shell">
-  <nav aria-label="Missions"><ol id="nav"></ol></nav>
-  <main id="stage" tabindex="-1"></main>
+  <nav class="rail" id="rail" aria-label="Activity sections"></nav>
+  <main id="main">
+
+    <!-- BRIEFING -->
+    <section class="view" id="v-briefing" aria-labelledby="h-brief">
+      <div class="letter">
+        <h1 id="h-brief">You’ve been assigned to the FFSI engagement</h1>
+        <p>Federal Food Services Inc. (FFSI) runs dining operations on three Army installations. Its subcontract now carries DFARS 252.204-7012 and a CMMC Level 2 requirement, because FFSI receives installation delivery schedules and troop-strength meal counts marked as CUI. Before the C3PAO arrives, FFSI wants an independent readiness review.</p>
+        <div class="meta">
+          <b>Client</b><span>Federal Food Services Inc., CUI enclave (34 users, 2 sites)</span>
+          <b>Standard</b><span>NIST SP 800-171 Rev 2 (110 requirements), assessed with SP 800-171A</span>
+          <b>Target</b><span>CMMC Level 2, C3PAO certification assessment</span>
+          <b>Your roles</b><span>Cybersecurity associate first (map and scope), then auditor (evaluate, score, report)</span>
+        </div>
+        <p>This activity reinforces what you learned in the lesson. Keep the <a href="#" data-go="reference">framework reference</a> open as you work, the way you would on a real engagement. Every mission is scored, and the summary at the end can be printed or saved.</p>
+        <div class="name-field">
+          <label for="learnerName"><b>Your name for the summary</b></label>
+          <input type="text" id="learnerName" placeholder="First and last name" autocomplete="name">
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Knowledge, skills, and abilities you’ll demonstrate</h3>
+        <p class="lead" style="margin-bottom:.8rem">Each mission is mapped to these. Your summary reports mastery for each one.</p>
+        <div style="overflow-x:auto"><table class="ksa-table" id="ksaTable"></table></div>
+      </div>
+
+      <div class="panel">
+        <h3>The engagement, in order</h3>
+        <div class="mission-map" id="missionMap"></div>
+      </div>
+      <div class="nav-row"><span></span><button class="btn" data-go="reference">Open the framework reference</button></div>
+    </section>
+
+    <!-- REFERENCE -->
+    <section class="view" id="v-reference" aria-labelledby="h-ref">
+      <h2 id="h-ref">Framework reference</h2>
+      <p class="lead">All 110 NIST SP 800-171 Rev 2 requirements with their CMMC 2.0 practice identifiers. This is the corrected version of the guide you’ll audit in Mission 1.</p>
+      <div class="note"><b>Which revision?</b> NIST published Rev 3 (17 families, 97 requirements) in May 2024, but a DoD class deviation keeps DFARS 252.204-7012 and CMMC Level 2 assessments on Rev 2. Know both, assess against Rev 2.</div>
+      <div class="toolbar">
+        <div class="seg" role="group" aria-label="Filter by CMMC level">
+          <button data-lvl="all" aria-pressed="true">All 110</button>
+          <button data-lvl="1" aria-pressed="false">Level 1 practices (17)</button>
+          <button data-lvl="2" aria-pressed="false">Added at Level 2 (93)</button>
+        </div>
+        <input type="text" class="search" id="refSearch" placeholder="Search by ID or keyword, e.g. 3.5.3 or wireless" aria-label="Search requirements">
+        <button class="btn ghost" id="expandAll">Expand all</button>
+      </div>
+      <div id="refCount" class="fam-count" style="margin-bottom:.6rem"></div>
+      <div id="famList"></div>
+
+      <div class="grid-2" style="margin-top:1.4rem">
+        <div class="panel flat">
+          <h3>CMMC 2.0 levels at a glance</h3>
+          <table class="compare">
+            <tr><th>Level</th><th>Protects</th><th>Requirements</th><th>Assessment</th></tr>
+            <tr><td>1</td><td>FCI</td><td>15 FAR 52.204-21 requirements, assessed as 17 practices</td><td>Annual self-assessment and affirmation</td></tr>
+            <tr><td>2</td><td>CUI</td><td>110 NIST SP 800-171 Rev 2</td><td>Self or C3PAO every 3 years, annual affirmation</td></tr>
+            <tr><td>3</td><td>CUI, critical programs</td><td>110 plus 24 selected NIST SP 800-172</td><td>DIBCAC, after Final Level 2 (C3PAO)</td></tr>
+          </table>
+        </div>
+        <div class="panel flat">
+          <h3>Rev 2 compared with Rev 3</h3>
+          <table class="compare">
+            <tr><th></th><th>Rev 2 (2020)</th><th>Rev 3 (2024)</th></tr>
+            <tr><td>Families</td><td>14</td><td>17 (adds PL, SA, SR)</td></tr>
+            <tr><td>Requirements</td><td>110</td><td>97</td></tr>
+            <tr><td>Parameters</td><td>Fixed wording</td><td>Organization-defined parameters (ODPs)</td></tr>
+            <tr><td>Assessment guide</td><td>SP 800-171A</td><td>SP 800-171A Rev 3</td></tr>
+          </table>
+        </div>
+      </div>
+      <div class="nav-row"><button class="btn ghost" data-go="briefing">Back to briefing</button><button class="btn" data-go="m1">Start Mission 1</button></div>
+    </section>
+
+    <!-- M1 -->
+    <section class="view" id="v-m1" aria-labelledby="h-m1">
+      <span class="role-tag audit">Auditor role</span>
+      <h2 id="h-m1">Mission 1: Audit the legacy guide</h2>
+      <p class="lead">FFSI’s staff have been studying from an older interactive guide. Before anyone relies on it, review ten statements taken directly from that page and decide whether each one is accurate today. Check your reasoning against the framework reference.</p>
+      <div id="m1List"></div>
+      <div class="nav-row"><button class="btn ghost" data-go="reference">Framework reference</button><span class="score-chip" id="m1Score"></span><button class="btn" data-go="m2">Continue to Mission 2</button></div>
+    </section>
+
+    <!-- M2 -->
+    <section class="view" id="v-m2" aria-labelledby="h-m2">
+      <span class="role-tag assoc">Associate role</span>
+      <h2 id="h-m2">Mission 2: Map the evidence</h2>
+      <p class="lead">FFSI’s IT lead dumped fourteen artifacts into the evidence folder with no labels. Select an artifact, then select the requirement family it supports. Each family gets exactly one artifact. Drag and drop also works.</p>
+      <div class="m2-wrap">
+        <div>
+          <div class="evidence-pile" id="m2Pile"></div>
+        </div>
+        <div>
+          <div class="bins" id="m2Bins"></div>
+          <div class="m2-log" id="m2Log" aria-live="polite"></div>
+        </div>
+      </div>
+      <div class="nav-row"><button class="btn ghost" data-go="m1">Back</button><span class="score-chip" id="m2Score"></span><button class="btn" data-go="m3">Continue to Mission 3</button></div>
+    </section>
+
+    <!-- M3 -->
+    <section class="view" id="v-m3" aria-labelledby="h-m3">
+      <span class="role-tag assoc">Associate role</span>
+      <h2 id="h-m3">Mission 3: Scope the enclave</h2>
+      <p class="lead">Scoping decides what the assessor will examine. Using the CMMC Level 2 scoping guidance, place each FFSI asset in its category. A wrong call either wastes assessment effort or leaves CUI unprotected.</p>
+      <div class="cat-key" id="catKey"></div>
+      <div id="m3List"></div>
+      <div class="nav-row"><button class="btn ghost" data-go="m2">Back</button><span class="score-chip" id="m3Score"></span><button class="btn" data-go="m4">Continue to Mission 4</button></div>
+    </section>
+
+    <!-- M4 -->
+    <section class="view" id="v-m4" aria-labelledby="h-m4">
+      <span class="role-tag audit">Auditor role</span>
+      <h2 id="h-m4">Mission 4: The assessor’s bench</h2>
+      <p class="lead">Six requirements, six workpapers. For each, review the evidence gathered by examine, interview, and test. Check every SP 800-171A assessment objective the evidence satisfies, then record your determination. A requirement is MET only if every objective is satisfied.</p>
+      <div class="case-tabs" role="tablist" id="caseTabs"></div>
+      <div id="caseBody"></div>
+      <div class="nav-row"><button class="btn ghost" data-go="m3">Back</button><span class="score-chip" id="m4Score"></span><button class="btn" data-go="m5">Continue to Mission 5</button></div>
+    </section>
+
+    <!-- M5 -->
+    <section class="view" id="v-m5" aria-labelledby="h-m5">
+      <span class="role-tag audit">Auditor role</span>
+      <h2 id="h-m5">Mission 5: Score it and test the POA&amp;M</h2>
+      <p class="lead">Day two is done. Combine your Mission 4 results with the other team’s findings, calculate FFSI’s score under the DoD Assessment Methodology, and decide what that means for certification.</p>
+      <div class="grid-2">
+        <div class="panel">
+          <h3>Consolidated NOT MET findings</h3>
+          <p style="font-size:.9rem;color:var(--muted);margin-bottom:.6rem">All other 104 requirements were assessed MET.</p>
+          <table class="findings">
+            <tr><th>Requirement</th><th>Condition</th></tr>
+            <tr><td class="mono">AC.L2-3.1.8</td><td>Server OU has no lockout threshold</td></tr>
+            <tr><td class="mono">AU.L2-3.3.4</td><td>No alert when log forwarding fails</td></tr>
+            <tr><td class="mono">IA.L2-3.5.3</td><td>MFA enforced for remote and privileged access, but on-site users reach CUI in SharePoint with a password only</td></tr>
+            <tr><td class="mono">IR.L2-3.6.3</td><td>IR plan exists, never tested</td></tr>
+            <tr><td class="mono">PE.L2-3.10.4</td><td>No log of loading dock entries</td></tr>
+            <tr><td class="mono">SC.L2-3.13.11</td><td>SFTP transfers encrypted, but the crypto module is not FIPS validated</td></tr>
+          </table>
+        </div>
+        <div class="panel">
+          <h3>Reference: scoring and POA&amp;M rules</h3>
+          <p style="font-size:.92rem;margin-bottom:.5rem">Start at 110 and subtract each NOT MET requirement’s point value (5, 3, or 1). The lowest possible score is −203.</p>
+          <table class="findings">
+            <tr><th>Requirement</th><th>Value</th></tr>
+            <tr><td class="mono">3.1.8, 3.3.4, 3.6.3, 3.10.4</td><td>1 point each</td></tr>
+            <tr><td class="mono">3.5.3</td><td>5, or 3 if MFA is in place for remote and privileged users but not general users</td></tr>
+            <tr><td class="mono">3.13.11</td><td>5, or 3 if encryption is used but is not FIPS validated</td></tr>
+          </table>
+          <p style="font-size:.92rem;margin-top:.7rem">Under 32 CFR §170.21, Conditional Level 2 status requires a score of at least 88 (80%). Only 1-point requirements may go on a POA&amp;M, except 3.1.20, 3.1.22, 3.10.3, 3.10.4, and 3.10.5. SC.L2-3.13.11 may be POA&amp;M’d when encryption is used but not FIPS validated.</p>
+          <p style="font-size:.82rem;color:var(--muted);margin-top:.5rem">Point values follow DoD Assessment Methodology v1.2.1. Confirm against the current version before using them on a live engagement.</p>
+        </div>
+      </div>
+
+      <div class="panel" id="m5Form">
+        <div class="q-block" style="margin-top:0">
+          <p>1. What is FFSI’s score?</p>
+          <input type="number" id="m5ScoreIn" min="-203" max="110" aria-label="FFSI score" style="width:9rem">
+        </div>
+        <div class="q-block">
+          <p>2. Which NOT MET requirements may be placed on a POA&amp;M?</p>
+          <div class="check-list" id="m5Poam"></div>
+        </div>
+        <div class="q-block">
+          <p>3. What can FFSI expect from the C3PAO if nothing changes?</p>
+          <div class="check-list" id="m5Status"></div>
+        </div>
+        <div class="q-block">
+          <p>4. Once Conditional status is granted, the POA&amp;M closeout assessment must happen within</p>
+          <div class="check-list" id="m5Close"></div>
+        </div>
+        <div class="det-row"><button class="btn" id="m5Submit">Check my analysis</button></div>
+        <div class="feedback" id="m5Feedback"></div>
+      </div>
+      <div class="nav-row"><button class="btn ghost" data-go="m4">Back</button><span class="score-chip" id="m5Score"></span><button class="btn" data-go="m6">Continue to Mission 6</button></div>
+    </section>
+
+    <!-- M6 -->
+    <section class="view" id="v-m6" aria-labelledby="h-m6">
+      <span class="role-tag audit">Auditor role</span>
+      <h2 id="h-m6">Mission 6: Write the finding</h2>
+      <p class="lead">An assessor is only as good as the findings they write. Choose one NOT MET requirement from Mission 4 and document it so FFSI’s leadership understands the gap and its IT team can fix it. Your finding appears in the summary.</p>
+      <div class="panel">
+        <div class="form-grid">
+          <div>
+            <label for="f-req">Requirement</label>
+            <select id="f-req" style="width:100%">
+              <option value="">Choose a NOT MET requirement</option>
+              <option value="IA.L2-3.5.3">IA.L2-3.5.3 Multifactor authentication</option>
+              <option value="AC.L2-3.1.8">AC.L2-3.1.8 Unsuccessful logon attempts</option>
+              <option value="PE.L2-3.10.4">PE.L2-3.10.4 Physical access logs</option>
+              <option value="SC.L2-3.13.11">SC.L2-3.13.11 FIPS-validated cryptography</option>
+            </select>
+          </div>
+          <div>
+            <label for="f-obj">Objective(s) not satisfied <span class="hint">e.g. [f]</span></label>
+            <input type="text" id="f-obj" style="width:100%;min-width:0">
+          </div>
+          <div class="full">
+            <label for="f-cond">Condition <span class="hint">What you observed, stated as fact</span></label>
+            <textarea id="f-cond"></textarea>
+          </div>
+          <div class="full">
+            <label for="f-evid">Evidence <span class="hint">Artifacts, interviews, and tests, with method</span></label>
+            <textarea id="f-evid"></textarea>
+          </div>
+          <div class="full">
+            <label for="f-risk">Risk to CUI <span class="hint">Why it matters, in plain language</span></label>
+            <textarea id="f-risk"></textarea>
+          </div>
+          <div class="full">
+            <label for="f-rem">Recommended remediation</label>
+            <textarea id="f-rem"></textarea>
+          </div>
+          <div>
+            <label for="f-poam">Eligible for a POA&amp;M?</label>
+            <select id="f-poam" style="width:100%"><option value="">Choose</option><option value="yes">Yes</option><option value="no">No</option></select>
+          </div>
+          <div>
+            <label for="f-date">Target remediation date</label>
+            <input type="date" id="f-date" style="width:100%">
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>Check your finding before you file it</h3>
+        <p style="font-size:.92rem;color:var(--muted);margin-bottom:.5rem">Be honest. Check only the statements your finding meets.</p>
+        <div class="check-list" id="rubric"></div>
+        <div class="det-row">
+          <button class="btn" id="m6Submit">File the finding</button>
+          <button class="btn ghost" id="m6Model">Compare with a model finding</button>
+        </div>
+        <div class="feedback" id="m6Feedback"></div>
+        <div class="model" id="modelBox"></div>
+      </div>
+      <div class="nav-row"><button class="btn ghost" data-go="m5">Back</button><span class="score-chip" id="m6Score"></span><button class="btn green" data-go="summary">View my summary</button></div>
+    </section>
+
+    <!-- SUMMARY -->
+    <section class="view" id="v-summary" aria-labelledby="h-sum">
+      <div id="summaryBody"></div>
+      <div class="panel no-print">
+        <label for="reflection"><b>Reflection</b> <span style="color:var(--muted);font-size:.9rem">Which finding would you raise first with FFSI’s leadership, and why?</span></label>
+        <textarea id="reflection" style="margin-top:.5rem"></textarea>
+      </div>
+      <div class="actions no-print">
+        <button class="btn" id="printBtn">Print or save as PDF</button>
+        <button class="btn ghost" id="dlBtn">Download summary (.html)</button>
+        <button class="btn ghost" id="resetBtn" style="margin-left:auto;border-color:var(--red);color:var(--red)">Reset activity</button>
+      </div>
+    </section>
+
+  </main>
 </div>
 
-<div id="scrim"></div>
-<aside id="drawer" aria-hidden="true" aria-label="Progress log">
-  <div class="dhead"><h2 style="font-size:1.15rem">Progress log</h2><button class="btn" id="closeLog">Close</button></div>
-  <div class="dbody" id="dbody"></div>
-</aside>
-
-<div id="resetScrim" aria-hidden="true">
-  <div class="rdlg" role="dialog" aria-modal="true" aria-labelledby="rTitle" aria-describedby="rDesc">
-    <h2 id="rTitle">Start over</h2>
-    <p class="muted small" id="rDesc">Choose how much to clear. Progress is stored only in this browser.</p>
-    <div class="ropt" id="rMission">
-      <h3 id="rMissionTitle">Restart this mission</h3>
-      <p class="small muted">Clears your answers and score for this mission only, so you can earn its points again. The activity log keeps a record of the restart.</p>
-      <div><button class="btn primary" id="rMissionGo">Restart mission</button></div>
-    </div>
-    <div class="ropt">
-      <h3>Reset the whole lab</h3>
-      <p class="small muted">Erases every mission, all scores, the activity log, and your authenticator enrollment. Download your log first if your instructor needs this attempt.</p>
-      <label class="chk"><input type="checkbox" id="rKeep" checked> Keep my name and student ID</label>
-      <div class="row"><button class="btn" id="rDl">Download log (CSV)</button><button class="btn danger-solid" id="rAllGo">Reset everything</button></div>
-    </div>
-    <div class="row" style="justify-content:flex-end;margin-top:16px"><button class="btn" id="rCancel">Cancel</button></div>
-  </div>
-</div>
-
-<div id="toast" role="status" aria-live="polite"></div>
 <script>
-/* ================= core state & logging ================= */
-const KEY='mfa-lab-progress-v1', THEME_KEY='mfa-lab-theme';
-const MISSIONS=[
-  {id:'m0',title:'Briefing',sub:'Who you are and what you’ll do',max:0},
-  {id:'m1',title:'Sort the factors',sub:'Know, have, are, somewhere',max:17},
-  {id:'m2',title:'Set up an authenticator',sub:'Enroll and use TOTP',max:3},
-  {id:'m3',title:'Approve a push',sub:'Number matching',max:3},
-  {id:'m4',title:'Survive push bombing',sub:'MFA fatigue attack',max:3},
-  {id:'m5',title:'Beat the phishing proxy',sub:'Adversary-in-the-middle',max:3},
-  {id:'m6',title:'Set the policy',sub:'Admin decisions',max:6},
-  {id:'m7',title:'Knowledge check',sub:'10 questions',max:10}
+(function(){
+"use strict";
+
+/* ---------- DATA ---------- */
+const KSAS = [
+  {c:"K1",t:"Knowledge",d:"Structure of NIST SP 800-171 Rev 2 (14 families, 110 requirements) and how Rev 3 differs",m:["m1","m2"]},
+  {c:"K2",t:"Knowledge",d:"CMMC 2.0 levels, FCI and CUI, assessment types, and the DFARS and 32 CFR Part 170 rules behind them",m:["m1","m5"]},
+  {c:"K3",t:"Knowledge",d:"SP 800-171A assessment objectives and the examine, interview, and test methods",m:["m4"]},
+  {c:"K4",t:"Knowledge",d:"DoD Assessment Methodology scoring and POA&M eligibility rules",m:["m5","m6"]},
+  {c:"S1",t:"Skill",d:"Map implementation evidence to the correct requirement family and requirement",m:["m2"]},
+  {c:"S2",t:"Skill",d:"Scope assets into CMMC Level 2 asset categories",m:["m3"]},
+  {c:"S3",t:"Skill",d:"Evaluate evidence against determination statements and reach MET or NOT MET",m:["m4"]},
+  {c:"S4",t:"Skill",d:"Calculate an SPRS score and determine certification outcome",m:["m5"]},
+  {c:"S5",t:"Skill",d:"Write a clear, evidence-based finding and POA&M entry",m:["m6"]},
+  {c:"A1",t:"Ability",d:"Apply professional skepticism to training and vendor materials",m:["m1"]},
+  {c:"A2",t:"Ability",d:"Exercise judgment on incomplete evidence and communicate risk to stakeholders",m:["m4","m6"]}
 ];
-const fresh=()=>({student:'',studentId:'',started:null,current:'m0',secret:null,missions:{},log:[]});
-let S=load();
-function load(){try{const v=JSON.parse(localStorage.getItem(KEY));if(v&&v.missions)return v;}catch(e){}return fresh();}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
-function M(id){return S.missions[id]||(S.missions[id]={score:0,done:false,attempts:0,data:{}});}
-/* read-only peek: does not create a mission record (keeps "Not started" accurate after a reset) */
-function P(id){return S.missions[id]||{score:0,done:false,attempts:0,data:{}};}
-function award(id,pts){M(id).score=Math.min(MISSIONS.find(m=>m.id===id).max,M(id).score+pts);save();renderChrome();}
-function complete(id){const m=M(id);if(m.done)return;m.done=true;logEv(id,'Mission complete',`Score ${m.score}/${MISSIONS.find(x=>x.id===id).max}`,true);toast(`Mission complete: ${MISSIONS.find(x=>x.id===id).title}`);save();renderChrome();}
-function logEv(mid,ev,detail='',ok=null){S.log.push({t:new Date().toISOString(),mission:mid,event:ev,detail,result:ok===null?'':(ok?'correct':'incorrect')});save();renderChrome();if(drawerOpen)renderDrawer();}
-const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-let toastT;function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),2600);}
-const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
-const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
-const userName=()=>(S.student||'student').trim().toLowerCase().replace(/[^a-z]+/g,'.').replace(/^\.|\.$/g,'')||'student';
-const email=()=>userName()+'@prairietech.edu';
 
-/* timers cleared whenever a mission re-renders */
-let timers=[];function later(fn,ms){const t=setTimeout(fn,ms);timers.push(t);return t;}
-function clearTimers(){timers.forEach(clearTimeout);timers=[];}
+const SECTIONS = [
+  {id:"briefing",label:"Briefing",sub:"Engagement and KSAs"},
+  {id:"reference",label:"Framework reference",sub:"All 110 requirements"},
+  {id:"m1",label:"Audit the legacy guide",sub:"Auditor",n:1},
+  {id:"m2",label:"Map the evidence",sub:"Associate",n:2},
+  {id:"m3",label:"Scope the enclave",sub:"Associate",n:3},
+  {id:"m4",label:"The assessor’s bench",sub:"Auditor",n:4},
+  {id:"m5",label:"Score and POA&M",sub:"Auditor",n:5},
+  {id:"m6",label:"Write the finding",sub:"Auditor",n:6},
+  {id:"summary",label:"Summary",sub:"Print or save"}
+];
+const MISSION_BLURBS = {
+  m1:"Decide which statements in an older training guide still hold up.",
+  m2:"Sort unlabeled evidence into the 14 requirement families.",
+  m3:"Categorize FFSI’s assets for a Level 2 assessment.",
+  m4:"Evaluate six requirements against SP 800-171A objectives.",
+  m5:"Calculate the score and test POA&M eligibility.",
+  m6:"Document one finding for leadership and IT."
+};
 
-/* ================= theme ================= */
-function applyTheme(t){document.documentElement.dataset.theme=t;const b=$('#themeBtn');b.textContent=t==='dark'?'Light mode':'Dark mode';b.setAttribute('aria-pressed',t==='dark');}
-let theme='light';try{theme=localStorage.getItem(THEME_KEY)||'light';}catch(e){}
-applyTheme(theme);
-$('#themeBtn').onclick=()=>{theme=theme==='dark'?'light':'dark';applyTheme(theme);try{localStorage.setItem(THEME_KEY,theme);}catch(e){}};
+// Rev 2 requirements: [text, level]
+const FAMILIES = [
+ {code:"AC",n:1,name:"Access Control",r:[
+  ["Limit system access to authorized users, processes acting on behalf of authorized users, and devices (including other systems).",1],
+  ["Limit system access to the types of transactions and functions that authorized users are permitted to execute.",1],
+  ["Control the flow of CUI in accordance with approved authorizations.",2],
+  ["Separate the duties of individuals to reduce the risk of malevolent activity without collusion.",2],
+  ["Employ the principle of least privilege, including for specific security functions and privileged accounts.",2],
+  ["Use non-privileged accounts or roles when accessing nonsecurity functions.",2],
+  ["Prevent non-privileged users from executing privileged functions and capture the execution of such functions in audit logs.",2],
+  ["Limit unsuccessful logon attempts.",2],
+  ["Provide privacy and security notices consistent with applicable CUI rules.",2],
+  ["Use session lock with pattern-hiding displays to prevent access and viewing of data after a period of inactivity.",2],
+  ["Terminate (automatically) a user session after a defined condition.",2],
+  ["Monitor and control remote access sessions.",2],
+  ["Employ cryptographic mechanisms to protect the confidentiality of remote access sessions.",2],
+  ["Route remote access via managed access control points.",2],
+  ["Authorize remote execution of privileged commands and remote access to security-relevant information.",2],
+  ["Authorize wireless access prior to allowing such connections.",2],
+  ["Protect wireless access using authentication and encryption.",2],
+  ["Control connection of mobile devices.",2],
+  ["Encrypt CUI on mobile devices and mobile computing platforms.",2],
+  ["Verify and control/limit connections to and use of external systems.",1],
+  ["Limit use of portable storage devices on external systems.",2],
+  ["Control CUI posted or processed on publicly accessible systems.",1]]},
+ {code:"AT",n:2,name:"Awareness and Training",r:[
+  ["Ensure that managers, system administrators, and users are made aware of the security risks associated with their activities and of the applicable policies, standards, and procedures.",2],
+  ["Ensure that personnel are trained to carry out their assigned information security-related duties and responsibilities.",2],
+  ["Provide security awareness training on recognizing and reporting potential indicators of insider threat.",2]]},
+ {code:"AU",n:3,name:"Audit and Accountability",r:[
+  ["Create and retain system audit logs and records to enable monitoring, analysis, investigation, and reporting of unlawful or unauthorized system activity.",2],
+  ["Ensure that the actions of individual system users can be uniquely traced to those users.",2],
+  ["Review and update logged events.",2],
+  ["Alert in the event of an audit logging process failure.",2],
+  ["Correlate audit record review, analysis, and reporting processes for investigation and response.",2],
+  ["Provide audit record reduction and report generation to support on-demand analysis and reporting.",2],
+  ["Provide a system capability that compares and synchronizes internal system clocks with an authoritative source to generate time stamps for audit records.",2],
+  ["Protect audit information and audit logging tools from unauthorized access, modification, and deletion.",2],
+  ["Limit management of audit logging functionality to a subset of privileged users.",2]]},
+ {code:"CM",n:4,name:"Configuration Management",r:[
+  ["Establish and maintain baseline configurations and inventories of systems (hardware, software, firmware, and documentation) throughout the system development life cycles.",2],
+  ["Establish and enforce security configuration settings for information technology products employed in systems.",2],
+  ["Track, review, approve or disapprove, and log changes to systems.",2],
+  ["Analyze the security impact of changes prior to implementation.",2],
+  ["Define, document, approve, and enforce physical and logical access restrictions associated with changes to systems.",2],
+  ["Employ the principle of least functionality by configuring systems to provide only essential capabilities.",2],
+  ["Restrict, disable, or prevent the use of nonessential programs, functions, ports, protocols, and services.",2],
+  ["Apply deny-by-exception (blacklisting) policy to prevent the use of unauthorized software or deny-all, permit-by-exception (whitelisting) policy to allow the execution of authorized software.",2],
+  ["Control and monitor user-installed software.",2]]},
+ {code:"IA",n:5,name:"Identification and Authentication",r:[
+  ["Identify system users, processes acting on behalf of users, and devices.",1],
+  ["Authenticate (or verify) the identities of users, processes, or devices, as a prerequisite to allowing access to systems.",1],
+  ["Use multifactor authentication for local and network access to privileged accounts and for network access to non-privileged accounts.",2],
+  ["Employ replay-resistant authentication mechanisms for network access to privileged and non-privileged accounts.",2],
+  ["Prevent reuse of identifiers for a defined period.",2],
+  ["Disable identifiers after a defined period of inactivity.",2],
+  ["Enforce a minimum password complexity and change of characters when new passwords are created.",2],
+  ["Prohibit password reuse for a specified number of generations.",2],
+  ["Allow temporary password use for system logons with an immediate change to a permanent password.",2],
+  ["Store and transmit only cryptographically-protected passwords.",2],
+  ["Obscure feedback of authentication information.",2]]},
+ {code:"IR",n:6,name:"Incident Response",r:[
+  ["Establish an operational incident-handling capability for systems that includes preparation, detection, analysis, containment, recovery, and user response activities.",2],
+  ["Track, document, and report incidents to designated officials and/or authorities both internal and external to the organization.",2],
+  ["Test the organizational incident response capability.",2]]},
+ {code:"MA",n:7,name:"Maintenance",r:[
+  ["Perform maintenance on organizational systems.",2],
+  ["Provide controls on the tools, techniques, mechanisms, and personnel used to conduct system maintenance.",2],
+  ["Ensure equipment removed for off-site maintenance is sanitized of any CUI.",2],
+  ["Check media containing diagnostic and test programs for malicious code before the media are used in organizational systems.",2],
+  ["Require multifactor authentication to establish nonlocal maintenance sessions via external network connections and terminate such connections when nonlocal maintenance is complete.",2],
+  ["Supervise the maintenance activities of maintenance personnel without required access authorization.",2]]},
+ {code:"MP",n:8,name:"Media Protection",r:[
+  ["Protect (i.e., physically control and securely store) system media containing CUI, both paper and digital.",2],
+  ["Limit access to CUI on system media to authorized users.",2],
+  ["Sanitize or destroy system media containing CUI before disposal or release for reuse.",1],
+  ["Mark media with necessary CUI markings and distribution limitations.",2],
+  ["Control access to media containing CUI and maintain accountability for media during transport outside of controlled areas.",2],
+  ["Implement cryptographic mechanisms to protect the confidentiality of CUI stored on digital media during transport unless otherwise protected by alternative physical safeguards.",2],
+  ["Control the use of removable media on system components.",2],
+  ["Prohibit the use of portable storage devices when such devices have no identifiable owner.",2],
+  ["Protect the confidentiality of backup CUI at storage locations.",2]]},
+ {code:"PS",n:9,name:"Personnel Security",r:[
+  ["Screen individuals prior to authorizing access to organizational systems containing CUI.",2],
+  ["Ensure that organizational systems containing CUI are protected during and after personnel actions such as terminations and transfers.",2]]},
+ {code:"PE",n:10,name:"Physical Protection",r:[
+  ["Limit physical access to organizational systems, equipment, and the respective operating environments to authorized individuals.",1],
+  ["Protect and monitor the physical facility and support infrastructure for organizational systems.",2],
+  ["Escort visitors and monitor visitor activity.",1],
+  ["Maintain audit logs of physical access.",1],
+  ["Control and manage physical access devices.",1],
+  ["Enforce safeguarding measures for CUI at alternate work sites.",2]]},
+ {code:"RA",n:11,name:"Risk Assessment",r:[
+  ["Periodically assess the risk to organizational operations, organizational assets, and individuals, resulting from the operation of organizational systems and the associated processing, storage, or transmission of CUI.",2],
+  ["Scan for vulnerabilities in organizational systems and applications periodically and when new vulnerabilities affecting those systems and applications are identified.",2],
+  ["Remediate vulnerabilities in accordance with risk assessments.",2]]},
+ {code:"CA",n:12,name:"Security Assessment",r:[
+  ["Periodically assess the security controls in organizational systems to determine if the controls are effective in their application.",2],
+  ["Develop and implement plans of action designed to correct deficiencies and reduce or eliminate vulnerabilities in organizational systems.",2],
+  ["Monitor security controls on an ongoing basis to ensure the continued effectiveness of the controls.",2],
+  ["Develop, document, and periodically update system security plans that describe system boundaries, system environments of operation, how security requirements are implemented, and the relationships with or connections to other systems.",2]]},
+ {code:"SC",n:13,name:"System and Communications Protection",r:[
+  ["Monitor, control, and protect communications (i.e., information transmitted or received by organizational systems) at the external boundaries and key internal boundaries of organizational systems.",1],
+  ["Employ architectural designs, software development techniques, and systems engineering principles that promote effective information security within organizational systems.",2],
+  ["Separate user functionality from system management functionality.",2],
+  ["Prevent unauthorized and unintended information transfer via shared system resources.",2],
+  ["Implement subnetworks for publicly accessible system components that are physically or logically separated from internal networks.",1],
+  ["Deny network communications traffic by default and allow network communications traffic by exception (i.e., deny all, permit by exception).",2],
+  ["Prevent remote devices from simultaneously establishing non-remote connections with organizational systems and communicating via some other connection to resources in external networks (i.e., split tunneling).",2],
+  ["Implement cryptographic mechanisms to prevent unauthorized disclosure of CUI during transmission unless otherwise protected by alternative physical safeguards.",2],
+  ["Terminate network connections associated with communications sessions at the end of the sessions or after a defined period of inactivity.",2],
+  ["Establish and manage cryptographic keys for cryptography employed in organizational systems.",2],
+  ["Employ FIPS-validated cryptography when used to protect the confidentiality of CUI.",2],
+  ["Prohibit remote activation of collaborative computing devices and provide indication of devices in use to users present at the device.",2],
+  ["Control and monitor the use of mobile code.",2],
+  ["Control and monitor the use of Voice over Internet Protocol (VoIP) technologies.",2],
+  ["Protect the authenticity of communications sessions.",2],
+  ["Protect the confidentiality of CUI at rest.",2]]},
+ {code:"SI",n:14,name:"System and Information Integrity",r:[
+  ["Identify, report, and correct system flaws in a timely manner.",1],
+  ["Provide protection from malicious code at designated locations within organizational systems.",1],
+  ["Monitor system security alerts and advisories and take action in response.",2],
+  ["Update malicious code protection mechanisms when new releases are available.",1],
+  ["Perform periodic scans of organizational systems and real-time scans of files from external sources as files are downloaded, opened, or executed.",1],
+  ["Monitor organizational systems, including inbound and outbound communications traffic, to detect attacks and indicators of potential attacks.",2],
+  ["Identify unauthorized use of organizational systems.",2]]}
+];
+function rid(f,i,lvl){return `${f.code}.L${lvl}-3.${f.n}.${i+1}`;}
 
-/* ================= chrome: nav, meter, drawer ================= */
-function status(id){const m=S.missions[id];if(!m)return'';return m.done?'done':'part';}
-function renderChrome(){
-  const counted=MISSIONS.slice(1);
-  const done=counted.filter(m=>P(m.id).done).length;
-  $('#meterText').textContent=`${done} of 7 missions complete`;
-  $('#segs').innerHTML=counted.map(m=>`<i class="${status(m.id)}" title="${esc(m.title)}"></i>`).join('');
-  $('#nav').innerHTML=MISSIONS.map((m,i)=>{const st=i===0?(S.started?'done':''):status(m.id);
-    return `<li><button data-go="${m.id}" ${S.current===m.id?'aria-current="step"':''}><span class="dot ${st}">${st==='done'?'✓':i===0?'★':i}</span><span>${esc(m.title)}<small>${esc(m.sub)}</small></span></button></li>`}).join('');
-  $('#logCount').textContent=S.log.length;
-}
-$('#nav').addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b)go(b.dataset.go);});
-let drawerOpen=false;
-function openDrawer(on){drawerOpen=on;$('#drawer').classList.toggle('on',on);$('#scrim').classList.toggle('on',on);$('#drawer').setAttribute('aria-hidden',!on);if(on){renderDrawer();$('#closeLog').focus();}}
-$('#logBtn').onclick=()=>openDrawer(true);$('#closeLog').onclick=()=>openDrawer(false);$('#scrim').onclick=()=>openDrawer(false);
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&drawerOpen)openDrawer(false);});
-function totals(){let s=0,m=0;MISSIONS.slice(1).forEach(x=>{s+=P(x.id).score;m+=x.max;});return{s,m,pct:Math.round(100*s/m)};}
-function renderDrawer(){
-  const T=totals();
-  const rows=MISSIONS.slice(1).map(x=>`<tr><td>${esc(x.title)}</td><td>${P(x.id).done?'Complete':(S.missions[x.id]?'In progress':'Not started')}</td><td>${P(x.id).score}/${x.max}</td></tr>`).join('');
-  const items=S.log.slice().reverse().map(l=>`<li><time>${new Date(l.t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</time><span><b>${esc(MISSIONS.find(m=>m.id===l.mission)?.title||l.mission)}:</b> ${esc(l.event)}${l.result?` <span class="${l.result==='correct'?'ok':'no'}">${l.result==='correct'?'✓':'✗'}</span>`:''}${l.detail?`<br><span class="muted">${esc(l.detail)}</span>`:''}</span></li>`).join('')||'<li><span></span><span class="muted">No activity yet. Start with the briefing.</span></li>';
-  $('#dbody').innerHTML=`
-   <div><div class="muted small">Student</div><div style="font-weight:700">${esc(S.student||'Not entered')}${S.studentId?` · ID ${esc(S.studentId)}`:''}</div>
-   ${S.started?`<div class="muted small">Started ${new Date(S.started).toLocaleString()}</div>`:''}</div>
-   <div><table class="scores"><thead><tr><th>Mission</th><th>Status</th><th>Score</th></tr></thead><tbody>${rows}</tbody>
-   <tfoot><tr><th>Total</th><th></th><th>${T.s}/${T.m} (${T.pct}%)</th></tr></tfoot></table></div>
-   <div class="row"><button class="btn primary" id="dlCsv">Download CSV</button><button class="btn" id="dlJson">Download JSON</button><button class="btn" id="showTxt">Show as text</button></div>
-   <textarea class="dump" id="dump" hidden readonly aria-label="Log as text"></textarea>
-   <div><h3 style="font-size:1rem;margin-bottom:6px">Activity</h3><ul class="loglist">${items}</ul></div>
-   <button class="btn danger" id="resetAll"><span aria-hidden="true">↺</span> Start over or reset…</button>`;
-  $('#dlCsv').onclick=()=>download(csv(),`mfa-lab-${userName()}.csv`,'text/csv');
-  $('#dlJson').onclick=()=>download(JSON.stringify(exportObj(),null,2),`mfa-lab-${userName()}.json`,'application/json');
-  $('#showTxt').onclick=()=>{const d=$('#dump');d.hidden=!d.hidden;d.value=csv();if(!d.hidden){d.focus();d.select();}};
-  $('#resetAll').onclick=()=>openReset();
-}
-function exportObj(){const T=totals();return{student:S.student,studentId:S.studentId,started:S.started,exported:new Date().toISOString(),total:`${T.s}/${T.m}`,percent:T.pct,
-  missions:MISSIONS.slice(1).map(x=>({mission:x.title,complete:P(x.id).done,score:P(x.id).score,max:x.max})),log:S.log};}
-function csv(){const q=v=>`"${String(v??'').replace(/"/g,'""')}"`;
-  const head=['timestamp','student','student_id','mission','event','detail','result'];
-  const lines=S.log.map(l=>[l.t,S.student,S.studentId,MISSIONS.find(m=>m.id===l.mission)?.title||l.mission,l.event,l.detail,l.result].map(q).join(','));
-  const T=totals();lines.push([new Date().toISOString(),S.student,S.studentId,'SUMMARY','Total score',`${T.s}/${T.m}`,`${T.pct}%`].map(q).join(','));
-  return [head.join(','),...lines].join('\n');}
-function download(text,name,type){try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;document.body.appendChild(a);a.click();a.remove();toast(`Saved ${name}`);}catch(e){toast('Download blocked here. Use “Show as text” and copy instead.');}}
+const M1 = [
+ {q:"17 NIST SP 800-171 Rev 3 Control Families … 110 Total NIST SP 800-171 Controls",a:false,
+  why:"The page mixes revisions. Rev 2 has 14 families and 110 requirements. Rev 3 has 17 families and 97 requirements. CMMC Level 2 is assessed against Rev 2."},
+ {q:"Level 2: All NIST SP 800-171 (110 controls)",a:true,
+  why:"Correct. CMMC Level 2 requires all 110 Rev 2 security requirements, which include the 17 Level 1 practices."},
+ {q:"Level 3: NIST SP 800-171 + 800-172 (130 controls)",a:false,
+  why:"The final CMMC rule (32 CFR Part 170) sets Level 3 at the 110 Level 2 requirements plus 24 selected NIST SP 800-172 requirements, not 20."},
+ {q:"Practice IDs such as AC.1.001, AU.2.041, and SC.2.184",a:false,
+  why:"That numbering comes from CMMC 1.0. CMMC 2.0 practice IDs follow the NIST numbering, for example AC.L1-3.1.1 and AC.L2-3.1.8."},
+ {q:"AC.2.008 Privilege functions control: Limit unsuccessful logon attempts.",a:false,
+  why:"The title and description don’t match. Limiting unsuccessful logon attempts is AC.L2-3.1.8. Preventing non-privileged users from executing privileged functions is AC.L2-3.1.7."},
+ {q:"Maintenance (MA) includes a Level 1 control: MA.1.131 System maintenance",a:false,
+  why:"Level 1 practices come only from AC, IA, MP, PE, SC, and SI. All six MA requirements are Level 2."},
+ {q:"Level 1 … to protect Federal Contract Information (FCI). This level requires annual self-assessment.",a:true,
+  why:"Correct. Level 1 protects FCI with an annual self-assessment and an annual affirmation entered in SPRS."},
+ {q:"Level 1: Basic Safeguarding (17 controls) from FAR 52.204-21",a:true,
+  why:"Accurate, with nuance. FAR 52.204-21 lists 15 safeguarding requirements; the CMMC Level 1 assessment guide breaks them into 17 practices for assessment."},
+ {q:"Level 3 … Requires DIBCAC assessment.",a:true,
+  why:"Correct. Level 3 is assessed by DCMA’s DIBCAC, and an organization must first hold Final Level 2 (C3PAO) status for the same scope."},
+ {q:"Planning (PL), System and Services Acquisition (SA), and Supply Chain Risk Management (SR) are families assessed at CMMC Level 2.",a:false,
+  why:"PL, SA, and SR are new in Rev 3. Level 2 is assessed against Rev 2, which has 14 families and none of these three."}
+];
 
-/* ================= TOTP (RFC 6238, real HMAC-SHA1) ================= */
-const B32='ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
-function newSecret(){const b=new Uint8Array(10);crypto.getRandomValues(b);let bits='';b.forEach(x=>bits+=x.toString(2).padStart(8,'0'));let s='';for(let i=0;i<bits.length;i+=5)s+=B32[parseInt(bits.substr(i,5).padEnd(5,'0'),2)];return s;}
-function b32decode(s){let bits='';for(const c of s.toUpperCase()){const v=B32.indexOf(c);if(v>=0)bits+=v.toString(2).padStart(5,'0');}const o=new Uint8Array(Math.floor(bits.length/8));for(let i=0;i<o.length;i++)o[i]=parseInt(bits.substr(i*8,8),2);return o;}
-const hasSubtle=!!(window.crypto&&crypto.subtle);
-const otpCache={};
-async function totpAt(secret,counter){
-  const k=secret+':'+counter;if(otpCache[k])return otpCache[k];
-  let h;
-  if(hasSubtle){
-    const key=await crypto.subtle.importKey('raw',b32decode(secret),{name:'HMAC',hash:'SHA-1'},false,['sign']);
-    const buf=new ArrayBuffer(8),dv=new DataView(buf);dv.setUint32(0,Math.floor(counter/4294967296));dv.setUint32(4,counter>>>0);
-    h=new Uint8Array(await crypto.subtle.sign('HMAC',key,buf));
-  }else{ /* fallback: simulated digest if Web Crypto is unavailable */
-    h=new Uint8Array(20);let x=2166136261;const str=secret+counter;for(let i=0;i<20;i++){x^=str.charCodeAt(i%str.length)+i;x=Math.imul(x,16777619)>>>0;h[i]=x&255;}
-  }
-  const off=h[19]&15;const bin=((h[off]&127)<<24)|(h[off+1]<<16)|(h[off+2]<<8)|h[off+3];
-  return otpCache[k]={code:String(bin%1e6).padStart(6,'0'),hmac:[...h].map(b=>b.toString(16).padStart(2,'0')),off,bin,counter};
-}
-const counterNow=()=>Math.floor(Date.now()/30000);
-function ensureSecret(){if(!S.secret){S.secret=newSecret();save();}return S.secret;}
-async function verifyOtp(code){const c=counterNow();
-  for(const d of [0,-1,1]){if((await totpAt(S.secret,c+d)).code===code)return'ok';}
-  for(const d of [-2,-3,-4,-5,-6]){if((await totpAt(S.secret,c+d)).code===code)return'expired';}
-  return'bad';}
-let lastCounter=-1,curOtp=null;
-/* forget the cached code so the phone shows the new secret's code immediately after a reset */
-function resetTotp(){lastCounter=-1;curOtp=null;}
-async function tick(){
-  $$('.js-clock').forEach(e=>{if(!e.dataset.fixed)e.textContent=new Date().toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}).replace(/\s?[AP]M/i,'');});
-  if(!S.secret)return;
-  const c=counterNow();if(c!==lastCounter||!curOtp){lastCounter=c;curOtp=await totpAt(S.secret,c);}
-  const left=30-Math.floor((Date.now()/1000)%30);
-  $$('.js-otp').forEach(e=>{e.textContent=curOtp.code.slice(0,3)+' '+curOtp.code.slice(3);e.classList.toggle('low',left<=5);});
-  $$('.js-ring').forEach(e=>{e.style.strokeDashoffset=String(88*(1-left/30));});
-  $$('.js-left').forEach(e=>e.textContent=left+' s');
-  const hood=$('#hood');if(hood){
-    const hex=curOtp.hmac.map((b,i)=>i>=curOtp.off&&i<curOtp.off+4?`<mark>${b}</mark>`:b).join(' ');
-    hood.innerHTML=`<dt>Unix time</dt><dd>${Math.floor(Date.now()/1000)}</dd>
-    <dt>Counter T</dt><dd>floor(time ÷ 30) = ${c}</dd>
-    <dt>HMAC-SHA1</dt><dd>${hex}</dd>
-    <dt>Offset</dt><dd>last nibble 0x${curOtp.hmac[19][1]} → byte ${curOtp.off}</dd>
-    <dt>31-bit value</dt><dd>${curOtp.bin}</dd>
-    <dt>mod 10⁶</dt><dd style="color:var(--navy);font-weight:700">${curOtp.code}</dd>
-    <dt>Valid for</dt><dd>${left} s (server also accepts ±1 step for clock drift)</dd>
-    ${hasSubtle?'':'<dt>Note</dt><dd>Web Crypto unavailable: digest is simulated.</dd>'}`;}
-}
-setInterval(tick,1000);
+const M2_ITEMS = [
+ {id:"e1",fam:"PE",kind:"Paper binder",t:"Visitor sign-in binder at reception with escort initials",req:"PE.L1-3.10.3"},
+ {id:"e2",fam:"RA",kind:"Report",t:"Quarterly authenticated vulnerability scan report for the enclave",req:"RA.L2-3.11.2"},
+ {id:"e3",fam:"AC",kind:"Group Policy export",t:"Screen lock after 15 minutes of inactivity with a blank screen saver",req:"AC.L2-3.1.10"},
+ {id:"e4",fam:"AT",kind:"LMS certificates",t:"Completion records for the annual insider threat awareness module",req:"AT.L2-3.2.3"},
+ {id:"e5",fam:"CM",kind:"Ticket",t:"Change advisory board ticket approving and logging a firewall rule change",req:"CM.L2-3.4.3"},
+ {id:"e6",fam:"AU",kind:"Config file",t:"Log server set to sync time with an authoritative NTP source",req:"AU.L2-3.3.7"},
+ {id:"e7",fam:"PS",kind:"HR record",t:"Background check completed before an enclave account was issued",req:"PS.L2-3.9.1"},
+ {id:"e8",fam:"MP",kind:"Vendor certificate",t:"Certificate of destruction for shredded hard drives",req:"MP.L1-3.8.3"},
+ {id:"e9",fam:"MA",kind:"Session record",t:"Vendor remote support session opened with MFA and closed after the patch window",req:"MA.L2-3.7.5"},
+ {id:"e10",fam:"CA",kind:"Spreadsheet",t:"Plan of action tracking open deficiencies with owners and dates",req:"CA.L2-3.12.2"},
+ {id:"e11",fam:"SC",kind:"Firewall ruleset",t:"Final rule: deny any any; all allowed traffic listed by exception",req:"SC.L2-3.13.6"},
+ {id:"e12",fam:"SI",kind:"EDR console",t:"Dashboard showing malware definitions updated on every endpoint today",req:"SI.L1-3.14.4"},
+ {id:"e13",fam:"IA",kind:"Password policy",t:"Prevents reuse of the last 24 passwords",req:"IA.L2-3.5.8"},
+ {id:"e14",fam:"IR",kind:"Ticket export",t:"Incident tickets showing a phishing event reported to the prime and to DoD within 72 hours",req:"IR.L2-3.6.2"}
+];
 
-/* ================= reusable device markup ================= */
-const lockIco='<svg viewBox="0 0 16 16"><path d="M4 7V5a4 4 0 0 1 8 0v2h1v8H3V7h1zm2 0h4V5a2 2 0 0 0-4 0v2z" fill="currentColor"/></svg>';
-function browser(host,path,inner,evil=false){return `<div class="browser"><div class="urlbar"><div class="url ${evil?'evil':''}">${lockIco}<span>https://<span class="host">${esc(host)}</span>${esc(path)}</span></div></div><div class="page" id="page">${inner}</div></div>`;}
-function phone(inner,opts={}){return `<div class="phone-wrap"><div class="phone" aria-label="Simulated phone"><div class="screen"><div class="notch"></div>
-  <div class="sbar"><span class="js-clock" ${opts.time?`data-fixed="1"`:''}>${opts.time||''}</span><span>5G ▮</span></div><div id="phoneBody" style="display:flex;flex-direction:column;flex:1">${inner}</div></div></div></div>`;}
-function otpCard(){return `<div class="otp-card"><div class="otp-acct">Prairie Tech SSO<small>${esc(email())}</small></div>
-  <div class="otp-row"><span class="otp-code js-otp">--- ---</span><svg class="ring" viewBox="0 0 34 34"><circle class="bg" cx="17" cy="17" r="14"/><circle class="fg js-ring" cx="17" cy="17" r="14" stroke-dasharray="88"/></svg></div></div>`;}
-const authApp=inner=>`<div class="app-title">Authenticator <span class="muted small">🔒</span></div><div class="app-body">${inner}</div>`;
-const ssoLogo=(name='Prairie Tech')=>`<div class="sso-logo"><b>PT</b>${name} sign-in</div>`;
-function head(i,title,lede,goal){return `<div class="mission-head"><div class="mhead-row"><div class="step">Mission ${i} of 7</div><button class="btn sm" data-restart="m${i}" aria-label="Restart Mission ${i}"><span aria-hidden="true">↺</span> Restart mission</button></div><h2>${title}</h2><p>${lede}</p></div>${goal?`<div class="goal"><span aria-hidden="true">🎯</span><span>${goal}</span></div>`:''}`;}
-function qr(seed){let x=0;for(const c of seed)x=(x*31+c.charCodeAt(0))>>>0;const n=21,cells=[];const r=()=>{x^=x<<13;x^=x>>>17;x^=x<<5;x>>>=0;return x%2;};
-  const finder=(i,j)=>{for(const[a,b]of[[0,0],[0,n-7],[n-7,0]]){if(i>=a&&i<a+7&&j>=b&&j<b+7){const y=i-a,z=j-b;return(y===0||y===6||z===0||z===6||(y>=2&&y<=4&&z>=2&&z<=4));}}return null;};
-  for(let i=0;i<n;i++)for(let j=0;j<n;j++){const f=finder(i,j);if(f===true||(f===null&&r()))cells.push(`<rect x="${j}" y="${i}" width="1" height="1"/>`);}
-  return `<svg class="qr" viewBox="0 0 ${n} ${n}" role="img" aria-label="Simulated QR code"><g fill="#13213b">${cells.join('')}</g></svg>`;}
-function choiceQ(container,q,onAnswer){ /* q:{q,opts:[{t,ok,why}]} */
-  const opts=shuffle(q.opts);const id='q'+Math.random().toString(36).slice(2,7);
-  container.innerHTML=`<div class="stack"><div style="font-weight:700">${q.q}</div><div class="choices" id="${id}">${opts.map((o,i)=>`<button class="choice" data-i="${i}"><span class="k">${'ABCDE'[i]}</span><span>${o.t}</span></button>`).join('')}</div><div class="fbx"></div></div>`;
-  let first=true;
-  $('#'+id).addEventListener('click',e=>{const b=e.target.closest('.choice');if(!b||b.disabled)return;const o=opts[+b.dataset.i];
-    if(o.ok){b.classList.add('right');$$('.choice',$('#'+id)).forEach(x=>x.disabled=true);container.querySelector('.fbx').innerHTML=`<div class="fb ok"><strong>Correct.</strong>${o.why||q.why||''}</div>`;onAnswer(true,first);}
-    else{b.classList.add('wrong','shake');b.disabled=true;container.querySelector('.fbx').innerHTML=`<div class="fb bad"><strong>Not quite.</strong>${o.why||'Try another option.'}</div>`;onAnswer(false,first,o);first=false;}
-  });}
-</script>
-<script>
-/* ================= router ================= */
-const R={};
-function go(id){clearTimers();S.current=id;if(id!=='m0'&&!S.missions[id]){M(id);logEv(id,'Mission started');}save();renderChrome();
-  const st=$('#stage');st.innerHTML='';R[id]();window.scrollTo({top:0,behavior:'smooth'});st.focus({preventScroll:true});}
-function once(mid,flag,pts){const d=M(mid).data;if(d['p_'+flag])return false;d['p_'+flag]=1;award(mid,pts);return true;}
-function nextBtn(id){const i=MISSIONS.findIndex(m=>m.id===id);const n=MISSIONS[i+1];return n?`<button class="btn primary" data-go="${n.id}">Next: ${esc(n.title)}</button>`:'';}
-$('#stage').addEventListener('click',e=>{
-  const r=e.target.closest('[data-restart]');if(r){openReset(r.dataset.restart);return;}
-  const b=e.target.closest('[data-go]');if(b)go(b.dataset.go);});
+const CATS = [
+ {id:"cui",n:"CUI Asset",d:"Processes, stores, or transmits CUI. Fully assessed."},
+ {id:"spa",n:"Security Protection Asset",d:"Provides security functions for the enclave, even without CUI. Assessed."},
+ {id:"crma",n:"Contractor Risk Managed Asset",d:"Can, but isn’t intended to, handle CUI because of policy and procedure. Documented in the SSP, reviewed."},
+ {id:"spec",n:"Specialized Asset",d:"IoT, OT, GFE, restricted systems, or test equipment. Documented in the SSP."},
+ {id:"oos",n:"Out-of-Scope Asset",d:"Cannot handle CUI and is physically or logically separated. Not assessed."}
+];
+const M3 = [
+ {i:"💻",t:"Operations planner’s laptop",d:"Stores the monthly installation delivery schedules received from the prime.",a:"cui",
+  why:"It stores CUI, so it is a CUI Asset and every applicable requirement is assessed on it."},
+ {i:"📊",t:"Log server (SIEM)",d:"Collects and correlates logs from every enclave system. Holds no CUI itself.",a:"spa",
+  why:"It provides security functions for the CUI environment, which makes it a Security Protection Asset."},
+ {i:"📟",t:"Army-issued handheld receiving scanner",d:"Government-furnished device used at the loading dock to receive shipments.",a:"spec",
+  why:"Government-furnished equipment is a Specialized Asset. It is documented in the SSP and shown on the network diagram."},
+ {i:"📱",t:"Kitchen manager’s inventory tablet",d:"Joined to the enclave network and could open SharePoint, but policy forbids using it for CUI and staff are trained on that.",a:"crma",
+  why:"It can handle CUI but isn’t intended to, because of documented policy and procedure. That is a Contractor Risk Managed Asset."},
+ {i:"🌐",t:"Public marketing website",d:"Hosted by an outside web firm. No connection to the enclave, no CUI.",a:"oos",
+  why:"It cannot process, store, or transmit CUI and is separated from the enclave, so it is out of scope."},
+ {i:"🔑",t:"Identity provider and domain controller",d:"Authenticates every enclave user and enforces Group Policy.",a:"spa",
+  why:"Authentication and policy enforcement are security functions, so it is a Security Protection Asset."},
+ {i:"✉️",t:"GCC High email tenant",d:"FFSI’s mailboxes, where the prime sends CUI attachments.",a:"cui",
+  why:"It stores and transmits CUI. As a cloud service, it must also meet FedRAMP Moderate or equivalent under DFARS 252.204-7012."},
+ {i:"🧾",t:"Cafeteria point-of-sale terminals",d:"On their own VLAN with no route to the enclave. Handle card payments only.",a:"oos",
+  why:"They are logically separated and can’t reach CUI, so they are out of scope. Keep the VLAN separation documented."}
+];
 
-/* ================= start over / reset ================= */
-let resetTarget=null,resetReturn=null;
-const resetOpen=()=>$('#resetScrim').classList.contains('on');
-function openReset(mid){
-  const cand=mid||S.current;
-  resetTarget=cand&&cand!=='m0'?cand:null;
-  resetReturn=document.activeElement;
-  const m=MISSIONS.find(x=>x.id===resetTarget);
-  $('#rMission').hidden=!m;
-  if(m)$('#rMissionTitle').textContent=`Restart Mission ${MISSIONS.indexOf(m)}: ${m.title}`;
-  if(drawerOpen)openDrawer(false);
-  $('#resetScrim').classList.add('on');$('#resetScrim').setAttribute('aria-hidden','false');
-  (m?$('#rMissionGo'):$('#rAllGo')).focus();
+const M4 = [
+ {id:"c1",rid:"AC.L2-3.1.8",title:"Limit unsuccessful logon attempts",
+  ev:[["Examine","Access Control Policy AC-04: accounts lock for 30 minutes after 5 invalid logon attempts."],
+      ["Examine","GPO export, Workstations OU: account lockout threshold set to 5."],
+      ["Examine","GPO export, Enclave Servers OU: account lockout threshold set to 0 (never lock)."],
+      ["Test","Assessor entered 10 wrong passwords for a test account on the file server FFSI-FS01. The account did not lock."]],
+  obj:[["[a]","The means of limiting unsuccessful logon attempts is defined.",true],["[b]","The defined means of limiting unsuccessful logon attempts is implemented.",false]],
+  det:"notmet",why:"The policy defines the means, so [a] is satisfied. The servers that hold CUI don’t enforce it, and the test confirmed that, so [b] fails. One failed objective makes the requirement NOT MET."},
+ {id:"c2",rid:"IA.L2-3.5.3",title:"Multifactor authentication",
+  ev:[["Examine","Account inventory separates privileged and non-privileged accounts and lists every enclave user."],
+      ["Examine","Conditional access policy A requires MFA for all privileged roles from any location."],
+      ["Examine","Conditional access policy B requires MFA for all users, but excludes the named location FFSI HQ."],
+      ["Test","Assessor observed a server console logon by a domain admin that required a smart card and PIN."],
+      ["Test","From an FFSI HQ desk, a standard user opened the CUI SharePoint site with a password only."]],
+  obj:[["[a]","Privileged accounts are identified.",true],["[b]","Non-privileged accounts are identified.",true],["[c]","Users are identified.",true],
+       ["[d]","MFA is implemented for local access to privileged accounts.",true],["[e]","MFA is implemented for network access to privileged accounts.",true],
+       ["[f]","MFA is implemented for network access to non-privileged accounts.",false]],
+  det:"notmet",why:"Everything checks out except [f]. Excluding the office network means standard users reach CUI over the network with one factor. That location exclusion is a common real-world gap."},
+ {id:"c3",rid:"IR.L2-3.6.1",title:"Incident-handling capability",
+  ev:[["Examine","Incident Response Plan v3 covers preparation, detection, analysis, containment, eradication, and recovery, with named roles."],
+      ["Examine","Retainer with an MSSP that monitors the SIEM around the clock and escalates by phone."],
+      ["Interview","Help desk lead describes how users report suspicious email with the report button and what happens next."],
+      ["Examine","Recovery runbooks for the file server and identity provider, with backup restore steps."]],
+  obj:[["[a]","An operational incident-handling capability is established.",true],["[b]","It includes preparation.",true],["[c]","It includes detection.",true],
+       ["[d]","It includes analysis.",true],["[e]","It includes containment.",true],["[f]","It includes recovery.",true],["[g]","It includes user response activities.",true]],
+  det:"met",why:"Each of the seven objectives has supporting evidence from more than one method. This is MET. Whether the plan has been tested is a separate requirement, 3.6.3."},
+ {id:"c4",rid:"PE.L2-3.10.4",title:"Maintain audit logs of physical access",
+  ev:[["Examine","Badge system logs for the main entrance, retained one year."],
+      ["Examine","Visitor sign-in binder at reception."],
+      ["Interview","Kitchen staff say delivery drivers are let in through the loading dock door, which opens into the hallway beside the operations office."],
+      ["Examine","The loading dock door has a key lock only. No badge reader, no log."]],
+  obj:[["[a]","Audit logs of physical access are maintained.",false]],
+  det:"notmet",why:"Logs exist for the front door, but people enter the facility that houses CUI systems through the dock with no record. Partial logging does not satisfy [a]."},
+ {id:"c5",rid:"SC.L2-3.13.11",title:"FIPS-validated cryptography",
+  ev:[["Examine","BitLocker on all laptops with the Windows FIPS policy enabled. CMVP certificate for the module confirmed."],
+      ["Examine","CUI email uses the GCC High tenant."],
+      ["Interview","IT lead explains that CUI files go to the prime through a self-hosted SFTP server built from a community Linux image."],
+      ["Test","Assessor checked the SFTP server’s crypto library. The build is not a FIPS-validated module and FIPS mode is unavailable."]],
+  obj:[["[a]","FIPS-validated cryptography is employed to protect the confidentiality of CUI.",false]],
+  det:"notmet",why:"Encrypted is not the same as FIPS validated. One CUI path uses a non-validated module, so [a] fails. Because encryption is used, the deduction is 3 points instead of 5."},
+ {id:"c6",rid:"AT.L2-3.2.2",title:"Role-based security training",
+  ev:[["Examine","RACI chart assigns security duties to the IT lead, two system administrators, and the facility security officer."],
+      ["Examine","Training records: both administrators completed vendor hardening and logging courses this year."],
+      ["Interview","A system administrator walks through how they review the SIEM dashboard and escalate alerts, matching the procedure."]],
+  obj:[["[a]","Information security-related duties, roles, and responsibilities are defined.",true],["[b]","Those duties, roles, and responsibilities are assigned to designated personnel.",true],
+       ["[c]","Personnel are adequately trained to carry out their assigned duties.",true]],
+  det:"met",why:"Roles are defined and assigned, training records exist, and the interview shows the training stuck. All three objectives are satisfied, so this is MET."}
+];
+
+const M5_POAM = [
+ {id:"3.1.8",ok:true},{id:"3.3.4",ok:true},{id:"3.5.3",ok:false},{id:"3.6.3",ok:true},{id:"3.10.4",ok:false},{id:"3.13.11",ok:true}
+];
+const M5_STATUS = [
+ {id:"s1",t:"Final Level 2 status, because the score is above 88"},
+ {id:"s2",t:"Conditional Level 2 status, with all six findings on a POA&M"},
+ {id:"s3",t:"No Conditional status until 3.5.3 and 3.10.4 are MET, even though the score is high enough"},
+ {id:"s4",t:"Failure, because the score is below the 88-point minimum"}
+];
+const M5_CLOSE = [{id:"d90",t:"90 days"},{id:"d180",t:"180 days"},{id:"d365",t:"One year"},{id:"dnext",t:"Before the next contract option year"}];
+
+const RUBRIC = [
+ "The condition states what I observed, not what I assume or recommend.",
+ "I cite the specific requirement and the objective that is not satisfied.",
+ "The evidence names the artifact, interview, or test and the method used.",
+ "The risk is explained in terms FFSI leadership would understand.",
+ "The remediation is specific enough for IT to act on and to verify later."
+];
+const POAM_OK = {"IA.L2-3.5.3":"no","AC.L2-3.1.8":"yes","PE.L2-3.10.4":"no","SC.L2-3.13.11":"yes"};
+const MODEL = {
+ "IA.L2-3.5.3":{o:"[f]",c:"MFA is not enforced for network access by non-privileged users connecting from the FFSI HQ network. Standard users can open the CUI SharePoint site with a password only.",
+  e:"Examine: Conditional access policy B, which excludes the named location FFSI HQ. Test: a standard user opened the CUI SharePoint site from an HQ desk with no second factor.",
+  r:"A single stolen or guessed password gives an on-site attacker or malicious insider access to installation delivery schedules and troop counts.",
+  m:"Remove the FFSI HQ exclusion from policy B so MFA applies to all users at every location, then retest from an HQ desk.",p:"No. 3.5.3 is a 5-point requirement (3 points partial), so it can’t go on a POA&M."},
+ "AC.L2-3.1.8":{o:"[b]",c:"The Enclave Servers OU does not enforce the account lockout threshold defined in policy AC-04.",
+  e:"Examine: GPO export showing threshold 0 on the Enclave Servers OU. Test: 10 invalid attempts on FFSI-FS01 did not lock the test account.",
+  r:"Attackers can try unlimited passwords against the servers that store CUI.",
+  m:"Apply the lockout GPO (5 attempts, 30 minutes) to the Enclave Servers OU and repeat the test.",p:"Yes. It is a 1-point requirement not on the exclusion list."},
+ "PE.L2-3.10.4":{o:"[a]",c:"Physical access through the loading dock door is not logged.",
+  e:"Interview: kitchen staff on dock deliveries. Examine: the dock door has a key lock only and no log.",
+  r:"People can enter the area beside the CUI operations office with no record, so incidents can’t be traced.",
+  m:"Add a badge reader or a staffed delivery log at the dock and retain it with the badge logs.",p:"No. 3.10.4 is excluded from POA&Ms under 32 CFR §170.21."},
+ "SC.L2-3.13.11":{o:"[a]",c:"CUI sent to the prime through the self-hosted SFTP server is protected by a cryptographic module that is not FIPS validated.",
+  e:"Interview: IT lead on the SFTP transfer process. Test: the server’s crypto library is not a validated module and FIPS mode is unavailable.",
+  r:"DoD can’t rely on the strength of the encryption protecting CUI in transit to the prime.",
+  m:"Move transfers to a platform using a CMVP-validated module in FIPS mode, or rebuild the server on a FIPS-capable OS image.",p:"Yes. Encryption is in place, so the 3-point partial case may go on a POA&M."}
+};
+
+/* ---------- STATE ---------- */
+const KEY="ffsi171_activity_v1", TKEY="ffsi171_theme";
+const blank = () => ({name:"",m1:{},m2:{placed:{},miss:{}},m3:{},m4:{},m5:{score:"",poam:[],status:"",close:"",done:false,pts:0},
+  m6:{req:"",obj:"",cond:"",evid:"",risk:"",rem:"",poam:"",date:"",rubric:[],done:false},reflection:"",view:"briefing"});
+let S = blank();
+function load(){try{const raw=localStorage.getItem(KEY);if(raw){S=Object.assign(blank(),JSON.parse(raw));}}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}updateProgress();}
+
+/* ---------- THEME ---------- */
+const themeBtn=document.getElementById("themeBtn");
+function setTheme(t){document.documentElement.setAttribute("data-theme",t);themeBtn.textContent=t==="dark"?"Light mode":"Dark mode";themeBtn.setAttribute("aria-pressed",t==="dark");try{localStorage.setItem(TKEY,t);}catch(e){}}
+themeBtn.addEventListener("click",()=>setTheme(document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark"));
+let savedTheme="light";try{savedTheme=localStorage.getItem(TKEY)||"light";}catch(e){}
+setTheme(savedTheme);
+
+/* ---------- SCORING ---------- */
+function m1Score(){let p=0,d=0;M1.forEach((c,i)=>{if(S.m1[i]!==undefined){d++;if(S.m1[i]===c.a)p++;}});return {p,max:M1.length,done:d===M1.length};}
+function m2Score(){let p=0,d=0;M2_ITEMS.forEach(it=>{if(S.m2.placed[it.id]){d++;if(!S.m2.miss[it.id])p++;}});return {p,max:M2_ITEMS.length,done:d===M2_ITEMS.length};}
+function m3Score(){let p=0,d=0;M3.forEach((a,i)=>{if(S.m3[i]){d++;if(S.m3[i]===a.a)p++;}});return {p,max:M3.length,done:d===M3.length};}
+function m4Score(){let p=0,d=0;M4.forEach(c=>{const r=S.m4[c.id];if(r&&r.done){d++;if(r.det===c.det)p++;if(c.obj.every((o,i)=>!!(r.objs||[])[i]===o[2]))p++;}});return {p,max:M4.length*2,done:d===M4.length};}
+function m5Score(){return {p:S.m5.done?S.m5.pts:0,max:6,done:S.m5.done};}
+function m6Score(){if(!S.m6.done)return {p:0,max:6,done:false};let p=S.m6.rubric.filter(Boolean).length;if(S.m6.req&&S.m6.poam===POAM_OK[S.m6.req])p++;return {p,max:6,done:true};}
+const SCORERS={m1:m1Score,m2:m2Score,m3:m3Score,m4:m4Score,m5:m5Score,m6:m6Score};
+function chip(id){const s=SCORERS[id]();document.getElementById(id+"Score").textContent=`${s.p} of ${s.max} points${s.done?"":" so far"}`;}
+function updateProgress(){
+  const ids=Object.keys(SCORERS);const done=ids.filter(i=>SCORERS[i]().done).length;
+  const pct=Math.round(done/ids.length*100);
+  document.getElementById("progBar").style.width=pct+"%";
+  document.getElementById("progLabel").textContent=`${done} of 6 missions complete`;
+  document.querySelectorAll(".rail .num").forEach(n=>{const id=n.dataset.id;if(SCORERS[id])n.classList.toggle("done",SCORERS[id]().done);});
 }
-function closeReset(){$('#resetScrim').classList.remove('on');$('#resetScrim').setAttribute('aria-hidden','true');
-  if(resetReturn&&document.contains(resetReturn))resetReturn.focus();resetReturn=null;}
-function restartMission(id){
-  const m=MISSIONS.find(x=>x.id===id);if(!m)return;const prev=P(id);
-  clearTimers();
-  logEv(id,'Mission restarted',`Previous score ${prev.score}/${m.max}${prev.done?' (was complete)':''}`);
-  delete S.missions[id];
-  if(id==='m2'){S.secret=null;resetTotp();} /* re-enroll with a brand-new shared secret */
-  save();go(id);toast(`Mission restarted: ${m.title}`);
+
+/* ---------- NAV ---------- */
+const rail=document.getElementById("rail");
+function buildRail(){
+  let html="<h4>Prepare</h4>";
+  SECTIONS.forEach((s,i)=>{
+    if(i===2)html+="<h4>Missions</h4>";
+    if(s.id==="summary")html+="<h4>Wrap up</h4>";
+    const badge=s.n?`<span class="num" data-id="${s.id}">${s.n}</span>`:`<span class="num" aria-hidden="true">${s.id==="summary"?"✓":s.id==="briefing"?"i":"≡"}</span>`;
+    html+=`<button data-go="${s.id}">${badge}<span>${s.label}<span class="sub">${s.sub}</span></span></button>`;
+  });
+  rail.innerHTML=html;
 }
-function resetAll(keep){
-  const name=S.student,sid=S.studentId;
-  clearTimers();S=fresh();
-  if(keep){S.student=name;S.studentId=sid;}
-  resetTotp();save();go('m0');
-  toast(keep&&name?'Lab reset. Your name was kept.':'Lab reset');
+function go(id){
+  document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id==="v-"+id));
+  rail.querySelectorAll("button").forEach(b=>b.toggleAttribute("aria-current",false));
+  const cur=rail.querySelector(`button[data-go="${id}"]`);if(cur)cur.setAttribute("aria-current","page");
+  S.view=id;save();
+  if(id==="summary")renderSummary();
+  window.scrollTo({top:0});
+  const h=document.querySelector("#v-"+id+" h1, #v-"+id+" h2");if(h){h.setAttribute("tabindex","-1");h.focus({preventScroll:true});}
 }
-$('#resetBtn').onclick=()=>openReset();
-$('#rCancel').onclick=closeReset;
-$('#resetScrim').addEventListener('click',e=>{if(e.target.id==='resetScrim')closeReset();});
-$('#rMissionGo').onclick=()=>{const id=resetTarget;closeReset();restartMission(id);};
-$('#rAllGo').onclick=()=>{const k=$('#rKeep').checked;closeReset();resetAll(k);};
-$('#rDl').onclick=()=>download(csv(),`mfa-lab-${userName()}.csv`,'text/csv');
-document.addEventListener('keydown',e=>{
-  if(!resetOpen())return;
-  if(e.key==='Escape'){e.preventDefault();closeReset();return;}
-  if(e.key==='Tab'){ /* keep keyboard focus inside the dialog */
-    const f=$$('button,input',$('.rdlg')).filter(x=>x.offsetParent!==null&&!x.disabled);
-    if(!f.length)return;const a=f[0],z=f[f.length-1];
-    if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus();}
-    else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus();}
-  }
+document.addEventListener("click",e=>{const g=e.target.closest("[data-go]");if(g){e.preventDefault();go(g.dataset.go);}});
+
+/* ---------- BRIEFING ---------- */
+function buildBriefing(){
+  const nm=document.getElementById("learnerName");nm.value=S.name;
+  nm.addEventListener("input",()=>{S.name=nm.value;save();});
+  document.getElementById("ksaTable").innerHTML="<tr><th>Code</th><th>Type</th><th>Description</th><th>Missions</th></tr>"+
+    KSAS.map(k=>`<tr><td class="ksa-code">${k.c}</td><td>${k.t}</td><td>${k.d}</td><td>${k.m.map(m=>m.replace("m","")).join(", ")}</td></tr>`).join("");
+  document.getElementById("missionMap").innerHTML=SECTIONS.filter(s=>s.n).map(s=>`<div><b>${s.n}. ${s.label}</b><span class="role-tag ${s.sub==="Associate"?"assoc":"audit"}" style="margin:.2rem 0 .3rem">${s.sub} role</span><br>${MISSION_BLURBS[s.id]}</div>`).join("");
+}
+
+/* ---------- REFERENCE ---------- */
+let refLvl="all",refQ="",allOpen=false;
+function buildRef(){
+  const q=refQ.trim().toLowerCase();let shown=0;
+  document.getElementById("famList").innerHTML=FAMILIES.map(f=>{
+    const rows=f.r.map((r,i)=>({id:rid(f,i,r[1]),t:r[0],l:r[1]})).filter(r=>{
+      if(refLvl==="1"&&r.l!==1)return false;if(refLvl==="2"&&r.l!==2)return false;
+      if(q&&!(r.id.toLowerCase().includes(q)||r.t.toLowerCase().includes(q)||f.name.toLowerCase().includes(q)))return false;return true;});
+    shown+=rows.length;if(!rows.length)return "";
+    const open=(q||allOpen)?" open":"";
+    return `<details class="fam"${open}><summary><span class="fam-code">${f.code}</span><span><b>${f.name}</b> <span class="fam-count">3.${f.n}</span></span><span class="fam-count">${rows.length} of ${f.r.length}</span></summary>`+
+      rows.map(r=>`<div class="req"><span class="rid">${r.id}</span><span>${r.t}</span><span class="lvl l${r.l}">Level ${r.l}</span></div>`).join("")+"</details>";
+  }).join("")||`<div class="panel flat">No requirements match “${refQ}”. Try an ID like 3.13.11 or a word like encrypt.</div>`;
+  document.getElementById("refCount").textContent=`Showing ${shown} requirement${shown===1?"":"s"}`;
+}
+document.querySelectorAll(".seg button").forEach(b=>b.addEventListener("click",()=>{
+  refLvl=b.dataset.lvl;document.querySelectorAll(".seg button").forEach(x=>x.setAttribute("aria-pressed",x===b));buildRef();}));
+document.getElementById("refSearch").addEventListener("input",e=>{refQ=e.target.value;buildRef();});
+document.getElementById("expandAll").addEventListener("click",e=>{allOpen=!allOpen;e.target.textContent=allOpen?"Collapse all":"Expand all";buildRef();});
+
+/* ---------- M1 ---------- */
+function buildM1(){
+  document.getElementById("m1List").innerHTML=M1.map((c,i)=>{
+    const ans=S.m1[i];const done=ans!==undefined;
+    const cls=v=>done?(v===c.a?" right":(ans===v?" wrong":"")):"";
+    return `<article class="claim"><div class="legacy-strip">Legacy guide excerpt ${i+1} of ${M1.length}</div><div class="claim-body">
+      <q>${c.q}</q><div class="choice-row">
+      <button class="choice${cls(true)}" data-m1="${i}" data-v="1" ${done?"disabled":""}>Accurate</button>
+      <button class="choice${cls(false)}" data-m1="${i}" data-v="0" ${done?"disabled":""}>Inaccurate or outdated</button></div>
+      <div class="feedback ${done?"show "+(ans===c.a?"ok":"no"):""}" aria-live="polite">${done?`<b>${ans===c.a?"Good call.":"Not quite."}</b>${c.why}`:""}</div></div></article>`;
+  }).join("");chip("m1");
+}
+document.getElementById("m1List").addEventListener("click",e=>{const b=e.target.closest("[data-m1]");if(!b)return;
+  S.m1[b.dataset.m1]=b.dataset.v==="1";save();buildM1();});
+
+/* ---------- M2 ---------- */
+let sel=null;
+function buildM2(){
+  const pile=M2_ITEMS.filter(it=>!S.m2.placed[it.id]);
+  document.getElementById("m2Pile").innerHTML=pile.length?pile.map(it=>`<button class="ev-card" draggable="true" data-ev="${it.id}" aria-pressed="${sel===it.id}"><span class="ev-kind">${it.kind}</span>${it.t}</button>`).join("")
+    :`<div class="panel flat"><b>Evidence folder sorted.</b> Every family has its artifact. Hover or read each bin to see the specific requirement it supports.</div>`;
+  document.getElementById("m2Bins").innerHTML=FAMILIES.map(f=>{
+    const it=M2_ITEMS.find(x=>x.fam===f.code&&S.m2.placed[x.id]);
+    return `<button class="bin${it?" filled":""}" data-bin="${f.code}" aria-label="${f.name}${it?", contains "+it.t:""}"><b>${f.code}</b>${f.name}${it?`<span class="placed">✓ <span class="mono">${it.req}</span></span>`:""}</button>`;}).join("");
+  chip("m2");
+}
+function place(evId,fam){
+  const it=M2_ITEMS.find(x=>x.id===evId);if(!it||S.m2.placed[evId])return;
+  const log=document.getElementById("m2Log");
+  if(it.fam===fam){S.m2.placed[evId]=true;sel=null;log.textContent=`Correct. That artifact supports ${it.req}.`;save();buildM2();}
+  else{S.m2.miss[evId]=true;save();const b=document.querySelector(`[data-bin="${fam}"]`);if(b){b.classList.remove("miss");void b.offsetWidth;b.classList.add("miss");}
+    const f=FAMILIES.find(x=>x.code===fam);log.textContent=`Not ${f.name}. Reread the artifact and check the reference for which family governs it.`;chip("m2");}
+}
+const m2=document.getElementById("v-m2");
+m2.addEventListener("click",e=>{
+  const c=e.target.closest("[data-ev]");if(c){sel=sel===c.dataset.ev?null:c.dataset.ev;buildM2();if(sel)document.getElementById("m2Log").textContent="Now choose the family this artifact belongs to.";return;}
+  const b=e.target.closest("[data-bin]");if(b){if(!sel){document.getElementById("m2Log").textContent="Select an artifact first.";return;}place(sel,b.dataset.bin);}
 });
+m2.addEventListener("dragstart",e=>{const c=e.target.closest("[data-ev]");if(c){e.dataTransfer.setData("text/plain",c.dataset.ev);}});
+m2.addEventListener("dragover",e=>{const b=e.target.closest("[data-bin]");if(b){e.preventDefault();b.classList.add("hot");}});
+m2.addEventListener("dragleave",e=>{const b=e.target.closest("[data-bin]");if(b)b.classList.remove("hot");});
+m2.addEventListener("drop",e=>{const b=e.target.closest("[data-bin]");if(b){e.preventDefault();b.classList.remove("hot");place(e.dataTransfer.getData("text/plain"),b.dataset.bin);}});
 
-/* ================= M0 briefing ================= */
-R.m0=()=>{
-  const nextUp=MISSIONS.slice(1).find(m=>!P(m.id).done)||MISSIONS[7];
-  $('#stage').innerHTML=`
-  <div class="mission-head"><div class="step">Briefing</div><h2>Assume your password is already stolen.</h2>
-  <p>Billions of credentials circulate in breach dumps. In this lab you’ll sign in, get attacked, and make policy decisions, so you can see exactly what a second factor stops and what it doesn’t.</p></div>
-  <div class="stack" style="max-width:820px">
-   <div class="panel"><h3>Sign in to the lab</h3><p class="muted small">Your name labels your progress log. Everything stays in this browser until you download it.</p>
-    <div class="row" style="align-items:flex-end">
-     <div class="field" style="flex:2;min-width:200px;margin:0"><label for="nm">Your name</label><input id="nm" value="${esc(S.student)}" autocomplete="name" placeholder="First and last name"></div>
-     <div class="field" style="flex:1;min-width:140px;margin:0"><label for="sid">Student ID (optional)</label><input id="sid" value="${esc(S.studentId)}"></div>
-     <button class="btn primary" id="startBtn">${S.started?`Continue: ${esc(nextUp.title)}`:'Start the lab'}</button>
-    </div><div id="m0fb" style="margin-top:10px"></div>
-    ${S.started?`<p class="muted small" style="margin:12px 0 0">Want a fresh attempt? <button class="btn sm" data-restart="m0"><span aria-hidden="true">↺</span> Start over</button></p>`:''}</div>
-   <div class="panel"><h3>By the end you will be able to</h3><ul class="objectives">
-    <li>Classify authentication factors and tell true multifactor authentication from two steps of the same factor.</li>
-    <li>Enroll a time-based one-time password (TOTP) authenticator and explain how the six-digit code is computed.</li>
-    <li>Approve a push sign-in with number matching and explain the attack it defends against.</li>
-    <li>Recognize and respond to an MFA fatigue (push bombing) attack.</li>
-    <li>Explain why adversary-in-the-middle phishing defeats codes and pushes but not FIDO2 security keys or passkeys.</li>
-    <li>Choose MFA controls for privileged accounts, help desk resets, legacy protocols, and enrollment.</li></ul>
-    <p class="muted small" style="margin-top:10px">Aligned with CompTIA Security+ SY0-701 objective 4.6, NIST SP 800-63B, CISA guidance on phishing-resistant MFA, and NICE Framework knowledge and skill statements for identity and access management.</p></div>
-   <div class="panel"><h3>How it works</h3><p>Seven missions take about 40 minutes. The simulated phone on the right of each lab is your authenticator; its codes are generated with the real TOTP algorithm. You earn points for correct answers on the first try, and every action is written to the progress log. Open <b>Progress log</b> at any time to download a CSV or JSON record for your instructor. Use <b>Start over</b> at the top to replay one mission or reset the whole lab.</p></div>
+/* ---------- M3 ---------- */
+function buildM3(){
+  document.getElementById("catKey").innerHTML=CATS.map(c=>`<div><b>${c.n}</b>${c.d}</div>`).join("");
+  document.getElementById("m3List").innerHTML=M3.map((a,i)=>{
+    const ans=S.m3[i];const done=!!ans;
+    return `<div class="asset"><div class="asset-head"><span class="asset-icon" aria-hidden="true">${a.i}</span><div><h3 style="margin:0">${a.t}</h3><p style="font-size:.93rem;color:var(--muted)">${a.d}</p></div></div>
+     <div class="choice-row">${CATS.map(c=>`<button class="choice${done?(c.id===a.a?" right":(ans===c.id?" wrong":"")):""}" data-m3="${i}" data-c="${c.id}" ${done?"disabled":""}>${c.n}</button>`).join("")}</div>
+     <div class="feedback ${done?"show "+(ans===a.a?"ok":"no"):""}" aria-live="polite">${done?`<b>${ans===a.a?"Correct.":"Not quite. It’s a "+CATS.find(c=>c.id===a.a).n+"."}</b>${a.why}`:""}</div></div>`;
+  }).join("");chip("m3");
+}
+document.getElementById("m3List").addEventListener("click",e=>{const b=e.target.closest("[data-m3]");if(!b)return;S.m3[b.dataset.m3]=b.dataset.c;save();buildM3();});
+
+/* ---------- M4 ---------- */
+let caseIdx=0;
+function buildM4(){
+  document.getElementById("caseTabs").innerHTML=M4.map((c,i)=>{const r=S.m4[c.id];let dot="";
+    if(r&&r.done){const ok=r.det===c.det&&c.obj.every((o,j)=>!!(r.objs||[])[j]===o[2]);dot=`<span class="dot ${ok?"ok":"no"}" aria-label="${ok?"fully correct":"review feedback"}"></span>`;}
+    return `<button class="case-tab" role="tab" aria-selected="${i===caseIdx}" data-case="${i}">${c.rid}${dot}</button>`;}).join("");
+  const c=M4[caseIdx];const r=S.m4[c.id]||{objs:[],det:null,done:false};
+  const objHtml=c.obj.map((o,i)=>{let mark="";if(r.done)mark=(!!r.objs[i]===o[2])?" mark-ok":" mark-no";
+    return `<label class="obj${mark}"><input type="checkbox" data-obj="${i}" ${r.objs[i]?"checked":""} ${r.done?"disabled":""}><span><b class="mono">${o[0]}</b> ${o[1]}${r.done?` <em style="color:var(--muted)">(${o[2]?"satisfied":"not satisfied"})</em>`:""}</span></label>`;}).join("");
+  const detOk=r.done&&r.det===c.det;const objOk=r.done&&c.obj.every((o,i)=>!!r.objs[i]===o[2]);
+  document.getElementById("caseBody").innerHTML=`<div class="workpaper">
+    <div class="wp-head"><div><span class="rid">${c.rid}</span><h3 style="margin:.15rem 0 0">${c.title}</h3></div><span class="fam-count">Workpaper ${caseIdx+1} of ${M4.length}</span></div>
+    <span class="stamp ${r.done?r.det+" on":""}" aria-hidden="true">${r.det==="met"?"MET":"NOT MET"}</span>
+    <h3 style="font-size:1rem">Evidence collected</h3>
+    <ul class="ev-list">${c.ev.map(e=>`<li><span class="method ${e[0]}">${e[0]}</span><span>${e[1]}</span></li>`).join("")}</ul>
+    <h3 style="font-size:1rem">SP 800-171A objectives: check each one the evidence satisfies</h3>
+    <div>${objHtml}</div>
+    <div class="det-row">
+      <button class="det met" data-det="met" aria-pressed="${r.det==="met"}" ${r.done?"disabled":""}>MET</button>
+      <button class="det notmet" data-det="notmet" aria-pressed="${r.det==="notmet"}" ${r.done?"disabled":""}>NOT MET</button>
+      <button class="btn" id="recordDet" ${r.done||!r.det?"disabled":""}>Record determination</button>
+      ${r.done&&caseIdx<M4.length-1?`<button class="btn ghost" id="nextCase">Next workpaper</button>`:""}
+    </div>
+    <div class="feedback ${r.done?"show "+(detOk&&objOk?"ok":"no"):""}" aria-live="polite">${r.done?`<b>${detOk?"Determination correct.":"Determination should be "+(c.det==="met"?"MET":"NOT MET")+"."} ${objOk?"Objectives correct.":"Check the highlighted objectives."}</b>${c.why}`:""}</div>
   </div>`;
-  $('#startBtn').onclick=()=>{const n=$('#nm').value.trim();if(!n){$('#m0fb').innerHTML='<div class="fb warn">Enter your name so your instructor can match the log to you.</div>';$('#nm').focus();return;}
-    const changed=n!==S.student;S.student=n;S.studentId=$('#sid').value.trim();
-    if(!S.started){S.started=new Date().toISOString();logEv('m0','Lab started',`Student: ${n}`);}else if(changed)logEv('m0','Student name updated',n);
-    save();go(nextUp.id);};
-};
+  chip("m4");
+}
+const m4=document.getElementById("v-m4");
+m4.addEventListener("click",e=>{
+  const t=e.target.closest("[data-case]");if(t){caseIdx=+t.dataset.case;buildM4();return;}
+  const c=M4[caseIdx];S.m4[c.id]=S.m4[c.id]||{objs:[],det:null,done:false};const r=S.m4[c.id];
+  const d=e.target.closest("[data-det]");if(d&&!r.done){r.det=d.dataset.det;save();buildM4();return;}
+  if(e.target.id==="recordDet"&&r.det){r.done=true;save();buildM4();return;}
+  if(e.target.id==="nextCase"){caseIdx++;buildM4();}
+});
+m4.addEventListener("change",e=>{const o=e.target.closest("[data-obj]");if(!o)return;const c=M4[caseIdx];
+  S.m4[c.id]=S.m4[c.id]||{objs:[],det:null,done:false};S.m4[c.id].objs[+o.dataset.obj]=o.checked;save();});
+m4.addEventListener("keydown",e=>{const t=e.target.closest("[data-case]");if(!t)return;
+  if(e.key==="ArrowRight"||e.key==="ArrowLeft"){caseIdx=(caseIdx+(e.key==="ArrowRight"?1:-1)+M4.length)%M4.length;buildM4();document.querySelector(`[data-case="${caseIdx}"]`).focus();}});
 
-/* ================= M1 sort the factors ================= */
-const FACT=[
- {t:'Password',c:'know',why:'A memorized secret.'},
- {t:'PIN',c:'know',why:'A short memorized secret.'},
- {t:'Answer to a security question',c:'know',why:'A memorized secret, and often guessable from social media.'},
- {t:'Authenticator app on your phone',c:'have',why:'It proves you hold the device that stores the secret seed.'},
- {t:'FIDO2 security key',c:'have',why:'A physical key holding a private key that never leaves it.'},
- {t:'Smart card (PIV or CAC)',c:'have',why:'A card with a chip that stores a private key.'},
- {t:'Code texted to your phone',c:'have',why:'You type it, but it proves possession of the phone number. That’s why SIM swapping defeats it.'},
- {t:'Fingerprint',c:'are',why:'A physical biometric trait.'},
- {t:'Face recognition',c:'are',why:'A physical biometric trait.'},
- {t:'Iris scan',c:'are',why:'A physical biometric trait.'},
- {t:'GPS location inside a geofence',c:'somewhere',why:'Where the sign-in comes from.'},
- {t:'Signing in from the campus network',c:'somewhere',why:'Network location: a useful conditional-access signal, weak on its own.'}];
-const ico={know:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0-3.5 10.9V17h7v-3.1A6 6 0 0 0 12 3zM9.5 21h5"/></svg>',
- have:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>',
- are:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4a7 7 0 0 0-7 7v2M19 13v-2a7 7 0 0 0-3-5.7M9 11a3 3 0 0 1 6 0v3a8 8 0 0 1-2 5M12 11v4a6 6 0 0 1-2 4.5"/></svg>',
- somewhere:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-6.2 7-11.5a7 7 0 0 0-14 0C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>'};
-const BINS=[{k:'know',n:'Something you know',d:'Knowledge'},{k:'have',n:'Something you have',d:'Possession'},{k:'are',n:'Something you are',d:'Inherence'},{k:'somewhere',n:'Somewhere you are',d:'Location'}];
-const BIN_HINT={know:'Knowledge factors are secrets you memorize.',have:'Possession factors need a physical object or device present.',are:'Inherence factors are traits of your body or behavior.',somewhere:'Location factors describe where the sign-in comes from.'};
-const COMBOS=[
- {t:'Password + answer to a security question',mfa:false,why:'Both are knowledge factors. Two of the same factor is two-step verification, not multifactor.'},
- {t:'Smart card + PIN',mfa:true,why:'Possession (the card) plus knowledge (the PIN). This is how PIV and CAC cards work.'},
- {t:'Fingerprint + face scan',mfa:false,why:'Both are inherence factors, so one category is still doing all the work.'},
- {t:'Password + code from an authenticator app',mfa:true,why:'Knowledge plus possession.'},
- {t:'Password + PIN',mfa:false,why:'Two memorized secrets: one factor, used twice.'}];
-R.m1=()=>{
-  const d=M('m1').data;d.placed=d.placed||{};d.missed=d.missed||{};d.combo=d.combo||{};d.order=d.order||shuffle(FACT.map((_,i)=>i));
-  let sel=null;
-  const allPlaced=()=>FACT.every((_,i)=>d.placed[i]);
-  function draw(fb=''){
-    $('#stage').innerHTML=head(1,'Sort the factors','Authentication factors fall into categories. MFA means proving identity with factors from <b>two or more different</b> categories.','Select a card, then select the category it belongs to. You can also drag cards onto a category.')+
-    `<div class="stack" style="margin-top:20px">
-     <div class="panel"><div class="row" style="justify-content:space-between;margin-bottom:10px"><h3 style="margin:0">Part A: Classify each method</h3><span class="muted small">${Object.keys(d.placed).length} of ${FACT.length} sorted</span></div>
-      <div class="pool" id="pool" aria-label="Unsorted cards">${d.order.filter(i=>!d.placed[i]).map(i=>`<button class="chip" draggable="true" data-i="${i}">${esc(FACT[i].t)}</button>`).join('')||'<span class="muted">All cards sorted.</span>'}</div>
-      <div id="m1fb" style="margin:12px 0" aria-live="polite">${fb}</div>
-      <div class="bins">${BINS.map(b=>`<button class="bin" data-bin="${b.k}"><span class="ico">${ico[b.k]}</span><h4>${b.n}</h4><span class="eg">${b.d}</span><span class="got">${FACT.map((f,i)=>d.placed[i]===b.k?`<span class="chip placed">${esc(f.t)}</span>`:'').join('')}</span></button>`).join('')}</div></div>
-     ${allPlaced()?`<div class="panel"><h3>Part B: Is it really MFA?</h3><p class="muted small">Decide whether each combination is true multifactor authentication.</p>
-      ${COMBOS.map((c,i)=>`<div class="combo"><div><div style="font-weight:600">${esc(c.t)}</div><div class="small" id="cfb${i}">${d.combo[i]?`<span style="color:var(--green-ink)">✓ ${c.mfa?'MFA':'Not MFA'}.</span> ${esc(c.why)}`:''}</div></div>
-      <div class="yn">${d.combo[i]?'':`<button class="btn" data-c="${i}" data-v="1">MFA</button><button class="btn" data-c="${i}" data-v="0">Not MFA</button>`}</div></div>`).join('')}</div>`:''}
-     ${M('m1').done?`<div class="fb ok"><strong>Mission complete. Score ${M('m1').score}/17.</strong>Key idea: count categories, not steps. Two passwords are still one factor.</div><div>${nextBtn('m1')}</div>`:''}
-    </div>`;
-    wire();}
-  function place(i,bin){const f=FACT[i];
-    if(f.c===bin){d.placed[i]=bin;if(!d.missed[i])award('m1',1);logEv('m1',`Sorted “${f.t}”`,BINS.find(b=>b.k===bin).n,true);sel=null;
-      draw(`<div class="fb ok"><strong>“${esc(f.t)}”: ${BINS.find(b=>b.k===bin).n}.</strong>${esc(f.why)}</div>`);}
-    else{d.missed[i]=1;M('m1').attempts++;save();logEv('m1',`Sorted “${f.t}”`,`Chose ${BINS.find(b=>b.k===bin).n}`,false);
-      $('#m1fb').innerHTML=`<div class="fb bad"><strong>Not ${BINS.find(b=>b.k===bin).n.toLowerCase()}.</strong>${BIN_HINT[bin]} Try another category.</div>`;
-      const el=$(`[data-bin="${bin}"]`);el.classList.remove('shake');void el.offsetWidth;el.classList.add('shake');}}
-  function wire(){
-    $$('#pool .chip').forEach(c=>{c.onclick=()=>{sel=+c.dataset.i;$$('#pool .chip').forEach(x=>x.classList.toggle('sel',x===c));};
-      c.ondragstart=e=>{e.dataTransfer.setData('text/plain',c.dataset.i);sel=+c.dataset.i;};});
-    $$('.bin').forEach(b=>{b.onclick=()=>{if(sel===null){$('#m1fb').innerHTML='<div class="fb warn">Select a card first, then a category.</div>';return;}place(sel,b.dataset.bin);};
-      b.ondragover=e=>{e.preventDefault();b.classList.add('over');};b.ondragleave=()=>b.classList.remove('over');
-      b.ondrop=e=>{e.preventDefault();b.classList.remove('over');place(+e.dataTransfer.getData('text/plain'),b.dataset.bin);};});
-    $$('[data-c]').forEach(btn=>btn.onclick=()=>{const i=+btn.dataset.c,c=COMBOS[i],v=btn.dataset.v==='1';
-      if(v===c.mfa){d.combo[i]=1;if(!d['cm'+i])award('m1',1);logEv('m1',`Combo: ${c.t}`,c.mfa?'MFA':'Not MFA',true);
-        if(COMBOS.every((_,k)=>d.combo[k]))complete('m1');draw();}
-      else{d['cm'+i]=1;save();logEv('m1',`Combo: ${c.t}`,`Answered ${v?'MFA':'Not MFA'}`,false);$('#cfb'+i).innerHTML=`<span style="color:var(--red)">✗ Look again: which category does each part belong to?</span>`;}});
-  }
-  draw();
-};
+/* ---------- M5 ---------- */
+function buildM5(){
+  const d=S.m5.done;
+  document.getElementById("m5ScoreIn").value=S.m5.score;document.getElementById("m5ScoreIn").disabled=d;
+  document.getElementById("m5Poam").innerHTML=M5_POAM.map(p=>`<label><input type="checkbox" data-poam="${p.id}" ${S.m5.poam.includes(p.id)?"checked":""} ${d?"disabled":""}><span class="mono">${p.id}</span>${d?` <em style="color:${p.ok?"var(--green)":"var(--red)"}">${p.ok?"eligible":"not eligible"}</em>`:""}</label>`).join("");
+  document.getElementById("m5Status").innerHTML=M5_STATUS.map(s=>`<label><input type="radio" name="m5s" value="${s.id}" ${S.m5.status===s.id?"checked":""} ${d?"disabled":""}>${s.t}</label>`).join("");
+  document.getElementById("m5Close").innerHTML=M5_CLOSE.map(s=>`<label><input type="radio" name="m5c" value="${s.id}" ${S.m5.close===s.id?"checked":""} ${d?"disabled":""}>${s.t}</label>`).join("");
+  document.getElementById("m5Submit").disabled=d;
+  const fb=document.getElementById("m5Feedback");
+  if(d){const r=m5Detail();fb.className="feedback show "+(S.m5.pts===6?"ok":"no");
+    fb.innerHTML=`<b>${S.m5.pts} of 6 points.</b>
+    Score: ${r.score?"correct":"the score is 100"}. 110 − 1 (3.1.8) − 1 (3.3.4) − 3 (3.5.3, partial) − 1 (3.6.3) − 1 (3.10.4) − 3 (3.13.11, partial) = 100.<br>
+    POA&amp;M: ${r.poam?"correct":"eligible items are 3.1.8, 3.3.4, 3.6.3, and 3.13.11"}. 3.5.3 is worth more than 1 point, and 3.10.4 is on the exclusion list.<br>
+    Outcome: ${r.status?"correct":"FFSI can’t reach Conditional status yet"}. A score of 100 clears the 88 minimum, but two findings can’t be deferred to a POA&amp;M.<br>
+    Closeout: ${r.close?"correct":"it is 180 days"}. The POA&amp;M closeout assessment must happen within 180 days of Conditional status.`;}
+  else{fb.className="feedback";fb.innerHTML="";}
+  chip("m5");
+}
+function m5Detail(){const want=M5_POAM.filter(p=>p.ok).map(p=>p.id).sort().join();
+  return {score:+S.m5.score===100,poam:[...S.m5.poam].sort().join()===want,status:S.m5.status==="s3",close:S.m5.close==="d180"};}
+const m5=document.getElementById("v-m5");
+m5.addEventListener("input",e=>{if(e.target.id==="m5ScoreIn"){S.m5.score=e.target.value;save();}});
+m5.addEventListener("change",e=>{
+  if(e.target.dataset.poam){const id=e.target.dataset.poam;S.m5.poam=S.m5.poam.filter(x=>x!==id);if(e.target.checked)S.m5.poam.push(id);save();}
+  if(e.target.name==="m5s"){S.m5.status=e.target.value;save();}
+  if(e.target.name==="m5c"){S.m5.close=e.target.value;save();}
+});
+document.getElementById("m5Submit").addEventListener("click",()=>{
+  if(S.m5.score===""||!S.m5.status||!S.m5.close){const fb=document.getElementById("m5Feedback");fb.className="feedback show no";fb.innerHTML="<b>Answer all four questions first.</b>Enter a score, pick POA&amp;M items, an outcome, and a closeout window.";return;}
+  const r=m5Detail();S.m5.pts=(r.score?2:0)+(r.poam?2:0)+(r.status?1:0)+(r.close?1:0);S.m5.done=true;save();buildM5();});
 
-/* ================= M2 TOTP enrollment ================= */
-R.m2=()=>{
-  ensureSecret();const d=M('m2').data;d.stage=d.stage||'enroll';const sec=S.secret;
-  const uri=`otpauth://totp/PrairieTech:${email()}?secret=${sec}&issuer=PrairieTech&algorithm=SHA1&digits=6&period=30`;
-  function portal(){
-    if(d.stage==='enroll'||d.stage==='added')return `<div class="sso">${ssoLogo()}<h3>Set up your authenticator app</h3><p class="muted small">Your organization now requires a second factor for ${esc(email())}.</p>
-      <div class="row" style="align-items:flex-start;flex-wrap:nowrap;gap:16px">${qr(sec)}<div class="small"><p><b>1.</b> On your phone, open the authenticator and tap <b>Add account</b>.</p><p><b>2.</b> Scan this QR code. Can’t scan? Enter this setup key:</p><span class="secret">${sec.match(/.{1,4}/g).join(' ')}</span></div></div>
-      <details style="margin:12px 0" class="small"><summary class="muted">What’s inside the QR code?</summary><code style="word-break:break-all;display:block;margin-top:6px">${esc(uri)}</code><p class="muted" style="margin-top:6px">The setup key is the shared secret. Anyone who copies it can generate your codes forever, so it’s shown only once.</p></details>
-      <div class="field"><label for="c1">3. Enter the 6-digit code from the app</label><input id="c1" class="code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="••••••"></div>
-      <button class="btn primary" id="v1" style="width:100%">Verify and turn on</button><div id="fb2" style="margin-top:12px" aria-live="polite"></div></div>`;
-    if(d.stage==='confirmed')return `<div class="sso">${ssoLogo()}<div class="fb ok" style="margin-bottom:16px"><strong>Authenticator turned on.</strong>Now sign out and sign back in, the way you would every morning.</div>
-      <div class="field"><label>Email</label><input value="${esc(email())}" readonly></div>
-      <div class="field"><label>Password</label><input type="password" value="Kestrel-Harbor-42" readonly><span class="hint">Filled by your password manager</span></div>
-      <div class="field"><label for="c2">Code from your authenticator app</label><input id="c2" class="code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="••••••"></div>
-      <button class="btn primary" id="v2" style="width:100%">Sign in</button><div id="fb2" style="margin-top:12px" aria-live="polite"></div>
-      <p class="muted small" style="margin-top:12px">Curious? Wait for the code to change, then enter the old one.</p></div>`;
-    return `<div class="sso" style="text-align:center">${ssoLogo()}<div style="font-size:3rem">✅</div><h3>Signed in</h3><p class="muted">Password (something you know) plus the code (proof you have the phone).</p></div>`;}
-  function phoneUI(){
-    if(d.stage==='enroll')return authApp(`<div style="text-align:center;margin:auto 0" id="ph"><p class="muted small">No accounts yet</p><button class="btn primary" id="add">Add account</button></div>`);
-    return authApp(otpCard()+`<p class="muted small" style="text-align:center">New code in <span class="js-left">–</span></p>`);}
-  function draw(){
-    $('#stage').innerHTML=head(2,'Set up an authenticator','Time-based one-time passwords (TOTP, RFC 6238) are the codes from apps like Google Authenticator, Microsoft Authenticator, and Authy.','Enroll the phone, confirm the code, then sign in with it.')+
-     `<div class="lab" style="margin-top:20px"><div class="stack">${browser('sso.prairietech.edu',d.stage==='confirmed'||d.stage==='done'?'/login':'/mfa/setup',portal())}
-       ${d.stage!=='enroll'?`<details class="hood" open><summary>Under the hood: how the phone computes the code</summary><p class="small muted">Phone and server share the secret and the clock. Neither contacts the other at sign-in; both run the same math and compare results.</p><dl class="hood-grid" id="hood"></dl></details>`:''}
-       ${d.stage==='done'?`<div class="fb ok"><strong>Mission complete. Score ${M('m2').score}/3.</strong>TOTP blocks password-only attacks such as credential stuffing. Its weakness: the code is something a person can read and type, so a phishing page can collect it too. You’ll see that in Mission 5.</div><div>${nextBtn('m2')}</div>`:''}
-      </div>${phone(phoneUI())}</div>`;
-    tick();wire();}
-  async function check(inp,onOk){const v=inp.value.replace(/\D/g,'');const fb=$('#fb2');
-    if(v.length!==6){fb.innerHTML='<div class="fb warn">Enter all 6 digits.</div>';return;}
-    const r=await verifyOtp(v);
-    if(r==='ok')onOk();
-    else{d.wrong=1;M('m2').attempts++;save();inp.classList.remove('shake');void inp.offsetWidth;inp.classList.add('shake');
-      if(r==='expired'){logEv('m2','Entered expired code',v,false);fb.innerHTML='<div class="fb bad"><strong>That code expired.</strong>It belonged to an earlier 30-second window. The server accepts one step either side for clock drift, no more. Short lifetimes limit replay.</div>';}
-      else{logEv('m2','Entered wrong code',v,false);fb.innerHTML=`<div class="fb bad"><strong>Code rejected.</strong>${d.stage==='enroll'?'Add the account on the phone first, then type the code it shows.':'Type the code currently showing on the phone.'}</div>`;}}}
-  function wire(){
-    const add=$('#add');if(add)add.onclick=()=>{$('#ph').innerHTML=`<div style="border:3px solid var(--navy);border-radius:14px;height:180px;display:grid;place-items:center;margin-bottom:10px" class="muted small">Point the camera at the QR code</div><button class="btn primary" id="scan">Scan code on screen</button>`;
-      $('#scan').onclick=()=>{d.stage='added';save();logEv('m2','Scanned QR code','Shared secret stored on phone');draw();};};
-    const v1=$('#v1');if(v1){const i=$('#c1');i.onkeydown=e=>{if(e.key==='Enter')v1.click();};v1.onclick=()=>check(i,()=>{d.stage='confirmed';award('m2',1);logEv('m2','Enrollment confirmed','Code matched server',true);draw();});}
-    const v2=$('#v2');if(v2){const i=$('#c2');i.onkeydown=e=>{if(e.key==='Enter')v2.click();};v2.onclick=()=>check(i,()=>{d.stage='done';award('m2',1);if(!d.wrong)award('m2',1);logEv('m2','Signed in with TOTP','',true);complete('m2');draw();});}
-  }
-  draw();
-};
+/* ---------- M6 ---------- */
+const F6=["req","obj","cond","evid","risk","rem","poam","date"];
+function buildM6(){
+  F6.forEach(k=>{const el=document.getElementById("f-"+k);el.value=S.m6[k]||"";el.disabled=S.m6.done;});
+  document.getElementById("rubric").innerHTML=RUBRIC.map((t,i)=>`<label><input type="checkbox" data-rub="${i}" ${S.m6.rubric[i]?"checked":""} ${S.m6.done?"disabled":""}>${t}</label>`).join("");
+  document.getElementById("m6Submit").disabled=S.m6.done;
+  const fb=document.getElementById("m6Feedback");
+  if(S.m6.done){const ok=S.m6.poam===POAM_OK[S.m6.req];const s=m6Score();fb.className="feedback show "+(s.p>=5?"ok":"no");
+    fb.innerHTML=`<b>Finding filed: ${s.p} of 6 points.</b>POA&amp;M eligibility: ${ok?"correct":"check again"}. ${MODEL[S.m6.req].p} Compare your wording with the model finding below.`;}
+  chip("m6");
+}
+F6.forEach(k=>document.getElementById("f-"+k).addEventListener("input",e=>{S.m6[k]=e.target.value;save();}));
+document.getElementById("rubric").addEventListener("change",e=>{const i=e.target.dataset.rub;if(i!==undefined){S.m6.rubric[+i]=e.target.checked;save();}});
+document.getElementById("m6Submit").addEventListener("click",()=>{
+  const fb=document.getElementById("m6Feedback");const missing=["req","cond","evid","risk","rem","poam"].filter(k=>!S.m6[k].trim());
+  if(missing.length){fb.className="feedback show no";fb.innerHTML="<b>The finding isn’t complete.</b>Fill in the requirement, condition, evidence, risk, remediation, and POA&amp;M eligibility before filing.";return;}
+  S.m6.done=true;save();buildM6();showModel();});
+function showModel(){const box=document.getElementById("modelBox");const req=S.m6.req||document.getElementById("f-req").value;
+  if(!req){box.className="model show";box.innerHTML="Choose a requirement first to see its model finding.";return;}
+  const m=MODEL[req];box.className="model show";
+  box.innerHTML=`<b>Model finding for <span class="mono">${req}</span></b><dl><dt>Objective not satisfied</dt><dd>${m.o}</dd><dt>Condition</dt><dd>${m.c}</dd><dt>Evidence</dt><dd>${m.e}</dd><dt>Risk to CUI</dt><dd>${m.r}</dd><dt>Remediation</dt><dd>${m.m}</dd><dt>POA&amp;M</dt><dd>${m.p}</dd></dl>`;}
+document.getElementById("m6Model").addEventListener("click",showModel);
 
-/* ================= M3 push with number matching ================= */
-R.m3=()=>{
-  const d=M('m3').data;d.stage=d.stage||'start';
-  function newNum(){d.num=rnd(10,99);const s=new Set([d.num]);while(s.size<3)s.add(rnd(10,99));d.opts=shuffle([...s]);save();}
-  function draw(fb=''){
-    const portal=d.stage==='start'?`<div class="sso">${ssoLogo()}<div class="field"><label>Email</label><input value="${esc(email())}" readonly></div><div class="field"><label>Password</label><input type="password" value="Kestrel-Harbor-42" readonly><span class="hint">Filled by your password manager</span></div><button class="btn primary" id="go3" style="width:100%">Sign in</button></div>`
-     :d.stage==='wait'?`<div class="sso" style="text-align:center">${ssoLogo()}<h3>Approve the sign-in request</h3><p class="muted">Open your authenticator app and select the number shown below.</p><div class="big-number">${d.num}</div><p class="muted small">Didn’t get a notification? Check that your phone is online.</p></div>`
-     :`<div class="sso" style="text-align:center">${ssoLogo()}<div style="font-size:3rem">✅</div><h3>Signed in</h3><p class="muted">The number you picked proved that you, the person at this screen, approved this sign-in.</p></div>`;
-    const ph=d.stage==='wait'?`<div class="lock-time js-clock"></div><div class="lock-date">${new Date().toLocaleDateString([],{weekday:'long',month:'long',day:'numeric'})}</div><div class="app-body"><div class="push"><h4>Are you trying to sign in?</h4>
-      <dl><dt>App</dt><dd>Prairie Tech SSO</dd><dt>Account</dt><dd>${esc(email())}</dd><dt>Location</dt><dd>Chicago, IL (approximate)</dd><dt>Device</dt><dd>Chrome on Windows</dd><dt>Time</dt><dd>Just now</dd></dl>
-      <div class="small" style="font-weight:600">Select the number shown on your screen</div><div class="nums">${d.opts.map(n=>`<button data-n="${n}">${n}</button>`).join('')}</div>
-      <button class="btn danger" id="deny3" style="width:100%;margin-top:10px">No, it’s not me</button></div></div>`
-     :`<div class="lock-time js-clock"></div><div class="lock-date">${new Date().toLocaleDateString([],{weekday:'long',month:'long',day:'numeric'})}</div><div class="app-body"><p class="muted small" style="text-align:center">${d.stage==='start'?'No notifications':'Sign-in approved'}</p></div>`;
-    $('#stage').innerHTML=head(3,'Approve a push','Push MFA sends an approval request to the phone. Plain “Approve / Deny” pushes trained users to tap without thinking. Number matching forces them to look at the screen they’re signing in to.','Sign in, then match the number on the screen using the phone. Check the details before you tap.')+
-     `<div class="lab" style="margin-top:20px"><div class="stack">${browser('sso.prairietech.edu','/login',portal)}<div id="fb3" aria-live="polite">${fb}</div><div id="q3"></div></div>${phone(ph)}</div>`;
-    tick();wire();}
-  function wire(){
-    const g=$('#go3');if(g)g.onclick=()=>{newNum();d.stage='wait';save();logEv('m3','Push sent to phone');draw();};
-    $$('[data-n]').forEach(b=>b.onclick=()=>{const n=+b.dataset.n;
-      if(n===d.num){d.stage='ok';if(!d.miss)award('m3',1);award('m3',1);logEv('m3','Approved with matching number',String(n),true);draw('<div class="fb ok"><strong>Numbers matched.</strong>You confirmed that the sign-in on your screen is the one being approved.</div>');ask();}
-      else{d.miss=1;M('m3').attempts++;logEv('m3','Selected wrong number',`Picked ${n}, screen showed ${d.num}`,false);newNum();draw('<div class="fb bad"><strong>Numbers didn’t match. Sign-in blocked.</strong>A new request was sent. Read the number from the browser before choosing.</div>');}});
-    const dn=$('#deny3');if(dn)dn.onclick=()=>{d.miss=1;logEv('m3','Denied own sign-in','',false);d.stage='start';save();draw('<div class="fb warn"><strong>You denied your own sign-in.</strong>That was you at the browser. Sign in again.</div>');};
-  }
-  function ask(){
-    if(M('m3').done){$('#q3').innerHTML=`<div class="fb ok"><strong>Mission complete. Score ${M('m3').score}/3.</strong></div><div style="margin-top:12px">${nextBtn('m3')}</div>`;return;}
-    const box=document.createElement('div');box.className='panel';$('#q3').appendChild(box);
-    choiceQ(box,{q:'What does number matching protect against?',opts:[
-      {t:'An attacker who has the password triggering pushes and hoping the user taps Approve out of habit or annoyance.',ok:true,why:' The attacker can’t make you see their number unless you’re looking at their screen, so a blind tap no longer completes the sign-in.'},
-      {t:'Interception of the push notification over the network.',why:'Push channels are already encrypted. Number matching is about confirming the user’s intent.'},
-      {t:'Real-time phishing sites that relay the sign-in.',why:'Not quite. A phishing proxy can display the number to the victim, who then matches it. Only origin-bound methods like FIDO2 resist that.'},
-      {t:'The need for a password.',why:'Number matching is a second factor. The password step still happens first.'}]},
-      (ok,first)=>{if(ok){if(first)award('m3',1);logEv('m3','Question: purpose of number matching','',true);complete('m3');box.insertAdjacentHTML('beforeend',`<div class="fb ok" style="margin-top:12px"><strong>Mission complete. Score ${M('m3').score}/3.</strong></div><div style="margin-top:12px">${nextBtn('m3')}</div>`);}
-        else logEv('m3','Question: purpose of number matching','',false);});}
-  draw();if(d.stage==='ok')ask();
-};
-</script>
-<script>
-/* ================= M4 MFA fatigue ================= */
-R.m4=()=>{
-  const d=M('m4').data;d.stage=d.stage||'brief';
-  let count=0,denies=0,resolved=false;
-  const pushCard=n=>`<div class="push ${n>0?'mini':''}" data-k="${n}"><h4>Approve sign-in?</h4>${n===0?`<dl><dt>App</dt><dd>Prairie Tech SSO</dd><dt>Location</dt><dd>Unrecognized (VPN exit node)</dd><dt>Device</dt><dd>Windows, Chrome</dd><dt>Time</dt><dd>2:14 AM</dd></dl>
-    <div class="acts"><button class="ap" data-a="approve">Approve</button><button class="dn" data-a="deny">Deny</button></div><button class="btn danger" data-a="report" style="width:100%;margin-top:8px">This wasn’t me: report</button>`:'<div class="muted small">Prairie Tech SSO, unrecognized location</div>'}</div>`;
-  function frame(left,ph){$('#stage').innerHTML=head(4,'Survive push bombing','In an MFA fatigue attack, someone who already has your password floods your phone with push requests, hoping you approve one to make it stop, often while posing as IT support.','Respond to what arrives on your phone. Nobody at your house is signing in to anything.')+
-    `<div class="lab" style="margin-top:20px"><div class="stack" id="left4">${left}</div>${phone(ph,{time:'2:14'})}</div>`;}
-  const lock=inner=>`<div class="lock-time">2:14</div><div class="lock-date">${new Date().toLocaleDateString([],{weekday:'long',month:'long',day:'numeric'})}</div><div class="app-body" id="stack4">${inner}</div>`;
-  function brief(){d.stage='brief';save();
-    frame(`<div class="panel"><h3>2:14 AM</h3><p>You’re asleep. Your laptop is closed. Your phone is on the nightstand, and it starts buzzing.</p><button class="btn primary" id="wake">Pick up the phone</button></div>`,lock('<p class="muted small" style="text-align:center">Buzz… buzz…</p>'));
-    $('#wake').onclick=attack;}
-  function attack(){d.stage='attack';save();count=0;denies=0;resolved=false;logEv('m4','Attack began','Push flood started');
-    frame(`<div class="panel"><h3>What you know</h3><p>You are not signing in. Every prompt on the phone was started by someone else.</p><p class="muted small">Prompts received: <b id="cnt4">0</b> &nbsp; Denied: <b id="den4">0</b></p></div><div id="tip4"></div>`,lock(''));
-    $('#stack4').addEventListener('click',onAct);push();}
-  function push(){if(resolved)return;count++;$('#cnt4').textContent=count;
-    const st=$('#stack4');$$('.push',st).forEach((p,i)=>{p.outerHTML=pushCard(1);});
-    $$('.push',st).slice(1).forEach(p=>p.remove());
-    st.insertAdjacentHTML('afterbegin',pushCard(0));
-    const sm=$('.sms',st);if(sm)st.prepend(sm);
-    if(count===4)st.insertAdjacentHTML('afterbegin',`<div class="sms"><b>Text from +1 (312) 555-0187</b>Hi, this is Kevin from Prairie Tech IT. We’re fixing a sync error on your account. Approve the next prompt and the alerts will stop.</div>`);
-    if(count<14)later(push,2600);}
-  function onAct(e){const b=e.target.closest('[data-a]');if(!b||resolved)return;const a=b.dataset.a;
-    if(a==='approve'){resolved=true;clearTimers();d.everApproved=1;d.stage='breach';save();logEv('m4','Approved attacker’s push',`After ${count} prompts`,false);breach();}
-    else if(a==='deny'){denies++;$('#den4').textContent=denies;logEv('m4','Denied a prompt','',true);b.closest('.push').remove();
-      if(denies===3)$('#tip4').innerHTML='<div class="fb warn"><strong>Denying keeps you safe, but the prompts keep coming.</strong>What would let your security team know right now?</div>';}
-    else{resolved=true;clearTimers();d.stage='reported';if(!d.everApproved)once('m4','noapprove',1);once('m4','report',1);logEv('m4','Reported fraud',`After ${count} prompts and ${denies} denials`,true);reported();}}
-  function breach(){
-    frame(`<div class="fb bad"><strong>The attacker is in.</strong>Your approval completed their sign-in at 2:15 AM. To the identity provider, it looked exactly like you.</div>
-     <div class="panel"><h3>This really happens</h3><p>In 2022, an attacker who had bought an Uber contractor’s password sent repeated push requests, then messaged the contractor on WhatsApp claiming to be IT and saying the prompts would stop once one was approved. The contractor approved one and the attacker got into Uber’s internal network.</p><p>Approving “just to make it stop” is the whole attack.</p><button class="btn primary" id="again">Replay the attack</button></div>`,
-     lock(`<div class="push"><h4>Sign-in approved</h4><div class="muted small">Prairie Tech SSO, unrecognized location</div></div>`));
-    $('#again').onclick=attack;}
-  function reported(){
-    frame(`<div class="fb ok"><strong>Reported. The prompts stop.</strong>${d.everApproved?'Better this time.':'You never approved a prompt.'}</div>
-     <div class="panel"><h3>Meanwhile, in the security operations center</h3><div class="term" id="soc"></div></div><div class="panel" id="q4"></div>`,
-     lock(`<div class="push"><h4>Thanks for reporting</h4><div class="muted small">Your security team has been notified. Don’t approve requests you didn’t start.</div></div>`));
-    const lines=[`<span class="d">02:14:37</span> <span class="y">[IdP]</span> fraud report from ${esc(email())}`,`<span class="d">02:14:37</span> <span class="y">[SIEM]</span> ${count} push requests in ${Math.max(1,Math.round(count*2.6/60))} min, source IP 185.220.x.x (anonymizing VPN)`,
-      `<span class="d">02:14:38</span> <span class="r">[SOAR]</span> conclusion: valid password in attacker’s hands`,`<span class="d">02:14:39</span> <span class="g">[SOAR]</span> password reset forced, all sessions revoked`,
-      `<span class="d">02:14:40</span> <span class="g">[SOAR]</span> source IP blocked, analyst paged`];
-    lines.forEach((l,i)=>later(()=>{const s=$('#soc');if(s)s.insertAdjacentHTML('beforeend',`<div>${l}</div>`);},500*(i+1)));
-    later(()=>{const box=$('#q4');if(!box)return;
-      if(M('m4').done){box.innerHTML=`<div class="fb ok"><strong>Mission complete. Score ${M('m4').score}/3.</strong></div><div style="margin-top:12px">${nextBtn('m4')}</div>`;return;}
-      choiceQ(box,{q:'What does a flood of push requests you didn’t start tell the security team?',opts:[
-        {t:'The attacker already has the correct password.',ok:true,why:' Push requests are only sent after the password step succeeds. The account needs a password reset even though no prompt was approved.'},
-        {t:'Someone is trying to guess the password.',why:'A wrong password fails before any push is sent. Pushes mean the password was accepted.'},
-        {t:'The authenticator app is malfunctioning.',why:'The app only displays what the identity provider sends. Every one of those requests came from a real sign-in attempt.'},
-        {t:'Nothing, as long as every prompt was denied.',why:'Denials kept the attacker out tonight, but they still hold a working password.'}]},
-        (ok,first)=>{if(ok){if(first)once('m4','q',1);logEv('m4','Question: meaning of push flood','',true);complete('m4');
-          box.insertAdjacentHTML('beforeend',`<div class="fb ok" style="margin-top:12px"><strong>Mission complete. Score ${M('m4').score}/3.</strong>Defenses: number matching, rate limits on push requests, alerts on repeated denials, and user training to report rather than ignore.</div><div style="margin-top:12px">${nextBtn('m4')}</div>`);}
-          else logEv('m4','Question: meaning of push flood','',false);});},3200);}
-  if(d.stage==='reported')reported();else if(d.stage==='breach')breach();else brief();
-};
+/* ---------- SUMMARY ---------- */
+const esc=s=>String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function pctOf(id){const s=SCORERS[id]();return s.max?s.p/s.max:0;}
+function renderSummary(){
+  const ids=Object.keys(SCORERS);let tp=0,tm=0;ids.forEach(i=>{const s=SCORERS[i]();tp+=s.p;tm+=s.max;});
+  const pct=Math.round(tp/tm*100);
+  const rows=SECTIONS.filter(s=>s.n).map(s=>{const sc=SCORERS[s.id]();const p=Math.round(sc.p/sc.max*100);
+    return `<tr><td>${s.n}. ${s.label}</td><td>${s.sub}</td><td>${sc.done?"Complete":"In progress"}</td><td>${sc.p} / ${sc.max}</td><td style="width:28%"><div class="bar"><i class="${p>=80?"hi":p<60?"lo":""}" style="width:${p}%"></i></div></td></tr>`;}).join("");
+  const ksaRows=KSAS.map(k=>{const p=Math.round(k.m.reduce((a,m)=>a+pctOf(m),0)/k.m.length*100);
+    const lvl=p>=80?"Proficient":p>=60?"Developing":"Needs review";
+    return `<tr><td class="ksa-code">${k.c}</td><td>${k.d}</td><td>${lvl}</td><td style="width:22%"><div class="bar"><i class="${p>=80?"hi":p<60?"lo":""}" style="width:${p}%"></i></div></td></tr>`;}).join("");
+  const review=KSAS.filter(k=>k.m.reduce((a,m)=>a+pctOf(m),0)/k.m.length<.6).map(k=>k.c);
+  const f=S.m6;
+  const finding=f.done?`<table class="sum-table">
+    <tr><th style="width:24%">Requirement</th><td class="mono">${esc(f.req)} ${esc(f.obj)}</td></tr>
+    <tr><th>Condition</th><td>${esc(f.cond)}</td></tr><tr><th>Evidence</th><td>${esc(f.evid)}</td></tr>
+    <tr><th>Risk to CUI</th><td>${esc(f.risk)}</td></tr><tr><th>Remediation</th><td>${esc(f.rem)}</td></tr>
+    <tr><th>POA&amp;M eligible</th><td>${esc(f.poam)}${f.date?`, target ${esc(f.date)}`:""}</td></tr></table>`
+    :`<p>Not filed yet. Complete Mission 6 to include your finding.</p>`;
+  document.getElementById("summaryBody").innerHTML=`
+    <div class="sum-head"><div><h2 id="h-sum">Readiness review summary</h2>
+      <p style="color:var(--muted)">${esc(S.name)||"Learner name not entered"}<br>FFSI engagement, NIST SP 800-171 Rev 2 and CMMC Level 2<br>${new Date().toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"})}</p></div>
+      <div style="text-align:right"><div class="big-score">${pct}%</div><span style="color:var(--muted)">${tp} of ${tm} points</span></div></div>
+    <div class="panel"><h3>Mission results</h3><div style="overflow-x:auto"><table class="sum-table"><tr><th>Mission</th><th>Role</th><th>Status</th><th>Points</th><th>Score</th></tr>${rows}</table></div></div>
+    <div class="panel"><h3>KSA mastery</h3><div style="overflow-x:auto"><table class="sum-table"><tr><th>Code</th><th>Knowledge, skill, or ability</th><th>Level</th><th></th></tr>${ksaRows}</table></div>
+      <p style="margin-top:.7rem;font-size:.92rem">${review.length?`Revisit ${review.join(", ")} using the framework reference before the unit assessment.`:"No KSAs below 60%. You’re ready for the unit assessment."}</p></div>
+    <div class="panel"><h3>Filed finding</h3>${finding}</div>
+    ${S.reflection?`<div class="panel"><h3>Reflection</h3><p>${esc(S.reflection)}</p></div>`:""}`;
+  document.getElementById("reflection").value=S.reflection;
+}
+document.getElementById("reflection").addEventListener("input",e=>{S.reflection=e.target.value;save();});
+document.getElementById("reflection").addEventListener("change",renderSummary);
+document.getElementById("printBtn").addEventListener("click",()=>{renderSummary();window.print();});
+document.getElementById("dlBtn").addEventListener("click",()=>{
+  renderSummary();
+  const css=`body{font-family:system-ui,Segoe UI,Arial,sans-serif;color:#14213D;max-width:900px;margin:2rem auto;padding:0 1rem;line-height:1.5}h2,h3{font-family:Georgia,serif}.panel{border:1px solid #ccd;border-radius:10px;padding:1rem 1.2rem;margin:1rem 0}table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid #dde;padding:.4rem;text-align:left;vertical-align:top}.bar{height:10px;background:#e3e8f0;border-radius:99px;overflow:hidden}.bar i{display:block;height:100%;background:#0047AB}.bar i.hi{background:#00a86b}.bar i.lo{background:#B8322A}.big-score{font-size:2.6rem;font-weight:700;color:#0047AB;font-family:Georgia,serif}.ksa-code,.mono{font-family:Consolas,monospace}.sum-head{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}`;
+  const html=`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>FFSI Readiness Review Summary</title><style>${css}</style></head><body>${document.getElementById("summaryBody").innerHTML}</body></html>`;
+  const blob=new Blob([html],{type:"text/html"});const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);a.download=`FFSI-summary-${(S.name||"learner").replace(/\s+/g,"-")}.html`;
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+});
+function resetActivity(){
+  if(!confirm("Start over? This clears every answer, your finding, and your reflection. Your light or dark setting is kept."))return;
+  try{localStorage.removeItem(KEY);}catch(e){}
+  S=blank();sel=null;caseIdx=0;refLvl="all";refQ="";allOpen=false;
+  document.getElementById("refSearch").value="";
+  document.getElementById("expandAll").textContent="Expand all";
+  document.querySelectorAll(".seg button").forEach(x=>x.setAttribute("aria-pressed",x.dataset.lvl==="all"));
+  document.getElementById("m2Log").textContent="";
+  const mb=document.getElementById("modelBox");mb.className="model";mb.innerHTML="";
+  document.getElementById("reflection").value="";
+  save();buildAll();go("briefing");
+}
+document.getElementById("resetBtn").addEventListener("click",resetActivity);
+document.getElementById("topResetBtn").addEventListener("click",resetActivity);
 
-/* ================= M5 adversary-in-the-middle ================= */
-R.m5=()=>{
-  ensureSecret();const d=M('m5').data;d.stage=d.stage||'email';
-  const FAKE='sso.prairietech-login.com',REAL='sso.prairietech.edu';
-  const key=(cap)=>`<div class="panel" style="text-align:center"><h3>Your security key</h3><p class="muted small">A FIDO2 key registered to ${REAL}. Its private key never leaves the device.</p>
-    <button class="key" id="key" aria-label="Touch the security key" disabled><span class="body"><span class="pad"></span></span><span class="usb"></span></button><div class="key-cap" id="keycap">${cap||'Waiting for a sign-in request'}</div></div>`;
-  function frame(url,evil,page,right,below=''){
-    $('#stage').innerHTML=head(5,'Beat the phishing proxy','Adversary-in-the-middle (AiTM) phishing kits such as Evilginx sit between you and the real site, passing everything through in real time. You see the real login flow; they keep a copy of everything, including your session.','Read the email, follow what happens, then see what changes with a FIDO2 security key.')+
-    `<div class="lab" style="margin-top:20px"><div class="stack">${browser(url.h,url.p,page,evil)}<div id="fb5" aria-live="polite"></div>${below}</div>${right}</div>`;tick();}
-  const term='<div class="panel"><h3>Attacker’s console</h3><div class="term" id="term5"></div></div>';
-  function out(lines,done){lines.forEach((l,i)=>later(()=>{const t=$('#term5');if(t)t.insertAdjacentHTML('beforeend',`<div>${l}</div>`);if(i===lines.length-1&&done)done();},650*(i+1)));}
-  function showEmail(){d.stage='email';save();
-    frame({h:'mail.prairietech.edu',p:'/inbox'},false,`<div style="max-width:600px">
-      <div class="small muted">From: Prairie Tech IT Service Desk &lt;it-servicedesk@prairietech-support.com&gt;</div>
-      <h3 style="margin:6px 0 12px">Action required: re-verify MFA by 5:00 PM today</h3>
-      <p>Our records show your multi-factor enrollment is out of date. Re-verify now to avoid losing access to email and Canvas.</p>
-      <p><span class="btn primary" style="pointer-events:none">Re-verify MFA</span></p>
-      <p class="small muted">Link destination: <code>https://${FAKE}/auth</code></p>
-      <p class="small muted">Prairie Tech IT Service Desk</p></div>
-      <div class="row" style="border-top:1px solid var(--line);padding-top:16px;margin-top:8px"><button class="btn" id="clk">Click “Re-verify MFA”</button><button class="btn danger" id="rep">Report phishing</button></div>`,phone(authApp(otpCard())));
-    $('#rep').onclick=()=>{once('m5','rep',1);logEv('m5','Reported phishing email','Sender and link domains not prairietech.edu',true);
-      $('#fb5').innerHTML=`<div class="fb ok"><strong>Good catch.</strong>Neither the sender (prairietech-support.com) nor the link (prairietech-login.com) is prairietech.edu, and the deadline creates urgency. Your coworker Dana clicked it, though. Continue as Dana to see why her authenticator app didn’t save her.</div><button class="btn primary" id="asDana" style="margin-top:12px">Continue as Dana</button>`;$('#asDana').onclick=phish;};
-    $('#clk').onclick=()=>{d.clicked=1;logEv('m5','Clicked phishing link',FAKE,false);phish();};}
-  function phish(){d.stage='phish';save();
-    frame({h:FAKE,p:'/auth'},true,`<div class="sso">${ssoLogo()}<div class="field"><label>Email</label><input value="${esc(email())}" readonly></div><div class="field"><label>Password</label><input type="password" value="Kestrel-Harbor-42" readonly></div>
-      <div class="field"><label for="c5">Code from your authenticator app</label><input id="c5" class="code" inputmode="numeric" maxlength="6" placeholder="••••••"></div><button class="btn primary" id="v5" style="width:100%">Verify</button></div>`,phone(authApp(otpCard())),
-      `<div class="fb warn"><strong>The page looks right and shows a padlock.</strong>Enter the current code from the phone, as Dana did.</div>`);
-    const i=$('#c5');i.onkeydown=e=>{if(e.key==='Enter')$('#v5').click();};
-    $('#v5').onclick=async()=>{const v=i.value.replace(/\D/g,'');const r=v.length===6?await verifyOtp(v):'bad';
-      if(r!=='ok'){$('#fb5').innerHTML='<div class="fb bad"><strong>The real site rejected that code.</strong>The proxy forwards whatever you type to the real site, so it has to be the current code.</div>';return;}
-      logEv('m5','Entered TOTP on phishing site',`Code ${v} relayed`,false);stolen(v);};}
-  function stolen(v){d.stage='stolen';save();
-    frame({h:FAKE,p:'/auth'},true,`<div class="sso" style="text-align:center">${ssoLogo()}<div style="font-size:3rem">✅</div><h3>Verified</h3><p class="muted">Redirecting to your inbox…</p></div>`,phone(authApp(otpCard())),term);
-    out([`<span class="d">[proxy]</span> victim connected, relaying to ${REAL}`,`<span class="d">[proxy]</span> captured username <span class="y">${esc(email())}</span>`,`<span class="d">[proxy]</span> captured password <span class="y">Kestrel-Harbor-42</span>`,
-      `<span class="d">[proxy]</span> relayed TOTP <span class="y">${v||'••••••'}</span> → <span class="g">accepted by real IdP</span>`,`<span class="d">[proxy]</span> captured <span class="r">Set-Cookie: PT_SESSION=8f3c91e0a7…; Secure; HttpOnly</span>`,
-      `<span class="r">[attacker]</span> imported cookie into own browser, inbox open, no MFA prompt`,`<span class="r">[attacker]</span> creating inbox rule: forward messages containing “invoice” externally`],
-      ()=>{$('#fb5').innerHTML=`<div class="fb bad"><strong>The code worked exactly as designed, and that’s the problem.</strong>A one-time code is a secret a human can read and type, so a human can type it into the wrong site. The proxy didn’t need to break MFA. It let Dana complete it, then stole the session cookie issued afterward. Push with number matching fails the same way: the proxy simply shows Dana the number.</div><button class="btn primary" id="rew" style="margin-top:12px">Rewind: give Dana a security key</button>`;$('#rew').onclick=keyPhish;});}
-  function keyPhish(){d.stage='keyphish';save();
-    frame({h:FAKE,p:'/auth'},true,`<div class="sso">${ssoLogo()}<div class="field"><label>Email</label><input value="${esc(email())}" readonly></div><button class="btn primary" id="sk" style="width:100%">Sign in with security key</button></div>`,key(),term);
-    $('#sk').onclick=()=>{logEv('m5','Security key requested on phishing site');armKey(false);};}
-  function armKey(real){const k=$('#key');k.disabled=false;k.classList.add('blink');$('#keycap').textContent='Touch the gold pad to continue';
-    out([`<span class="d">[browser]</span> WebAuthn request from page origin <span class="${real?'g':'y'}">https://${real?REAL:FAKE}</span>`,`<span class="d">[browser]</span> relying party ID sent to key: <span class="${real?'g':'y'}">${real?'prairietech.edu':'prairietech-login.com'}</span>`]);
-    k.onclick=()=>{k.disabled=true;k.classList.remove('blink');real?realResult():phishResult();};}
-  function phishResult(){$('#keycap').innerHTML='<b style="color:var(--red)">No credential for this site. Nothing signed.</b>';
-    out([`<span class="d">[key]</span> searching for a credential bound to prairietech-login.com… <span class="r">none</span>`,`<span class="d">[key]</span> no assertion produced`,`<span class="r">[proxy]</span> waiting for assertion… timed out. Nothing to relay.`],
-      ()=>{logEv('m5','Security key refused phishing origin','',true);$('#fb5').innerHTML=`<div class="fb ok"><strong>The attack failed, and Dana didn’t have to notice anything.</strong>The browser, not the user, told the key which site was asking. The key holds no credential for prairietech-login.com, so it never signs.</div><button class="btn primary" id="rl" style="margin-top:12px">Now sign in at the real site</button>`;$('#rl').onclick=keyReal;});}
-  function keyReal(){d.stage='keyreal';save();
-    frame({h:REAL,p:'/login'},false,`<div class="sso">${ssoLogo()}<div class="field"><label>Email</label><input value="${esc(email())}" readonly></div><button class="btn primary" id="sk" style="width:100%">Sign in with security key</button></div>`,key(),'<div class="panel"><h3>What happened</h3><div class="term" id="term5"></div></div>');
-    $('#sk').onclick=()=>armKey(true);}
-  function realResult(){$('#keycap').innerHTML='<b style="color:var(--green-ink)">Signed for prairietech.edu</b>';$('#page').innerHTML=`<div class="sso" style="text-align:center">${ssoLogo()}<div style="font-size:3rem">✅</div><h3>Signed in</h3><p class="muted">No code to type, nothing to steal.</p></div>`;
-    out([`<span class="d">[key]</span> credential found for prairietech.edu`,`<span class="d">[key]</span> signing server challenge <span class="y">4c1e9a77…</span> with private key`,`<span class="g">[IdP]</span> signature verified with the stored public key ✓`,`<span class="g">[IdP]</span> signed in. The private key never left the device.`],
-      ()=>{logEv('m5','Signed in with security key at real site','',true);once('m5','flow',1);d.stage='q';save();askQ();});}
-  function askQ(){let box=$('#q5');if(!box){$('#fb5').insertAdjacentHTML('afterend','<div class="panel" id="q5"></div>');box=$('#q5');}
-    if(M('m5').done){box.innerHTML=`<div class="fb ok"><strong>Mission complete. Score ${M('m5').score}/3.</strong></div><div style="margin-top:12px">${nextBtn('m5')}</div>`;return;}
-    choiceQ(box,{q:'Why did the security key stop the proxy when the six-digit code didn’t?',opts:[
-      {t:'The credential is bound to the real site’s origin, the browser reports the true origin, and there’s no secret for the user to type or relay.',ok:true,why:' This is what CISA and NIST mean by phishing-resistant: the protection doesn’t depend on the user spotting the fake.'},
-      {t:'The fake site’s TLS certificate was invalid.',why:'The phishing page had a valid padlock. Attackers get free certificates for domains they own.'},
-      {t:'Security keys produce longer codes that take too long to relay.',why:'Keys don’t produce codes at all. They sign a challenge, and only for the registered site.'},
-      {t:'The key detected malware on the computer.',why:'Keys don’t scan the computer. The protection comes from origin binding.'}]},
-      (ok,first)=>{if(ok){if(first)once('m5','q',1);logEv('m5','Question: why FIDO2 resists phishing','',true);complete('m5');
-        box.insertAdjacentHTML('beforeend',`<div class="fb ok" style="margin-top:12px"><strong>Mission complete. Score ${M('m5').score}/3.</strong>Passkeys use the same FIDO2/WebAuthn origin binding, stored on a phone or laptop instead of a separate key.</div><div style="margin-top:12px">${nextBtn('m5')}</div>`);}
-        else logEv('m5','Question: why FIDO2 resists phishing','',false);});}
-  ({email:showEmail,phish,stolen:()=>stolen(''),keyphish:keyPhish,keyreal:keyReal,q:()=>{keyReal();d.stage='q';save();$('#page').innerHTML=`<div class="sso" style="text-align:center">${ssoLogo()}<div style="font-size:3rem">✅</div><h3>Signed in</h3></div>`;askQ();}})[d.stage]();
-};
-
-/* ================= M6 policy console ================= */
-const SCEN=[
- {tag:'Privileged accounts',h:'Domain and cloud admins need MFA. Which method do you require?',opts:[
-  {t:'FIDO2 security keys or passkeys',ok:true,why:' Admin accounts are the top phishing target, so they get phishing-resistant authenticators first.'},
-  {t:'Codes sent by SMS',why:'SMS can be intercepted or redirected by SIM swapping, and NIST SP 800-63B treats it as a restricted authenticator.'},
-  {t:'Authenticator app codes (TOTP)',why:'Much better than SMS, but phishable through a real-time proxy. You saw it in Mission 5.'},
-  {t:'Codes sent to a personal email address',why:'Whoever controls that mailbox controls the factor.'}]},
- {tag:'Help desk',h:'A caller says she’s Professor Ruiz, lost her phone, and needs MFA reset before her class starts in 10 minutes.',opts:[
-  {t:'Verify identity through an established out-of-band process (call back the number on file, manager confirmation, or ID check), then reset and log it.',ok:true,why:' Help desk resets are a favorite social-engineering path. Urgency is a pressure tactic, not a reason to skip verification.'},
-  {t:'Reset it, because she knew her employee ID.',why:'Employee IDs appear on badges, email signatures, and old documents. They prove nothing.'},
-  {t:'Send a temporary code to the personal email address she gives you.',why:'An attacker would give you their own address.'},
-  {t:'Turn off MFA on her account for the day.',why:'That hands an attacker a password-only account.'}]},
- {tag:'SOC alert',h:'Logs show 27 denied push requests for one user in 8 minutes, from an anonymizing VPN.',opts:[
-  {t:'Treat the password as compromised: force a reset, revoke sessions, contact the user, and investigate the source.',ok:true,why:' Push requests only follow a correct password.'},
-  {t:'No action needed, since every request was denied.',why:'Denials mean the attacker isn’t in yet. They still have the password.'},
-  {t:'Turn off the user’s MFA so the alerts stop.',why:'That completes the attack for them.'},
-  {t:'Tell the user to mute notifications.',why:'Then the next prompt gets approved by accident, or never reported.'}]},
- {tag:'Legacy protocols',h:'Some accounts still sign in to email over IMAP with basic authentication, which never shows an MFA prompt.',opts:[
-  {t:'Block legacy authentication and move users to clients that support modern authentication.',ok:true,why:' Basic auth skips the MFA challenge entirely, which is why attackers password-spray those endpoints.'},
-  {t:'Leave it. MFA is turned on for those accounts, so they’re covered.',why:'MFA only protects sign-ins that actually ask for it.'},
-  {t:'Require longer passwords for those accounts only.',why:'Helps against guessing, not against stolen or reused passwords.'},
-  {t:'Allow it only during business hours.',why:'Attackers work business hours too.'}]},
- {tag:'Emergency access',h:'You need a break-glass admin account in case the MFA service itself fails. How do you protect it?',opts:[
-  {t:'A long random password plus FIDO2 keys kept in a physical safe, with an alert to the security team on every sign-in.',ok:true,why:' It stays usable in an outage, stays strong, and can’t be used quietly.'},
-  {t:'Exclude it from MFA and keep the password in a shared team spreadsheet.',why:'A shared, unprotected, unmonitored super-admin is an attacker’s dream.'},
-  {t:'Register one admin’s personal phone for SMS codes.',why:'Single point of failure, phishable, and gone if that admin leaves.'},
-  {t:'Don’t create one; MFA outages never happen.',why:'They do, and lockout of every admin is its own incident.'}]},
- {tag:'Enrollment',h:'Students are enrolling in MFA for the first time. Which control matters most?',opts:[
-  {t:'Require an already verified session or in-person check before registering a factor, and notify the user whenever a new factor is added.',ok:true,why:' Attackers with a stolen password try to register their own device to keep access.'},
-  {t:'Let anyone who knows the password register a new phone.',why:'Then a stolen password becomes a permanent second factor for the attacker.'},
-  {t:'Allow students to skip enrollment for 90 days.',why:'Delay leaves accounts password-only during the riskiest period.'},
-  {t:'Email students their setup key.',why:'The setup key is the shared secret. Emailing it exposes it to anyone in the mailbox.'}]}];
-R.m6=()=>{
-  const d=M('m6').data;d.ok=d.ok||{};
-  $('#stage').innerHTML=head(6,'Set the policy','You’re the junior specialist on the identity team. Each card is a decision you’ll face in the first year on the job.','Choose the best control for each situation. Points go to first-try answers.')+
-   `<div class="stack" style="margin-top:20px;max-width:860px">${SCEN.map((s,i)=>`<div class="scenario" id="sc${i}"><span class="tag">${s.tag}</span><div id="sq${i}"></div></div>`).join('')}<div id="end6"></div></div>`;
-  const finish=()=>{if(SCEN.every((_,i)=>d.ok[i])){complete('m6');$('#end6').innerHTML=`<div class="fb ok"><strong>Mission complete. Score ${M('m6').score}/6.</strong>Pattern to remember: strongest factors for highest-risk accounts, verify identity before any MFA change, and close every path that skips MFA.</div><div style="margin-top:12px">${nextBtn('m6')}</div>`;}};
-  SCEN.forEach((s,i)=>{const box=$('#sq'+i);
-    if(d.ok[i]){box.innerHTML=`<h4>${s.h}</h4><div class="fb ok"><strong>${s.opts[0].t}</strong>${s.opts[0].why}</div>`;return;}
-    choiceQ(box,{q:`<h4 style="margin:0">${s.h}</h4>`,opts:s.opts},(ok,first)=>{if(ok){d.ok[i]=1;if(first)award('m6',1);else save();logEv('m6',`Policy: ${s.tag}`,'',true);finish();}else logEv('m6',`Policy: ${s.tag}`,'',false);});});
-  finish();
-};
-
-/* ================= M7 knowledge check ================= */
-const QUIZ=[
- {q:'Which combination is true multifactor authentication?',opts:[{t:'Smart card + PIN',ok:true,why:' Possession plus knowledge.'},{t:'Password + security question',why:'Two knowledge factors.'},{t:'Fingerprint + face scan',why:'Two inherence factors.'},{t:'Password + PIN',why:'Two knowledge factors.'}]},
- {q:'What is the default time step for TOTP codes under RFC 6238?',opts:[{t:'30 seconds',ok:true,why:' Most authenticator apps use 30 seconds, and servers usually accept one step either side for clock drift.'},{t:'10 seconds'},{t:'60 seconds'},{t:'5 minutes'}]},
- {q:'Which method does CISA describe as phishing-resistant MFA?',opts:[{t:'FIDO2/WebAuthn (security keys and passkeys)',ok:true,why:' CISA also lists PKI-based smart cards (PIV/CAC).'},{t:'Push with number matching',why:'Number matching stops fatigue attacks, but a proxy can show the victim the number.'},{t:'TOTP authenticator app',why:'Codes can be typed into a phishing page and relayed.'},{t:'SMS one-time codes',why:'The weakest common option.'}]},
- {q:'SIM swapping most directly defeats which method?',opts:[{t:'SMS one-time codes',ok:true,why:' Once the attacker controls the number, the codes go to them.'},{t:'FIDO2 security keys'},{t:'Smart card + PIN'},{t:'Fingerprint reader'}]},
- {q:'In an adversary-in-the-middle attack, what does the attacker steal to stay signed in without facing MFA again?',opts:[{t:'The session cookie or token issued after sign-in',ok:true,why:' Defenses include phishing-resistant MFA, token binding, short session lifetimes, and alerts on impossible travel.'},{t:'The TOTP shared secret',why:'The proxy only sees one code, not the seed.'},{t:'The security key’s private key',why:'It never leaves the key.'},{t:'The user’s biometric template'}]},
- {q:'Where does the TOTP shared secret live after enrollment?',opts:[{t:'On both the identity provider’s server and the authenticator app',ok:true,why:' Both compute the code from it, so the server-side seed store must be protected like a password database.'},{t:'Only on the phone'},{t:'Only on the server'},{t:'Nowhere; codes come from the time alone',why:'Time alone would give everyone the same code.'}]},
- {q:'A user gets a burst of push requests they didn’t start. What has most likely happened?',opts:[{t:'Their password has been compromised.',ok:true,why:' Pushes only follow a correct password.'},{t:'Their phone has malware.'},{t:'Someone is guessing their password.',why:'Wrong guesses never reach the push step.'},{t:'The identity provider is down.'}]},
- {q:'In biometrics, the point where the false acceptance rate equals the false rejection rate is called the…',opts:[{t:'Crossover error rate (CER)',ok:true,why:' A lower CER means a more accurate biometric system.'},{t:'False acceptance rate (FAR)'},{t:'False rejection rate (FRR)'},{t:'True positive rate (TPR)'}]},
- {q:'Number matching mainly defends against…',opts:[{t:'MFA fatigue and blind approvals',ok:true,why:' The user has to see the sign-in screen to choose the number.'},{t:'SIM swapping'},{t:'Adversary-in-the-middle phishing',why:'The proxy can show the number to the victim.'},{t:'Credential stuffing',why:'That is stopped by having any second factor at all.'}]},
- {q:'How does NIST SP 800-63B treat one-time codes sent by SMS or voice?',opts:[{t:'As a restricted authenticator: allowed, but agencies must offer an alternative and explain the risk',ok:true,why:' Not banned, but not recommended for higher-risk accounts.'},{t:'Prohibited at every assurance level'},{t:'Phishing-resistant'},{t:'Required for the highest assurance level (AAL3)',why:'AAL3 requires a hardware-based, phishing-resistant authenticator.'}]}];
-R.m7=()=>{
-  const d=M('m7').data;d.ok=d.ok||{};
-  $('#stage').innerHTML=head(7,'Knowledge check','Ten questions covering every mission plus a few exam favorites. Wrong answers explain themselves; keep going until each is right.','Points count on first-try answers only.')+
-   `<div class="stack" style="margin-top:20px;max-width:860px">${QUIZ.map((q,i)=>`<div class="panel"><div class="muted small" style="font-weight:700;margin-bottom:6px">Question ${i+1} of ${QUIZ.length}</div><div id="kq${i}"></div></div>`).join('')}<div id="end7"></div></div>`;
-  const finish=()=>{if(QUIZ.every((_,i)=>d.ok[i])){complete('m7');cert();}};
-  QUIZ.forEach((q,i)=>{const box=$('#kq'+i);
-    if(d.ok[i]){const o=q.opts[0];box.innerHTML=`<div style="font-weight:700;margin-bottom:8px">${q.q}</div><div class="fb ok"><strong>${o.t}</strong>${o.why||''}</div>`;return;}
-    choiceQ(box,q,(ok,first)=>{if(ok){d.ok[i]=1;if(first)award('m7',1);else save();logEv('m7',`Question ${i+1}`,'',true);finish();}else logEv('m7',`Question ${i+1}`,'',false);});});
-  finish();
-};
-function cert(){const T=totals();const left=MISSIONS.slice(1).filter(m=>!P(m.id).done);
-  $('#end7').innerHTML=`<div class="cert"><div style="font-size:2.4rem">🛡️</div><h3>${left.length?'Knowledge check complete':'MFA Lab complete'}</h3>
-   <p style="font-size:1.1rem;margin-bottom:4px"><b>${esc(S.student||'Student')}</b></p><p class="muted">${new Date().toLocaleString()}</p>
-   <p style="font-size:2rem;font-weight:800;color:var(--navy);margin:8px 0">${T.s} / ${T.m}</p><p class="muted">${T.pct}% of points earned on first try</p>
-   ${left.length?`<div class="fb warn" style="text-align:left;margin:12px 0"><strong>Still open:</strong>${left.map(m=>esc(m.title)).join(', ')}</div>`:''}
-   <div class="row" style="justify-content:center;margin-top:14px"><button class="btn primary" id="cCsv">Download progress log (CSV)</button><button class="btn" id="cLog">Open progress log</button><button class="btn" id="cAgain"><span aria-hidden="true">↺</span> Start over</button></div></div>`;
-  $('#cCsv').onclick=()=>download(csv(),`mfa-lab-${userName()}.csv`,'text/csv');$('#cLog').onclick=()=>openDrawer(true);$('#cAgain').onclick=()=>openReset('m0');}
-
-/* ================= start ================= */
-renderChrome();
-const h=location.hash.replace('#','');
-go(MISSIONS.some(m=>m.id===h)?h:(S.started?S.current:'m0'));
+/* ---------- INIT ---------- */
+function buildAll(){buildBriefing();buildRef();buildM1();buildM2();buildM3();buildM4();buildM5();buildM6();}
+load();buildRail();buildAll();go(S.view||"briefing");
+})();
 </script>
 </body>
 </html>
