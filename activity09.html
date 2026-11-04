@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Incident Response Plan Builder: Operation Night Shift</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F2F5F9;--surface:#FFFFFF;--surface-2:#E9EFF7;--ink:#13203A;--muted:#56637B;--line:#CDD6E3;
+  --navy:#0047AB;--on-navy:#FFFFFF;--navy-soft:#DCE7F8;
+  --green:#00784D;--green-brand:#00a86b;--green-soft:#D9F3E8;
+  --amber:#8F5400;--amber-soft:#FCEBCB;
+  --red:#B8233A;--red-soft:#FBE1E5;
+  --term-bg:#0F1E36;--term-ink:#D5E2F5;--term-dim:#8EA3C4;
+  --shadow:0 1px 2px rgba(19,32,58,.06),0 8px 24px rgba(19,32,58,.06);
+  --sans:"Barlow",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --cond:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Consolas,"Courier New",monospace;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0B1322;--surface:#122039;--surface-2:#192B4A;--ink:#E6ECF6;--muted:#9EACC3;--line:#2A3D61;
+    --navy:#6EA6FF;--on-navy:#071228;--navy-soft:#1C3360;
+    --green:#3FD69A;--green-brand:#2FCB8C;--green-soft:#123A30;
+    --amber:#F4B652;--amber-soft:#3A2C12;
+    --red:#FF7A8C;--red-soft:#3D1A24;
+    --term-bg:#060D1A;--term-ink:#D5E2F5;--term-dim:#7F94B6;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0B1322;--surface:#122039;--surface-2:#192B4A;--ink:#E6ECF6;--muted:#9EACC3;--line:#2A3D61;
+  --navy:#6EA6FF;--on-navy:#071228;--navy-soft:#1C3360;
+  --green:#3FD69A;--green-brand:#2FCB8C;--green-soft:#123A30;
+  --amber:#F4B652;--amber-soft:#3A2C12;
+  --red:#FF7A8C;--red-soft:#3D1A24;
+  --term-bg:#060D1A;--term-ink:#D5E2F5;--term-dim:#7F94B6;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:calc(env(safe-area-inset-top,0px) + 90px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--navy);outline-offset:2px;border-radius:4px}
+h1,h2,h3{font-family:var(--cond);line-height:1.15;margin:0}
+p{margin:.5em 0}
+code,.mono{font-family:var(--mono);font-size:.86em}
+
+/* ticket bar */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--surface);border-bottom:1px solid var(--line)}
+.topbar-in{max-width:1240px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.inc{display:flex;align-items:center;gap:12px;min-width:0}
+.inc-id{font-family:var(--mono);font-size:.78rem;background:var(--red-soft);color:var(--red);padding:3px 8px;border-radius:4px;font-weight:600;white-space:nowrap}
+.inc h1{font-size:1.45rem;font-weight:700;white-space:nowrap}
+.lifecycle{display:flex;gap:4px;margin-left:auto;align-items:center}
+.lc{font-family:var(--cond);font-size:.95rem;font-weight:600;padding:3px 10px;border-radius:999px;color:var(--muted);border:1px solid var(--line)}
+.lc.done{color:var(--green);border-color:var(--green);background:var(--green-soft)}
+.lc.now{color:var(--on-navy);background:var(--navy);border-color:var(--navy)}
+.clock{font-family:var(--mono);font-weight:600;font-size:1.05rem;letter-spacing:.02em;min-width:9.5ch;text-align:right}
+.clock small{display:block;font-family:var(--sans);font-weight:500;font-size:.7rem;color:var(--muted);letter-spacing:0}
+.theme-btn{border:1px solid var(--line);background:var(--surface-2);border-radius:999px;padding:6px 14px;cursor:pointer;font-weight:600;font-size:.9rem;white-space:nowrap}
+.theme-btn:hover{border-color:var(--navy)}
+.reset-btn{background:transparent}
+.reset-btn:hover{border-color:var(--red);color:var(--red)}
+.reset-btn.confirming,.btn.confirming{background:var(--red);border-color:var(--red);color:#fff}
+.progress{height:4px;background:var(--surface-2)}
+.progress span{display:block;height:100%;background:var(--green-brand);transition:width .4s ease}
+
+/* shell */
+.shell{max-width:1240px;margin:0 auto;padding:28px 20px 72px;display:grid;grid-template-columns:262px minmax(0,1fr);gap:32px;align-items:start}
+.rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 92px)}
+.rail ol{list-style:none;margin:0;padding:0;counter-reset:st;position:relative}
+.rail ol::before{content:"";position:absolute;left:15px;top:14px;bottom:14px;width:2px;background:var(--line)}
+.rail li{position:relative}
+.rail button{display:flex;gap:12px;align-items:center;width:100%;text-align:left;background:none;border:0;padding:7px 8px 7px 0;cursor:pointer;border-radius:8px}
+.rail .dot{position:relative;z-index:1;flex:none;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-family:var(--cond);font-weight:700;font-size:1rem;background:var(--surface);border:2px solid var(--line);color:var(--muted)}
+.rail .lbl{font-weight:500;line-height:1.25;font-size:.95rem}
+.rail .lbl small{display:block;color:var(--muted);font-size:.8rem;font-weight:400}
+.rail button:hover .lbl{color:var(--navy)}
+.rail li.done .dot{background:var(--green-soft);border-color:var(--green);color:var(--green)}
+.rail li.cur .dot{background:var(--navy);border-color:var(--navy);color:var(--on-navy)}
+.rail li.cur .lbl{font-weight:700}
+
+/* main */
+main{min-width:0;max-width:880px}
+.st-head{margin-bottom:22px}
+.st-step{color:var(--muted);font-weight:500;font-size:.95rem}
+.st-head h2{font-size:2.4rem;font-weight:700;margin:2px 0 8px}
+.st-head .intro{max-width:68ch;color:var(--ink)}
+.nist{display:inline-block;margin-top:6px;font-size:.88rem;color:var(--navy);background:var(--navy-soft);padding:3px 10px;border-radius:6px;font-weight:500}
+.task{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px 22px 18px;margin:0 0 20px;box-shadow:var(--shadow)}
+.task h3{font-size:1.4rem;font-weight:600;margin-bottom:4px}
+.task .tprompt{color:var(--muted);max-width:70ch;margin-bottom:14px}
+.domain{float:right;font-size:.78rem;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:2px 9px;margin-left:10px}
+
+/* choice rows */
+.rows{display:flex;flex-direction:column;gap:8px}
+.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.row.term{background:var(--term-bg);color:var(--term-ink);border-color:transparent;font-family:var(--mono);font-size:.82rem}
+.row.term .seg button{background:transparent;color:var(--term-ink);border-color:#36507A}
+.row.term .seg button[aria-pressed="true"]{background:#6EA6FF;color:#071228;border-color:#6EA6FF}
+.row.ok{box-shadow:inset 4px 0 0 var(--green-brand)}
+.row.bad{box-shadow:inset 4px 0 0 var(--red)}
+.row .why{grid-column:1/-1;font-family:var(--sans);font-size:.9rem;margin-top:2px}
+.row.term .why{color:var(--term-dim)}
+.row.term.ok .why b{color:#3FD69A}.row.term.bad .why b{color:#FF7A8C}
+.row.ok .why b{color:var(--green)}.row.bad .why b{color:var(--red)}
+.tree{white-space:pre-wrap;word-break:break-word}
+.tree .br{color:var(--term-dim)}
+.seg{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end}
+.seg button{border:1px solid var(--line);background:var(--surface-2);padding:5px 11px;border-radius:6px;cursor:pointer;font-size:.88rem;font-weight:600;font-family:var(--sans)}
+.seg button:hover{border-color:var(--navy)}
+.seg button[aria-pressed="true"]{background:var(--navy);color:var(--on-navy);border-color:var(--navy)}
+select{border:1px solid var(--line);background:var(--surface-2);border-radius:6px;padding:6px 8px;max-width:100%;cursor:pointer}
+
+/* order */
+.order{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.order li{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--surface)}
+.order .n{font-family:var(--cond);font-weight:700;font-size:1.2rem;color:var(--navy);text-align:center}
+.order li.ok{box-shadow:inset 4px 0 0 var(--green-brand)}.order li.bad{box-shadow:inset 4px 0 0 var(--red)}
+.mv{display:flex;gap:4px}
+.mv button{width:34px;height:32px;border:1px solid var(--line);background:var(--surface-2);border-radius:6px;cursor:pointer;font-size:.95rem}
+.mv button:hover:not(:disabled){border-color:var(--navy)}
+.mv button:disabled{opacity:.35;cursor:default}
+
+/* mcq & multi */
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:11px 14px;cursor:pointer}
+.opt:hover{border-color:var(--navy)}
+.opt .mark{flex:none;width:20px;height:20px;border-radius:50%;border:2px solid var(--line);margin-top:3px}
+.opt.sq .mark{border-radius:5px}
+.opt[aria-pressed="true"],.opt[aria-checked="true"]{border-color:var(--navy);background:var(--navy-soft)}
+.opt[aria-pressed="true"] .mark,.opt[aria-checked="true"] .mark{border-color:var(--navy);background:var(--navy);box-shadow:inset 0 0 0 3px var(--surface)}
+.opt.ok{border-color:var(--green-brand)}.opt.bad{border-color:var(--red)}
+.scene{border-left:4px solid var(--amber);background:var(--amber-soft);padding:10px 14px;border-radius:0 8px 8px 0;margin-bottom:12px}
+.scene .t{font-family:var(--mono);font-size:.8rem;font-weight:600;color:var(--amber)}
+
+/* feedback */
+.fb{margin-top:12px;padding:10px 14px;border-radius:8px;font-size:.95rem;border:1px solid}
+.fb.ok{background:var(--green-soft);border-color:var(--green-brand)}
+.fb.part{background:var(--amber-soft);border-color:var(--amber)}
+.fb.bad{background:var(--red-soft);border-color:var(--red)}
+.fb b{font-weight:600}
+.fb ul{margin:6px 0 0;padding-left:20px}
+
+/* text fields */
+.fields{display:grid;gap:14px}
+.fields.two{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.field label{display:block;font-weight:600;font-size:.95rem;margin-bottom:4px}
+.field .hint{font-weight:400;color:var(--muted);font-size:.85rem}
+.field input,.field textarea{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:9px 11px}
+.field textarea{min-height:78px;resize:vertical}
+.field input:focus,.field textarea:focus{border-color:var(--navy)}
+.legend{width:100%;border-collapse:collapse;font-size:.9rem;margin-bottom:14px}
+.legend th,.legend td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+.legend th{background:var(--surface-2);font-family:var(--cond);font-size:1.05rem;font-weight:600;white-space:nowrap}
+
+/* playbook */
+.pb{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
+.pb h4{font-family:var(--cond);font-size:1.15rem;margin:0 0 8px;font-weight:600}
+.pal{display:flex;flex-direction:column;gap:6px}
+.blk{display:flex;gap:10px;align-items:flex-start;text-align:left;width:100%;border:1px dashed var(--line);background:var(--surface-2);border-radius:8px;padding:8px 10px;cursor:pointer;font-size:.9rem}
+.blk:hover:not(:disabled){border-color:var(--navy);border-style:solid}
+.blk:disabled{opacity:.35;cursor:default}
+.blk .k,.seq .k{flex:none;font-family:var(--cond);font-weight:700;font-size:.95rem;color:var(--navy);min-width:72px}
+.seq{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:0;min-height:120px;border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--surface-2)}
+.seq li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 8px;font-size:.88rem;position:relative}
+.seq li+li{margin-top:16px}
+.seq li+li::before{content:"";position:absolute;left:28px;top:-17px;height:16px;border-left:2px solid var(--navy)}
+.seq .empty{color:var(--muted);font-size:.9rem;padding:20px 8px;text-align:center;border:0;background:none}
+.seq li.badblk{border-color:var(--red);background:var(--red-soft)}
+.checks{list-style:none;padding:0;margin:6px 0 0}
+.checks li{padding:2px 0}
+
+/* buttons */
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0 24px}
+.btn{border:1px solid var(--navy);background:var(--navy);color:var(--on-navy);padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:600;font-size:1rem}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--navy)}
+.btn.green{background:var(--green-brand);border-color:var(--green-brand);color:#fff}
+.score{font-family:var(--cond);font-size:1.3rem;font-weight:600}
+.score small{font-family:var(--sans);font-size:.85rem;color:var(--muted);font-weight:400}
+.nav-row{display:flex;justify-content:space-between;gap:10px;border-top:1px solid var(--line);padding-top:18px;margin-top:8px}
+
+/* briefing */
+.alert{background:var(--term-bg);color:var(--term-ink);border-radius:12px;padding:18px 20px;font-family:var(--mono);font-size:.82rem;line-height:1.7;margin-bottom:20px;overflow-x:auto}
+.alert .hi{color:#FF7A8C;font-weight:600}.alert .md{color:#F4B652}.alert .dim{color:var(--term-dim)}
+.alert-time{font-family:var(--cond);font-size:4.2rem;font-weight:700;line-height:1;color:#FF7A8C;margin-bottom:6px}
+.netmap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px;margin:8px 0 6px}
+.netmap svg{display:block;width:100%;min-width:560px;height:auto}
+.obj{padding-left:20px;margin:6px 0}
+.obj li{margin:3px 0}
+
+/* summary */
+.sum-head{border-bottom:3px solid var(--navy);padding-bottom:12px;margin-bottom:18px}
+.sum-head h2{font-size:2.2rem}
+.meta{color:var(--muted);font-size:.95rem}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:16px 0 22px}
+.kpi{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--surface)}
+.kpi b{display:block;font-family:var(--cond);font-size:2rem;line-height:1.1}
+.kpi span{color:var(--muted);font-size:.88rem}
+.bars{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
+.bar{display:grid;grid-template-columns:minmax(0,230px) minmax(0,1fr) 54px;gap:12px;align-items:center;font-size:.92rem}
+.bar .track{height:12px;background:var(--surface-2);border-radius:999px;overflow:hidden;border:1px solid var(--line)}
+.bar .fill{height:100%;background:var(--navy)}
+.bar .fill.hi{background:var(--green-brand)}.bar .fill.lo{background:var(--red)}
+.bar .pct{font-family:var(--mono);font-size:.85rem;text-align:right}
+.plan h3{font-size:1.35rem;margin:22px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--line)}
+.plan table{width:100%;border-collapse:collapse;font-size:.92rem}
+.plan th,.plan td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+.plan th{background:var(--surface-2);font-weight:600}
+.plan .blank{color:var(--muted);font-style:italic}
+.tick{color:var(--green);font-weight:700}.cross{color:var(--red);font-weight:700}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 24px);transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:8px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s;z-index:20}
+.toast.show{opacity:1}
+
+@media (max-width:960px){
+  .shell{grid-template-columns:1fr;gap:18px}
+  .rail{position:static;overflow-x:auto;margin:0 -20px;padding:0 20px}
+  .rail ol{display:flex;gap:4px;width:max-content}
+  .rail ol::before{display:none}
+  .rail button{flex-direction:column;gap:4px;width:auto;padding:4px 6px;text-align:center}
+  .rail .lbl{font-size:.78rem;max-width:88px}
+  .rail .lbl small{display:none}
+  .lifecycle{display:none}
+  .inc h1{font-size:1.2rem;white-space:normal}
+  .pb{grid-template-columns:1fr}
+  .st-head h2{font-size:1.9rem}
+}
+@media (max-width:560px){
+  body{font-size:16px}
+  .row{grid-template-columns:1fr}
+  .seg{justify-content:flex-start}
+  .bar{grid-template-columns:1fr 54px}.bar .track{grid-column:1/-1;grid-row:2}
+  .alert-time{font-size:3rem}
+  .clock small{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media print{
+  :root{--bg:#fff;--surface:#fff;--surface-2:#eef2f7;--ink:#000;--muted:#444;--line:#999;--navy:#0047AB;color-scheme:light}
+  body{background:#fff;font-size:11pt}
+  body::before,.topbar,.rail,.nav-row,.no-print,.toast{display:none!important}
+  .shell{display:block;padding:0;max-width:none}
+  main{max-width:none}
+  .kpi,.plan table,.bar{break-inside:avoid}
+  .plan h3{break-after:avoid}
+  .bar .fill{print-color-adjust:exact;-webkit-print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="inc">
+      <span class="inc-id">INC-2026-1104</span>
+      <h1>Operation Night Shift: IR Plan Builder</h1>
+    </div>
+    <div class="lifecycle" id="lifecycle" aria-label="Incident status"></div>
+    <div class="clock" aria-live="off"><span id="clock">T+ 00:00:00</span><small>since first alert</small></div>
+    <button class="theme-btn reset-btn" id="resetBtn" type="button" data-act="reset" data-key="reset-top">↺ Start over</button>
+    <button class="theme-btn" id="themeBtn" type="button" aria-pressed="false">Dark mode</button>
+  </div>
+  <div class="progress" aria-hidden="true"><span id="prog" style="width:0"></span></div>
+</header>
+
+<div class="shell">
+  <nav class="rail" aria-label="Activity steps"><ol id="rail"></ol></nav>
+  <main id="main" tabindex="-1"></main>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- state ---------- */
+var KEY = "irpb-nightshift-v1";
+var S = { cur:0, a:{}, checked:{}, first:{}, start:Date.now(), theme:"light" };
+try { var raw = localStorage.getItem(KEY); if (raw) { var o = JSON.parse(raw); for (var k in o) S[k] = o[k]; } } catch(e) {}
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e) {} }
+
+function $(s){ return document.querySelector(s); }
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]; }); }
+
+var DOMAINS = {
+  plan:"Frameworks & planning",
+  net:"Network protocols & architecture",
+  os:"Operating system internals",
+  df:"Digital forensics",
+  cm:"Containment & mitigation",
+  auto:"Automation & orchestration"
+};
+
+/* ---------- content ---------- */
+var STATIONS = [
+{ id:"brief", short:"Briefing", sub:"Scenario and goals", title:"Incident briefing" },
+
+{ id:"ksa", short:"Map the KSAs", sub:"What responders need", title:"Map the knowledge, skills, and abilities",
+  nist:"Workforce lens: NICE Framework KSA statements",
+  intro:"Incident responders are hired and assessed on knowledge (what you know), skills (what you can demonstrably do), and abilities (the capacity to apply both under real conditions). Sort each statement before you start building the plan.",
+  tasks:[
+  { id:"ksa1", type:"choice", domain:"plan", title:"Sort the statements", prompt:"Choose K, S, or A for each statement.",
+    options:["Knowledge","Skill","Ability"],
+    items:[
+      {id:"a",text:"The four phases of the NIST SP 800-61 incident response lifecycle",ans:"Knowledge",why:"A body of facts and concepts you can recall and explain."},
+      {id:"b",text:"Default ports and normal behavior of DNS (53), SMB (445), and RDP (3389)",ans:"Knowledge",why:"Protocol facts that let you recognize abnormal traffic."},
+      {id:"c",text:"Expected parent-child process relationships in Windows, such as services.exe → svchost.exe",ans:"Knowledge",why:"OS internals knowledge used to spot masquerading processes."},
+      {id:"d",text:"Order of volatility for evidence collection (RFC 3227)",ans:"Knowledge",why:"A principle you know; collecting in that order is the related skill."},
+      {id:"e",text:"Analyzing a packet capture to identify periodic C2 beaconing",ans:"Skill",why:"An observable, measurable task performed with tools."},
+      {id:"f",text:"Acquiring a memory image and verifying it with SHA-256 hashes",ans:"Skill",why:"A hands-on forensic procedure you can be tested on."},
+      {id:"g",text:"Writing a SOAR playbook that isolates a host after analyst approval",ans:"Skill",why:"A build task with a concrete, checkable output."},
+      {id:"h",text:"Prioritizing containment decisions under time pressure with incomplete data",ans:"Ability",why:"An underlying capacity to apply knowledge and skill in a fluid situation."},
+      {id:"i",text:"Communicating incident status clearly to executives, legal counsel, and staff",ans:"Ability",why:"A broad capacity that shows up across many specific tasks."}
+    ]}
+  ]},
+
+{ id:"frame", short:"Frameworks", sub:"NIST SP 800-61 and CSF 2.0", title:"Anchor the plan to the frameworks",
+  nist:"NIST SP 800-61 Rev. 2 lifecycle · Rev. 3 and CSF 2.0",
+  intro:"Your plan needs a backbone. Rev. 2 gives you the classic four-phase lifecycle; Rev. 3 (April 2025) places incident response inside the six Cybersecurity Framework 2.0 functions so it becomes part of overall risk management.",
+  tasks:[
+  { id:"fr1", type:"order", domain:"plan", title:"Put the lifecycle in order",
+    prompt:"Use the arrows to arrange the NIST SP 800-61 Rev. 2 phases from first to last.",
+    items:["Preparation","Detection and analysis","Containment, eradication, and recovery","Post-incident activity"],
+    why:"The lifecycle is a loop: lessons learned in post-incident activity feed back into preparation, and detection often cycles back and forth with containment as new evidence appears." },
+  { id:"fr2", type:"select", domain:"plan", title:"Map activities to CSF 2.0 functions",
+    prompt:"Rev. 3 organizes incident response recommendations around the CSF 2.0 functions. Choose the function each activity supports.",
+    options:["Govern","Identify","Protect","Detect","Respond","Recover"],
+    rows:[
+      {id:"a",text:"Approve the IR policy and define who has authority to take systems offline",ans:"Govern",why:"Roles, responsibilities, authorities, and policy live in Govern."},
+      {id:"b",text:"Maintain an asset inventory that marks which systems are business-critical",ans:"Identify",why:"Asset management is part of Identify."},
+      {id:"c",text:"Deploy EDR agents and hardened configurations on endpoints",ans:"Protect",why:"Safeguards that reduce likelihood and impact are Protect."},
+      {id:"d",text:"Correlate SIEM alerts and declare an incident",ans:"Detect",why:"Finding and analyzing anomalies and indicators is Detect."},
+      {id:"e",text:"Isolate infected hosts and remove attacker persistence",ans:"Respond",why:"Containment and eradication fall under Respond."},
+      {id:"f",text:"Restore from clean, tested backups and confirm normal operations",ans:"Recover",why:"Restoring assets and operations is Recover."},
+      {id:"g",text:"Feed lessons learned into the organization’s improvement process",ans:"Identify",why:"In CSF 2.0, Improvement (ID.IM) sits under Identify, which is how Rev. 3 closes the loop."}
+    ]},
+  { id:"fr3", type:"mcq", domain:"plan", title:"What changed in Rev. 3?",
+    prompt:"Which statement best describes the main shift in NIST SP 800-61 Rev. 3?",
+    options:[
+      {t:"It organizes incident response recommendations around the CSF 2.0 functions, treating IR as part of cybersecurity risk management.",pts:2,fb:"Correct. Rev. 3 is a CSF 2.0 Community Profile, so IR activities are spread across Govern, Identify, Protect, Detect, Respond, and Recover."},
+      {t:"It replaces the lifecycle with a mandatory twelve-step checklist.",pts:0,fb:"Rev. 3 is recommendations, not a mandatory checklist."},
+      {t:"It applies only to federal agencies and drops guidance for other organizations.",pts:0,fb:"It is written for any organization, as Rev. 2 was."},
+      {t:"It removes preparation from the scope of incident response.",pts:0,fb:"Preparation is still central; it maps mostly to Govern, Identify, and Protect."}
+    ]}
+  ]},
+
+{ id:"prep", short:"Preparation", sub:"Build the plan’s core", title:"Preparation: build the core of your plan",
+  nist:"Rev. 2 phase 1: Preparation · CSF 2.0 Govern, Identify, Protect",
+  intro:"Lakeshore Precision Components needs a written IR plan before the next incident. Assign responsibilities, set severity levels, stock the jump kit, and write the sections that only you can decide. Your written answers carry straight into the plan summary at the end.",
+  tasks:[
+  { id:"pr1", type:"select", domain:"plan", title:"Assign responsibilities",
+    prompt:"Choose the role that owns each responsibility.",
+    options:["Incident commander","Forensic analyst","Legal and privacy counsel","Communications lead","IT operations"],
+    rows:[
+      {id:"a",text:"Decides when to escalate severity and approves containment actions",ans:"Incident commander",why:"One accountable decision-maker prevents conflicting orders."},
+      {id:"b",text:"Acquires memory and disk images and maintains chain of custody",ans:"Forensic analyst",why:"Evidence handling needs trained, documented collection."},
+      {id:"c",text:"Determines breach notification obligations and deadlines",ans:"Legal and privacy counsel",why:"Notification rules are legal determinations that vary by state, sector, and contract."},
+      {id:"d",text:"Drafts internal updates and any public or customer statements",ans:"Communications lead",why:"Consistent, approved messaging limits confusion and liability."},
+      {id:"e",text:"Rebuilds systems and restores data from backups",ans:"IT operations",why:"Ops executes recovery under the IR team’s direction."}
+    ]},
+  { id:"pr2", type:"choice", domain:"plan", title:"Classify severity",
+    prompt:"Use the matrix to classify each event.",
+    legend:[
+      ["SEV1","Critical","Widespread operational impact or confirmed theft of sensitive data"],
+      ["SEV2","High","Confirmed compromise limited to a few systems"],
+      ["SEV3","Moderate","Malicious activity detected and blocked; no confirmed compromise"],
+      ["SEV4","Low","Policy violation or informational event"]
+    ],
+    options:["SEV1","SEV2","SEV3","SEV4"],
+    items:[
+      {id:"a",text:"Ransomware is encrypting file servers at both plants",ans:"SEV1",why:"Widespread operational impact."},
+      {id:"b",text:"One workstation has a confirmed C2 beacon; no lateral movement found yet",ans:"SEV2",why:"Confirmed compromise, limited scope; escalate if it spreads."},
+      {id:"c",text:"EDR quarantined a commodity trojan at download; it never executed",ans:"SEV3",why:"Malicious but blocked."},
+      {id:"d",text:"An employee installed an unapproved browser extension",ans:"SEV4",why:"Policy violation with no malicious activity."}
+    ]},
+  { id:"pr3", type:"multi", domain:"df", title:"Stock the jump kit",
+    prompt:"Select every item that belongs in a ready-to-go incident response jump kit.",
+    options:[
+      {t:"Hardware write blocker",ok:true,why:"Prevents changes to original media during imaging."},
+      {t:"Forensic laptop with imaging and memory-capture tools",ok:true,why:"A trusted, known-good analysis platform."},
+      {t:"Forensically wiped, labeled storage drives",ok:true,why:"Clean media avoids cross-contamination between cases."},
+      {t:"Blank chain-of-custody forms and evidence bags",ok:true,why:"Documentation keeps evidence admissible."},
+      {t:"Out-of-band contact list and phones",ok:true,why:"Attackers may be reading corporate email and chat."},
+      {t:"A sticky note with the production domain admin password",ok:false,why:"Never store privileged credentials in plain text; use a vault and break-glass process."},
+      {t:"The compromised user’s own laptop, to use for analysis",ok:false,why:"An untrusted machine can alter or hide evidence."},
+      {t:"One shared USB drive reused across every case",ok:false,why:"Reused media contaminates evidence."}
+    ]},
+  { id:"pr4", type:"text", title:"Write your plan sections",
+    prompt:"These are judgment calls with no single right answer. Be specific to Lakeshore; they appear verbatim in your plan summary.",
+    fields:[
+      {id:"scope",label:"Scope",hint:"Which systems, data, sites, and business units does the plan cover?",rows:3},
+      {id:"oob",label:"Out-of-band communication and escalation",hint:"What channel will the team use if email and chat are compromised? Who is called, in what order?",rows:3},
+      {id:"notify",label:"Notification triggers",hint:"When do you notify leadership, legal, cyber insurance, law enforcement, customers, or regulators?",rows:3}
+    ]}
+  ]},
+
+{ id:"detect", short:"Detection & analysis", sub:"Network and OS evidence", title:"Detection and analysis: read the evidence",
+  nist:"Rev. 2 phase 2: Detection and analysis · CSF 2.0 Detect",
+  intro:"It is 23:52. You have network logs from the core switch and a process tree from the EDR console on FIN-WS-057. Separate normal activity from indicators of compromise, then use OS internals to confirm what the attacker did.",
+  tasks:[
+  { id:"dt1", type:"choice", domain:"net", term:true, title:"Triage the network log",
+    prompt:"Mark each line Normal or Suspicious. Think about protocol, direction, timing, and size.",
+    options:["Normal","Suspicious"],
+    items:[
+      {id:"a",text:"23:41:02  10.10.20.57 → 10.10.1.5:53/udp  DNS A  update.microsoft.com",ans:"Normal",why:"Routine update lookup through the internal resolver."},
+      {id:"b",text:"23:41:15  10.10.20.57 → 10.10.1.5:53/udp  DNS TXT  dGhpcyBpcyBkYXRh0x9f.c2.cdn-sync.net",ans:"Suspicious",why:"A long encoded subdomain in a TXT query is a classic sign of DNS tunneling or C2."},
+      {id:"c",text:"23:42:00, 23:43:00, 23:44:01  10.10.20.57 → 203.0.113.66:443  TLS  312 B each",ans:"Suspicious",why:"Fixed interval and fixed size to the same external IP: beaconing."},
+      {id:"d",text:"23:44:30  10.10.20.57 → 10.10.5.20:445  SMB2 TREE_CONNECT \\\\FS01\\ADMIN$",ans:"Suspicious",why:"A user workstation mounting an admin share on a server suggests PsExec-style lateral movement."},
+      {id:"e",text:"23:45:10  10.10.5.20 → 10.10.1.10:123/udp  NTP",ans:"Normal",why:"Time sync with the internal NTP server is expected."},
+      {id:"f",text:"23:46:02  10.10.20.57  ARP who-has 10.10.20.1",ans:"Normal",why:"Resolving the default gateway is normal Layer 2 behavior."},
+      {id:"g",text:"23:47:40  10.10.20.57 → 10.10.5.20:3389  RDP  session 41 min",ans:"Suspicious",why:"A finance workstation running a long RDP session to a file server near midnight."},
+      {id:"h",text:"23:58:12  10.10.5.20 → 198.51.100.24:443  TLS  4.2 GB outbound  SNI mega-sync.io",ans:"Suspicious",why:"Large outbound transfer from a file server to a file-sharing service: likely exfiltration before encryption."}
+    ]},
+  { id:"dt2", type:"mcq", domain:"net", title:"Architecture check",
+    prompt:"Which architectural control would most directly have blocked the 23:44:30 SMB connection?",
+    options:[
+      {t:"Internal segmentation: ACLs or host firewalls that block the user VLAN from server admin ports (445, 3389), with admin access allowed only from jump hosts",pts:2,fb:"Correct. This was east-west traffic inside the network; segmentation and tiered admin access stop it."},
+      {t:"A stricter rule on the internet-facing perimeter firewall",pts:0,fb:"The connection never crossed the perimeter; it was internal, east-west traffic."},
+      {t:"Switching DNS to a public resolver",pts:0,fb:"That would remove internal DNS visibility and does nothing about SMB."},
+      {t:"Enabling WPA3 on the office Wi-Fi",pts:0,fb:"The workstation is wired and already trusted on the network."}
+    ]},
+  { id:"dt3", type:"choice", domain:"os", term:true, tree:true, title:"Inspect the process tree",
+    prompt:"EDR process tree for FIN-WS-057. Mark each process Normal or Suspicious using what you know about Windows parent-child relationships and file paths.",
+    options:["Normal","Suspicious"],
+    items:[
+      {id:"a",d:0,text:"wininit.exe  (PID 512)",ans:"Normal",why:"Session 0 initialization; expected parent of services.exe and lsass.exe."},
+      {id:"b",d:1,text:"lsass.exe  (PID 664)  C:\\Windows\\System32",ans:"Normal",why:"Correct parent, correct path, one instance."},
+      {id:"c",d:1,text:"services.exe  (PID 640)",ans:"Normal",why:"The Service Control Manager, launched by wininit.exe."},
+      {id:"d",d:2,text:"svchost.exe -k netsvcs  C:\\Windows\\System32",ans:"Normal",why:"Legitimate svchost: parent services.exe, System32 path, -k service group."},
+      {id:"e",d:0,text:"explorer.exe  (PID 3120)",ans:"Normal",why:"The user’s shell."},
+      {id:"f",d:1,text:"OUTLOOK.EXE",ans:"Normal",why:"The user’s mail client."},
+      {id:"g",d:2,text:"WINWORD.EXE  Invoice_4471.docm",ans:"Suspicious",why:"A macro-enabled attachment opened from email: the likely initial access."},
+      {id:"h",d:3,text:"cmd.exe /c powershell …",ans:"Suspicious",why:"Office applications should not spawn command shells."},
+      {id:"i",d:4,text:"powershell.exe -nop -w hidden -enc JABjAD0A…",ans:"Suspicious",why:"No profile, hidden window, Base64-encoded command: a common loader pattern."},
+      {id:"j",d:5,text:"rundll32.exe comsvcs.dll, MiniDump 664 C:\\Users\\Public\\l.dmp full",ans:"Suspicious",why:"Dumping PID 664 (LSASS) to harvest credentials. This explains the later admin logons."},
+      {id:"k",d:1,text:"svchost.exe  C:\\Users\\Public\\svchost.exe",ans:"Suspicious",why:"Masquerading: wrong parent (explorer.exe) and wrong path for svchost."},
+      {id:"l",d:1,text:"chrome.exe",ans:"Normal",why:"A browser launched by the user."}
+    ]},
+  { id:"dt4", type:"select", domain:"os", title:"Match the Windows event IDs",
+    prompt:"Pick the meaning of each event ID you would query on FS01 and the workstation.",
+    options:["A new process was created","Successful logon","Failed logon","A service was installed","The security audit log was cleared","A scheduled task was created"],
+    rows:[
+      {id:"a",text:"4688",ans:"A new process was created",why:"Enable command-line logging so 4688 captures the encoded PowerShell."},
+      {id:"b",text:"4624, logon type 10",ans:"Successful logon",why:"Type 10 is RemoteInteractive (RDP); type 3 is network logon such as SMB."},
+      {id:"c",text:"4625",ans:"Failed logon",why:"Bursts suggest password guessing or spraying."},
+      {id:"d",text:"7045 (System log)",ans:"A service was installed",why:"PsExec installs a service (PSEXESVC) on the target, so 7045 on FS01 is a lateral-movement clue."},
+      {id:"e",text:"1102",ans:"The security audit log was cleared",why:"Attackers clear logs to hide activity; this event itself is a strong indicator."},
+      {id:"f",text:"4698",ans:"A scheduled task was created",why:"A common persistence mechanism."}
+    ]},
+  { id:"dt5", type:"multi", domain:"os", title:"Check the Linux build server",
+    prompt:"The attacker reused stolen credentials to SSH into the Linux build server BLD-02 (10.10.5.31). Select every location that could hold persistence or evidence of that intrusion.",
+    options:[
+      {t:"Cron jobs: /etc/crontab, /etc/cron.d/, /var/spool/cron/",ok:true,why:"Scheduled persistence."},
+      {t:"systemd unit files in /etc/systemd/system/",ok:true,why:"Malicious services survive reboots."},
+      {t:"~/.ssh/authorized_keys for each account",ok:true,why:"An added key gives the attacker passwordless re-entry."},
+      {t:"Shell startup files: ~/.bashrc, /etc/profile.d/",ok:true,why:"Code that runs at every login."},
+      {t:"/var/log/auth.log (or /var/log/secure)",ok:true,why:"Records the SSH logins, source IPs, and sudo use."},
+      {t:"/proc/cpuinfo",ok:false,why:"Hardware information, not persistence or intrusion evidence."},
+      {t:"/usr/share/doc/",ok:false,why:"Package documentation; not a useful place to look."}
+    ]}
+  ]},
+
+{ id:"forensics", short:"Digital forensics", sub:"Collect and preserve", title:"Digital forensics: collect evidence that holds up",
+  nist:"Rev. 2: evidence gathering and handling · RFC 3227",
+  intro:"Leadership may involve law enforcement and the cyber insurer, so evidence must be collected in the right order, verified, and documented.",
+  tasks:[
+  { id:"df1", type:"order", domain:"df", title:"Order of volatility",
+    prompt:"Arrange the evidence sources from most volatile (collect first) to least volatile, following RFC 3227.",
+    items:["CPU registers and cache","Routing table, ARP cache, process table, kernel statistics, memory","Temporary file systems","Disk","Remote logging and monitoring data","Physical configuration and network topology","Archival media"],
+    why:"Collect what disappears fastest first. Memory holds injected code, live connections, and keys that a shutdown destroys." },
+  { id:"df2", type:"mcq", domain:"df", title:"Live response decision",
+    prompt:"FIN-WS-057 is still powered on, and you suspect fileless malware running in PowerShell. What do you do first?",
+    options:[
+      {t:"Capture RAM with a trusted tool run from external media, then hash the image",pts:2,fb:"Correct. Memory is where fileless malware lives; capture it before anything else changes."},
+      {t:"Pull the power cord to freeze the disk",pts:0,fb:"That destroys the in-memory payload, network connections, and decryption keys."},
+      {t:"Run a full antivirus scan to see what it finds",pts:0,fb:"A scan changes the system and timestamps, and fileless malware often evades it."},
+      {t:"Reboot into Safe Mode to stop the malware",pts:0,fb:"Rebooting wipes memory evidence."}
+    ]},
+  { id:"df3", type:"mcq", domain:"df", title:"Verify integrity",
+    prompt:"Acquisition SHA-256 ends in …4be0 7c1e. After copying the image to the analysis server, the verification hash ends in …4be0 7c9e. What does this mean?",
+    options:[
+      {t:"The copy no longer matches the original. Document the mismatch, re-verify, and reacquire or recopy before relying on it.",pts:2,fb:"Correct. Any difference in a cryptographic hash means the data differs."},
+      {t:"Small differences at the end of a hash are normal; continue the analysis.",pts:0,fb:"A single changed bit produces a completely different hash. There is no “close enough.”"},
+      {t:"Switch to MD5 so the two values match.",pts:0,fb:"Changing algorithms hides the problem, and MD5 is weaker."},
+      {t:"Delete the original image to avoid confusion.",pts:0,fb:"Never destroy original evidence."}
+    ]},
+  { id:"df4", type:"text", two:true, title:"Log a chain-of-custody entry",
+    prompt:"Record the memory image from FIN-WS-057 as your first piece of evidence.",
+    fields:[
+      {id:"eid",label:"Evidence ID",hint:"e.g. LPC-2026-001",rows:1},
+      {id:"desc",label:"Description",hint:"Item, source host, and acquisition method",rows:1},
+      {id:"by",label:"Collected by",hint:"Name and role",rows:1},
+      {id:"when",label:"Date and time (with time zone)",hint:"e.g. 2026-11-04 23:58 CST",rows:1},
+      {id:"hash",label:"SHA-256 hash",hint:"Paste or summarize the value",rows:1},
+      {id:"store",label:"Storage location and transfer",hint:"Where it is kept and who received it",rows:1}
+    ]}
+  ]},
+
+{ id:"contain", short:"Containment", sub:"Contain, eradicate, recover", title:"Containment, eradication, and recovery",
+  nist:"Rev. 2 phase 3 · CSF 2.0 Respond and Recover",
+  intro:"Make the call at each decision point. Some choices are better than others, and a few make things worse. Each choice adds to your plan’s containment strategy.",
+  tasks:[
+  { id:"cm1", type:"mcq", domain:"cm", scene:"23:52", title:"Decision 1: Stop the beacon",
+    prompt:"FIN-WS-057 is confirmed beaconing to 203.0.113.66. What is your first containment action?",
+    options:[
+      {t:"Use EDR to network-isolate FIN-WS-057 while leaving it powered on",pts:2,fb:"Best choice. It cuts C2 and lateral movement, preserves memory, and keeps the EDR channel open for remote collection."},
+      {t:"Unplug the network cable",pts:1,fb:"It works, but you lose remote collection and someone must be on site."},
+      {t:"Power off the workstation",pts:0,fb:"It contains the host but destroys volatile evidence you have not captured."},
+      {t:"Leave it online for 48 hours to watch the attacker",pts:0,fb:"Monitoring an attacker requires explicit leadership and legal approval, and here data is already leaving the network."}
+    ]},
+  { id:"cm2", type:"mcq", domain:"cm", scene:"00:20", title:"Decision 2: Credentials",
+    prompt:"FS01 shows the attacker logged in as the admin account svc-backup, and LSASS was dumped on the workstation. What do you do about credentials?",
+    options:[
+      {t:"Disable svc-backup, reset every credential cached on the dumped host, and if domain admin hashes were exposed, reset krbtgt twice",pts:2,fb:"Best choice. An LSASS dump exposes every credential on that host; krbtgt is reset twice to invalidate forged Kerberos tickets."},
+      {t:"Delete the svc-backup account",pts:1,fb:"It stops the account but breaks backups and removes artifacts you need for scoping. Disable instead."},
+      {t:"Reset only the finance user’s password",pts:0,fb:"The dump exposed far more than one user’s password."}
+    ]},
+  { id:"cm3", type:"mcq", domain:"cm", scene:"00:45", title:"Decision 3: Block the indicators",
+    prompt:"You have IOCs: the domain cdn-sync.net, IPs 203.0.113.66 and 198.51.100.24, and the loader’s file hash.",
+    options:[
+      {t:"Sinkhole the domain in DNS, block both IPs at the firewall and proxy, and add the hash to the EDR blocklist",pts:2,fb:"Best choice. Targeted, layered blocking across network and endpoint."},
+      {t:"Block all outbound TCP 443 for the company",pts:0,fb:"Overbroad. It stops the business, and attackers rotate infrastructure."},
+      {t:"Wait until eradication is finished before blocking anything",pts:0,fb:"The attacker keeps C2 and exfiltration channels open in the meantime."}
+    ]},
+  { id:"cm4", type:"mcq", domain:"cm", scene:"03:30", title:"Decision 4: Eradicate and recover",
+    prompt:"FS01 and FIN-WS-057 must return to service. Initial access was at 21:10; FS01’s most recent backup ran at 23:00.",
+    options:[
+      {t:"Rebuild both from known-good images, close the initial-access path (block macros from the internet), restore data from a backup verified clean and taken before 21:10, then monitor closely",pts:2,fb:"Best choice. Rebuild rather than clean, fix the root cause, and restore from a point before the compromise."},
+      {t:"Restore the 23:00 backup without checking it",pts:1,fb:"Restoring is right, but the 23:00 backup was taken after the compromise and may include the attacker’s persistence."},
+      {t:"Run an antivirus scan, delete the payload, and reconnect",pts:0,fb:"Leaves persistence you have not found, such as the fake svchost.exe or scheduled tasks."}
+    ]}
+  ]},
+
+{ id:"auto", short:"Automation", sub:"SOAR playbook", title:"Automate the response with a SOAR playbook",
+  nist:"CSF 2.0 Detect and Respond · orchestration and automation",
+  intro:"Next time, a beacon like this should be handled in minutes. Build a playbook from the blocks: click a block to add it, then reorder. Leave out anything that does not belong.",
+  tasks:[
+  { id:"pb", type:"playbook", domain:"auto", title:"Build the playbook",
+    prompt:"Use case: C2 beacon detected on a user workstation." },
+  { id:"au2", type:"mcq", domain:"auto", title:"Safe to automate fully?",
+    prompt:"Which step is the safest to run with no human approval?",
+    options:[
+      {t:"Enriching the alert with threat intelligence and opening a ticket",pts:2,fb:"Correct. It is read-only or low-risk, and saves analysts the most time."},
+      {t:"Disabling the domain admin account named in the alert",pts:0,fb:"It could lock out your own responders or break services; keep a human gate."},
+      {t:"Isolating a production database server",pts:0,fb:"A false positive becomes a self-inflicted outage."},
+      {t:"Wiping a host flagged by one low-confidence rule",pts:0,fb:"Irreversible, and it destroys evidence."}
+    ]},
+  { id:"au3", type:"mcq", domain:"auto", title:"Add a guardrail",
+    prompt:"A playbook auto-isolated the payroll server on a false positive during the payroll run. Which guardrail fixes this best?",
+    options:[
+      {t:"Check asset criticality and require human approval before isolating Tier-0 or business-critical servers",pts:2,fb:"Correct. Keep automation fast for workstations and add a gate where impact is high."},
+      {t:"Turn off automation entirely",pts:0,fb:"You lose the speed that makes SOAR valuable."},
+      {t:"Lower the alert threshold so more alerts fire",pts:0,fb:"That would create more false positives, not fewer."},
+      {t:"Run playbooks only during business hours",pts:0,fb:"Attacks happen at night, as this one did."}
+    ]}
+  ]},
+
+{ id:"post", short:"Post-incident", sub:"Metrics and lessons", title:"Post-incident activity: measure and improve",
+  nist:"Rev. 2 phase 4: Post-incident activity · CSF 2.0 Identify (Improvement)",
+  intro:"Reconstruct the timeline, calculate response metrics, and record the lessons that will change your plan.",
+  tasks:[
+  { id:"po1", type:"number", domain:"plan", title:"Calculate the metrics",
+    prompt:"Timeline: macro document opened at 21:10 · first EDR alert at 23:41 · workstation and FS01 contained at 01:15 · services restored at 09:30.",
+    fields:[
+      {id:"mttd",label:"Time to detect (compromise → first alert), in minutes",ans:151,tol:0,why:"21:10 to 23:41 is 2 hours 31 minutes = 151 minutes."},
+      {id:"ttc",label:"Time to contain (first alert → contained), in minutes",ans:94,tol:0,why:"23:41 to 01:15 crosses midnight: 19 + 60 + 15 = 94 minutes."}
+    ]},
+  { id:"po2", type:"mcq", domain:"plan", title:"Lessons-learned meeting",
+    prompt:"When does NIST recommend holding the lessons-learned meeting for a major incident?",
+    options:[
+      {t:"Within several days after the incident ends, with everyone who was involved",pts:2,fb:"Correct. Memories are fresh and the findings can update the plan quickly."},
+      {t:"At next year’s audit, and only for SEV1 incidents",pts:0,fb:"Too late; details are lost, and smaller incidents also teach lessons."},
+      {t:"Before containment, to save time later",pts:0,fb:"Containment comes first; review happens after."},
+      {t:"Never; the ticket documentation replaces it",pts:0,fb:"Documentation feeds the meeting but does not replace the discussion."}
+    ]},
+  { id:"po3", type:"text", title:"Record lessons learned",
+    prompt:"These go into the final section of your plan.",
+    fields:[
+      {id:"well",label:"What worked well",hint:"Detection, tools, coordination",rows:2},
+      {id:"gap",label:"What needs to improve",hint:"Gaps in visibility, process, or skills",rows:2},
+      {id:"change",label:"One concrete change to the plan",hint:"An owner, an action, and a due date",rows:2}
+    ]}
+  ]},
+
+{ id:"summary", short:"Plan summary", sub:"Save or print", title:"Your incident response plan" }
+];
+
+var PB_BLOCKS = [
+  {id:"trig",k:"Trigger",t:"EDR alert: C2 beacon detected on a workstation"},
+  {id:"enrich",k:"Enrich",t:"Look up the IP, domain, and file hash in threat intelligence"},
+  {id:"decide",k:"Decide",t:"Is confidence high and is the asset a workstation (not Tier-0)?"},
+  {id:"approve",k:"Approve",t:"On-call analyst approves containment"},
+  {id:"isolate",k:"Contain",t:"EDR network-isolates the host and keeps it powered on"},
+  {id:"collect",k:"Collect",t:"Pull a memory image and triage package; record SHA-256 hashes"},
+  {id:"notify",k:"Notify",t:"Open an IR ticket and page the incident channel"},
+  {id:"close",k:"Document",t:"Attach evidence, hashes, and timeline to the ticket for review"},
+  {id:"wipe",k:"Remediate",t:"Automatically reimage the host right away",bad:"Destroys evidence before anyone has analyzed it."},
+  {id:"del",k:"Remediate",t:"Automatically delete the user’s Active Directory account",bad:"Irreversible and removes scoping artifacts; disable accounts, with approval."},
+  {id:"b443",k:"Block",t:"Block all outbound TCP 443 across the company",bad:"An overbroad outage; block the specific IOCs instead."}
+];
+var PB_PALETTE = ["notify","isolate","trig","wipe","collect","decide","del","close","enrich","b443","approve"];
+var PB_REQ = ["trig","enrich","decide","approve","isolate","collect","notify","close"];
+function pbBlock(id){ for (var i=0;i<PB_BLOCKS.length;i++) if (PB_BLOCKS[i].id===id) return PB_BLOCKS[i]; }
+
+/* ---------- helpers ---------- */
+function stIndex(id){ for (var i=0;i<STATIONS.length;i++) if (STATIONS[i].id===id) return i; return -1; }
+function findTask(id){ for (var i=0;i<STATIONS.length;i++){ var ts=STATIONS[i].tasks||[]; for (var j=0;j<ts.length;j++) if (ts[j].id===id) return ts[j]; } }
+function ans(id){ return S.a[id]; }
+function obj(id){ if (!S.a[id] || typeof S.a[id]!=="object") S.a[id]={}; return S.a[id]; }
+
+function getOrder(t){
+  var v = S.a[t.id];
+  if (!Array.isArray(v) || v.length!==t.items.length){
+    var idx = t.items.map(function(_,i){return i;});
+    // deterministic scramble
+    idx.sort(function(a,b){ return ((a*7+3)%5) - ((b*7+3)%5) || b-a; });
+    var same = idx.every(function(x,i){return x===i;});
+    if (same) idx.reverse();
+    S.a[t.id] = idx; v = idx;
+  }
+  return v;
+}
+
+function pbGrade(){
+  var seq = Array.isArray(S.a.pb) ? S.a.pb : [];
+  function pos(id){ return seq.indexOf(id); }
+  function before(a,b){ return pos(a)>-1 && pos(b)>-1 && pos(a)<pos(b); }
+  var missing = PB_REQ.filter(function(id){ return seq.indexOf(id)<0; });
+  var bad = seq.filter(function(id){ return pbBlock(id).bad; });
+  var checks = [
+    {ok:missing.length===0, msg: missing.length? "Missing steps: "+missing.map(function(id){return pbBlock(id).k;}).join(", ")+"." : "All eight essential steps are present."},
+    {ok:bad.length===0, msg: bad.length? "Remove the harmful step"+(bad.length>1?"s":"")+": "+bad.map(function(id){return "“"+pbBlock(id).t+"” ("+pbBlock(id).bad+")";}).join(" ") : "No harmful steps included."},
+    {ok:pos("trig")===0 && pos("close")===seq.length-1 && seq.length>1, msg:"The trigger starts the playbook and documentation closes it."},
+    {ok:before("enrich","decide"), msg:"Enrichment comes before the decision, so the decision has context."},
+    {ok:before("decide","approve") && before("approve","isolate"), msg:"Decide, then get approval, then isolate. The human gate sits right before the disruptive action."},
+    {ok:before("decide","collect") && before("trig","notify"), msg:"Evidence collection and notification happen once the alert is confirmed."}
+  ];
+  var p = checks.filter(function(c){return c.ok;}).length;
+  return {p:p, m:checks.length, checks:checks};
+}
+
+function gradeTask(t){
+  var v = S.a[t.id], p=0, m=0;
+  switch(t.type){
+    case "choice": t.items.forEach(function(it){ m++; if (v && v[it.id]===it.ans) p++; }); break;
+    case "select": t.rows.forEach(function(r){ m++; if (v && v[r.id]===r.ans) p++; }); break;
+    case "order": var o=getOrder(t); o.forEach(function(x,i){ m++; if (x===i) p++; }); break;
+    case "mcq": m=Math.max.apply(null,t.options.map(function(o){return o.pts;})); if (v!=null && t.options[v]) p=t.options[v].pts; break;
+    case "multi": var sel=v||{}, hits=0, wrong=0; t.options.forEach(function(o,i){ if (o.ok) m++; if (sel[i]&&o.ok) hits++; if (sel[i]&&!o.ok) wrong++; }); p=Math.max(0,hits-wrong); break;
+    case "number": t.fields.forEach(function(f){ m++; var x=parseFloat((v||{})[f.id]); if (!isNaN(x) && Math.abs(x-f.ans)<=f.tol) p++; }); break;
+    case "playbook": var g=pbGrade(); p=g.p; m=g.m; break;
+  }
+  return {p:p,m:m};
+}
+function stationScore(st){
+  var p=0,m=0; (st.tasks||[]).forEach(function(t){ var g=gradeTask(t); p+=g.p; m+=g.m; });
+  return {p:p,m:m};
+}
+function pct(p,m){ return m? Math.round(100*p/m) : 0; }
+function gradable(st){ return st.tasks && stationScore(st).m>0; }
+
+/* ---------- renderers ---------- */
+function domainTag(t){ return t.domain? '<span class="domain">'+esc(DOMAINS[t.domain])+'</span>' : ""; }
+function fbBox(cls, html){ return '<div class="fb '+cls+'">'+html+'</div>'; }
+
+function rChoice(t, chk){
+  var v = S.a[t.id] || {};
+  var h = "";
+  if (t.legend){
+    h += '<table class="legend"><tbody>'+t.legend.map(function(r){ return '<tr><th>'+esc(r[0])+'</th><td><b>'+esc(r[1])+'</b></td><td>'+esc(r[2])+'</td></tr>'; }).join("")+'</tbody></table>';
+  }
+  h += '<div class="rows">';
+  t.items.forEach(function(it){
+    var sel = v[it.id], cls = "row"+(t.term?" term":"");
+    if (chk && sel) cls += sel===it.ans? " ok":" bad";
+    var label = esc(it.text);
+    if (t.tree){
+      var pad = it.d? new Array(it.d).join("   ")+"└─ " : "";
+      label = '<span class="tree"><span class="br">'+esc(pad)+'</span>'+label+'</span>';
+    }
+    h += '<div class="'+cls+'"><div>'+label+'</div><div class="seg" role="group" aria-label="Classify">';
+    t.options.forEach(function(o){
+      h += '<button type="button" data-act="choice" data-t="'+t.id+'" data-i="'+it.id+'" data-v="'+esc(o)+'" data-key="'+t.id+'-'+it.id+'-'+esc(o)+'" aria-pressed="'+(sel===o)+'">'+esc(o)+'</button>';
+    });
+    h += '</div>';
+    if (chk && sel) h += '<div class="why"><b>'+(sel===it.ans?"Correct.":"Answer: "+esc(it.ans)+".")+'</b> '+esc(it.why)+'</div>';
+    else if (chk && !sel) h += '<div class="why"><b>Not answered.</b></div>';
+    h += '</div>';
+  });
+  return h + '</div>';
+}
+
+function rSelect(t, chk){
+  var v = S.a[t.id] || {};
+  var h = '<div class="rows">';
+  t.rows.forEach(function(r){
+    var sel = v[r.id], cls="row";
+    if (chk && sel) cls += sel===r.ans?" ok":" bad";
+    h += '<div class="'+cls+'"><div>'+esc(r.text)+'</div><div><select data-act="select" data-t="'+t.id+'" data-i="'+r.id+'" data-key="'+t.id+'-'+r.id+'" aria-label="'+esc(r.text)+'"><option value="">Choose…</option>';
+    t.options.forEach(function(o){ h += '<option'+(sel===o?" selected":"")+'>'+esc(o)+'</option>'; });
+    h += '</select></div>';
+    if (chk) h += '<div class="why"><b>'+(!sel?"Not answered. ":sel===r.ans?"Correct.":"Answer: "+esc(r.ans)+".")+'</b> '+(sel?esc(r.why):"")+'</div>';
+    h += '</div>';
+  });
+  return h + '</div>';
+}
+
+function rOrder(t, chk){
+  var o = getOrder(t);
+  var h = '<ol class="order">';
+  o.forEach(function(idx, pos){
+    var cls = chk? (idx===pos?"ok":"bad") : "";
+    h += '<li class="'+cls+'"><span class="n">'+(pos+1)+'</span><span>'+esc(t.items[idx])+'</span><span class="mv">'+
+      '<button type="button" data-act="mv" data-t="'+t.id+'" data-p="'+pos+'" data-d="-1" data-key="'+t.id+'-up-'+idx+'" aria-label="Move up: '+esc(t.items[idx])+'"'+(pos===0?" disabled":"")+'>▲</button>'+
+      '<button type="button" data-act="mv" data-t="'+t.id+'" data-p="'+pos+'" data-d="1" data-key="'+t.id+'-dn-'+idx+'" aria-label="Move down: '+esc(t.items[idx])+'"'+(pos===o.length-1?" disabled":"")+'>▼</button></span></li>';
+  });
+  h += '</ol>';
+  if (chk){
+    var g = gradeTask(t);
+    if (g.p===g.m) h += fbBox("ok","<b>Correct order.</b> "+esc(t.why));
+    else h += fbBox(g.p? "part":"bad","<b>"+g.p+" of "+g.m+" in the right position.</b> Correct order: "+t.items.map(function(x,i){return (i+1)+". "+esc(x);}).join(" · ")+"<br>"+esc(t.why));
+  }
+  return h;
+}
+
+function rMcq(t, chk){
+  var v = S.a[t.id];
+  var h = "";
+  if (t.scene) h += '<div class="scene"><span class="t">'+esc(t.scene)+'</span> '+esc(t.prompt)+'</div>';
+  h += '<div class="opts" role="radiogroup" aria-label="'+esc(t.title)+'">';
+  var best = Math.max.apply(null,t.options.map(function(o){return o.pts;}));
+  t.options.forEach(function(o,i){
+    var cls = "opt";
+    if (chk && v===i) cls += o.pts===best?" ok":" bad";
+    h += '<button type="button" class="'+cls+'" role="radio" aria-checked="'+(v===i)+'" data-act="mcq" data-t="'+t.id+'" data-v="'+i+'" data-key="'+t.id+'-'+i+'"><span class="mark" aria-hidden="true"></span><span>'+esc(o.t)+'</span></button>';
+  });
+  h += '</div>';
+  if (chk){
+    if (v==null) h += fbBox("bad","<b>Not answered.</b>");
+    else {
+      var o = t.options[v], cls = o.pts===best?"ok":(o.pts>0?"part":"bad");
+      var bestOpt = t.options.filter(function(x){return x.pts===best;})[0];
+      h += fbBox(cls, "<b>"+(o.pts===best?"Strong choice.":o.pts>0?"Partially effective.":"Not the best move.")+"</b> "+esc(o.fb)+(o.pts!==best?"<br><b>Better:</b> "+esc(bestOpt.t)+". "+esc(bestOpt.fb):""));
+    }
+  }
+  return h;
+}
+
+function rMulti(t, chk){
+  var v = S.a[t.id] || {};
+  var h = '<div class="opts">';
+  t.options.forEach(function(o,i){
+    var on = !!v[i], cls = "opt sq";
+    if (chk && (on || o.ok)) cls += (on===o.ok)?" ok":" bad";
+    h += '<button type="button" class="'+cls+'" role="checkbox" aria-checked="'+on+'" data-act="multi" data-t="'+t.id+'" data-v="'+i+'" data-key="'+t.id+'-'+i+'"><span class="mark" aria-hidden="true"></span><span>'+esc(o.t)+
+      (chk && (on||o.ok)? '<br><small>'+(on===o.ok? (o.ok?"✓ Belongs. ":"✓ Correctly left out. ") : (o.ok?"✗ You missed this. ":"✗ Does not belong. "))+esc(o.why)+'</small>':"")+'</span></button>';
+  });
+  h += '</div>';
+  if (chk){ var g=gradeTask(t); h += fbBox(g.p===g.m?"ok":g.p?"part":"bad","<b>"+g.p+" of "+g.m+".</b> Each wrong selection cancels one correct one."); }
+  return h;
+}
+
+function rNumber(t, chk){
+  var v = S.a[t.id] || {};
+  var h = '<div class="fields two">';
+  t.fields.forEach(function(f){
+    h += '<div class="field"><label for="f-'+t.id+f.id+'">'+esc(f.label)+'</label><input id="f-'+t.id+f.id+'" type="number" inputmode="numeric" data-act="num" data-t="'+t.id+'" data-f="'+f.id+'" data-key="'+t.id+'-'+f.id+'" value="'+esc(v[f.id]||"")+'">';
+    if (chk){ var x=parseFloat(v[f.id]), ok=!isNaN(x)&&Math.abs(x-f.ans)<=f.tol; h += fbBox(ok?"ok":"bad","<b>"+(ok?"Correct.":"Answer: "+f.ans+".")+"</b> "+esc(f.why)); }
+    h += '</div>';
+  });
+  return h + '</div>';
+}
+
+function rText(t){
+  var v = S.a[t.id] || {};
+  var h = '<div class="fields'+(t.two?" two":"")+'">';
+  t.fields.forEach(function(f){
+    var id = 'f-'+t.id+f.id;
+    h += '<div class="field"><label for="'+id+'">'+esc(f.label)+(f.hint?' <span class="hint">'+esc(f.hint)+'</span>':'')+'</label>';
+    if (f.rows>1) h += '<textarea id="'+id+'" rows="'+f.rows+'" data-act="txt" data-t="'+t.id+'" data-f="'+f.id+'" data-key="'+t.id+'-'+f.id+'">'+esc(v[f.id]||"")+'</textarea>';
+    else h += '<input id="'+id+'" type="text" data-act="txt" data-t="'+t.id+'" data-f="'+f.id+'" data-key="'+t.id+'-'+f.id+'" value="'+esc(v[f.id]||"")+'">';
+    h += '</div>';
+  });
+  return h + '</div>';
+}
+
+function rPlaybook(t, chk){
+  var seq = Array.isArray(S.a.pb)? S.a.pb : [];
+  var h = '<div class="pb"><div><h4>Available blocks</h4><div class="pal">';
+  PB_PALETTE.forEach(function(id){
+    var b = pbBlock(id), used = seq.indexOf(id)>-1;
+    h += '<button type="button" class="blk" data-act="pbadd" data-b="'+id+'" data-key="pba-'+id+'"'+(used?" disabled":"")+'><span class="k">'+esc(b.k)+'</span><span>'+esc(b.t)+'</span></button>';
+  });
+  h += '</div></div><div><h4>Your playbook</h4><ol class="seq">';
+  if (!seq.length) h += '<li class="empty">Click blocks on the left to add steps.</li>';
+  seq.forEach(function(id,pos){
+    var b = pbBlock(id);
+    h += '<li class="'+(chk && b.bad?"badblk":"")+'"><span class="k">'+esc(b.k)+'</span><span>'+esc(b.t)+'</span><span class="mv">'+
+      '<button type="button" data-act="pbmv" data-p="'+pos+'" data-d="-1" data-key="pbu-'+id+'" aria-label="Move up"'+(pos===0?" disabled":"")+'>▲</button>'+
+      '<button type="button" data-act="pbmv" data-p="'+pos+'" data-d="1" data-key="pbd-'+id+'" aria-label="Move down"'+(pos===seq.length-1?" disabled":"")+'>▼</button>'+
+      '<button type="button" data-act="pbrm" data-p="'+pos+'" data-key="pbr-'+id+'" aria-label="Remove">✕</button></span></li>';
+  });
+  h += '</ol></div></div>';
+  if (chk){
+    var g = pbGrade();
+    h += fbBox(g.p===g.m?"ok":g.p?"part":"bad","<b>"+g.p+" of "+g.m+" design checks passed.</b><ul class=\"checks\">"+g.checks.map(function(c){return '<li><span class="'+(c.ok?"tick":"cross")+'">'+(c.ok?"✓":"✗")+'</span> '+esc(c.msg)+'</li>';}).join("")+"</ul>");
+  }
+  return h;
+}
+
+function rTask(t, chk){
+  var body = "";
+  switch(t.type){
+    case "choice": body=rChoice(t,chk); break;
+    case "select": body=rSelect(t,chk); break;
+    case "order": body=rOrder(t,chk); break;
+    case "mcq": body=rMcq(t,chk); break;
+    case "multi": body=rMulti(t,chk); break;
+    case "number": body=rNumber(t,chk); break;
+    case "text": body=rText(t); break;
+    case "playbook": body=rPlaybook(t,chk); break;
+  }
+  return '<section class="task" aria-labelledby="h-'+t.id+'">'+domainTag(t)+'<h3 id="h-'+t.id+'">'+esc(t.title)+'</h3>'+
+    (t.scene? "" : '<p class="tprompt">'+esc(t.prompt)+'</p>')+body+'</section>';
+}
+
+function navRow(i){
+  var prev = i>0? '<button class="btn ghost" type="button" data-act="go" data-to="'+(i-1)+'">Previous: '+esc(STATIONS[i-1].short)+'</button>' : '<span></span>';
+  var next = i<STATIONS.length-1? '<button class="btn" type="button" data-act="go" data-to="'+(i+1)+'">Next: '+esc(STATIONS[i+1].short)+'</button>' : '';
+  return '<div class="nav-row">'+prev+next+'</div>';
+}
+
+function stationHTML(st, i){
+  var chk = !!S.checked[st.id];
+  var h = '<div class="st-head"><div class="st-step">Step '+(i+1)+' of '+STATIONS.length+'</div><h2>'+esc(st.title)+'</h2><p class="intro">'+esc(st.intro)+'</p>'+(st.nist?'<span class="nist">'+esc(st.nist)+'</span>':'')+'</div>';
+  st.tasks.forEach(function(t){ h += rTask(t, chk); });
+  if (gradable(st)){
+    var sc = stationScore(st), f = S.first[st.id];
+    h += '<div class="actions"><button class="btn green" type="button" data-act="check" data-st="'+st.id+'" data-key="check-'+st.id+'">'+(chk?"Recheck my answers":"Check my answers")+'</button>';
+    if (chk) h += '<span class="score" aria-live="polite">'+sc.p+' / '+sc.m+' <small>('+pct(sc.p,sc.m)+'%'+(f?' · first attempt '+pct(f.p,f.m)+'%':'')+')</small></span>';
+    else h += '<span class="score"><small>Feedback appears after you check. You can revise and recheck; your first attempt is recorded.</small></span>';
+    h += '</div>';
+  }
+  return h + navRow(i);
+}
+
+function briefHTML(){
+  var v = S.a.learner || {};
+  return '<div class="st-head"><div class="st-step">Step 1 of '+STATIONS.length+'</div><h2>Incident briefing</h2></div>'+
+  '<div class="alert" role="region" aria-label="Initial alert"><div class="alert-time">23:41</div>'+
+  '<div><span class="hi">[EDR] HIGH</span>  FIN-WS-057  WINWORD.EXE spawned powershell.exe with an encoded command</div>'+
+  '<div><span class="md">[SIEM] MED</span>   Rare outbound TLS from 10.10.20.57 to 203.0.113.66 at a regular interval</div>'+
+  '<div><span class="md">[SIEM] MED</span>   SMB admin-share access from the user VLAN to FS01</div>'+
+  '<div class="dim">On-call: you · Day: Wednesday · Most staff offline · No written IR plan on file</div></div>'+
+  '<section class="task"><h3>The situation</h3><p>You are the on-call incident responder for <b>Lakeshore Precision Components</b>, a 400-person manufacturer with two plants, a Windows Active Directory domain, and a Linux build server. Alerts just fired on a finance workstation. The company has tools but no written incident response plan.</p><p>As you work through each step, you will respond to this incident <i>and</i> build the IR plan the company should have had. Your choices, written sections, and scores combine into a plan you can save or print at the end.</p>'+
+  '<div class="netmap" role="img" aria-label="Network map: Internet to firewall to core switch, which connects the user VLAN 10.10.20.0/24 with FIN-WS-057, the server VLAN 10.10.5.0/24 with FS01 and BLD-02, and core services 10.10.1.0/24 with DC01, DNS and NTP.">'+netSVG()+'</div></section>'+
+  '<section class="task"><h3>What you will practice</h3><ul class="obj">'+
+  '<li>Apply the NIST SP 800-61 lifecycle and the CSF 2.0 functions to a live incident</li>'+
+  '<li>Read network traffic and Windows and Linux artifacts to find indicators of compromise</li>'+
+  '<li>Collect and preserve digital evidence in the right order with chain of custody</li>'+
+  '<li>Choose containment, eradication, and recovery actions and weigh their tradeoffs</li>'+
+  '<li>Design a SOAR playbook with appropriate human approval gates</li>'+
+  '<li>Measure the response and turn lessons learned into plan changes</li></ul></section>'+
+  '<section class="task"><h3>Who is responding?</h3><p class="tprompt">Your name appears on the plan summary.</p><div class="fields two">'+
+  '<div class="field"><label for="ln">Your name</label><input id="ln" type="text" data-act="txt" data-t="learner" data-f="name" data-key="ln" value="'+esc(v.name||"")+'" autocomplete="name"></div>'+
+  '<div class="field"><label for="lc">Course and section</label><input id="lc" type="text" data-act="txt" data-t="learner" data-f="course" data-key="lc" value="'+esc(v.course||"")+'"></div></div></section>'+
+  '<div class="actions"><button class="btn" type="button" data-act="go" data-to="1">Begin the response</button></div>';
+}
+
+function netSVG(){
+  var box = function(x,y,w,h,title,lines,accent){
+    var s = '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="8" fill="var(--surface-2)" stroke="'+(accent||"var(--line)")+'" stroke-width="'+(accent?2:1)+'"/>';
+    s += '<text x="'+(x+12)+'" y="'+(y+22)+'" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="700" font-size="17" fill="var(--ink)">'+title+'</text>';
+    lines.forEach(function(l,i){ s += '<text x="'+(x+12)+'" y="'+(y+42+i*17)+'" font-family="JetBrains Mono, monospace" font-size="11.5" fill="'+(l.c||"var(--muted)")+'">'+l.t+'</text>'; });
+    return s;
+  };
+  var ln = function(x1,y1,x2,y2){ return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="var(--line)" stroke-width="2"/>'; };
+  return '<svg viewBox="0 0 700 270" xmlns="http://www.w3.org/2000/svg">'+
+    ln(130,130,175,130)+ln(275,130,320,130)+ln(400,130,430,55)+ln(400,130,430,135)+ln(400,130,430,215)+
+    box(10,90,120,80,"Internet",[{t:"C2 203.0.113.66",c:"var(--red)"},{t:"exfil 198.51.100.24",c:"var(--red)"}],"var(--red)")+
+    box(175,100,100,60,"Firewall",[{t:"edge / NAT"}])+
+    box(320,100,80,60,"Core",[{t:"L3 switch"}])+
+    box(430,15,260,80,"User VLAN 10.10.20.0/24",[{t:"FIN-WS-057  .57",c:"var(--red)"},{t:"~380 workstations"}],"var(--amber)")+
+    box(430,100,260,75,"Server VLAN 10.10.5.0/24",[{t:"FS01 file server  .20",c:"var(--amber)"},{t:"BLD-02 Linux build  .31"}])+
+    box(430,182,260,80,"Core services 10.10.1.0/24",[{t:"DC01 .4   DNS .5"},{t:"NTP .10"}])+
+  '</svg>';
+}
+
+/* ---------- summary ---------- */
+function tv(tid, fid){ var o = S.a[tid]||{}; var s = (o[fid]||"").trim(); return s; }
+function para(s){ return s? esc(s).replace(/\n/g,"<br>") : '<span class="blank">Not written yet.</span>'; }
+
+function domainScores(){
+  var d = {}; Object.keys(DOMAINS).forEach(function(k){ d[k]={p:0,m:0}; });
+  STATIONS.forEach(function(st){ (st.tasks||[]).forEach(function(t){ if (!t.domain) return; var g=gradeTask(t); d[t.domain].p+=g.p; d[t.domain].m+=g.m; }); });
+  return d;
+}
+function totals(){
+  var p=0,m=0,fp=0,fm=0,done=0,n=0;
+  STATIONS.forEach(function(st){ if (!gradable(st)) return; n++; var s=stationScore(st); p+=s.p; m+=s.m; if (S.first[st.id]){ done++; fp+=S.first[st.id].p; fm+=S.first[st.id].m; } });
+  return {p:p,m:m,fp:fp,fm:fm,done:done,n:n};
+}
+
+function summaryHTML(){
+  var L = S.a.learner || {}, T = totals(), D = domainScores();
+  var date = new Date().toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"});
+  var h = '<div class="no-print actions"><button class="btn" type="button" data-act="print">Print or save as PDF</button><button class="btn ghost" type="button" data-act="copy">Copy as text</button><button class="btn ghost" type="button" data-act="reset">Start over</button></div>';
+  h += '<div class="sum-head"><h2>Incident Response Plan: Lakeshore Precision Components</h2><div class="meta">Prepared by '+esc(L.name||"(name not entered)")+(L.course?' · '+esc(L.course):'')+' · '+date+' · Built during INC-2026-1104 “Operation Night Shift”</div></div>';
+  h += '<div class="kpis"><div class="kpi"><b>'+pct(T.fp,T.fm)+'%</b><span>First-attempt score ('+T.fp+' / '+T.fm+')</span></div>'+
+       '<div class="kpi"><b>'+pct(T.p,T.m)+'%</b><span>Current score ('+T.p+' / '+T.m+')</span></div>'+
+       '<div class="kpi"><b>'+T.done+' / '+T.n+'</b><span>Steps checked</span></div></div>';
+  h += '<div class="plan"><h3>Performance by KSA domain</h3><div class="bars">';
+  Object.keys(DOMAINS).forEach(function(k){
+    var x = D[k], pc = pct(x.p,x.m);
+    h += '<div class="bar"><span>'+esc(DOMAINS[k])+'</span><span class="track"><span class="fill '+(pc>=80?"hi":pc<60?"lo":"")+'" style="width:'+pc+'%;display:block"></span></span><span class="pct">'+pc+'%</span></div>';
+  });
+  h += '</div>';
+
+  h += '<h3>1. Purpose and scope</h3><p>This plan follows the NIST SP 800-61 lifecycle (preparation; detection and analysis; containment, eradication, and recovery; post-incident activity) and aligns incident response with the CSF 2.0 functions as described in SP 800-61 Rev. 3.</p><p>'+para(tv("pr4","scope"))+'</p>';
+
+  h += '<h3>2. Roles and responsibilities</h3><table><thead><tr><th>Responsibility</th><th>Owner</th></tr></thead><tbody>';
+  findTask("pr1").rows.forEach(function(r){ var a=(S.a.pr1||{})[r.id]; h += '<tr><td>'+esc(r.text)+'</td><td>'+(a?esc(a)+' '+(a===r.ans?'<span class="tick">✓</span>':'<span class="cross">✗</span> <small>(expected: '+esc(r.ans)+')</small>'):'<span class="blank">Unassigned</span>')+'</td></tr>'; });
+  h += '</tbody></table>';
+
+  h += '<h3>3. Severity classification</h3><table><thead><tr><th>Level</th><th>Definition</th></tr></thead><tbody>';
+  findTask("pr2").legend.forEach(function(r){ h += '<tr><td><b>'+esc(r[0])+'</b> '+esc(r[1])+'</td><td>'+esc(r[2])+'</td></tr>'; });
+  h += '</tbody></table>';
+
+  h += '<h3>4. Communication, escalation, and notification</h3><p><b>Out-of-band channel and escalation:</b> '+para(tv("pr4","oob"))+'</p><p><b>Notification triggers:</b> '+para(tv("pr4","notify"))+'</p>';
+
+  h += '<h3>5. Jump kit</h3>';
+  var jk = findTask("pr3"), js = S.a.pr3||{}, items = jk.options.filter(function(o,i){return js[i];});
+  h += items.length? '<ul>'+items.map(function(o){return '<li>'+esc(o.t)+(o.ok?'':' <span class="cross">✗ remove</span>')+'</li>';}).join("")+'</ul>' : '<p class="blank">No items selected.</p>';
+
+  h += '<h3>6. Detection and analysis: indicators identified</h3><table><thead><tr><th>Source</th><th>Flagged as suspicious</th></tr></thead><tbody>';
+  ["dt1","dt3"].forEach(function(id){
+    var t=findTask(id), v=S.a[id]||{};
+    var f=t.items.filter(function(it){return v[it.id]==="Suspicious";});
+    h += '<tr><td>'+esc(t.title)+'</td><td>'+(f.length? f.map(function(it){return '<code>'+esc(it.text)+'</code> '+(it.ans==="Suspicious"?'<span class="tick">✓</span>':'<span class="cross">✗</span>');}).join("<br>") : '<span class="blank">None flagged</span>')+'</td></tr>';
+  });
+  h += '</tbody></table>';
+
+  h += '<h3>7. Evidence handling</h3><p><b>Collection order (most to least volatile):</b></p><ol>';
+  var vt = findTask("df1"); getOrder(vt).forEach(function(i,pos){ h += '<li>'+esc(vt.items[i])+(i===pos?'':' <span class="cross">✗</span>')+'</li>'; });
+  h += '</ol><table><thead><tr><th colspan="2">Chain-of-custody entry</th></tr></thead><tbody>';
+  findTask("df4").fields.forEach(function(f){ h += '<tr><th>'+esc(f.label)+'</th><td>'+para(tv("df4",f.id))+'</td></tr>'; });
+  h += '</tbody></table>';
+
+  h += '<h3>8. Containment, eradication, and recovery strategy</h3><table><thead><tr><th>Decision</th><th>Selected action</th></tr></thead><tbody>';
+  ["cm1","cm2","cm3","cm4"].forEach(function(id){
+    var t=findTask(id), v=S.a[id], best=Math.max.apply(null,t.options.map(function(o){return o.pts;}));
+    h += '<tr><td>'+esc(t.title.replace(/^Decision \d: /,""))+'</td><td>'+(v!=null? esc(t.options[v].t)+' '+(t.options[v].pts===best?'<span class="tick">✓</span>':'<span class="cross">✗</span>'):'<span class="blank">No decision</span>')+'</td></tr>';
+  });
+  h += '</tbody></table>';
+
+  h += '<h3>9. Automation playbook: C2 beacon on a workstation</h3>';
+  var seq = Array.isArray(S.a.pb)? S.a.pb:[];
+  h += seq.length? '<ol>'+seq.map(function(id){var b=pbBlock(id); return '<li><b>'+esc(b.k)+':</b> '+esc(b.t)+(b.bad?' <span class="cross">✗ remove</span>':'')+'</li>';}).join("")+'</ol>' : '<p class="blank">No playbook built.</p>';
+
+  h += '<h3>10. Metrics and lessons learned</h3>';
+  var nm = S.a.po1||{};
+  h += '<table><tbody><tr><th>Time to detect</th><td>'+(nm.mttd? esc(nm.mttd)+' min':'<span class="blank">Not calculated</span>')+'</td></tr><tr><th>Time to contain</th><td>'+(nm.ttc? esc(nm.ttc)+' min':'<span class="blank">Not calculated</span>')+'</td></tr></tbody></table>';
+  h += '<p><b>What worked well:</b> '+para(tv("po3","well"))+'</p><p><b>What needs to improve:</b> '+para(tv("po3","gap"))+'</p><p><b>Plan change:</b> '+para(tv("po3","change"))+'</p>';
+
+  h += '<h3>Step scores</h3><table><thead><tr><th>Step</th><th>First attempt</th><th>Current</th></tr></thead><tbody>';
+  STATIONS.forEach(function(st){ if (!gradable(st)) return; var s=stationScore(st), f=S.first[st.id];
+    h += '<tr><td>'+esc(st.short)+'</td><td>'+(f? f.p+' / '+f.m+' ('+pct(f.p,f.m)+'%)':'<span class="blank">Not checked</span>')+'</td><td>'+s.p+' / '+s.m+' ('+pct(s.p,s.m)+'%)</td></tr>'; });
+  h += '</tbody></table></div>';
+  return h + '<div class="nav-row">'+'<button class="btn ghost" type="button" data-act="go" data-to="'+(STATIONS.length-2)+'">Previous: '+esc(STATIONS[STATIONS.length-2].short)+'</button></div>';
+}
+
+function summaryText(){
+  var L=S.a.learner||{}, T=totals(), D=domainScores(), out=[];
+  out.push("INCIDENT RESPONSE PLAN: LAKESHORE PRECISION COMPONENTS");
+  out.push("Prepared by: "+(L.name||"(name not entered)")+(L.course?" | "+L.course:"")+" | "+new Date().toLocaleDateString());
+  out.push("First-attempt score: "+pct(T.fp,T.fm)+"% | Current score: "+pct(T.p,T.m)+"%","");
+  out.push("PERFORMANCE BY DOMAIN"); Object.keys(DOMAINS).forEach(function(k){ out.push("- "+DOMAINS[k]+": "+pct(D[k].p,D[k].m)+"%"); });
+  out.push("","1. SCOPE",tv("pr4","scope")||"(not written)");
+  out.push("","2. ROLES"); findTask("pr1").rows.forEach(function(r){ out.push("- "+r.text+": "+((S.a.pr1||{})[r.id]||"unassigned")); });
+  out.push("","3. SEVERITY LEVELS"); findTask("pr2").legend.forEach(function(r){ out.push("- "+r[0]+" "+r[1]+": "+r[2]); });
+  out.push("","4. COMMUNICATION","Out-of-band/escalation: "+(tv("pr4","oob")||"(not written)"),"Notification triggers: "+(tv("pr4","notify")||"(not written)"));
+  var js=S.a.pr3||{}; out.push("","5. JUMP KIT"); findTask("pr3").options.forEach(function(o,i){ if(js[i]) out.push("- "+o.t); });
+  out.push("","6. EVIDENCE COLLECTION ORDER"); var vt=findTask("df1"); getOrder(vt).forEach(function(i,p){ out.push((p+1)+". "+vt.items[i]); });
+  out.push("Chain of custody:"); findTask("df4").fields.forEach(function(f){ out.push("- "+f.label+": "+(tv("df4",f.id)||"")); });
+  out.push("","7. CONTAINMENT STRATEGY"); ["cm1","cm2","cm3","cm4"].forEach(function(id){ var t=findTask(id),v=S.a[id]; out.push("- "+t.title+": "+(v!=null?t.options[v].t:"(no decision)")); });
+  out.push("","8. AUTOMATION PLAYBOOK"); (Array.isArray(S.a.pb)?S.a.pb:[]).forEach(function(id,i){ var b=pbBlock(id); out.push((i+1)+". "+b.k+": "+b.t); });
+  var nm=S.a.po1||{}; out.push("","9. METRICS AND LESSONS","Time to detect: "+(nm.mttd||"?")+" min | Time to contain: "+(nm.ttc||"?")+" min");
+  out.push("Worked well: "+(tv("po3","well")||""),"Improve: "+(tv("po3","gap")||""),"Plan change: "+(tv("po3","change")||""));
+  return out.join("\n");
+}
+
+/* ---------- chrome ---------- */
+function renderRail(){
+  $("#rail").innerHTML = STATIONS.map(function(st,i){
+    var cls = (i===S.cur?"cur ":"")+(S.checked[st.id]?"done":"");
+    var sub = st.sub;
+    if (S.checked[st.id]){ var s=stationScore(st); sub = pct(s.p,s.m)+"% · "+st.sub; }
+    return '<li class="'+cls+'"><button type="button" data-act="go" data-to="'+i+'"'+(i===S.cur?' aria-current="step"':'')+'><span class="dot">'+(S.checked[st.id]?"✓":(i+1))+'</span><span class="lbl">'+esc(st.short)+'<small>'+esc(sub)+'</small></span></button></li>';
+  }).join("");
+  var n = STATIONS.filter(gradable).length, d = STATIONS.filter(function(st){return gradable(st)&&S.checked[st.id];}).length;
+  $("#prog").style.width = (100*d/n)+"%";
+}
+function renderStatus(){
+  var steps = ["Open","Analyzing","Contained","Recovered","Closed"], at = 0;
+  if (S.checked.detect) at=1; if (S.checked.contain) at=3; else if (S.checked.forensics) at=2; if (S.checked.post) at=4;
+  if (!S.checked.detect && S.cur>=stIndex("detect")) at=Math.max(at,1);
+  $("#lifecycle").innerHTML = steps.map(function(s,i){ return '<span class="lc '+(i<at?"done":i===at?"now":"")+'">'+s+'</span>'; }).join("");
+}
+function render(keepFocus){
+  var key = keepFocus && document.activeElement && document.activeElement.getAttribute("data-key");
+  renderRail(); renderStatus();
+  var st = STATIONS[S.cur], main = $("#main");
+  main.innerHTML = st.id==="brief"? briefHTML() : st.id==="summary"? summaryHTML() : stationHTML(st, S.cur);
+  if (key){ var el = main.querySelector('[data-key="'+key.replace(/"/g,'\\"')+'"]'); if (el && !el.disabled) el.focus(); }
+}
+function go(i){
+  S.cur = Math.max(0,Math.min(STATIONS.length-1,i)); save(); render(false);
+  window.scrollTo({top:0,behavior:"auto"}); $("#main").focus({preventScroll:true});
+}
+function toast(msg){ var t=$("#toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toast._t); toast._t=setTimeout(function(){t.classList.remove("show");},2200); }
+
+/* ---------- events ---------- */
+document.addEventListener("click", function(e){
+  var b = e.target.closest("[data-act]"); if (!b) return;
+  var act = b.getAttribute("data-act"), tid = b.getAttribute("data-t");
+  if (act==="choice"){ obj(tid)[b.getAttribute("data-i")] = b.getAttribute("data-v"); }
+  else if (act==="mcq"){ S.a[tid] = +b.getAttribute("data-v"); }
+  else if (act==="multi"){ var o=obj(tid), i=b.getAttribute("data-v"); o[i]=!o[i]; }
+  else if (act==="mv"){ var t=findTask(tid), ord=getOrder(t).slice(), p=+b.getAttribute("data-p"), d=+b.getAttribute("data-d"), q=p+d;
+    if (q<0||q>=ord.length) return; var tmp=ord[p]; ord[p]=ord[q]; ord[q]=tmp; S.a[tid]=ord;
+    b.setAttribute("data-key", (d<0?tid+"-up-":tid+"-dn-")+tmp); }
+  else if (act==="pbadd"){ var seq=Array.isArray(S.a.pb)?S.a.pb:[]; seq.push(b.getAttribute("data-b")); S.a.pb=seq; }
+  else if (act==="pbmv"){ var s2=S.a.pb.slice(), p2=+b.getAttribute("data-p"), q2=p2+(+b.getAttribute("data-d")); if(q2<0||q2>=s2.length) return; var t2=s2[p2]; s2[p2]=s2[q2]; s2[q2]=t2; S.a.pb=s2; }
+  else if (act==="pbrm"){ S.a.pb.splice(+b.getAttribute("data-p"),1); }
+  else if (act==="check"){ var st=STATIONS[stIndex(b.getAttribute("data-st"))]; S.checked[st.id]=true; if (!S.first[st.id]) S.first[st.id]=stationScore(st); var sc=stationScore(st); toast("Checked: "+sc.p+" / "+sc.m+" ("+pct(sc.p,sc.m)+"%)"); }
+  else if (act==="go"){ go(+b.getAttribute("data-to")); return; }
+  else if (act==="print"){ window.print(); return; }
+  else if (act==="copy"){ copyText(summaryText()); return; }
+  else if (act==="reset"){
+    if (!b.classList.contains("confirming")){
+      b._label = b.textContent; b.classList.add("confirming"); b.textContent = "Click again to erase all answers";
+      clearTimeout(b._t); b._t = setTimeout(function(){ b.classList.remove("confirming"); b.textContent = b._label; }, 4000);
+      return;
+    }
+    clearTimeout(b._t); b.classList.remove("confirming"); b.textContent = b._label;
+    var th=S.theme; S={cur:0,a:{},checked:{},first:{},start:Date.now(),theme:th}; save(); go(0);
+    toast("Activity reset. Starting from the briefing.");
+    return; }
+  else return;
+  save(); render(true);
+});
+document.addEventListener("change", function(e){
+  var el = e.target, act = el.getAttribute && el.getAttribute("data-act"); if (!act) return;
+  if (act==="select"){ obj(el.getAttribute("data-t"))[el.getAttribute("data-i")] = el.value; save(); render(true); }
+  else if (act==="num"){ save(); if (S.checked[STATIONS[S.cur].id]) render(true); }
+});
+document.addEventListener("input", function(e){
+  var el = e.target, act = el.getAttribute && el.getAttribute("data-act");
+  if (act==="txt" || act==="num"){ obj(el.getAttribute("data-t"))[el.getAttribute("data-f")] = el.value; save(); }
+});
+function copyText(txt){
+  function fallback(){ var ta=document.createElement("textarea"); ta.value=txt; ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta); ta.select(); var ok=false; try{ ok=document.execCommand("copy"); }catch(e){} ta.remove(); toast(ok?"Plan copied as text":"Copy blocked. Use Print or save as PDF instead."); }
+  try { navigator.clipboard.writeText(txt).then(function(){ toast("Plan copied as text"); }, fallback); } catch(e){ fallback(); }
+}
+
+/* theme */
+function applyTheme(){
+  document.documentElement.setAttribute("data-theme", S.theme);
+  var b=$("#themeBtn"); b.textContent = S.theme==="dark"? "Light mode" : "Dark mode"; b.setAttribute("aria-pressed", S.theme==="dark");
+}
+$("#themeBtn").addEventListener("click", function(){ S.theme = S.theme==="dark"?"light":"dark"; save(); applyTheme(); });
+
+/* clock */
+function tick(){
+  var s = Math.max(0,Math.floor((Date.now()-S.start)/1000)), hh=Math.floor(s/3600), mm=Math.floor(s%3600/60), ss=s%60;
+  function z(n){ return (n<10?"0":"")+n; }
+  $("#clock").textContent = "T+ "+z(hh)+":"+z(mm)+":"+z(ss);
+}
+window.addEventListener("beforeprint", function(){ if (STATIONS[S.cur].id!=="summary"){ S.cur=STATIONS.length-1; render(false); } });
+
+applyTheme(); render(false); tick(); setInterval(tick,1000);
+})();
+</script>
+</body>
+</html>
