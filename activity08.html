@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FreshFlow SOC: SIEM Training Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E8EDF3;--panel:#FFFFFF;--panel2:#F3F6FA;--ink:#0F1C2E;--muted:#52627A;--line:#D2DAE4;
+  --navy:#0047AB;--navy-deep:#003680;--on-navy:#FFFFFF;--green:#00805A;--green-bright:#00A86B;
+  --info:#35587E;--info-bg:#E6EEF8;--warn:#8F5200;--warn-bg:#FCEFD6;--err:#B23A0C;--err-bg:#FBE5D9;--crit:#AE1229;--crit-bg:#FADFE4;
+  --l35:#ECEFFA;--l3:#E7EFF8;--l2:#E5F2EC;--l1:#EDF4E4;--l0:#F6F0E2;
+  --row-hover:#EEF3F9;--sel:#DCE7F7;
+  --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:'Atkinson Hyperlegible',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  color-scheme:light;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0A1220;--panel:#111C2E;--panel2:#16233A;--ink:#E3EAF4;--muted:#93A4BC;--line:#253650;
+    --navy:#6F9DFF;--navy-deep:#0D2652;--on-navy:#FFFFFF;--green:#34D49C;--green-bright:#34D49C;
+    --info:#9DBDE9;--info-bg:#18294A;--warn:#F4B547;--warn-bg:#3A2A0E;--err:#FF9259;--err-bg:#3E2012;--crit:#FF6A7D;--crit-bg:#45141F;
+    --l35:#141E36;--l3:#122036;--l2:#11262A;--l1:#172720;--l0:#262217;
+    --row-hover:#18263D;--sel:#1E3358;color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0A1220;--panel:#111C2E;--panel2:#16233A;--ink:#E3EAF4;--muted:#93A4BC;--line:#253650;
+  --navy:#6F9DFF;--navy-deep:#0D2652;--on-navy:#FFFFFF;--green:#34D49C;--green-bright:#34D49C;
+  --info:#9DBDE9;--info-bg:#18294A;--warn:#F4B547;--warn-bg:#3A2A0E;--err:#FF9259;--err-bg:#3E2012;--crit:#FF6A7D;--crit-bg:#45141F;
+  --l35:#141E36;--l3:#122036;--l2:#11262A;--l1:#172720;--l0:#262217;
+  --row-hover:#18263D;--sel:#1E3358;color-scheme:dark;
+}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--navy);outline-offset:2px}
+h1,h2,h3,h4{line-height:1.2;margin:0}
+.app{display:grid;grid-template-rows:auto 1fr;height:100%}
+
+/* Top bar */
+.top{display:flex;align-items:center;gap:20px;padding:10px 20px;background:var(--navy-deep);color:var(--on-navy);flex-wrap:wrap}
+[data-theme="light"] .top{background:#0047AB}
+.brand{display:flex;align-items:center;gap:12px;margin-right:auto}
+.mark{display:grid;place-items:center;width:38px;height:38px;border-radius:9px;background:#00A86B;color:#fff;font-weight:700;letter-spacing:.02em}
+.brand h1{font-size:19px}
+.brand p{margin:0;font-size:13px;opacity:.85}
+.clock,.score{display:flex;flex-direction:column;align-items:flex-end;font-size:12px;opacity:.95}
+.clock strong{font-family:var(--mono);font-size:17px}
+.score strong{font-size:20px}
+.score .row{display:flex;align-items:baseline;gap:4px}
+.btn-top{background:transparent;border:1.5px solid rgba(255,255,255,.7);color:#fff;border-radius:999px;padding:6px 14px;cursor:pointer}
+.btn-top:hover{background:rgba(255,255,255,.12)}
+
+/* Layout */
+.main{display:grid;grid-template-columns:minmax(330px,410px) 1fr;min-height:0}
+.tasks{overflow:auto;background:var(--panel);border-right:1px solid var(--line)}
+.console{overflow:auto;padding:16px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.panel h2{font-size:15px;margin-bottom:10px}
+
+/* Buttons and fields */
+.btn{border:1.5px solid var(--navy);background:var(--navy);color:#fff;border-radius:7px;padding:7px 14px;cursor:pointer;font-weight:700;white-space:nowrap}
+[data-theme="dark"] .btn{color:#0A1220}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--navy)}
+.btn.go{background:var(--green-bright);border-color:var(--green-bright);color:#fff}
+[data-theme="dark"] .btn.go{color:#0A1220}
+.btn.stop{background:var(--crit);border-color:var(--crit);color:#fff}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.small{padding:4px 10px;font-size:13px}
+select,input[type=text],textarea{background:var(--panel2);border:1.5px solid var(--line);border-radius:7px;padding:7px 10px;min-width:0}
+textarea{width:100%;min-height:84px;resize:vertical}
+.field{display:flex;flex-direction:column;gap:3px;font-size:12.5px;color:var(--muted)}
+.field select,.field input{color:var(--ink);font-size:14px}
+
+/* Injector */
+.inj-row{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+.inj-row+.inj-row{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
+.inj-row .grow{flex:1 1 220px}
+.scn-status{font-size:13px;color:var(--muted);min-width:120px}
+
+/* Search */
+.searchbar{display:flex;gap:8px;flex-wrap:wrap}
+.searchbar input{flex:1 1 280px;font-family:var(--mono);font-size:14px}
+details.syntax{margin-top:8px;font-size:13.5px;color:var(--muted)}
+details.syntax summary{cursor:pointer;color:var(--navy)}
+details.syntax code{font-family:var(--mono);font-size:12.5px;background:var(--panel2);padding:1px 5px;border-radius:4px;color:var(--ink)}
+.syntax-grid{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin-top:8px}
+
+/* Overview: Purdue + volume */
+.overview{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:14px}
+.purdue{display:flex;flex-direction:column;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+.lvl{display:grid;grid-template-columns:118px 1fr;border-top:1px solid var(--line)}
+.lvl:first-child{border-top:0}
+.lvl-label{padding:8px 10px;font-size:12px;color:var(--muted);border-right:1px solid var(--line);display:flex;flex-direction:column;justify-content:center}
+.lvl-label b{font-size:14px;color:var(--ink)}
+.lvl[data-l="3.5"]{background:var(--l35)} .lvl[data-l="3"]{background:var(--l3)} .lvl[data-l="2"]{background:var(--l2)} .lvl[data-l="1"]{background:var(--l1)} .lvl[data-l="0"]{background:var(--l0)}
+.tiles{display:flex;flex-wrap:wrap;gap:6px;padding:7px}
+.tile{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:0;padding:5px 9px 5px 9px;border:1.5px solid var(--line);background:var(--panel);border-radius:6px;cursor:pointer;min-width:118px;text-align:left}
+.tile:hover{border-color:var(--navy)}
+.tile.on{border-color:var(--navy);box-shadow:inset 0 0 0 1.5px var(--navy)}
+.tile .id{font-family:var(--mono);font-size:12.5px;font-weight:600}
+.tile .ip{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.tile .cnt{position:absolute;top:4px;right:6px;font-size:11px;color:var(--muted)}
+.tile .dot{position:absolute;bottom:6px;right:7px;width:8px;height:8px;border-radius:50%;background:var(--line)}
+.tile[data-worst="warning"] .dot{background:var(--warn)} .tile[data-worst="error"] .dot{background:var(--err)} .tile[data-worst="critical"] .dot{background:var(--crit)} .tile[data-worst="info"] .dot{background:var(--info)}
+.tile.flash-info{animation:fl-info .9s} .tile.flash-warning{animation:fl-warn .9s} .tile.flash-error{animation:fl-err .9s} .tile.flash-critical{animation:fl-crit 1.2s}
+@keyframes fl-info{0%{box-shadow:0 0 0 4px var(--info)}100%{box-shadow:0 0 0 0 transparent}}
+@keyframes fl-warn{0%{box-shadow:0 0 0 5px var(--warn)}100%{box-shadow:0 0 0 0 transparent}}
+@keyframes fl-err{0%{box-shadow:0 0 0 6px var(--err)}100%{box-shadow:0 0 0 0 transparent}}
+@keyframes fl-crit{0%,40%{box-shadow:0 0 0 7px var(--crit)}100%{box-shadow:0 0 0 0 transparent}}
+@media (prefers-reduced-motion: reduce){.tile[class*="flash-"]{animation:none}.drawer{transition:none}}
+
+.hist{display:flex;align-items:flex-end;gap:2px;height:118px;padding:4px 0;border-bottom:1px solid var(--line)}
+.bar{flex:1;display:flex;flex-direction:column-reverse;height:100%;min-width:3px}
+.bar span{display:block;width:100%}
+.bar .info{background:var(--info);opacity:.55} .bar .warning{background:var(--warn)} .bar .error{background:var(--err)} .bar .critical{background:var(--crit)}
+.hist-axis{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:3px}
+.sevstats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:12px}
+.sevstat{border:1.5px solid var(--line);border-radius:7px;background:var(--panel2);padding:6px 8px;text-align:left;cursor:pointer}
+.sevstat:hover{border-color:var(--navy)}
+.sevstat b{display:block;font-size:20px}
+.sevstat small{font-size:12px;color:var(--muted)}
+.sevstat.info b{color:var(--info)} .sevstat.warning b{color:var(--warn)} .sevstat.error b{color:var(--err)} .sevstat.critical b{color:var(--crit)}
+.total-line{font-size:13px;color:var(--muted);margin-top:8px}
+
+/* Results */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:-4px -4px 12px}
+.tab{background:transparent;border:0;border-bottom:3px solid transparent;padding:8px 12px;cursor:pointer;font-weight:700;color:var(--muted)}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--navy)}
+.badge{display:inline-block;min-width:20px;padding:0 6px;border-radius:999px;background:var(--panel2);border:1px solid var(--line);font-size:12px;margin-left:4px}
+.badge.hot{background:var(--crit);border-color:var(--crit);color:#fff}
+.tablewrap{overflow-x:auto;max-height:520px;overflow-y:auto;border:1px solid var(--line);border-radius:8px}
+table.ev{width:100%;border-collapse:collapse;font-size:13px}
+table.ev th{position:sticky;top:0;background:var(--panel2);text-align:left;padding:7px 9px;font-size:12px;color:var(--muted);border-bottom:1px solid var(--line);white-space:nowrap}
+table.ev td{padding:6px 9px;border-bottom:1px solid var(--line);vertical-align:top}
+table.ev tr{cursor:pointer}
+table.ev tbody tr:hover{background:var(--row-hover)}
+table.ev tr.sel{background:var(--sel)}
+table.ev tr.r-critical td:first-child{box-shadow:inset 4px 0 0 var(--crit)}
+table.ev tr.r-error td:first-child{box-shadow:inset 4px 0 0 var(--err)}
+table.ev tr.r-warning td:first-child{box-shadow:inset 4px 0 0 var(--warn)}
+.mono{font-family:var(--mono);font-size:12.5px;white-space:nowrap}
+.msg{min-width:280px}
+.sev{display:inline-flex;align-items:center;gap:5px;padding:1px 8px;border-radius:5px;font-size:12px;font-weight:700;white-space:nowrap}
+.sev-info{background:var(--info-bg);color:var(--info)} .sev-warning{background:var(--warn-bg);color:var(--warn)} .sev-error{background:var(--err-bg);color:var(--err)} .sev-critical{background:var(--crit-bg);color:var(--crit)}
+.tag{display:inline-block;font-size:11px;padding:0 6px;border-radius:4px;border:1px solid var(--line);color:var(--muted);margin-left:6px}
+.pin{color:var(--green);font-weight:700;margin-right:4px}
+.empty{color:var(--muted);padding:18px;text-align:center;margin:0}
+.result-line{font-size:13px;color:var(--muted);margin:0 0 8px}
+
+.alert{border:1.5px solid var(--line);border-radius:9px;padding:12px 14px;margin-bottom:10px;background:var(--panel)}
+.alert.open{border-left:5px solid var(--crit)}
+.alert.done{border-left:5px solid var(--green)}
+.alert header{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.alert header strong{font-size:15px}
+.alert .meta{font-size:12.5px;color:var(--muted);font-family:var(--mono)}
+.alert p{margin:6px 0}
+.evlist{list-style:none;padding:0;margin:6px 0;font-family:var(--mono);font-size:12px}
+.evlist li{padding:3px 0;border-bottom:1px dotted var(--line)}
+.disp{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.disp label{display:flex;gap:8px;align-items:flex-start;cursor:pointer}
+.disp small{color:var(--muted)}
+.fb{margin-top:8px;padding:8px 10px;border-radius:7px;font-size:14px}
+.fb.ok{background:var(--l2);border:1px solid var(--green)}
+.fb.bad{background:var(--crit-bg);border:1px solid var(--crit)}
+.fb.neutral{background:var(--panel2);border:1px solid var(--line)}
+
+.timeline{list-style:none;margin:0;padding:0 0 0 14px;border-left:2px solid var(--navy)}
+.timeline li{position:relative;padding:6px 0 10px 12px}
+.timeline li::before{content:"";position:absolute;left:-21px;top:12px;width:12px;height:12px;border-radius:50%;background:var(--panel);border:2px solid var(--navy)}
+.timeline .when{font-family:var(--mono);font-size:12px;color:var(--muted)}
+
+/* Drawer */
+.drawer{position:fixed;top:0;right:0;height:100%;width:min(470px,100%);background:var(--panel);border-left:1px solid var(--line);box-shadow:-10px 0 30px rgba(0,0,0,.18);transform:translateX(105%);transition:transform .22s ease;z-index:40;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.drawer.open{transform:none}
+.drawer-head{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.drawer-head h2{font-size:16px;margin-right:auto}
+.drawer-body{overflow:auto;padding:14px 16px}
+dl.kv{display:grid;grid-template-columns:130px 1fr;gap:5px 12px;margin:0 0 14px;font-size:14px}
+dl.kv dt{color:var(--muted)}
+dl.kv dd{margin:0;word-break:break-word}
+pre.raw{background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:10px;font-family:var(--mono);font-size:12px;white-space:pre-wrap;word-break:break-all;margin:6px 0 14px}
+.pivots{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 14px}
+.drawer h3{font-size:14px;margin-top:4px}
+.explain{font-size:13.5px;color:var(--muted)}
+
+/* Task panel */
+.steps{display:flex;flex-wrap:wrap;gap:5px;padding:12px 16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel);z-index:5}
+.step{min-width:32px;height:32px;border-radius:16px;border:1.5px solid var(--line);background:var(--panel2);cursor:pointer;font-weight:700;font-size:13px;padding:0 9px}
+.step[aria-current="step"]{background:var(--navy);border-color:var(--navy);color:#fff}
+[data-theme="dark"] .step[aria-current="step"]{color:#0A1220}
+.step.done{border-color:var(--green);color:var(--green)}
+.step.done[aria-current="step"]{color:#fff}
+.task-body{padding:16px 18px 28px}
+.task-kicker{font-size:13px;color:var(--muted);display:flex;justify-content:space-between}
+.task-body h2{font-size:22px;margin:4px 0 6px}
+.goal{color:var(--muted);margin:0 0 14px}
+.task-body h3{font-size:15px;margin:18px 0 8px}
+ol.do{margin:0;padding-left:20px}
+ol.do li{margin-bottom:6px}
+ol.do code,.task-body code{font-family:var(--mono);font-size:12.5px;background:var(--panel2);border:1px solid var(--line);padding:0 5px;border-radius:4px}
+ul.checks{list-style:none;padding:0;margin:0}
+ul.checks li{display:flex;gap:9px;align-items:flex-start;padding:7px 10px;border:1px solid var(--line);border-radius:7px;margin-bottom:6px;background:var(--panel2);font-size:14px}
+ul.checks .st{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700;border:1.5px solid var(--muted);color:var(--muted)}
+ul.checks li.ok .st{background:var(--green-bright);border-color:var(--green-bright);color:#fff}
+ul.checks li.bad .st{background:var(--crit);border-color:var(--crit);color:#fff}
+.q{border:1px solid var(--line);border-radius:9px;padding:12px 13px;margin:0 0 10px}
+.q legend{font-weight:700;padding:0 4px;font-size:14.5px}
+.q .opt{display:flex;gap:8px;align-items:flex-start;padding:5px 6px;border-radius:6px;cursor:pointer;font-size:14px}
+.q .opt:hover{background:var(--row-hover)}
+.q .opt.right{background:var(--l2);outline:1.5px solid var(--green)}
+.q .opt.wrong{background:var(--crit-bg);outline:1.5px solid var(--crit)}
+.q .why{font-size:13.5px;margin-top:6px;padding:8px 10px;border-radius:6px;background:var(--panel2)}
+.q .note{font-size:12.5px;color:var(--muted);margin-top:4px}
+.submit-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.warnmsg{color:var(--crit);font-size:13.5px}
+.navrow{display:flex;justify-content:space-between;margin-top:18px;padding-top:12px;border-top:1px solid var(--line)}
+.intro p{margin:0 0 10px}
+.intro ul{padding-left:20px;margin:0 0 10px}
+.namefield{display:flex;flex-direction:column;gap:4px;margin:12px 0}
+.report-table{width:100%;border-collapse:collapse;font-size:14px;margin-bottom:12px}
+.report-table td,.report-table th{border-bottom:1px solid var(--line);padding:6px 4px;text-align:left}
+.report-table td:last-child,.report-table th:last-child{text-align:right;font-family:var(--mono)}
+textarea.report{font-family:var(--mono);font-size:12px;min-height:220px}
+.toasts{position:fixed;left:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:8px;z-index:60;max-width:360px}
+.toast{background:var(--ink);color:var(--panel);padding:10px 14px;border-radius:8px;font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+.toast.alertt{background:var(--crit);color:#fff}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+@media (max-width:1100px){.overview{grid-template-columns:1fr}}
+@media (max-width:980px){
+  .app{height:auto;display:block}
+  .main{display:flex;flex-direction:column}
+  .tasks{border-right:0;border-bottom:1px solid var(--line);overflow:visible}
+  .steps{position:static}
+  .console{overflow:visible}
+  .clock{display:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <span class="mark" aria-hidden="true">FF</span>
+      <div><h1>FreshFlow SOC</h1><p>SIEM training lab for a Chicago food-processing plant</p></div>
+    </div>
+    <div class="clock"><span>Wall clock (UTC)</span><strong id="clock">--:--:--</strong></div>
+    <div class="score"><span>Auto-scored</span><div class="row"><strong id="score">0</strong><span>/ 100</span></div></div>
+    <button id="themeBtn" class="btn-top" type="button" aria-pressed="false">Dark mode</button>
+  </header>
+
+  <div class="main">
+    <aside class="tasks" aria-label="Lab tasks">
+      <nav class="steps" id="steps" aria-label="Lab progress"></nav>
+      <div id="taskBody" class="task-body"></div>
+    </aside>
+
+    <main class="console" aria-label="SIEM console">
+      <section class="panel" aria-labelledby="injH">
+        <h2 id="injH">Event injector</h2>
+        <div class="inj-row">
+          <label class="field">Category<select id="cat"></select></label>
+          <label class="field">Asset<select id="asset"></select></label>
+          <label class="field">Severity<select id="sev">
+            <option value="">Auto (realistic for the event)</option>
+            <option value="info">Info</option><option value="warning">Warning</option>
+            <option value="error">Error</option><option value="critical">Critical</option>
+          </select></label>
+          <button class="btn" type="button" id="genBtn">Generate</button>
+        </div>
+        <div class="inj-row">
+          <label class="field grow">Custom message (creates a synthetic test event)<input type="text" id="custom" placeholder="Type a message, then inject it on the selected asset"></label>
+          <button class="btn ghost" type="button" id="injBtn">Inject test event</button>
+        </div>
+        <div class="inj-row">
+          <button class="btn go" type="button" id="liveBtn">Start live feed</button>
+          <label class="field">Scenario<select id="scn">
+            <option value="sns">Sensor fault (Task 5)</option>
+            <option value="atk">Cyber attack (Task 8)</option>
+            <option value="fail">Equipment failure (Task 9)</option>
+            <option value="mnt">Planned maintenance (Task 10)</option>
+          </select></label>
+          <button class="btn" type="button" id="runBtn">Run scenario</button>
+          <span class="scn-status" id="scnStatus" aria-live="polite"></span>
+          <button class="btn ghost" type="button" id="clearBtn" style="margin-left:auto">Clear console</button>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="qH">
+        <h2 id="qH">Search events</h2>
+        <div class="searchbar">
+          <label class="sr" for="q">Query</label>
+          <input type="text" id="q" placeholder='Try: sev>=warning asset:PLC-TANK01 "setpoint"' autocomplete="off" spellcheck="false">
+          <button class="btn" type="button" id="searchBtn">Search</button>
+          <button class="btn ghost" type="button" id="resetQ">Show all</button>
+        </div>
+        <details class="syntax">
+          <summary>Query syntax</summary>
+          <div class="syntax-grid">
+            <code>sev:critical</code><span>One severity. Comma for several: <code>sev:error,critical</code></span>
+            <code>sev&gt;=warning</code><span>That severity and everything worse</span>
+            <code>asset:HMI-OP01</code><span>Events from one asset (or click its tile)</span>
+            <code>eid:4625</code><span>Event ID. Comma for several: <code>eid:4624,4625</code></span>
+            <code>cat:security</code><span>Category: system, security, network, process, alarm, audit…</span>
+            <code>ip:10.1.1.20</code><span>Matches asset, source or destination IP; also <code>src:</code> and <code>dst:</code></span>
+            <code>user:admin</code><span>User name in the event</span>
+            <code>tag:T0855</code><span>MITRE ATT&amp;CK technique</span>
+            <code>"setpoint"</code><span>Free text anywhere in the event</span>
+            <code>-eid:4624</code><span>A leading minus excludes matches</span>
+          </div>
+        </details>
+      </section>
+
+      <section class="overview">
+        <div class="panel">
+          <h2>Plant assets by Purdue level</h2>
+          <div class="purdue" id="purdue"></div>
+        </div>
+        <div class="panel">
+          <h2>Event volume <span id="histScope" style="font-weight:400;color:var(--muted);font-size:13px"></span></h2>
+          <div id="hist"></div>
+          <div class="sevstats" id="sevStats"></div>
+          <div class="total-line" id="totalLine"></div>
+        </div>
+      </section>
+
+      <section class="panel" aria-label="Results">
+        <div class="tabs" role="tablist">
+          <button class="tab" role="tab" data-tab="events" aria-selected="true">Events<span class="badge" id="bEvents">0</span></button>
+          <button class="tab" role="tab" data-tab="alerts" aria-selected="false">Alerts<span class="badge" id="bAlerts">0</span></button>
+          <button class="tab" role="tab" data-tab="case" aria-selected="false">Case<span class="badge" id="bCase">0</span></button>
+        </div>
+        <div id="tabBody"></div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<aside class="drawer" id="drawer" role="dialog" aria-labelledby="drawerTitle" aria-hidden="true">
+  <div class="drawer-head">
+    <h2 id="drawerTitle">Event detail</h2>
+    <button class="btn go small" type="button" id="pinBtn">Pin to case</button>
+    <button class="btn ghost small" type="button" id="closeDrawer">Close</button>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+</aside>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script>
+/* ---------- Helpers ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const rnd=a=>a[Math.floor(Math.random()*a.length)];
+const ri=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const iso=t=>new Date(t).toISOString();
+const hms=t=>iso(t).slice(11,19);
+
+/* ---------- Plant model ---------- */
+const ASSETS={
+  'FW-DMZ01':{name:'DMZ firewall',ip:'10.1.0.1',lvl:'3.5',kind:'fw'},
+  'SW-CORE01':{name:'Core switch with network sensor',ip:'10.1.1.1',lvl:'3',kind:'switch'},
+  'SCADA-01':{name:'SCADA master station',ip:'10.1.1.10',lvl:'2',kind:'scada'},
+  'HMI-OP01':{name:'Operator HMI terminal',ip:'10.1.1.20',lvl:'2',kind:'hmi'},
+  'ENG-WS01':{name:'Engineering workstation',ip:'10.1.1.30',lvl:'2',kind:'eng'},
+  'PLC-TANK01':{name:'Tank level PLC',ip:'10.1.2.101',lvl:'1',kind:'plc'},
+  'PLC-CONV01':{name:'Conveyor PLC',ip:'10.1.2.102',lvl:'1',kind:'plc'},
+  'RTU-FIELD01':{name:'Remote terminal unit',ip:'10.1.3.10',lvl:'1',kind:'rtu'},
+  'PUMP-01':{name:'Primary circulation pump',ip:'10.1.2.201',lvl:'0',kind:'pump'},
+  'PUMP-02':{name:'Backup circulation pump',ip:'10.1.2.203',lvl:'0',kind:'pump'},
+  'VALVE-CV01':{name:'Control valve CV-01',ip:'10.1.2.202',lvl:'0',kind:'valve'},
+  'SENSOR-T01':{name:'Temperature sensor T-01',ip:'10.1.2.210',lvl:'0',kind:'sensor'}
+};
+const LEVELS=[['3.5','Industrial DMZ'],['3','Site operations'],['2','Supervisory control'],['1','Basic control'],['0','Physical process']];
+const SEV={info:{n:6,label:'Info',icon:'●'},warning:{n:4,label:'Warning',icon:'▲'},error:{n:3,label:'Error',icon:'■'},critical:{n:2,label:'Critical',icon:'◆'}};
+const SEVR={info:0,warning:1,error:2,critical:3};
+const CATS={system:'System',security:'Security',application:'Application',network:'Network',process:'Process control',alarm:'Alarms',maintenance:'Maintenance',audit:'Audit',performance:'Performance',compliance:'Compliance'};
+const TECH={T0846:'Remote System Discovery',T1110:'Brute Force (Enterprise)',T0822:'External Remote Services',T0859:'Valid Accounts',T0886:'Remote Services',T0801:'Monitor Process State',T0855:'Unauthorized Command Message',T0836:'Modify Parameter',T0878:'Alarm Suppression',T0831:'Manipulation of Control',T0858:'Change Operating Mode',T0843:'Program Download',T1136:'Create Account (Enterprise)',T1098:'Account Manipulation (Enterprise)'};
+
+/* Templates: e=event ID, s=realistic severity, m=message, on=asset kinds or IDs, f=fields, x=scenario-only */
+const TPL={
+  system:[
+    {e:1000,s:'info',m:'System boot completed; all services nominal'},
+    {e:1001,s:'info',m:'Service {svc} started'},
+    {e:1002,s:'info',m:'Configuration loaded: {cfg}'},
+    {e:1010,s:'warning',m:'Disk usage at {hpct}% on /var/log'},
+    {e:1011,s:'warning',m:'CPU temperature {ctemp} °C exceeds 75 °C advisory'},
+    {e:1030,s:'warning',m:'NTP synchronization lost; clock drift {ms} ms'},
+    {e:1020,s:'error',m:'Service {svc} terminated unexpectedly (exit code 139)'}
+  ],
+  security:[
+    {e:4624,s:'info',m:'Successful logon: {user} (logon type 2, console)',on:['scada','hmi','eng'],f:{user:'user'}},
+    {e:4625,s:'warning',m:'Failed logon: {user} from {extip} (bad password)',f:{user:'user',src:'extip'}},
+    {e:4672,s:'warning',m:'Special privileges assigned to new logon: {user}',on:['scada','hmi','eng'],f:{user:'user'}},
+    {e:4740,s:'error',m:'Account locked out: {user} after repeated failures',f:{user:'user'}},
+    {e:5156,s:'info',m:'Connection permitted: {intip} → {extip}:443',on:['fw'],f:{src:'intip',dst:'extip',proto:'=HTTPS'}},
+    {e:5157,s:'warning',m:'Inbound connection blocked: {extip} → 10.1.0.1:{blkport}',on:['fw'],f:{src:'extip',dst:'=10.1.0.1'}}
+  ],
+  application:[
+    {e:1500,s:'info',m:'Historian service writing {thr} tags/min',on:['scada']},
+    {e:1501,s:'info',m:'Database connection established to historian'},
+    {e:1510,s:'warning',m:'OPC UA session timed out for client {intip}',f:{src:'intip',proto:'=OPC UA'}},
+    {e:1520,s:'error',m:'Module {mod} error: invalid data in register {reg}'},
+    {e:1530,s:'info',m:'License validation successful'},
+    {e:1540,s:'info',m:'API request served: GET /api/v1/alarms ({ms} ms)'}
+  ],
+  network:[
+    {e:5000,s:'info',m:'Interface eth{n0} link up, 1 Gbps full duplex'},
+    {e:5010,s:'warning',m:'Packet loss {pl}% on uplink to {line}',on:['switch','fw','rtu']},
+    {e:5011,s:'warning',m:'Bandwidth utilization {hpct}% on port Gi1/0/{port}',on:['switch','fw']},
+    {e:5020,s:'warning',m:'Spanning-tree topology change on VLAN {vlan}',on:['switch']},
+    {e:5030,s:'warning',m:'New MAC address {mac} learned on port Gi1/0/{port} (VLAN {vlan})',on:['switch']},
+    {e:5040,s:'info',m:'NSM: Modbus/TCP read FC03 10.1.1.10 → 10.1.2.101:502, registers 40001–40020',on:['switch'],f:{src:'=10.1.1.10',dst:'=10.1.2.101',proto:'=Modbus/TCP'}},
+    {e:5041,s:'info',m:'NSM: Modbus/TCP write FC06 10.1.1.30 → 10.1.2.102:502, register {reg}',on:['switch'],f:{src:'=10.1.1.30',dst:'=10.1.2.102',proto:'=Modbus/TCP'}},
+    {e:5050,s:'info',m:'NSM: DNP3 unsolicited response from 10.1.3.10 ({n} class 1 events)',on:['switch','rtu','scada'],f:{src:'=10.1.3.10',proto:'=DNP3'}}
+  ],
+  process:[
+    {e:6000,s:'info',m:'Tank 1 level {level}%',on:['PLC-TANK01']},
+    {e:6001,s:'info',m:'Pump run feedback: {flow} GPM, motor {amps} A',on:['pump']},
+    {e:6002,s:'info',m:'Product temperature {ptemp} °C (limit 4.4 °C)',on:['sensor']},
+    {e:6003,s:'info',m:'Flow stabilized at {flow} GPM',on:['PLC-TANK01','pump']},
+    {e:6004,s:'info',m:'Valve position {pos}% (commanded {pos}%)',on:['valve']},
+    {e:6005,s:'info',m:'Batch {batch} completed and released',on:['plc','scada']},
+    {e:6006,s:'info',m:'Conveyor speed {speed} ft/min on Line A',on:['PLC-CONV01']},
+    {e:6010,s:'warning',m:'Setpoint changed by operator at HMI: {sp}',on:['plc']}
+  ],
+  alarm:[
+    {e:7000,s:'error',m:'High temperature alarm: T-01 at {hitemp} °C',on:['sensor']},
+    {e:7001,s:'warning',m:'Low pressure warning in {line} header: {psi} psi',on:['plc','pump','valve']},
+    {e:7003,s:'error',m:'Polling timeout: no response for 3 s',on:['scada','hmi','rtu','plc']},
+    {e:7004,s:'warning',m:'Vibration {vib} mm/s on motor bearing (advisory 4.5)',on:['pump']},
+    {e:7007,s:'warning',m:'Valve travel deviation: commanded {pos}%, actual {pos2}%',on:['valve']},
+    {e:7009,s:'error',m:'RTU battery low; backup runtime under 30 min',on:['rtu']},
+    {e:7006,s:'critical',m:'Emergency stop pressed at {line} station',on:['plc'],x:1},
+    {e:7008,s:'critical',m:'Power supply failure on I/O rack 2; running on UPS',on:['plc','rtu'],x:1}
+  ],
+  maintenance:[
+    {e:8000,s:'info',m:'Scheduled maintenance started ({wo})'},
+    {e:8001,s:'info',m:'Calibration completed; offset {off} °C',on:['sensor']},
+    {e:8002,s:'warning',m:'Filter replacement due within 48 h',on:['pump','valve']},
+    {e:8003,s:'info',m:'Inspection passed ({wo})'},
+    {e:8004,s:'warning',m:'Spare parts low: bearing kit BK-6205 (1 on hand)',on:['pump']}
+  ],
+  audit:[
+    {e:9000,s:'info',m:'{user} opened the tank overview screen',on:['hmi','scada'],f:{user:'user'}},
+    {e:9001,s:'info',m:'Configuration change committed by {user}',f:{user:'user'}},
+    {e:9003,s:'warning',m:'Group membership changed for {user}',on:['scada','hmi','eng'],f:{user:'user'}},
+    {e:9005,s:'info',m:'Nightly backup verified (SHA-256 match)'},
+    {e:9006,s:'info',m:'Alarm acknowledged by {user}',on:['hmi','scada'],f:{user:'user'}}
+  ],
+  performance:[
+    {e:3000,s:'info',m:'CPU utilization {pct}%'},
+    {e:3001,s:'info',m:'Memory in use {mem} MB'},
+    {e:3002,s:'info',m:'Controller scan time {ms} ms',on:['plc','rtu']},
+    {e:3003,s:'info',m:'Throughput {thr} cases/hour',on:['scada','plc']},
+    {e:3010,s:'warning',m:'Screen refresh latency {lat} ms (target 250 ms)',on:['hmi','scada']}
+  ],
+  compliance:[
+    {e:2000,s:'info',m:'HACCP CCP-2 cold-hold record verified for batch {batch}'},
+    {e:2001,s:'info',m:'Temperature log archived with audit trail'},
+    {e:2002,s:'info',m:'Lot traceability record created for {batch}'},
+    {e:2005,s:'info',m:'Sanitation verification logged for {line}'},
+    {e:2003,s:'error',m:'CCP-2 deviation: product at {hitemp} °C above 4.4 °C limit',on:['sensor','plc','scada'],x:1}
+  ]
+};
+function gen(k){
+  switch(k){
+    case 'svc':return rnd(['ModbusGateway','OPCUAServer','HistorianSvc','AlarmManager']);
+    case 'cfg':return rnd(['plc_map.xml','scada.ini','opcua_endpoints.json']);
+    case 'hpct':return ri(85,97); case 'pct':return ri(12,78); case 'ctemp':return ri(76,84);
+    case 'ms':return ri(18,85); case 'user':return rnd(['operator1','jwilliams','tech_dlee','scada_svc','admin']);
+    case 'extip':return rnd(['203.0.113.77','192.0.2.14','203.0.113.9','198.51.100.140']);
+    case 'intip':return rnd(['10.1.1.10','10.1.1.20','10.1.1.30']);
+    case 'blkport':return rnd(['502 (Modbus/TCP)','20000 (DNP3)','44818 (EtherNet/IP)','4840 (OPC UA)','3389 (RDP)','23 (Telnet)']);
+    case 'thr':return ri(1800,2400); case 'mod':return rnd(['driver_modbus','tag_scaler','data_logger']);
+    case 'reg':return 40000+ri(1,50); case 'n0':return ri(0,1); case 'pl':return ri(2,9);
+    case 'line':return rnd(['Line A','Line B']); case 'port':return ri(1,48); case 'vlan':return rnd([10,20,30]);
+    case 'mac':return Array.from({length:6},()=>ri(0,255).toString(16).padStart(2,'0')).join(':');
+    case 'level':return ri(35,80); case 'flow':return ri(285,320); case 'amps':return ri(29,32);
+    case 'ptemp':return (ri(20,39)/10).toFixed(1); case 'pos':return ri(20,80); case 'pos2':return ri(5,95);
+    case 'batch':return 'B'+ri(1000,9999); case 'speed':return ri(105,130);
+    case 'sp':return rnd(['Tank 1 low-level 20% → 25%','Line A speed 120 → 110 ft/min']);
+    case 'hitemp':return (ri(50,75)/10).toFixed(1); case 'psi':return ri(18,26); case 'vib':return (ri(25,42)/10).toFixed(1);
+    case 'wo':return 'WO-'+ri(5000,5999); case 'off':return '+'+(ri(1,4)/10).toFixed(1);
+    case 'mem':return ri(1100,3800); case 'lat':return ri(400,900); case 'n':return ri(3,12);
+    default:return '?';
+  }
+}
+function fill(m,f){
+  const v={};const g=k=>(k in v)?v[k]:(v[k]=gen(k));
+  const msg=m.replace(/\{(\w+)\}/g,(_,k)=>g(k));
+  const fields={};
+  if(f)for(const [fk,src] of Object.entries(f))fields[fk]=src.startsWith('=')?src.slice(1):String(g(src));
+  return {msg,fields};
+}
+const fits=(t,id)=>!t.on||t.on.includes(ASSETS[id].kind)||t.on.includes(id);
+function fromTemplate(asset,cat,sevOverride,origin){
+  let pool=TPL[cat].filter(t=>!t.x&&fits(t,asset));
+  if(!pool.length)pool=TPL[cat].filter(t=>!t.x&&!t.on);
+  if(!pool.length)pool=TPL[cat].filter(t=>!t.x);
+  const t=rnd(pool);const {msg,fields}=fill(t.m,t.f);
+  return {asset,cat,eid:t.e,sev:sevOverride||t.s,msg,...fields,tags:[],origin};
+}
+
+/* ---------- Scenarios ---------- */
+const ATK='198.51.100.23';
+const SCN={
+  sns:{name:'Sensor fault',steps(){
+    const s=[];
+    for(let i=0;i<10;i++){
+      s.push({d:i*10,a:'SENSOR-T01',c:'alarm',e:7000,s:'error',m:'High temperature alarm: T-01 reads 85.3 °C',k:i===0?'s1':undefined});
+      s.push({d:i*10+5,a:'SENSOR-T01',c:'alarm',e:7012,s:'info',m:'T-01 high temperature returned to normal (3.6 °C)'});
+    }
+    s.push({d:110,a:'HMI-OP01',c:'audit',e:9008,s:'warning',m:'Operator jwilliams shelved alarm T-01 HIGH for 60 minutes',f:{user:'jwilliams'}});
+    s.push({d:130,a:'SENSOR-T01',c:'maintenance',e:8011,s:'warning',m:'Signal quality BAD: open circuit detected on RTD input'});
+    s.push({d:160,a:'SENSOR-T01',c:'maintenance',e:8012,s:'info',m:'Work order WO-5520 opened: replace T-01 RTD element'});
+    return s;}},
+  atk:{name:'Cyber attack',steps(){
+    const s=[
+      {d:0,a:'FW-DMZ01',c:'security',e:5157,s:'warning',m:`Inbound connection blocked: ${ATK} → 10.1.0.1:502 (Modbus/TCP)`,f:{src:ATK,dst:'10.1.0.1',proto:'Modbus/TCP'},t:['T0846'],k:'a0'},
+      {d:6,a:'FW-DMZ01',c:'security',e:5157,s:'warning',m:`Inbound connection blocked: ${ATK} → 10.1.0.1:20000 (DNP3)`,f:{src:ATK,dst:'10.1.0.1',proto:'DNP3'},t:['T0846']},
+      {d:12,a:'FW-DMZ01',c:'security',e:5157,s:'warning',m:`Inbound connection blocked: ${ATK} → 10.1.0.1:44818 (EtherNet/IP)`,f:{src:ATK,dst:'10.1.0.1',proto:'EtherNet/IP'},t:['T0846']},
+      {d:40,a:'FW-DMZ01',c:'security',e:5156,s:'info',m:`Inbound connection permitted: ${ATK} → 10.1.0.1:443 (remote-access VPN portal)`,f:{src:ATK,dst:'10.1.0.1',proto:'HTTPS'}}
+    ];
+    for(let i=0;i<6;i++)s.push({d:70+i*14,a:'FW-DMZ01',c:'security',e:4625,s:'warning',m:`VPN logon failed: contractor_mx from ${ATK} (bad password)`,f:{src:ATK,user:'contractor_mx'},t:['T1110'],k:i===0?'a1':undefined});
+    s.push(
+      {d:170,a:'FW-DMZ01',c:'security',e:4624,s:'info',m:`VPN logon succeeded: contractor_mx from ${ATK}; assigned 10.1.0.50`,f:{src:ATK,user:'contractor_mx'},t:['T0822','T0859'],k:'a3'},
+      {d:240,a:'HMI-OP01',c:'security',e:4624,s:'info',m:'Remote Desktop logon (type 10): contractor_mx from 10.1.0.50',f:{src:'10.1.0.50',user:'contractor_mx',proto:'RDP'},t:['T0886'],k:'a4'},
+      {d:252,a:'HMI-OP01',c:'security',e:4672,s:'warning',m:'Special privileges assigned to new logon: contractor_mx',f:{user:'contractor_mx'}},
+      {d:300,a:'SW-CORE01',c:'network',e:5040,s:'info',m:'NSM: Modbus/TCP read FC03 10.1.1.20 → 10.1.2.101:502, registers 40001–40050',f:{src:'10.1.1.20',dst:'10.1.2.101',proto:'Modbus/TCP'},t:['T0801'],k:'a5'},
+      {d:360,a:'SW-CORE01',c:'network',e:5041,s:'warning',m:'NSM: Modbus/TCP write FC16 10.1.1.20 → 10.1.2.101:502, register 40010 = 110',f:{src:'10.1.1.20',dst:'10.1.2.101',proto:'Modbus/TCP'},t:['T0855','T0836'],k:'a6'},
+      {d:362,a:'PLC-TANK01',c:'audit',e:9002,s:'warning',m:'Setpoint HL_SP changed 92% → 110% via Modbus from 10.1.1.20 (no local operator action recorded)',f:{src:'10.1.1.20'},t:['T0836'],k:'a7'},
+      {d:365,a:'PLC-TANK01',c:'alarm',e:7011,s:'warning',m:'High-level alarm disabled: setpoint 110% is outside instrument range 0–100%',t:['T0878']},
+      {d:470,a:'PLC-TANK01',c:'process',e:6000,s:'info',m:'Tank 1 level 97%'},
+      {d:530,a:'PLC-TANK01',c:'alarm',e:7002,s:'critical',m:'SIS-01 high-high level (reported via PLC-TANK01): Tank 1 at 101%, overflow imminent',t:['T0831'],k:'a8'},
+      {d:532,a:'PLC-TANK01',c:'alarm',e:7005,s:'critical',m:'Safety interlock SIS-01 tripped: inlet valve CV-01 forced closed',k:'a9'},
+      {d:534,a:'VALVE-CV01',c:'process',e:6004,s:'info',m:'Valve position 0% (commanded by SIS-01)'},
+      {d:600,a:'FW-DMZ01',c:'security',e:5156,s:'info',m:`Outbound connection permitted: 10.1.0.50 → ${ATK}:443 (VPN session still active)`,f:{src:'10.1.0.50',dst:ATK,proto:'HTTPS'}}
+    );return s;}},
+  fail:{name:'Equipment failure',steps(){return [
+    {d:0,a:'PUMP-01',c:'alarm',e:7004,s:'warning',m:'Vibration 4.2 mm/s on motor bearing (advisory 4.5)',k:'f0'},
+    {d:90,a:'PUMP-01',c:'alarm',e:7004,s:'warning',m:'Vibration 5.6 mm/s on motor bearing, rising (advisory 4.5)'},
+    {d:180,a:'PUMP-01',c:'performance',e:3020,s:'warning',m:'Motor current 38 A (nominal 31 A); bearing temperature 71 °C'},
+    {d:240,a:'PUMP-01',c:'alarm',e:7004,s:'error',m:'Vibration 7.9 mm/s on motor bearing (trip limit 7.1)'},
+    {d:262,a:'PUMP-01',c:'alarm',e:7020,s:'critical',m:'PUMP-01 tripped: motor overload relay opened',k:'f1'},
+    {d:264,a:'PLC-TANK01',c:'process',e:6011,s:'error',m:'Circulation flow 42 GPM, below 150 GPM minimum',k:'f2'},
+    {d:267,a:'PLC-TANK01',c:'process',e:6012,s:'info',m:'Lead/lag logic: start command sent to PUMP-02',k:'f3'},
+    {d:275,a:'PUMP-02',c:'process',e:6001,s:'info',m:'Pump run feedback: 312 GPM, motor 30 A'},
+    {d:300,a:'HMI-OP01',c:'audit',e:9006,s:'info',m:'Alarm PUMP-01 TRIP acknowledged by jwilliams',f:{user:'jwilliams'}},
+    {d:420,a:'PUMP-01',c:'maintenance',e:8010,s:'info',m:'Work order WO-5512 opened: PUMP-01 bearing inspection and replacement',k:'f4'},
+    {d:600,a:'PLC-TANK01',c:'process',e:6003,s:'info',m:'Flow stabilized at 305 GPM on PUMP-02',k:'f5'}
+  ];}},
+  mnt:{name:'Planned maintenance',steps(){return [
+    {d:0,a:'ENG-WS01',c:'audit',e:9010,s:'info',m:'Change CHG-2611 approved: PLC-CONV01 logic update tonight, approver R. Okafor',k:'m0'},
+    {d:30,a:'ENG-WS01',c:'security',e:4624,s:'info',m:'Successful logon: tech_dlee (logon type 2, console)',f:{user:'tech_dlee'}},
+    {d:60,a:'PLC-CONV01',c:'process',e:6013,s:'info',m:'Line A stopped by operator for maintenance'},
+    {d:95,a:'PLC-CONV01',c:'audit',e:9004,s:'warning',m:'PLC mode changed RUN → PROGRAM from 10.1.1.30 (ENG-WS01)',f:{src:'10.1.1.30',user:'tech_dlee'},t:['T0858'],k:'m1'},
+    {d:150,a:'PLC-CONV01',c:'audit',e:9007,s:'warning',m:'Logic download: 14 rungs modified (project ConveyorA_v3.2)',f:{src:'10.1.1.30',user:'tech_dlee'},t:['T0843']},
+    {d:300,a:'SENSOR-T01',c:'maintenance',e:8001,s:'info',m:'Calibration completed; offset +0.3 °C'},
+    {d:330,a:'SENSOR-T01',c:'compliance',e:2004,s:'warning',m:'HACCP CCP-2 temperature record gap: 12 minutes while T-01 was offline for calibration',k:'m3'},
+    {d:360,a:'PLC-CONV01',c:'audit',e:9004,s:'warning',m:'PLC mode changed PROGRAM → RUN from 10.1.1.30 (ENG-WS01)',f:{src:'10.1.1.30',user:'tech_dlee'},t:['T0858'],k:'m2'},
+    {d:380,a:'PLC-CONV01',c:'process',e:6006,s:'info',m:'Conveyor speed 120 ft/min on Line A'},
+    {d:420,a:'ENG-WS01',c:'audit',e:9011,s:'info',m:'Change CHG-2611 closed: implemented as approved, post-change test passed'}
+  ];}}
+};
+const NEEDLE=[
+  {a:'HMI-OP01',c:'security',e:4720,s:'warning',m:'User account created: svc_update (by operator1)',f:{user:'operator1'},t:['T1136'],k:'n1'},
+  {a:'HMI-OP01',c:'security',e:4732,s:'warning',m:'Member added to local Administrators group: svc_update (by operator1)',f:{user:'operator1'},t:['T1098'],k:'n2'}
+];
+
+/* ---------- Correlation rules ---------- */
+const RULES={
+  BF:{title:'Possible password guessing',sev:'error',desc:'Five or more failed logons from one source address within 5 minutes.'},
+  LAF:{title:'Successful logon after repeated failures',sev:'critical',desc:'A logon succeeded from an address that failed at least 3 times in the previous 10 minutes.'},
+  MBW:{title:'Modbus write from a non-engineering host',sev:'critical',desc:'A Modbus/TCP write reached a controller from a host other than ENG-WS01 (10.1.1.30), the only station approved to change PLCs.'},
+  MODE:{title:'PLC operating mode changed',sev:'error',desc:'A controller entered or left RUN mode. Attackers do this before downloading logic (ATT&CK for ICS T0858).'},
+  FLOOD:{title:'Alarm flood on one asset',sev:'warning',desc:'Eight or more alarm events from the same asset within 2 minutes.'},
+  ACCT:{title:'New local account on an OT host',sev:'error',desc:'A user account was created on a Level 2 host. OT accounts change rarely and only through change control.'}
+};
+const DISP={
+  tp:['Malicious (true positive)','The rule fired on real attacker activity.'],
+  btp:['Not malicious (benign true positive)','The rule worked, but the activity was authorized or had a non-malicious cause.'],
+  fp:['Rule misfired (false positive)','The rule’s condition wasn’t actually met; the rule needs tuning.']
+};
+const EXPECT={
+  'atk:BF':['tp','Repeated failures from one internet address against one contractor account, seconds apart, is password guessing. It was malicious, and it worked: the next alert shows the logon succeeding.'],
+  'atk:LAF':['tp','A success from the same address right after the failures means the attacker now holds valid credentials and is inside the VPN.'],
+  'atk:MBW':['tp','The write came from the HMI during a remote session, not from ENG-WS01 under a change ticket, and it pushed a safety setpoint past the instrument’s range.'],
+  'mnt:MODE':['btp','Same technique an attacker uses (T0858), but done from ENG-WS01 by tech_dlee inside approved change CHG-2611. The rule worked as designed; the activity was authorized.'],
+  'sns:FLOOD':['btp','The rule correctly detected a flood, but the cause is a failed sensor: readings jump between 3.6 °C and 85.3 °C every few seconds, which a refrigerated tank can’t do, and the device reports an open circuit. Hand it to maintenance.'],
+  'ndl:ACCT':['tp','An account named to look like a service account, created at an operator HMI and immediately made an administrator, is a classic persistence move. Treat it as malicious until someone proves it was authorized.']
+};
+
+/* ---------- State ---------- */
+const KEY='freshflow-siem-lab-v2';
+const fresh=()=>({events:[],seq:0,clock:0,alerts:[],case:[],act:{detail:0,queries:[],map:0,live:0,scn:{},scnDone:{},clean:{}},ans:{},sub:{},done:{},name:'',task:0,q:'',tab:'events'});
+let S=fresh();
+let liveTimer=null,liveRun=0,playing=null,playTimer=null,saveTimer=null,pending=false,curTerms=[];
+function load(){try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);S={...fresh(),...d,act:{...fresh().act,...(d.act||{})}};}}catch(e){}}
+function save(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>{try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}},300);}
+
+/* ---------- Event pipeline ---------- */
+function nextManualTs(){S.clock=Math.max(S.clock+1500,Date.now());return S.clock;}
+function addEvent(o,ts){
+  const ev={seq:++S.seq,ts:ts??nextManualTs(),ip:ASSETS[o.asset].ip,tags:[],...o};
+  S.clock=Math.max(S.clock,ev.ts);
+  S.events.push(ev);
+  if(S.events.length>1500)S.events.splice(0,S.events.length-1500);
+  flash(ev);runRules(ev);render();save();
+  return ev;
+}
+const slim=e=>({seq:e.seq,ts:e.ts,sev:e.sev,asset:e.asset,eid:e.eid,msg:e.msg,cat:e.cat,k:e.k,tags:e.tags,src:e.src,dst:e.dst,user:e.user,ip:e.ip,proto:e.proto,origin:e.origin,scn:e.scn,syn:e.syn});
+function runRules(ev){
+  const win=(ms,p)=>S.events.filter(e=>e.ts>=ev.ts-ms&&e.ts<=ev.ts&&p(e));
+  if(ev.eid===4625&&ev.src){const f=win(300000,e=>e.eid===4625&&e.src===ev.src);if(f.length>=5)fire('BF',ev.src,f,ev);}
+  if(ev.eid===4624&&ev.src){const f=win(600000,e=>e.eid===4625&&e.src===ev.src);if(f.length>=3)fire('LAF',ev.src+'>'+ev.seq,[...f,ev],ev);}
+  if(ev.eid===5041&&ev.src&&ev.src!=='10.1.1.30')fire('MBW','w'+ev.seq,[ev],ev);
+  if(ev.eid===9004)fire('MODE','m'+ev.seq,[ev],ev);
+  if(ev.cat==='alarm'){const f=win(120000,e=>e.cat==='alarm'&&e.asset===ev.asset);if(f.length>=8)fire('FLOOD',ev.asset,f,ev);}
+  if(ev.eid===4720)fire('ACCT','a'+ev.seq,[ev],ev);
+}
+function fire(rule,dk,evs,trig){
+  const ex=S.alerts.find(a=>a.rule===rule&&a.dk===dk&&trig.ts-a.last<600000);
+  if(ex){const have=new Set(ex.evs.map(e=>e.seq));evs.forEach(e=>{if(!have.has(e.seq))ex.evs.push(slim(e));});ex.last=trig.ts;return;}
+  const scn=trig.scn||null;const exp=EXPECT[(scn||'')+':'+rule];
+  const a={id:'AL-'+(101+S.alerts.length),rule,dk,ts:trig.ts,last:trig.ts,scn,exp:exp?exp[0]:null,evs:evs.map(slim),disp:null,note:''};
+  S.alerts.push(a);
+  toast(`Alert ${a.id}: ${RULES[rule].title}`,true);
+}
+
+/* ---------- Generators ---------- */
+function background(){
+  const ids=Object.keys(ASSETS);
+  for(let i=0;i<8;i++){
+    const a=rnd(ids);
+    const cats=Object.keys(TPL).filter(c=>TPL[c].some(t=>!t.x&&fits(t,a)));
+    const o=fromTemplate(a,rnd(cats),null,'live');
+    if(o.sev==='info'||Math.random()<0.3)return o;
+  }
+  return fromTemplate('SCADA-01','performance',null,'live');
+}
+function startLive(){
+  if(liveTimer||playing)return;
+  liveRun=0;
+  liveTimer=setInterval(()=>{
+    liveRun++;S.act.live++;
+    S.clock=Math.max(S.clock,Date.now()-600000)+ri(4,28)*1000;
+    if(liveRun===15&&!S.events.some(e=>e.k==='n1')){
+      NEEDLE.forEach((n,i)=>addEvent({asset:n.a,cat:n.c,eid:n.e,sev:n.s,msg:n.m,...(n.f||{}),tags:n.t,origin:'live',scn:'ndl',k:n.k},S.clock+i*4000));
+    }else addEvent(background(),S.clock);
+  },900);
+  syncLiveBtn();
+}
+function stopLive(){if(liveTimer){clearInterval(liveTimer);liveTimer=null;}syncLiveBtn();render();}
+function syncLiveBtn(){const b=$('#liveBtn');b.textContent=liveTimer?'Stop live feed':'Start live feed';b.className='btn '+(liveTimer?'stop':'go');}
+function runScenario(id){
+  if(playing)return;stopLive();
+  const steps=SCN[id].steps();
+  if(S.events.length===0)S.act.clean[id]=true;
+  S.act.scn[id]=true;
+  const base=Math.max(S.clock+2000,Date.now());let i=0;playing=id;
+  $('#runBtn').disabled=true;$('#liveBtn').disabled=true;$('#clearBtn').disabled=true;
+  const tick=()=>{
+    const st=steps[i];
+    addEvent({asset:st.a,cat:st.c,eid:st.e,sev:st.s,msg:st.m,...(st.f||{}),tags:st.t||[],origin:'scenario',scn:id,k:st.k},base+st.d*1000);
+    i++;$('#scnStatus').textContent=`${SCN[id].name}: event ${i} of ${steps.length}`;
+    if(i<steps.length)playTimer=setTimeout(tick,750);
+    else{playing=null;S.act.scnDone[id]=true;$('#scnStatus').textContent=`${SCN[id].name}: finished`;
+      $('#runBtn').disabled=false;$('#liveBtn').disabled=false;$('#clearBtn').disabled=false;toast(`${SCN[id].name} scenario finished`);render();save();}
+  };
+  tick();
+}
+
+/* ---------- Query ---------- */
+const QKEYS=['sev','cat','asset','eid','ip','src','dst','user','tag','origin'];
+function parseQ(str){
+  const terms=[];const re=/(-)?(?:(\w+)(>=|:)("[^"]*"|\S+)|"([^"]*)"|(\S+))/g;let m;
+  while((m=re.exec(str))){
+    const neg=!!m[1];
+    if(m[2]&&QKEYS.includes(m[2].toLowerCase()))terms.push({neg,key:m[2].toLowerCase(),op:m[3],val:m[4].replace(/^"|"$/g,'').toLowerCase()});
+    else if(m[2])terms.push({neg,key:null,val:(m[2]+m[3]+m[4]).toLowerCase()});
+    else terms.push({neg,key:null,val:(m[5]??m[6]).toLowerCase()});
+  }
+  return terms;
+}
+const textOf=e=>[e.msg,e.asset,e.ip,e.user,e.src,e.dst,e.eid,e.cat,e.proto,(e.tags||[]).join(' ')].join(' ').toLowerCase();
+function termMatch(e,t){
+  const vals=t.val.split(',');
+  switch(t.key){
+    case 'sev':return t.op==='>='?SEVR[e.sev]>=(SEVR[t.val]??99):vals.includes(e.sev);
+    case 'cat':return vals.some(x=>e.cat===x||CATS[e.cat].toLowerCase().startsWith(x));
+    case 'asset':return vals.includes(e.asset.toLowerCase());
+    case 'eid':return vals.includes(String(e.eid));
+    case 'ip':return vals.some(x=>[e.ip,e.src,e.dst].includes(x));
+    case 'src':return vals.includes(e.src||'');
+    case 'dst':return vals.includes(e.dst||'');
+    case 'user':return vals.includes((e.user||'').toLowerCase());
+    case 'tag':return (e.tags||[]).some(x=>vals.includes(x.toLowerCase()));
+    case 'origin':return vals.includes(e.origin)||(vals.includes('synthetic')&&e.syn);
+    default:return textOf(e).includes(t.val);
+  }
+}
+const matches=e=>curTerms.every(t=>termMatch(e,t)!==t.neg);
+function runQuery(str,fromMap){
+  S.q=str.trim();$('#q').value=S.q;curTerms=parseQ(S.q);
+  if(S.q){const n=S.events.filter(matches).length;
+    S.act.queries.push({keys:[...new Set(curTerms.filter(t=>t.key).map(t=>t.key))],free:curTerms.some(t=>!t.key),n});
+    if(S.act.queries.length>60)S.act.queries.shift();}
+  if(fromMap)S.act.map++;
+  setTab('events');render();save();
+}
+function setAssetFilter(id){
+  const cur=curTerms.find(t=>t.key==='asset'&&!t.neg);
+  let rest=S.q.replace(/-?asset:\S+/gi,'').replace(/\s+/g,' ').trim();
+  const on=cur&&cur.val===id.toLowerCase();
+  runQuery(on?rest:(rest+' asset:'+id).trim(),true);
+}
+
+/* ---------- Rendering ---------- */
+function render(){if(pending)return;pending=true;requestAnimationFrame(()=>{pending=false;renderAll();});}
+function renderAll(){
+  const list=S.events.filter(matches);
+  renderPurdue();renderHist(list);renderStats();renderTabs(list);evalChecks();renderChecks();renderScore();renderSteps();
+}
+function pill(s){return `<span class="sev sev-${s}"><span aria-hidden="true">${SEV[s].icon}</span>${SEV[s].label}</span>`;}
+function renderPurdue(){
+  const assetTerm=curTerms.find(t=>t.key==='asset'&&!t.neg);
+  const counts={},worst={};
+  S.events.forEach(e=>{counts[e.asset]=(counts[e.asset]||0)+1;if(!worst[e.asset]||SEVR[e.sev]>SEVR[worst[e.asset]])worst[e.asset]=e.sev;});
+  const el=$('#purdue');
+  if(!el.dataset.built){
+    el.innerHTML=LEVELS.map(([l,n])=>`<div class="lvl" data-l="${l}"><div class="lvl-label"><b>Level ${l}</b>${n}</div><div class="tiles">${
+      Object.entries(ASSETS).filter(([,a])=>a.lvl===l).map(([id,a])=>`<button type="button" class="tile" data-asset="${id}" title="${esc(a.name)}: click to filter"><span class="id">${id}</span><span class="ip">${a.ip}</span><span class="cnt"></span><span class="dot"></span></button>`).join('')
+    }</div></div>`).join('');
+    el.dataset.built=1;
+  }
+  el.querySelectorAll('.tile').forEach(t=>{const id=t.dataset.asset;
+    t.querySelector('.cnt').textContent=counts[id]||'';
+    if(worst[id])t.dataset.worst=worst[id];else delete t.dataset.worst;
+    const on=!!assetTerm&&assetTerm.val.split(',').includes(id.toLowerCase());
+    t.classList.toggle('on',on);t.setAttribute('aria-pressed',on);});
+}
+function flash(ev){
+  const t=document.querySelector(`.tile[data-asset="${ev.asset}"]`);if(!t)return;
+  t.classList.remove('flash-info','flash-warning','flash-error','flash-critical');void t.offsetWidth;t.classList.add('flash-'+ev.sev);
+}
+function renderHist(list){
+  const el=$('#hist');$('#histScope').textContent=S.q?'(filtered)':'(all events)';
+  if(!list.length){el.innerHTML='<p class="empty">No events to chart yet.</p>';return;}
+  const N=36;let min=Infinity,max=-Infinity;list.forEach(e=>{if(e.ts<min)min=e.ts;if(e.ts>max)max=e.ts;});
+  const span=Math.max(max-min,1);const b=Array.from({length:N},()=>({info:0,warning:0,error:0,critical:0}));
+  list.forEach(e=>{b[Math.min(N-1,Math.floor((e.ts-min)/span*N))][e.sev]++;});
+  const tot=x=>x.info+x.warning+x.error+x.critical;const mx=Math.max(...b.map(tot),1);
+  el.innerHTML=`<div class="hist" role="img" aria-label="Event volume over time by severity">${b.map(x=>`<div class="bar" title="${tot(x)} events: ${x.critical} critical, ${x.error} error, ${x.warning} warning, ${x.info} info">${['info','warning','error','critical'].map(s=>x[s]?`<span class="${s}" style="height:${x[s]/mx*100}%"></span>`:'').join('')}</div>`).join('')}</div><div class="hist-axis"><span>${hms(min)}Z</span><span>${hms(max)}Z</span></div>`;
+}
+function renderStats(){
+  const c={info:0,warning:0,error:0,critical:0};S.events.forEach(e=>c[e.sev]++);
+  $('#sevStats').innerHTML=['critical','error','warning','info'].map(s=>`<button type="button" class="sevstat ${s}" data-sevq="${s}"><b>${c[s]}</b><small>${SEV[s].icon} ${SEV[s].label}</small></button>`).join('');
+  $('#totalLine').textContent=`${S.events.length} events in the console. Click a count to filter by that severity.`;
+}
+function setTab(t){S.tab=t;document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));}
+function renderTabs(list){
+  const open=S.alerts.filter(a=>!a.disp).length;
+  $('#bEvents').textContent=S.q?`${list.length}/${S.events.length}`:S.events.length;
+  const ba=$('#bAlerts');ba.textContent=open?open+' open':S.alerts.length;ba.classList.toggle('hot',open>0);
+  $('#bCase').textContent=S.case.length;
+  const body=$('#tabBody');
+  if(S.tab==='events'){
+    if(!S.events.length){body.innerHTML='<p class="empty">The console is empty. Use the Event injector, start the live feed or run a scenario.</p>';return;}
+    if(!list.length){body.innerHTML=`<p class="empty">No events match <code>${esc(S.q)}</code>. Check the spelling or click Show all.</p>`;return;}
+    const rows=list.slice(-400).reverse();
+    const pinned=new Set(S.case.map(e=>e.seq));
+    body.innerHTML=`<p class="result-line">${S.q?`${list.length} of ${S.events.length} events match <code>${esc(S.q)}</code>`:`Showing ${Math.min(list.length,400)} newest of ${S.events.length} events`}. Click a row for detail.</p>
+    <div class="tablewrap"><table class="ev"><thead><tr><th>Time (UTC)</th><th>Severity</th><th>Asset</th><th>Event ID</th><th>Category</th><th>Message</th></tr></thead><tbody>${
+      rows.map(e=>`<tr tabindex="0" data-seq="${e.seq}" class="r-${e.sev}${S.sel===e.seq?' sel':''}"><td class="mono">${hms(e.ts)}</td><td>${pill(e.sev)}</td><td class="mono">${e.asset}</td><td class="mono">${e.eid}</td><td>${CATS[e.cat]}</td><td class="msg">${pinned.has(e.seq)?'<span class="pin" title="Pinned to case">⚑</span>':''}${esc(e.msg)}${e.syn?'<span class="tag">synthetic</span>':''}</td></tr>`).join('')
+    }</tbody></table></div>`;
+  }else if(S.tab==='alerts')renderAlerts(body);
+  else renderCase(body);
+}
+function renderAlerts(body){
+  if(!S.alerts.length){body.innerHTML='<p class="empty">No alerts yet. Correlation rules watch every event; alerts appear here when one fires.</p>';return;}
+  const list=[...S.alerts].sort((a,b)=>(!!a.disp-!!b.disp)||b.ts-a.ts);
+  body.innerHTML=list.map(a=>{
+    const r=RULES[a.rule];
+    const ev=`<details><summary>Evidence: ${a.evs.length} event${a.evs.length>1?'s':''}</summary><ul class="evlist">${a.evs.slice(-12).map(e=>`<li>${hms(e.ts)} ${e.asset} ${e.eid} ${esc(e.msg)}</li>`).join('')}</ul></details>`;
+    let tail;
+    if(!a.disp){
+      tail=`<fieldset class="disp" style="border:0;padding:0"><legend class="sr">Disposition for ${a.id}</legend>${Object.entries(DISP).map(([k,[l,d]])=>`<label><input type="radio" name="d-${a.id}" value="${k}"><span><b>${l}</b><br><small>${d}</small></span></label>`).join('')}</fieldset>
+      <label class="field">Triage note: cite the evidence that supports your call<textarea data-note="${a.id}" placeholder="What did you see, and why does it support this disposition?"></textarea></label>
+      <div class="submit-row"><button class="btn small" type="button" data-save="${a.id}">Save disposition</button><span class="warnmsg" id="w-${a.id}"></span></div>`;
+    }else{
+      const ex=EXPECT[(a.scn||'')+':'+a.rule];
+      let fb;
+      if(!a.exp)fb=`<div class="fb neutral">This alert came from practice events, so it isn’t graded.</div>`;
+      else if(a.disp===a.exp)fb=`<div class="fb ok"><b>Correct.</b> ${esc(ex[1])}</div>`;
+      else fb=`<div class="fb bad"><b>Not quite. The evidence supports “${DISP[a.exp][0]}”.</b> ${esc(ex[1])}</div>`;
+      tail=`<p><b>Your disposition:</b> ${DISP[a.disp][0]}</p><p><b>Note:</b> ${esc(a.note)}</p>${fb}`;
+    }
+    return `<article class="alert ${a.disp?'done':'open'}"><header>${pill(r.sev)}<strong>${a.id}: ${r.title}</strong><span class="meta">${hms(a.ts)}Z rule ${a.rule}</span></header><p>${r.desc}</p>${ev}${tail}</article>`;
+  }).join('');
+}
+function renderCase(body){
+  if(!S.case.length){body.innerHTML='<p class="empty">Your case is empty. Open an event and click Pin to case to add evidence to the timeline.</p>';return;}
+  const list=[...S.case].sort((a,b)=>a.ts-b.ts);
+  body.innerHTML=`<p class="result-line">Pinned evidence in time order. This timeline goes into your report.</p><ol class="timeline">${list.map(e=>`<li><div class="when">${iso(e.ts).replace('T',' ').slice(0,19)}Z ${e.asset} event ${e.eid}</div><div>${pill(e.sev)} ${esc(e.msg)}</div><div style="margin-top:4px"><button class="btn ghost small" type="button" data-open="${e.seq}">Open</button> <button class="btn ghost small" type="button" data-unpin="${e.seq}">Remove</button></div></li>`).join('')}</ol>`;
+}
+
+/* ---------- Drawer ---------- */
+function openDrawer(seq){
+  const e=S.events.find(x=>x.seq===seq)||S.case.find(x=>x.seq===seq);if(!e)return;
+  S.act.detail++;S.sel=seq;
+  const a=ASSETS[e.asset];const pri=16*8+SEV[e.sev].n;
+  const sd=[`cat="${e.cat}"`,`lvl="${a.lvl}"`,e.src&&`src="${e.src}"`,e.dst&&`dst="${e.dst}"`,e.user&&`user="${e.user}"`,e.proto&&`proto="${e.proto}"`,e.syn&&'synthetic="true"'].filter(Boolean).join(' ');
+  const raw=`<${pri}>1 ${iso(e.ts)} ${e.asset} freshflow - ${e.eid} [ff@32473 ${sd}] ${e.msg}`;
+  const kv=[['Event ID',e.eid],['Severity',`${SEV[e.sev].label} (syslog ${SEV[e.sev].n})`],['Category',CATS[e.cat]],['Asset',`${e.asset}, ${a.name}`],['Asset IP',e.ip],['Purdue level',`Level ${a.lvl}`],['Timestamp',iso(e.ts)],['Source',e.src],['Destination',e.dst],['Protocol',e.proto],['User',e.user],['Origin',e.syn?'Synthetic test event':({manual:'Injected by you',live:'Live feed',scenario:'Scenario'}[e.origin]||e.origin)]].filter(([,v])=>v!==undefined&&v!=='');
+  const piv=[[`asset:${e.asset}`,'This asset'],[`eid:${e.eid}`,'This event ID'],e.src&&[`ip:${e.src}`,`Source ${e.src}`],e.user&&[`user:${e.user}`,`User ${e.user}`]].filter(Boolean);
+  $('#drawerTitle').textContent=`Event #${e.seq}`;
+  $('#drawerBody').innerHTML=`<p style="margin:0 0 12px">${pill(e.sev)} ${esc(e.msg)}</p>
+  <dl class="kv">${kv.map(([k,v])=>`<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
+  ${e.tags&&e.tags.length?`<h3>MITRE ATT&amp;CK</h3><p style="margin:4px 0 14px">${e.tags.map(t=>`<a href="https://attack.mitre.org/techniques/${t}/" target="_blank" rel="noopener">${t} ${esc(TECH[t]||'')}</a>`).join('<br>')}</p>`:''}
+  <h3>Pivot: search for related events</h3><div class="pivots">${piv.map(([q,l])=>`<button class="btn ghost small" type="button" data-pivot="${esc(q)}">${esc(l)}</button>`).join('')}</div>
+  <h3>Raw syslog (RFC 5424)</h3><pre class="raw">${esc(raw)}</pre>
+  <p class="explain">PRI ${pri} = facility local0 (16) × 8 + severity ${SEV[e.sev].n}. The structured-data ID uses 32473, the private enterprise number reserved for documentation examples.</p>`;
+  syncPin();
+  const d=$('#drawer');d.classList.add('open');d.setAttribute('aria-hidden','false');$('#closeDrawer').focus();
+  render();save();
+}
+function closeDrawer(){const d=$('#drawer');d.classList.remove('open');d.setAttribute('aria-hidden','true');S.sel=null;render();}
+function syncPin(){const p=S.case.some(x=>x.seq===S.sel);const b=$('#pinBtn');b.textContent=p?'Unpin':'Pin to case';b.className='btn small '+(p?'ghost':'go');}
+function togglePin(seq){
+  const i=S.case.findIndex(x=>x.seq===seq);
+  if(i>=0){S.case.splice(i,1);toast('Removed from case');}
+  else{const e=S.events.find(x=>x.seq===seq);if(!e)return;S.case.push(slim(e));toast('Pinned to case');}
+  syncPin();render();save();
+}
+
+/* ---------- Tasks ---------- */
+const cnt=p=>S.events.filter(p).length;
+const pinned=k=>S.case.some(e=>e.k===k);
+function triage(scn,rule){
+  if(!S.act.scnDone[scn])return false;
+  const al=S.alerts.filter(a=>a.scn===scn&&(!rule||a.rule===rule));
+  if(!al.length||al.some(a=>!a.disp))return false;
+  return al.every(a=>a.disp===a.exp)?'ok':'bad';
+}
+const TASKS=[
+{id:'t1',pts:8,title:'Read a log entry',goal:'Learn the anatomy of one event before you analyze thousands.',
+ steps:['In the Event injector, set Category to <b>System</b> and Asset to <b>SCADA-01</b>. Leave Severity on Auto.','Click <b>Generate</b> three times.','Click any SCADA-01 row in the Events table. Read every field, then the raw syslog line.'],
+ checks:[{id:'t1c1',text:'Generate 3 System events on SCADA-01',fn:()=>cnt(e=>e.origin==='manual'&&e.cat==='system'&&e.asset==='SCADA-01')>=3},
+         {id:'t1c2',text:'Open an event’s detail panel',fn:()=>S.act.detail>0}],
+ qs:[{id:'t1q1',q:'What IP address does SCADA-01 report?',o:['10.1.1.10','10.1.1.20','10.1.0.1','10.1.2.101'],a:0,why:'SCADA-01 sits on the supervisory subnet at 10.1.1.10. 10.1.1.20 is the operator HMI, 10.1.0.1 the DMZ firewall and 10.1.2.101 the tank PLC.'},
+     {id:'t1q2',q:'An Info event’s raw syslog line starts with <134>. What does 134 encode?',o:['Facility local0 (16) × 8 + severity 6 (Informational)','The event ID assigned by the SIEM','The number of events since the last boot','The process ID of the logging service'],a:0,why:'Syslog PRI = facility × 8 + severity. FreshFlow devices log to local0 (16), so 16 × 8 + 6 = 134. A Critical event (severity 2) shows <130>.'},
+     {id:'t1q3',q:'Every timestamp ends in “Z”. Why does the SIEM normalize events to UTC?',o:['So events from devices in different time zones, and across daylight-saving changes, line up in one timeline','UTC timestamps take less disk space','PLCs can’t keep local time','It hides activity from operators'],a:0,why:'Correlation depends on correct ordering. “Z” marks UTC in ISO 8601. Mixed local times, or a device whose clock drifted (watch for event 1030, NTP sync lost), can make an effect appear before its cause.'}]},
+{id:'t2',pts:8,title:'Watch the front door',goal:'The DMZ firewall sees every connection between the outside world and the plant.',
+ steps:['Set Category to <b>Security</b> and Asset to <b>FW-DMZ01</b>.','Click <b>Generate</b> five times.','In Search events, type <code>eid:4625</code> and press Enter. Then click <b>Show all</b>.'],
+ checks:[{id:'t2c1',text:'Generate 5 Security events on FW-DMZ01',fn:()=>cnt(e=>e.origin==='manual'&&e.cat==='security'&&e.asset==='FW-DMZ01')>=5},
+         {id:'t2c2',text:'Run a query that filters on an event ID',fn:()=>S.act.queries.some(q=>q.keys.includes('eid'))}],
+ qs:[{id:'t2q1',q:'In the Windows-style event IDs FreshFlow uses, what does 4625 record?',o:['A failed logon','A successful logon','An account lockout','Special privileges assigned'],a:0,why:'4624 is a successful logon, 4625 a failed one, 4740 a lockout and 4672 special privileges. These four drive most authentication detections, so analysts know them by heart.'},
+     {id:'t2q2',q:'FW-DMZ01 sits at Purdue Level 3.5. Why are its logs among the most valuable in the plant?',o:['Every path between the internet or business network and the control network crosses it, so it sees scanning and remote access first','It stores the process historian','It controls the pumps directly','It has the most processing power'],a:0,why:'The industrial DMZ is the choke point. Reconnaissance (blocked 502 or 20000 probes) and remote-access logons show up here before anything touches a controller.'},
+     {id:'t2q3',q:'Which statement about severity is accurate?',o:['Severity is the source device’s rating; an Info event, such as a successful logon, can be the most important event in an incident','Critical events are always security incidents','Info events can be safely discarded','The SIEM calculates severity from an attack’s impact'],a:0,why:'Devices assign severity without context. In Task 8 the attacker’s successful VPN logon is logged as Info. Analysts assess risk; they don’t just sort by color.'}]},
+{id:'t3',pts:8,title:'Watch the process',goal:'Process data is where cyber events become physical consequences.',
+ steps:['Set Category to <b>Process control</b>.','Generate two events each on <b>PLC-TANK01</b>, <b>PUMP-01</b> and <b>SENSOR-T01</b>.','On the Purdue map, click the <b>PLC-TANK01</b> tile to filter. Click it again to clear.'],
+ checks:[{id:'t3c1',text:'Generate 2 Process events on each of PLC-TANK01, PUMP-01 and SENSOR-T01',fn:()=>['PLC-TANK01','PUMP-01','SENSOR-T01'].every(a=>cnt(e=>e.origin==='manual'&&e.cat==='process'&&e.asset===a)>=2)},
+         {id:'t3c2',text:'Filter by clicking an asset on the Purdue map',fn:()=>S.act.map>0}],
+ qs:[{id:'t3q1',q:'At which Purdue level does PLC-TANK01 operate?',o:['Level 1, basic control','Level 0, physical process','Level 2, supervisory control','Level 3, site operations'],a:0,why:'Level 0 holds sensors and actuators that touch the process. Level 1 controllers read them and drive outputs. Level 2 HMIs and SCADA supervise the controllers.'},
+     {id:'t3q2',q:'Tank 1 reads 97% and no high-level alarm appears. What’s the most concerning explanation?',o:['The alarm setpoint was raised or suppressed, so operators lose warning of an overflow','The tank is simply full, which is normal','The SIEM dropped the alarm to save disk space','Levels above 95% are never alarmed'],a:0,why:'Plausible process data with a missing expected alarm points to a manipulated setpoint or alarm suppression (ATT&CK for ICS T0878). You’ll see exactly this in Task 8.'},
+     {id:'t3q3',q:'Why is monitoring process control equipment both a safety and a security issue? Use one event you generated as an example.',short:true}]},
+{id:'t4',pts:8,title:'Test your detections',goal:'Analysts inject synthetic events to prove searches and rules work before a real incident.',
+ steps:['Set Asset to <b>HMI-OP01</b> and Severity to <b>Error</b>.','In Custom message, inject each line with <b>Inject test event</b>:<br><code>Unauthorized access attempt to production controls</code><br><code>Operator credentials compromised; immediate lockout required</code><br><code>Suspicious HMI command sequence detected</code>','Search for <code>"credentials"</code> (with the quotes) to confirm you can find your test event.'],
+ checks:[{id:'t4c1',text:'Inject 3 synthetic Error events on HMI-OP01',fn:()=>cnt(e=>e.syn&&e.asset==='HMI-OP01'&&e.sev==='error')>=3},
+         {id:'t4c2',text:'Find an event with a free-text search',fn:()=>S.act.queries.some(q=>q.free&&q.n>0)}],
+ qs:[{id:'t4q1',q:'Why is an operator HMI a high-value target?',o:['It carries an operator’s authority to change setpoints and start or stop equipment, and operators trust it as their view of the process','It stores customer credit card data','It’s the only device with an IP address','It enforces the firewall rules'],a:0,why:'Control an HMI and you can both act on the process and shape what operators see. That’s why the Task 8 attacker heads straight for HMI-OP01.'},
+     {id:'t4q2',q:'The injector marks custom events synthetic=true. Why label test events?',o:['So drills aren’t escalated as real incidents or counted in incident metrics','Labeled events search faster','Labels make events smaller','Unlabeled events are deleted after 24 hours'],a:0,why:'Unlabeled test data pollutes metrics and can trigger a real response. Mature SOCs tag detection tests and exclude them from reporting.'}]},
+{id:'t5',pts:8,title:'Separate noise from danger',goal:'Not every alert is an attack. Your job is to say what it is and who owns it.',
+ steps:['In Scenario, choose <b>Sensor fault</b> and click <b>Run scenario</b>. Watch the SENSOR-T01 tile.','When it finishes, open the <b>Alerts</b> tab and expand the evidence.','Choose a disposition, write a note that cites the evidence, and click <b>Save disposition</b>. Dispositions are final.'],
+ checks:[{id:'t5c1',text:'Run the Sensor fault scenario to the end',fn:()=>!!S.act.scnDone.sns},
+         {id:'t5c2',text:'Triage the alarm-flood alert (credit for the correct disposition)',fn:()=>triage('sns','FLOOD')}],
+ qs:[{id:'t5q1',q:'ISA-18.2 treats an alarm flood as roughly how many alarms per operator?',o:['More than 10 alarms in 10 minutes','More than 1 alarm per hour','100 alarms per second','Any single critical alarm'],a:0,why:'ISA-18.2, the alarm-management standard, uses about 10 alarms per 10 minutes per operator as the flood threshold. Floods bury the one alarm that matters.'},
+     {id:'t5q2',q:'What best shows that T-01 is a failed sensor rather than a real temperature problem?',o:['Readings swing between 3.6 °C and 85.3 °C every few seconds, which a refrigerated tank can’t physically do, and the device then reports an open circuit','The alarm severity is Error','The operator shelved the alarm','The events came from Level 0'],a:0,why:'Physics is evidence. Thermal mass makes instant 80-degree swings impossible, and the open-circuit diagnostic confirms an instrument fault.'},
+     {id:'t5q3',q:'Who should own this alarm next, and what should the SOC tell operations?',short:true}]},
+{id:'t6',pts:8,title:'Read the wire',goal:'Industrial protocols carry commands, and most of them trust whoever sends them.',
+ steps:['Set Category to <b>Network</b> and Asset to <b>SW-CORE01</b>.','Click <b>Generate</b> five times. Look for NSM (network security monitoring) events.','Search <code>sev>=warning</code> to see only events that need attention.'],
+ checks:[{id:'t6c1',text:'Generate 5 Network events on SW-CORE01',fn:()=>cnt(e=>e.origin==='manual'&&e.cat==='network'&&e.asset==='SW-CORE01')>=5},
+         {id:'t6c2',text:'Run a severity query such as sev>=warning',fn:()=>S.act.queries.some(q=>q.keys.includes('sev'))}],
+ qs:[{id:'t6q1',q:'Which TCP port does Modbus/TCP use by default?',o:['502','20000','44818','4840'],a:0,why:'502 is Modbus/TCP, 20000 is DNP3, 44818 is EtherNet/IP and 4840 is OPC UA. You’ll see attackers probe all four in Task 8.'},
+     {id:'t6q2',q:'Why is a Modbus write from an unexpected host serious?',o:['Standard Modbus has no authentication, so any host that can reach port 502 can change PLC registers','Modbus writes are encrypted and can’t be inspected','Modbus writes reboot the switch','Modbus writes are only allowed from the internet'],a:0,why:'Classic Modbus trusts every request. Secure Modbus with TLS exists but is rarely deployed, so knowing which hosts should write is your main control.'},
+     {id:'t6q3',q:'Event 5030 reports a new MAC address on a switch port. Why does that matter more on a control network than in an office?',o:['Control networks rarely change, so a new device is unusual and could be a rogue laptop or implant','MAC addresses reveal passwords','It means the switch has failed','It doesn’t; new MACs are constant in OT'],a:0,why:'OT networks are static by design. A new device is a strong signal worth checking against change records.'}]},
+{id:'t7',pts:10,title:'Find the needle',goal:'Real consoles are mostly normal. Learn to spot the one event that isn’t.',
+ steps:['Click <b>Start live feed</b>. Let it run until at least 25 events have arrived.','Click <b>Stop live feed</b>.','One event in the feed doesn’t belong. Hunt for it with queries; <code>cat:security</code> or <code>sev>=warning</code> are good starts.','Open the suspicious event and click <b>Pin to case</b>. If an alert fired, triage it too.'],
+ checks:[{id:'t7c1',text:'Capture at least 25 live-feed events',fn:()=>S.act.live>=25},
+         {id:'t7c2',text:'Stop the live feed',fn:()=>S.act.live>=25&&!liveTimer},
+         {id:'t7c3',text:'Pin the suspicious event to your case',fn:()=>pinned('n1')||pinned('n2')}],
+ qs:[{id:'t7q1',q:'Why do analysts build a baseline of normal activity first?',o:['An anomaly is only visible against what normal looks like for this plant','Baselines replace the need for alerts','Baselines delete Info events','Auditors require it before any search'],a:0,why:'You can’t call something unusual until you know what usual is. In OT, normal is very regular, which makes anomalies easier to see.'},
+     {id:'t7q2',q:'Which query surfaces new user accounts across every asset?',o:['eid:4720','asset:HMI-OP01','sev:critical','cat:process'],a:0,why:'4720 means a user account was created. Filtering by event ID searches every asset at once. The account was logged at Warning, so sev:critical would miss it.'}]},
+{id:'t8',pts:16,title:'Investigate the attack',goal:'Reconstruct a full attack on the tank system, from first probe to physical impact.',
+ steps:['Choose <b>Cyber attack</b> and click <b>Run scenario</b>. Let every event play.','Watch the Purdue map: notice how activity moves down the levels.','Triage every alert the attack raised. Cite evidence in each note.','Build your case: pin the events that tell the story, including the point of entry and the action that changed the process.'],
+ checks:[{id:'t8c1',text:'Run the Cyber attack scenario to the end',fn:()=>!!S.act.scnDone.atk},
+         {id:'t8c2',text:'Triage every alert the attack raised (credit when all are correct)',fn:()=>triage('atk')},
+         {id:'t8c3',text:'Pin the point of entry to your case',fn:()=>pinned('a3')},
+         {id:'t8c4',text:'Pin the event that changed the physical process',fn:()=>pinned('a6')||pinned('a7')}],
+ qs:[{id:'t8q1',q:'How did the attacker get in?',o:['Guessed a contractor’s VPN password, then used the valid account through remote access (T0822 External Remote Services, T0859 Valid Accounts)','Exploited a PLC firmware bug from the internet','Plugged a USB drive into the HMI','Phished the plant manager'],a:0,why:'Six failed VPN logons for contractor_mx, then a success from the same address. Every blocked probe on 502, 20000 and 44818 failed; the VPN didn’t.'},
+     {id:'t8q2',q:'Which event marks the moment the attack started changing the physical process?',o:['The Modbus FC16 write to register 40010 from 10.1.1.20','The first blocked connection on port 502','The Modbus FC03 read','The outbound VPN session at the end'],a:0,why:'Reads gather information (T0801). The write raised the high-level setpoint past the instrument’s range (T0855, T0836), which disabled the alarm and let the tank overfill.'},
+     {id:'t8q3',q:'SIS-01 tripped and closed CV-01. What does that tell the response team?',o:['The independent safety system prevented the overflow; protect it and don’t trust the PLC’s values until they’re verified','The attacker controls the safety system','The incident is over and needs no response','The tank level sensor is broken'],a:0,why:'Safety instrumented systems are the last layer of protection. They worked here, but the attacker still holds a live VPN session and changed PLC values that must be restored through engineering procedures.'},
+     {id:'t8q4',q:'List your first three containment actions, in order, and explain how each one keeps the process safe.',short:true}]},
+{id:'t9',pts:12,title:'Rule out an attack',goal:'Operations incidents also land in the SIEM. Prove what this one was.',
+ steps:['Click <b>Clear console</b>.','Choose <b>Equipment failure</b> and click <b>Run scenario</b>.','Find the earliest sign that something was wrong, open it and click <b>Pin to case</b>.'],
+ checks:[{id:'t9c1',text:'Clear the console, then run Equipment failure',fn:()=>!!S.act.clean.fail},
+         {id:'t9c2',text:'Pin the earliest warning sign of the failure',fn:()=>pinned('f0')}],
+ qs:[{id:'t9q1',q:'Which equipment failed?',o:['PUMP-01','PUMP-02','PLC-TANK01','VALVE-CV01'],a:0,why:'PUMP-01 tripped on motor overload. PUMP-02 is the backup that took over.'},
+     {id:'t9q2',q:'What evidence best shows this was mechanical, not a cyberattack?',o:['Vibration and motor current rose for minutes before the trip, and no logons, network anomalies or configuration changes came before it','Severity reached Critical','PUMP-02 started','A work order was opened'],a:0,why:'A physical failure leaves a physical trend. Compare Task 8, where authentication and network events came first.'},
+     {id:'t9q3',q:'How did the control system keep flow going?',o:['Lead/lag logic in PLC-TANK01 started the backup pump PUMP-02','The operator restarted PUMP-01','The firewall rerouted traffic','The SIEM sent a start command'],a:0,why:'Redundancy lives in the control logic. A SIEM observes and alerts; it never commands equipment.'},
+     {id:'t9q4',q:'What does a SIEM contribute to an operational incident like this, compared with a security incident?',short:true}]},
+{id:'t10',pts:14,title:'Check the change',goal:'Authorized work can look exactly like an attack. Context decides.',
+ steps:['Choose <b>Planned maintenance</b> and click <b>Run scenario</b>.','Two PLC mode-change alerts fire. Triage both; in each note, cite the change ticket by its number.','Find the compliance event the maintenance caused and pin it to your case.','Finish the reflection below, then open the Report.'],
+ checks:[{id:'t10c1',text:'Run the Planned maintenance scenario to the end',fn:()=>!!S.act.scnDone.mnt},
+         {id:'t10c2',text:'Triage the mode-change alerts (credit when all are correct)',fn:()=>triage('mnt')},
+         {id:'t10c3',text:'Reference the change ticket in a triage note',fn:()=>S.alerts.some(a=>a.scn==='mnt'&&a.disp&&/chg-?2611/i.test(a.note))},
+         {id:'t10c4',text:'Pin the HACCP record gap to your case',fn:()=>pinned('m3')}],
+ qs:[{id:'t10q1',q:'The mode change matches ATT&CK for ICS T0858, Change Operating Mode. Why isn’t it an incident here?',o:['It came from the engineering workstation, by the assigned technician, inside approved change CHG-2611, which closed as implemented','Warning events are never incidents','Mode changes can’t be malicious','It happened on the conveyor, not the tank'],a:0,why:'The technique is identical to an attack. Who, from where, and under which approved change is what separates them; that’s why the SOC needs change records.'},
+     {id:'t10q2',q:'What should happen with the HACCP temperature record gap?',o:['Document it with a corrective-action note that references the calibration and change record, so the cold-chain record stays defensible','Delete the gap entry','Ignore it because maintenance caused it','Fill the gap with estimated temperatures'],a:0,why:'Food-safety records must be complete and honest. A documented, explained gap is defensible in an audit; an altered or missing record isn’t.'},
+     {id:'t10q3',q:'Reflection: name three things this lab taught you about monitoring an industrial plant, each tied to a specific task.',short:true}]}
+];
+const VIEWS=['start',...TASKS.map(t=>t.id),'report'];
+
+function evalChecks(){
+  TASKS.forEach(t=>t.checks.forEach(c=>{
+    if(S.done[c.id])return;
+    const r=c.fn();
+    if(r===true||r==='ok'){S.done[c.id]='ok';toast('Check complete: '+c.text);}
+    else if(r==='bad')S.done[c.id]='bad';
+  }));
+}
+function taskScore(t){
+  const mcq=t.qs.filter(q=>!q.short);const per=t.pts/(t.checks.length+mcq.length);
+  let s=t.checks.filter(c=>S.done[c.id]==='ok').length*per;
+  if(S.sub[t.id])s+=mcq.filter(q=>S.ans[q.id]===q.a).length*per;
+  return Math.round(s*10)/10;
+}
+const total=()=>Math.round(TASKS.reduce((a,t)=>a+taskScore(t),0)*10)/10;
+function renderScore(){$('#score').textContent=total();}
+function renderSteps(){
+  $('#steps').innerHTML=VIEWS.map((v,i)=>{
+    const t=TASKS.find(x=>x.id===v);
+    const done=t&&S.sub[t.id]&&t.checks.every(c=>S.done[c.id]);
+    const label=v==='start'?'Start':v==='report'?'Report':String(i);
+    return `<button type="button" class="step${done?' done':''}" data-view="${i}" ${S.task===i?'aria-current="step"':''} aria-label="${t?`Task ${i}: ${esc(t.title)}${done?', complete':''}`:label}">${label}</button>`;
+  }).join('');
+}
+function renderChecks(){
+  const ul=$('#checksList');if(!ul)return;const t=TASKS.find(x=>x.id===VIEWS[S.task]);if(!t)return;
+  ul.innerHTML=t.checks.map(c=>{const st=S.done[c.id];return `<li class="${st||''}"><span class="st" aria-hidden="true">${st==='ok'?'✓':st==='bad'?'✗':''}</span><span>${c.text}${st==='bad'?' <small>(recorded as incorrect, no credit)</small>':''}<span class="sr">${st==='ok'?' complete':st==='bad'?' incorrect':' not yet done'}</span></span></li>`;}).join('');
+  const pts=$('#taskPts');if(pts)pts.textContent=`${taskScore(t)} / ${t.pts} points`;
+}
+function renderTask(){
+  const v=VIEWS[S.task];const body=$('#taskBody');
+  if(v==='start'){
+    body.innerHTML=`<div class="intro"><div class="task-kicker"><span>Before you begin</span><span>90 minutes</span></div>
+    <h2>Your shift at FreshFlow</h2>
+    <p>You’re the overnight analyst in FreshFlow’s security operations center. The Chicago plant runs tanks, pumps and conveyors through PLCs that all report to this SIEM.</p>
+    <p>Over ten tasks you’ll read events, query them, triage alerts and build a case, ending with a live attack on the tank system.</p>
+    <label class="namefield">Your name (appears on your report)<input type="text" id="nameIn" value="${esc(S.name)}" autocomplete="name"></label>
+    <h3>How the lab works</h3>
+    <ul><li>This panel tells you what to do. The console on the right is the SIEM.</li>
+    <li>Checks tick automatically when the console sees you do each step.</li>
+    <li>Multiple-choice questions are graded when you submit a task, with an explanation for each answer. Submissions are final.</li>
+    <li>Short answers go to your instructor in the report and aren’t auto-scored.</li>
+    <li>Your work saves in this browser. The report at the end lets you copy or download everything.</li></ul>
+    <h3>The console at a glance</h3>
+    <ul><li><b>Event injector</b> creates events, runs a live feed, and plays scenarios.</li>
+    <li><b>Search events</b> filters with a query language; open Query syntax for examples.</li>
+    <li><b>Purdue map</b> shows every asset by network level. Tiles flash as events arrive; click one to filter.</li>
+    <li><b>Events, Alerts and Case</b> hold the log, the correlation alerts you triage, and the evidence you pin.</li></ul>
+    <div class="navrow"><span></span><button class="btn" type="button" data-go="1">Start Task 1</button></div></div>`;
+    $('#nameIn').addEventListener('input',e=>{S.name=e.target.value;save();});
+    return;
+  }
+  if(v==='report'){renderReport(body);return;}
+  const t=TASKS.find(x=>x.id===v);const sub=!!S.sub[t.id];
+  body.innerHTML=`<div class="task-kicker"><span>Task ${S.task} of 10</span><span id="taskPts"></span></div>
+  <h2>${t.title}</h2><p class="goal">${t.goal}</p>
+  <h3>Do this in the console</h3><ol class="do">${t.steps.map(s=>`<li>${s}</li>`).join('')}</ol>
+  <h3>Checks</h3><ul class="checks" id="checksList"></ul>
+  <h3>Questions</h3>
+  ${t.qs.map((q,qi)=>{
+    if(q.short)return `<fieldset class="q"><legend>${qi+1}. ${esc(q.q)}</legend><textarea data-short="${q.id}" ${sub?'readonly':''} aria-label="Answer to question ${qi+1}">${esc(S.ans[q.id]||'')}</textarea><div class="note">Reviewed by your instructor.</div></fieldset>`;
+    return `<fieldset class="q"><legend>${qi+1}. ${esc(q.q)}</legend>${q.o.map((o,oi)=>{
+      let cls='opt';if(sub){if(oi===q.a)cls+=' right';else if(S.ans[q.id]===oi)cls+=' wrong';}
+      return `<label class="${cls}"><input type="radio" name="${q.id}" value="${oi}" ${S.ans[q.id]===oi?'checked':''} ${sub?'disabled':''}><span>${esc(o)}</span></label>`;
+    }).join('')}${sub?`<div class="why"><b>${S.ans[q.id]===q.a?'Correct.':'Not quite.'}</b> ${esc(q.why)}</div>`:''}</fieldset>`;
+  }).join('')}
+  <div class="submit-row">${sub?'<span>Submitted. Checks can still earn credit as you complete them.</span>':`<button class="btn" type="button" id="submitTask">Submit answers</button><span class="warnmsg" id="subWarn"></span>`}</div>
+  <div class="navrow"><button class="btn ghost" type="button" data-go="${S.task-1}">Previous</button><button class="btn" type="button" data-go="${S.task+1}">${S.task===10?'Open report':'Next task'}</button></div>`;
+  shuffleGuard(t);
+  renderChecks();
+}
+function shuffleGuard(t){ /* answers are listed with the key first in source; display order is shuffled per question, stable per student */
+  if(S.sub[t.id])return;
+  document.querySelectorAll('#taskBody fieldset.q').forEach(fs=>{
+    const opts=[...fs.querySelectorAll('label.opt')];if(!opts.length)return;
+    const seed=(fs.querySelector('input').name+S.name).split('').reduce((a,c)=>(a*31+c.charCodeAt(0))>>>0,7);
+    opts.map((o,i)=>[o,(Math.imul(seed^Math.imul(i+1,0x9e3779b9),2654435761)>>>0)%997]).sort((a,b)=>a[1]-b[1]).forEach(([o])=>fs.appendChild(o));
+  });
+}
+function submitTask(){
+  const t=TASKS.find(x=>x.id===VIEWS[S.task]);
+  const missing=t.qs.filter(q=>q.short?!(S.ans[q.id]||'').trim():S.ans[q.id]===undefined).length;
+  if(missing){$('#subWarn').textContent=`Answer every question first. ${missing} still blank.`;return;}
+  S.sub[t.id]=true;save();renderTask();renderAll();
+  toast(`Task ${S.task} submitted: ${taskScore(t)} of ${t.pts} points so far`);
+}
+function buildReport(){
+  const L=[];const line='-'.repeat(60);
+  L.push('FreshFlow SOC: SIEM Training Lab report');L.push(`Student: ${S.name||'(no name entered)'}`);L.push(`Generated: ${iso(Date.now())}`);
+  L.push(`Auto-scored: ${total()} / 100 (short answers reviewed by instructor)`);L.push(line);
+  TASKS.forEach((t,i)=>{
+    L.push(`TASK ${i+1}: ${t.title}  [${taskScore(t)} / ${t.pts}]${S.sub[t.id]?'':'  (not submitted)'}`);
+    t.checks.forEach(c=>L.push(`  [${S.done[c.id]==='ok'?'x':S.done[c.id]==='bad'?'!':' '}] ${c.text}`));
+    t.qs.forEach((q,qi)=>{
+      L.push(`  Q${qi+1}. ${q.q}`);
+      if(q.short)L.push(`     Answer: ${(S.ans[q.id]||'(blank)').replace(/\n/g,'\n             ')}`);
+      else L.push(`     Answer: ${S.ans[q.id]!==undefined?q.o[S.ans[q.id]]:'(blank)'}${S.sub[t.id]?(S.ans[q.id]===q.a?'  [correct]':'  [incorrect]'):''}`);
+    });
+    L.push('');
+  });
+  L.push(line);L.push('ALERT TRIAGE');
+  if(!S.alerts.length)L.push('  (no alerts)');
+  S.alerts.forEach(a=>L.push(`  ${a.id} ${RULES[a.rule].title}: ${a.disp?DISP[a.disp][0]:'OPEN'}${a.exp&&a.disp?(a.disp===a.exp?' [correct]':' [incorrect]'):''}${a.note?`\n     Note: ${a.note}`:''}`));
+  L.push(line);L.push('CASE TIMELINE');
+  if(!S.case.length)L.push('  (no pinned evidence)');
+  [...S.case].sort((a,b)=>a.ts-b.ts).forEach(e=>L.push(`  ${iso(e.ts)} ${e.asset} ${e.eid} ${SEV[e.sev].label}: ${e.msg}`));
+  return L.join('\n');
+}
+function renderReport(body){
+  const txt=buildReport();
+  body.innerHTML=`<div class="task-kicker"><span>End of lab</span><span>${total()} / 100</span></div><h2>Your report</h2>
+  <p class="goal">Copy or download this and submit it to your instructor.</p>
+  <table class="report-table"><thead><tr><th>Task</th><th>Points</th></tr></thead><tbody>${TASKS.map((t,i)=>`<tr><td>${i+1}. ${esc(t.title)}${S.sub[t.id]?'':' <small>(not submitted)</small>'}</td><td>${taskScore(t)} / ${t.pts}</td></tr>`).join('')}<tr><th>Auto-scored total</th><th>${total()} / 100</th></tr></tbody></table>
+  <label class="sr" for="reportTxt">Report text</label><textarea class="report" id="reportTxt" readonly>${esc(txt)}</textarea>
+  <div class="submit-row"><button class="btn" type="button" id="copyRep">Copy report</button><button class="btn ghost" type="button" id="dlRep">Download .txt</button><span id="repMsg" class="warnmsg" style="color:var(--muted)"></span></div>
+  <h3>Start over</h3><p class="goal">Erases every answer, event, alert and case pin in this browser.</p>
+  <button class="btn stop" type="button" id="resetLab">Reset the lab</button>
+  <div class="navrow"><button class="btn ghost" type="button" data-go="10">Back to Task 10</button><span></span></div>`;
+  $('#copyRep').onclick=async()=>{const ta=$('#reportTxt');try{await navigator.clipboard.writeText(ta.value);$('#repMsg').textContent='Copied.';}catch(e){ta.select();try{document.execCommand('copy');$('#repMsg').textContent='Copied.';}catch(_){$('#repMsg').textContent='Select the text above and copy it manually.';}}};
+  $('#dlRep').onclick=()=>{try{const b=new Blob([buildReport()],{type:'text/plain'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=`FreshFlow_SIEM_Lab_${(S.name||'student').replace(/\s+/g,'_')}_${iso(Date.now()).slice(0,10)}.txt`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),2000);$('#repMsg').textContent='If no download started, use Copy report instead.';}catch(e){$('#repMsg').textContent='Download isn’t available here. Use Copy report.';}};
+  $('#resetLab').onclick=()=>{if(confirm('Reset the whole lab? This can’t be undone.')){stopLive();clearTimeout(playTimer);playing=null;S=fresh();curTerms=[];$('#q').value='';try{localStorage.removeItem(KEY);}catch(e){}$('#runBtn').disabled=false;$('#liveBtn').disabled=false;$('#clearBtn').disabled=false;$('#scnStatus').textContent='';go(0);render();}};
+}
+function go(i){if(i<0||i>=VIEWS.length)return;S.task=i;save();renderTask();renderSteps();$('#taskBody').scrollIntoView?.({block:'start'});document.querySelector('.tasks').scrollTop=0;}
+
+/* ---------- Toasts, theme, clock ---------- */
+function toast(msg,isAlert){const d=document.createElement('div');d.className='toast'+(isAlert?' alertt':'');d.textContent=msg;$('#toasts').appendChild(d);setTimeout(()=>d.remove(),isAlert?5000:3000);while($('#toasts').children.length>3)$('#toasts').firstChild.remove();}
+function setTheme(t){document.documentElement.dataset.theme=t;const b=$('#themeBtn');b.textContent=t==='dark'?'Light mode':'Dark mode';b.setAttribute('aria-pressed',t==='dark');try{localStorage.setItem('freshflow-theme',t);}catch(e){}}
+
+/* ---------- Wiring ---------- */
+function init(){
+  let theme='light';try{theme=localStorage.getItem('freshflow-theme')||'light';}catch(e){}
+  setTheme(theme);
+  load();curTerms=parseQ(S.q||'');$('#q').value=S.q||'';
+  $('#cat').innerHTML=Object.entries(CATS).map(([k,v])=>`<option value="${k}">${v}</option>`).join('');
+  $('#asset').innerHTML=Object.entries(ASSETS).map(([k,a])=>`<option value="${k}">${k} (${a.name})</option>`).join('');
+  $('#themeBtn').onclick=()=>setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark');
+  $('#genBtn').onclick=()=>addEvent(fromTemplate($('#asset').value,$('#cat').value,$('#sev').value||null,'manual'));
+  $('#injBtn').onclick=()=>{const m=$('#custom').value.trim();if(!m){$('#custom').focus();toast('Type a message first');return;}
+    addEvent({asset:$('#asset').value,cat:$('#cat').value,eid:9999,sev:$('#sev').value||'info',msg:m,tags:[],origin:'manual',syn:true});$('#custom').value='';};
+  $('#custom').addEventListener('keydown',e=>{if(e.key==='Enter')$('#injBtn').click();});
+  $('#liveBtn').onclick=()=>liveTimer?stopLive():startLive();
+  $('#runBtn').onclick=()=>runScenario($('#scn').value);
+  $('#clearBtn').onclick=()=>{stopLive();S.events=[];S.sel=null;closeDrawer();toast('Console cleared. Alerts and case evidence were kept.');render();save();};
+  $('#searchBtn').onclick=()=>runQuery($('#q').value);
+  $('#q').addEventListener('keydown',e=>{if(e.key==='Enter')runQuery($('#q').value);});
+  $('#resetQ').onclick=()=>runQuery('');
+  $('#purdue').addEventListener('click',e=>{const t=e.target.closest('.tile');if(t)setAssetFilter(t.dataset.asset);});
+  $('#sevStats').addEventListener('click',e=>{const b=e.target.closest('[data-sevq]');if(b)runQuery('sev:'+b.dataset.sevq);});
+  document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{setTab(b.dataset.tab);render();save();});
+  $('#tabBody').addEventListener('click',e=>{
+    const tr=e.target.closest('tr[data-seq]');if(tr){openDrawer(+tr.dataset.seq);return;}
+    const o=e.target.closest('[data-open]');if(o){openDrawer(+o.dataset.open);return;}
+    const u=e.target.closest('[data-unpin]');if(u){togglePin(+u.dataset.unpin);return;}
+    const s=e.target.closest('[data-save]');if(s){const id=s.dataset.save;const a=S.alerts.find(x=>x.id===id);
+      const r=document.querySelector(`input[name="d-${id}"]:checked`);const note=document.querySelector(`[data-note="${id}"]`).value.trim();
+      if(!r){$('#w-'+id).textContent='Choose a disposition.';return;}
+      if(note.length<15){$('#w-'+id).textContent='Write a note that cites the evidence.';return;}
+      a.disp=r.value;a.note=note;render();save();}
+  });
+  $('#tabBody').addEventListener('keydown',e=>{const tr=e.target.closest('tr[data-seq]');if(tr&&(e.key==='Enter'||e.key===' ')){e.preventDefault();openDrawer(+tr.dataset.seq);}});
+  $('#drawerBody').addEventListener('click',e=>{const p=e.target.closest('[data-pivot]');if(p){runQuery(p.dataset.pivot);}});
+  $('#pinBtn').onclick=()=>{if(S.sel!=null)togglePin(S.sel);};
+  $('#closeDrawer').onclick=closeDrawer;
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#drawer').classList.contains('open'))closeDrawer();});
+  $('#steps').addEventListener('click',e=>{const b=e.target.closest('[data-view]');if(b)go(+b.dataset.view);});
+  $('#taskBody').addEventListener('click',e=>{const g=e.target.closest('[data-go]');if(g){go(+g.dataset.go);return;}if(e.target.id==='submitTask')submitTask();});
+  $('#taskBody').addEventListener('change',e=>{if(e.target.type==='radio'){S.ans[e.target.name]=+e.target.value;save();}});
+  $('#taskBody').addEventListener('input',e=>{const s=e.target.dataset.short;if(s){S.ans[s]=e.target.value;save();}});
+  setTab(S.tab||'events');
+  const tick=()=>{$('#clock').textContent=hms(Date.now());};tick();setInterval(tick,1000);
+  if(!S.events.length){
+    addEvent({asset:'SCADA-01',cat:'system',eid:1000,sev:'info',msg:'FreshFlow SIEM console initialized; collectors online for 12 assets',tags:[],origin:'live'});
+  }
+  renderTask();renderAll();
+}
+init();
+</script>
+</body>
+</html>
