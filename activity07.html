@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Access Review Week: Access Control Matrix Learning Activity</title>
+<style>
+:root{
+  --bg:#F3F6FA; --surface:#FFFFFF; --sunk:#E8EEF6; --ink:#13213C; --muted:#56657F; --rule:#D3DCE8;
+  --navy:#0047AB; --on-navy:#FFFFFF; --green:#00875A; --green-soft:#DDF3E8; --bad:#B42318; --bad-soft:#FDE7E5; --warn:#9A4A00;
+  --pA-bg:#FBE3EE; --pA:#A3134F; --pW-bg:#FFEBD6; --pW:#A84B00; --pR-bg:#DDF3E8; --pR:#0B6B45; --pD-bg:#FFFFFF; --pD:#A3AEC0;
+  --xh:rgba(0,71,171,.08); --shadow:0 12px 32px rgba(10,20,40,.18);
+  --serif:Charter,"Bitstream Charter","Sitka Text",Cambria,Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  color-scheme:light;
+}
+[data-theme="dark"]{
+  --bg:#0D1524; --surface:#152038; --sunk:#1C2A47; --ink:#E5ECF6; --muted:#9DABC2; --rule:#2B3B5C;
+  --navy:#7EA6FF; --on-navy:#0D1524; --green:#3DDBA2; --green-soft:#0F3B2A; --bad:#FF8A80; --bad-soft:#4A1A1A; --warn:#FFB86B;
+  --pA-bg:#4A1530; --pA:#FF9CC6; --pW-bg:#4A2A0E; --pW:#FFC08A; --pR-bg:#0F3B2A; --pR:#7CE3B5; --pD-bg:#152038; --pD:#5D6D88;
+  --xh:rgba(126,166,255,.13); --shadow:0 12px 32px rgba(0,0,0,.5);
+  color-scheme:dark;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:16px/1.55 var(--sans);background:var(--bg);color:var(--ink)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--navy);outline-offset:2px}
+h1,h2,h3{font-family:var(--serif);font-weight:700;line-height:1.2}
+p{max-width:68ch}
+
+/* Header and step rail */
+.top{position:sticky;top:0;z-index:30;background:var(--surface);border-bottom:1px solid var(--rule)}
+.bar{max-width:1440px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 20px}
+.brand h1{font-size:20px}
+.brand span{display:block;font-size:13px;color:var(--muted)}
+.tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.meter{font-size:14px;color:var(--muted);margin-right:6px}
+.meter b{color:var(--ink);font-size:18px;font-variant-numeric:tabular-nums}
+.steps{max-width:1440px;margin:0 auto;display:flex;gap:6px;overflow-x:auto;padding:0 20px 12px}
+.step{flex:none;display:flex;align-items:center;gap:6px;border:1px solid var(--rule);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:14px;color:var(--muted);cursor:pointer}
+.step:hover{border-color:var(--navy);color:var(--ink)}
+.step.cur{background:var(--navy);border-color:var(--navy);color:var(--on-navy)}
+.step i{width:8px;height:8px;border-radius:50%;background:var(--rule);font-style:normal}
+.step i.part{background:var(--warn)} .step i.done{background:var(--green)}
+.step.cur i{outline:2px solid var(--on-navy)}
+
+/* Buttons */
+.btn{border:1px solid var(--rule);background:var(--surface);border-radius:6px;padding:8px 14px;font-size:14px;font-weight:600;cursor:pointer}
+.btn:hover{border-color:var(--navy)}
+.btn.primary{background:var(--navy);border-color:var(--navy);color:var(--on-navy)}
+.btn.danger{background:var(--bad);border-color:var(--bad);color:#fff}
+[data-theme="dark"] .btn.danger{color:#2A0A08}
+.btn.sm{padding:5px 10px;font-size:13px}
+.btn.on{background:var(--sunk);border-color:var(--navy)}
+
+/* Layout */
+.app{max-width:1440px;margin:0 auto;padding:20px}
+.grid{display:grid;grid-template-columns:minmax(320px,410px) minmax(0,1fr);gap:20px;align-items:start}
+.panel{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:20px}
+.work{position:sticky;top:112px}
+@media (max-width:980px){.grid{grid-template-columns:1fr}.work{position:static}}
+
+/* Mission panel */
+.mhead{border-bottom:1px solid var(--rule);padding-bottom:14px;margin-bottom:14px}
+.mnum{font-size:14px;color:var(--muted)}
+.mhead h2{font-size:26px;margin:2px 0 6px}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.tags span{font-size:12px;border:1px solid var(--rule);border-radius:4px;padding:1px 6px;color:var(--muted)}
+.tags span.k{border-color:var(--navy);color:var(--navy)}
+.scen{background:var(--sunk);border-left:4px solid var(--navy);border-radius:0 8px 8px 0;padding:12px 14px;margin:12px 0;font-size:15px}
+.mpanel h3{font-size:17px;margin:18px 0 8px}
+.tasks{list-style:none;display:grid;gap:8px}
+.tasks li{display:grid;grid-template-columns:22px 1fr;gap:8px;font-size:15px}
+.tasks li::before{content:"";width:16px;height:16px;margin-top:3px;border:2px solid var(--rule);border-radius:50%}
+.tasks li.ok::before{background:var(--green);border-color:var(--green)}
+.tasks li.now{font-weight:600}
+.tasks li.now::before{border-color:var(--navy)}
+.tasks small{display:block;color:var(--muted);font-weight:400}
+.note{font-size:14px;color:var(--muted)}
+.notes{list-style:none;display:grid;gap:8px;font-size:14.5px}
+.notes li{padding:8px 10px;border:1px solid var(--rule);border-radius:6px}
+.form{display:grid;gap:10px;margin-top:8px}
+.form label,.pop label{display:grid;gap:4px;font-size:14px;font-weight:600}
+input[type=text],input[type=date],select,textarea{border:1px solid var(--rule);background:var(--surface);border-radius:6px;padding:8px 10px;font-weight:400;font-size:15px}
+textarea{min-height:64px;resize:vertical}
+.jd{border:1px solid var(--rule);border-radius:8px;padding:10px 12px;font-size:14.5px;margin-top:8px}
+.jd b{font-family:var(--serif);font-size:16px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chips span{font-size:13px;background:var(--green-soft);border-radius:4px;padding:2px 8px}
+.seg2{display:flex;gap:6px;margin:6px 0}
+
+/* Questions */
+.q{border:0;margin:14px 0}
+.q legend{font-weight:600;font-size:15px;margin-bottom:8px}
+.opt{display:block;width:100%;text-align:left;border:1px solid var(--rule);background:var(--surface);border-radius:6px;padding:8px 12px;margin-bottom:6px;font-size:14.5px;cursor:pointer}
+.opt:hover{border-color:var(--navy)}
+.opt.on{border-color:var(--navy);background:var(--sunk);box-shadow:inset 3px 0 0 var(--navy)}
+.opt.right{border-color:var(--green);background:var(--green-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.exp{font-size:14px;color:var(--muted);margin-top:4px}
+
+/* Results */
+.checkrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px;padding-top:14px;border-top:1px solid var(--rule)}
+.res{margin-top:14px;border:1px solid var(--rule);border-radius:8px;padding:12px 14px}
+.res h4{font-family:var(--serif);font-size:17px;margin-bottom:6px}
+.res ul{list-style:none;display:grid;gap:6px;font-size:14.5px}
+.res li{display:grid;grid-template-columns:20px 1fr;gap:6px}
+.res li b{font-weight:700}
+.res .y{color:var(--green)} .res .n{color:var(--bad)}
+.res small{display:block;color:var(--muted)}
+
+/* Workspace */
+.wtool{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.mode{font-size:14px;font-weight:600;padding:4px 10px;border-radius:6px;background:var(--sunk)}
+.mode[data-m="edit"]{box-shadow:inset 3px 0 0 var(--pW)}
+.mode[data-m="flag"]{box-shadow:inset 3px 0 0 var(--bad)}
+.mode[data-m="find"],.mode[data-m="select"]{box-shadow:inset 3px 0 0 var(--navy)}
+.readout{font-size:14px;color:var(--muted);min-height:22px;font-variant-numeric:tabular-nums}
+.readout b{color:var(--ink)}
+.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.legend span{display:flex;align-items:center;gap:4px}
+.legend i{display:inline-grid;place-items:center;width:22px;height:20px;border-radius:3px;font-style:normal;font-weight:700;font-size:12px;border:1px solid var(--rule)}
+.scroll{overflow:auto;max-height:calc(100vh - 300px);min-height:300px;border:1px solid var(--rule);border-radius:8px}
+@media (max-width:980px){.scroll{max-height:70vh}}
+
+table.acm{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular-nums}
+.acm th,.acm td{border-right:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.acm thead th{position:sticky;top:0;z-index:4;background:var(--surface);font-size:12px;font-weight:700;padding:8px 4px;min-width:44px;color:var(--muted)}
+.acm thead th abbr{text-decoration:none}
+.acm thead th.corner{left:0;z-index:6;text-align:left;padding-left:12px;font-family:var(--serif);font-size:14px;color:var(--ink)}
+.acm tbody th{position:sticky;left:0;z-index:3;background:var(--surface);min-width:200px;padding:0;text-align:left}
+.acm thead th.xh{color:var(--navy);background:var(--sunk)}
+.rowbtn{display:block;width:100%;border:0;background:transparent;text-align:left;padding:5px 12px;cursor:default}
+.edit .rowbtn{cursor:pointer}
+.edit .rowbtn:hover .nm{text-decoration:underline}
+.rowbtn .nm{display:block;font-weight:600;font-size:14px}
+.rowbtn .rl{display:block;font-size:12px;color:var(--muted)}
+tr.xr th{background:var(--sunk)}
+.acm td{padding:0}
+.cell{position:relative;display:block;width:100%;height:42px;border:0;font-weight:700;font-size:13px;cursor:pointer;background:var(--pD-bg);color:var(--pD)}
+.cell.pA{background:var(--pA-bg);color:var(--pA)}
+.cell.pW{background:var(--pW-bg);color:var(--pW)}
+.cell.pR{background:var(--pR-bg);color:var(--pR)}
+.view .cell{cursor:default}
+td.xh .cell,tr.xr .cell{box-shadow:inset 0 0 0 999px var(--xh)}
+.cell:hover,.cell:focus-visible{outline:2px solid var(--navy);outline-offset:-2px;z-index:2}
+.cell.sel{outline:3px solid var(--green);outline-offset:-3px}
+.cell.found{outline:3px solid var(--navy);outline-offset:-3px}
+.cell.tmp::after{content:"";position:absolute;left:4px;bottom:4px;width:6px;height:6px;border-radius:50%;background:var(--navy)}
+.cell.flg::before{content:attr(data-f);position:absolute;top:1px;right:2px;font-size:9px;line-height:1;padding:2px 3px;border-radius:3px;background:var(--bad);color:#fff}
+[data-theme="dark"] .cell.flg::before{color:#2A0A08}
+tr.off .cell{opacity:.4}
+tr.off .nm{text-decoration:line-through}
+tr.new th{box-shadow:inset 3px 0 0 var(--green)}
+.shake{animation:sh .3s}
+@keyframes sh{25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+@media (prefers-reduced-motion:reduce){.shake{animation:none}}
+details.more{margin-top:10px;font-size:14px}
+details.more summary{cursor:pointer;font-weight:600}
+.key{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:2px 14px;margin-top:6px;color:var(--muted)}
+.key b{color:var(--ink);display:inline-block;min-width:42px}
+.logl{list-style:none;max-height:220px;overflow:auto;margin-top:6px;display:grid;gap:4px}
+.logl li{border-left:3px solid var(--navy);padding:4px 8px;background:var(--sunk);border-radius:0 4px 4px 0}
+.logl small{color:var(--muted);display:block}
+
+/* ACME workspace */
+.assets{list-style:none;display:grid;gap:6px}
+.assets li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 10px;border:1px solid var(--rule);border-radius:6px}
+.assets li b{font-size:14.5px}
+.assets li small{display:block;color:var(--muted);font-size:13px}
+.segc{display:flex;border:1px solid var(--rule);border-radius:6px;overflow:hidden}
+.segc button{border:0;border-right:1px solid var(--rule);background:var(--surface);padding:6px 9px;font-size:12.5px;font-weight:700;cursor:pointer}
+.segc button:last-child{border-right:0}
+.segc button.on{background:var(--navy);color:var(--on-navy)}
+@media (max-width:560px){.assets li{grid-template-columns:1fr}}
+.zone{border-collapse:separate;border-spacing:0;margin-top:8px}
+.zone th,.zone td{border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:0}
+.zone thead th{font-size:12.5px;padding:8px 10px;color:var(--muted)}
+.zone tbody th{text-align:left;padding:6px 12px;font-size:14px;min-width:190px}
+.zone .cell{width:72px}
+.wsec+.wsec{margin-top:22px;padding-top:18px;border-top:1px solid var(--rule)}
+.wsec h3{font-size:19px}
+
+/* Briefing */
+.hero{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:28px;align-items:center;padding:28px}
+.hero h2{font-size:clamp(32px,5vw,52px);letter-spacing:-.01em}
+.hero p.lead{font-family:var(--serif);font-size:19px;line-height:1.6;margin:12px 0 18px}
+.mini{border-collapse:separate;border-spacing:3px;font-weight:700;font-size:13px}
+.mini td,.mini th{width:38px;height:32px;text-align:center;border-radius:4px}
+.mini th{font-size:11px;color:var(--muted);font-weight:600}
+.mini th.r{text-align:right;width:auto;padding-right:6px;white-space:nowrap}
+.mini .pA{background:var(--pA-bg);color:var(--pA)} .mini .pW{background:var(--pW-bg);color:var(--pW)}
+.mini .pR{background:var(--pR-bg);color:var(--pR)} .mini .pD{background:var(--sunk);color:var(--pD)}
+.mini .hit{outline:3px solid var(--navy);outline-offset:-3px}
+.mini th.hl{color:var(--navy)}
+.cap{font-size:13px;color:var(--muted);margin-top:8px}
+@media (max-width:860px){.hero{grid-template-columns:1fr}}
+.cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin-top:20px}
+@media (max-width:860px){.cols{grid-template-columns:1fr}}
+.cols h3{font-size:19px;margin-bottom:8px}
+.ksal{list-style:none;display:grid;gap:8px;font-size:14.5px}
+.ksal li{display:grid;grid-template-columns:34px 1fr;gap:6px}
+.ksal b{color:var(--navy)}
+.how{margin-top:20px}
+.how ol{margin:8px 0 0 20px;display:grid;gap:6px;max-width:80ch}
+
+/* Pop-over */
+#pop{position:fixed;z-index:60;width:min(330px,calc(100vw - 16px));background:var(--surface);border:1px solid var(--rule);border-radius:10px;box-shadow:var(--shadow);padding:16px}
+#pop h4{font-family:var(--serif);font-size:17px;margin-bottom:2px}
+#pop .cur{font-size:13px;color:var(--muted);margin-bottom:10px}
+#pop .seg{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-bottom:10px}
+#pop .seg button{border:1px solid var(--rule);border-radius:6px;padding:7px 0;font-weight:700;font-size:13px;cursor:pointer;background:var(--surface)}
+#pop .seg button.on{outline:3px solid var(--navy);outline-offset:-1px}
+#pop .seg .pA{background:var(--pA-bg);color:var(--pA)} #pop .seg .pW{background:var(--pW-bg);color:var(--pW)} #pop .seg .pR{background:var(--pR-bg);color:var(--pR)}
+#pop label{margin-bottom:8px}
+#pop .act{display:flex;gap:8px;margin-top:6px}
+#pop .err{color:var(--bad);font-size:13px;margin-top:6px}
+#pop .stack{display:grid;gap:6px}
+#pop .stack button{text-align:left;border:1px solid var(--rule);background:var(--surface);border-radius:6px;padding:8px 10px;cursor:pointer;font-size:14px}
+#pop .stack button span{display:block;font-size:12.5px;color:var(--muted)}
+#pop .stack button.on{border-color:var(--bad);box-shadow:inset 3px 0 0 var(--bad)}
+@media (max-width:640px){#pop{left:8px!important;right:8px;top:auto!important;bottom:8px;width:auto}}
+
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:70;max-width:min(560px,calc(100vw - 24px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:14.5px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity .2s}
+#toast.show{opacity:1}
+#toast.ok{border-left:5px solid var(--green)} #toast.warn{border-left:5px solid var(--warn)}
+
+/* Summary */
+.sumgrid{display:grid;grid-template-columns:minmax(260px,340px) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:980px){.sumgrid{grid-template-columns:1fr}}
+.sumctl{display:grid;gap:12px}
+.sumctl .btn{width:100%}
+
+/* Report (also used for the downloaded file and printing) */
+.rp{font:14px/1.5 var(--sans);color:var(--ink)}
+.rp h2{font-family:var(--serif);font-size:26px}
+.rp h3{font-family:var(--serif);font-size:18px;margin:20px 0 6px;border-bottom:2px solid var(--navy);padding-bottom:3px}
+.rp .meta{color:var(--muted)}
+.rp .big{display:flex;gap:28px;flex-wrap:wrap;margin:12px 0}
+.rp .big div{font-size:13px;color:var(--muted)}
+.rp .big b{display:block;font-family:var(--serif);font-size:30px;color:var(--ink)}
+.rp table{border-collapse:collapse;width:100%;margin-top:4px}
+.rp th,.rp td{border:1px solid var(--rule);padding:5px 8px;text-align:left;vertical-align:top}
+.rp th{background:var(--sunk);font-size:13px}
+.rp .bar2{height:10px;background:var(--sunk);border-radius:5px;overflow:hidden;min-width:120px}
+.rp .bar2 i{display:block;height:100%;background:var(--green)}
+.rp .mx td,.rp .mx th{padding:2px 4px;text-align:center;font-size:11.5px}
+.rp .mx td.nm{text-align:left;white-space:nowrap}
+.rp .stmt{border-left:4px solid var(--navy);padding:8px 12px;background:var(--sunk);white-space:pre-wrap}
+.rp .ok{color:var(--green);font-weight:700} .rp .no{color:var(--bad);font-weight:700}
+.rpwrap{overflow-x:auto}
+
+@media print{
+  :root,[data-theme="dark"]{--bg:#fff;--surface:#fff;--sunk:#EEF2F7;--ink:#000;--muted:#444;--rule:#BBB;--navy:#0047AB;--green:#00875A;--bad:#B42318}
+  body{background:#fff}
+  .top,.sumctl,#toast,#pop,.noprint{display:none!important}
+  .app{padding:0;max-width:none}
+  .sumgrid{display:block}
+  .panel{border:0;padding:0}
+  .rp *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .rp h3{break-after:avoid}
+  .rp tr{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="bar">
+    <div class="brand"><h1>Access Review Week</h1><span>Access control matrix learning activity</span></div>
+    <div class="tools">
+      <span class="meter" id="meter"></span>
+      <button class="btn sm" data-act="theme" id="themeBtn" aria-pressed="false">Dark mode</button>
+      <button class="btn sm" data-act="reset">Start over</button>
+    </div>
+  </div>
+  <nav class="steps" id="steps" aria-label="Activity steps"></nav>
+</header>
+<main class="app" id="main"></main>
+<div id="pop" hidden role="dialog" aria-modal="false"></div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ---------- Data ---------- */
+const SYS=[['ERP','ERP System'],['CRM','CRM Database'],['FIN','Financial Management'],['EML','Email System'],['PLC','PLC Controls'],['HMI','HMI Stations'],['PDB','Production Database'],['QCS','Quality Control System'],['WMS','Warehouse Management'],['RFID','RFID Tracking'],['CAM','Security Cameras'],['FW','Firewall Admin'],['NMON','Network Monitoring'],['BKP','Backup Systems'],['FS','File Server']];
+const CODES=SYS.map(s=>s[0]);
+const SYSNAME=Object.fromEntries(SYS);
+// Rights in system order: ERP CRM FIN EML PLC HMI PDB QCS WMS RFID CAM FW NMON BKP FS
+const EMP0=[
+ ['Carla Jennings','CEO','RRRW--RRR-----W'],
+ ['Marcus Lee','COO','WRRWRRWWWRR---W'],
+ ['Dr. Nia Clarke','CISO','R--WRRR---ARARR'],
+ ['Elaine Harper','Finance Director','WRWW----------W'],
+ ['Jason Trujillo','Network Administrator','---A------WRRAA'],
+ ['Regina Moore','OT Systems Engineer','---WWAWR----R--'],
+ ['Rachel Li','Compliance Officer','RRRW--RRR-RRRRR'],
+ ['Mike Chen','IT Support','---W--------RRW'],
+ ['Sarah Williams','Contract Coordinator','RW-W----------R'],
+ ['Jennifer Martinez','Production Supervisor','---WRWWWR------'],
+ ['Robert Johnson','Quality Inspector','---R--AW-------'],
+ ['Lisa Zhang','Warehouse Manager','R--W--W-WW-----'],
+ ['Carlos Rodriguez','Maintenance Tech','---RRR---------'],
+ ['Amanda Foster','HR Manager','--WW----------W'],
+ ['Kevin Brown','Sales Manager','RWWW-----------']
+];
+const ORIG=Object.fromEntries(EMP0.map(([n,,row])=>[n,Object.fromEntries(CODES.map((c,i)=>[c,row[i]]))]));
+const PN={'-':'Deny','R':'Read','W':'Write','A':'Admin'};
+const pc=v=>v==='-'?'pD':'p'+v;
+const glyph=v=>v==='-'?'–':v;
+
+const M1T=[['Regina Moore','HMI'],['Lisa Zhang','RFID'],['Rachel Li','FW']];
+const PLANTED=[
+ {k:'Robert Johnson|PDB',f:'EX',fix:'R'},
+ {k:'Kevin Brown|FIN',f:'EX',fix:'-'},
+ {k:'Amanda Foster|FIN',f:'SOD',fix:'-'},
+ {k:'Lisa Zhang|PDB',f:'CR',fix:'-'}
+];
+const FLAGS=[
+ {k:'EX',n:'Excessive privilege',s:'EX',d:'More access than the job needs'},
+ {k:'SOD',n:'Separation-of-duties conflict',s:'SoD',d:'One person can complete a sensitive process alone'},
+ {k:'CR',n:'Privilege creep',s:'CR',d:'Leftover access from a previous role'}
+];
+const FLAGN=Object.fromEntries(FLAGS.map(f=>[f.k,f]));
+
+const ASSETS=[
+ ['Guest Wi-Fi','OOS','Visitor internet access on an isolated VLAN'],
+ ['Primary Data Server','CUI','Stores DoD contract files marked CUI'],
+ ['SIEM Tools','SPA','Collects and correlates security logs from the CUI enclave'],
+ ['Secure Printers','CRMA','On the internal network; policy prohibits printing CUI'],
+ ['Azure Cloud Backup','CUI','Nightly backups of the primary data server'],
+ ['Personal Laptops','OOS','Employee-owned devices barred from the internal network'],
+ ['VPN Gateway','SPA','Authenticates remote access into the CUI zone'],
+ ['Warehouse Inventory System','CRMA','Internal system that could hold contract data; procedures keep CUI out'],
+ ['Contract Coordinator Workstations','CUI','Where coordinators open and edit CUI contracts'],
+ ['Badge Access Control','SPA','Controls physical entry to the CUI work area'],
+ ['Marketing Systems','OOS','Hosted website and campaign tools with no internal connection'],
+ ['IT Support Workstations','CRMA','Can reach internal systems; procedures keep CUI off them'],
+ ['Enterprise Firewall','SPA','Enforces the boundary between network zones'],
+ ['Secure File Server','CUI','Shares CUI documents among authorized staff']
+];
+const CATS=[['CUI','CUI asset'],['SPA','Security protection asset'],['CRMA','Contractor risk managed asset'],['OOS','Out of scope']];
+const ROLES=[
+ ['Contract Coordinator','Processes DoD contracts that contain CUI'],
+ ['IT Staff','Administers servers and network gear from the management zone'],
+ ['Sales Manager','Sells commercial services; needs internet access only'],
+ ['Facility Maintenance','Services HVAC and building control systems'],
+ ['Marketing Specialist','Runs campaigns; needs internet access only']
+];
+const ZONES=[['CUI','CUI zone'],['MGMT','Management zone'],['GUEST','Guest network'],['OT','OT network']];
+const RB_ROWS={'Contract Coordinator':'W---','IT Staff':'-WR-','Sales Manager':'W-W-','Facility Maintenance':'-WRW','Marketing Specialist':'--RR'};
+const RBAC0={};Object.entries(RB_ROWS).forEach(([r,s])=>ZONES.forEach((z,i)=>RBAC0[r+'|'+z[0]]=s[i]));
+const RB_PLANT=['Sales Manager|CUI','Facility Maintenance|MGMT','Marketing Specialist|OT'];
+
+const Q={
+ q1a:{s:'Count of admin holders',p:'At the start of the review, how many employees hold Admin (A) on at least one system?',o:['3','4','5','6'],a:1,e:'Dr. Nia Clarke, Jason Trujillo, Regina Moore, and Robert Johnson. Scanning each row for A is how you build the privileged-user list that NIST SP 800-171 3.1.7 reviews depend on.'},
+ q1b:{s:'Meaning of a row',p:'What does a single row of this matrix tell you?',o:['Every right one employee holds across all systems','Every employee who can reach one system','Which person owns each system','The login history of one account'],a:0,e:'A row belongs to one subject (a person or role). Read across it and you have that subject’s complete set of rights, which is its capability list.'},
+ q2a:{s:'Column stored with the object',p:'Real systems often store the column you built (everyone who can reach Backup Systems) with the object itself. What is it called?',o:['Access control list (ACL)','Capability list','Security label','Role assignment'],a:0,e:'A column read top to bottom is the object’s ACL. File system permissions and firewall rule sets are both ACLs.'},
+ q2b:{s:'Why matrices are stored sparsely',p:'Why don’t most systems store the whole matrix as one big table?',o:['Most cells are deny, so it is stored sparsely as ACLs or capability lists','A matrix can’t hold more than 15 columns','Regulations prohibit a central matrix','Rows can’t contain admin rights'],a:0,e:'Real matrices are huge and mostly empty. Storing only the non-empty cells, grouped by object (ACLs) or by subject (capability lists), is far more efficient.'},
+ q3a:{s:'Temporary admin evidence',p:'Jason’s firewall admin grant is temporary. What makes it audit-ready?',o:['A documented justification and an expiry date that is reviewed when it lapses','Verbal approval from the CISO','Granting Write instead of Admin','Adding him to the Backup Systems column'],a:0,e:'Assessors look for the who, why, and until-when of every privileged grant. An expiry date stops temporary access from becoming permanent.'},
+ q4a:{s:'Disable rather than delete',p:'Why does a revoked row stay in the matrix, greyed out, instead of being deleted?',o:['It keeps evidence of who had access and when it was removed','RBAC systems can’t delete rows','So the person can log back in after 30 days','The assessor needs the old password'],a:0,e:'Disabled accounts and their history are audit evidence. NIST SP 800-171 3.9.2 expects you to show that access was removed when personnel actions happened.'},
+ q4b:{s:'Transfers and privilege creep',p:'Mike is transferring, not leaving. Why remove everything first?',o:['Carrying old rights into a new job is privilege creep; provision the new role fresh','Transfers always end in termination','IT Support rights are illegal in other departments','So HR can reuse his account for someone else'],a:0,e:'Movers are the main source of privilege creep. Remove the old role’s rights, then grant only what the new role needs.'},
+ q5a:{s:'Default deny',p:'Every new row starts with deny in every cell. Which principle is that?',o:['Default deny','Need to know','Separation of duties','Mandatory access control'],a:0,e:'Access is never assumed. Each grant has to be added on purpose, which is how least privilege starts on day one.'},
+ q7a:{s:'Role-based model',p:'ACME’s zone matrix lists roles, not people. Which model is that?',o:['Role-based access control (RBAC)','Discretionary access control (DAC)','Mandatory access control (MAC)','Rule-based access control'],a:0,e:'Rights attach to roles and people inherit them through role assignment. One wrong role cell grants that access to everyone in the role, so role rows deserve extra scrutiny.'},
+ q7b:{s:'Out-of-scope condition',p:'Guest Wi-Fi can stay out of scope only if…',o:['It is separated from the CUI environment so it can’t reach CUI','It requires a password','Only employees use it','The SIEM monitors it'],a:0,e:'Out-of-scope assets can’t process, store, or transmit CUI and must be logically or physically separated from assets that do.'}
+};
+
+const MISSIONS=[
+ {id:1,short:'Read',title:'Read the matrix',max:5,ksa:['K1','S1'],nist:['3.1.1'],mode:'find'},
+ {id:2,short:'Slice',title:'Pull an ACL and a capability list',max:4,ksa:['K1','K2','S2'],nist:['3.1.1','3.1.2'],mode:'select'},
+ {id:3,short:'Change',title:'Approve two access changes',max:4,ksa:['K3','K5','S3','A1'],nist:['3.1.5','3.1.7','3.3.2'],mode:'edit'},
+ {id:4,short:'Revoke',title:'Process two leavers',max:5,ksa:['K5','S4'],nist:['3.9.2','3.3.1'],mode:'edit'},
+ {id:5,short:'Provision',title:'Onboard two new hires',max:5,ksa:['K3','K5','S5','A1'],nist:['3.1.1','3.1.5'],mode:'edit'},
+ {id:6,short:'Review',title:'Run the quarterly access review',max:9,ksa:['K3','K4','S6','A2'],nist:['3.1.4','3.1.5'],mode:'flag'},
+ {id:7,short:'Scope',title:'Scope ACME for CMMC Level 2',max:10,ksa:['K2','K6','A2'],nist:['CMMC scoping','3.1.3'],mode:'acme'}
+];
+const TOTAL=MISSIONS.reduce((a,m)=>a+m.max,0);
+const KSA=[
+ {id:'K1',g:'Knowledge',n:'ACM structure: subjects as rows, objects as columns, rights in cells',m:[1,2]},
+ {id:'K2',g:'Knowledge',n:'Access control lists, capability lists, and role-based access control',m:[2,7]},
+ {id:'K3',g:'Knowledge',n:'Least privilege, need to know, and default deny',m:[3,5,6]},
+ {id:'K4',g:'Knowledge',n:'Separation of duties and privilege creep',m:[6]},
+ {id:'K5',g:'Knowledge',n:'Account lifecycle: joiners, movers, and leavers',m:[3,4,5]},
+ {id:'K6',g:'Knowledge',n:'CMMC Level 2 asset scoping and NIST SP 800-171 access control requirements',m:[7]},
+ {id:'S1',g:'Skills',n:'Read and query the matrix to answer audit questions',m:[1]},
+ {id:'S2',g:'Skills',n:'Derive an ACL from a column and a capability list from a row',m:[2]},
+ {id:'S3',g:'Skills',n:'Change rights with a documented justification and expiry',m:[3]},
+ {id:'S4',g:'Skills',n:'Deprovision accounts while preserving the audit trail',m:[4]},
+ {id:'S5',g:'Skills',n:'Provision new users from a job description',m:[5]},
+ {id:'S6',g:'Skills',n:'Detect and remediate access violations',m:[6]},
+ {id:'S7',g:'Skills',n:'Produce audit evidence: change log, findings, and matrix export',m:['report']},
+ {id:'A1',g:'Abilities',n:'Judge access requests against business need',m:[3,5]},
+ {id:'A2',g:'Abilities',n:'Classify and prioritize access risk',m:[6,7]},
+ {id:'A3',g:'Abilities',n:'Communicate findings to an auditor or executive',m:['statement']}
+];
+const KSAN=Object.fromEntries(KSA.map(k=>[k.id,k.n]));
+
+/* ---------- State ---------- */
+const KEY='acm-review-week-v1';
+let S=null;
+function fresh(theme){return{v:1,theme:theme||'light',step:0,name:'',statement:'',
+ emps:EMP0.map(([n,role,row])=>({n,role,p:Object.fromEntries(CODES.map((c,i)=>[c,row[i]])),off:false})),
+ just:{},exp:{},flags:{},log:[],res:{},ans:{},form:{},
+ m1:{i:0,miss:[0,0,0],found:[0,0,0]},m2:{ph:0,sel:[[],[]]},m6:'flag',assets:{},rbac:{...RBAC0}}}
+try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+if(!S||S.v!==1)S=fresh();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+
+/* ---------- Helpers ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const today=()=>new Date().toISOString().slice(0,10);
+const emp=n=>S.emps.find(e=>e.n.toLowerCase()===n.toLowerCase());
+const keyName=k=>{const[n,c]=k.split('|');return `${n} × ${SYSNAME[c]}`};
+function log(a,d){S.log.push({t:new Date().toLocaleString(),a,d:d||''})}
+let toastT;
+function toast(msg,kind){const t=$('#toast');t.textContent=msg;t.className='show '+(kind||'');clearTimeout(toastT);toastT=setTimeout(()=>t.className='',3600)}
+function score(){return MISSIONS.reduce((a,m)=>a+(S.res[m.id]?S.res[m.id].score:0),0)}
+function currentMode(){const m=MISSIONS.find(x=>x.id===S.step);if(!m)return'view';if(m.id===6)return S.m6==='flag'?'flag':'edit';return m.mode}
+
+/* ---------- Header & steps ---------- */
+function renderTop(){
+ document.documentElement.dataset.theme=S.theme;
+ const tb=$('#themeBtn');tb.textContent=S.theme==='dark'?'Light mode':'Dark mode';tb.setAttribute('aria-pressed',S.theme==='dark');
+ $('#meter').innerHTML=`<b>${score()}</b> / ${TOTAL} points`;
+ const st=[{s:0,l:'Briefing'}].concat(MISSIONS.map(m=>({s:m.id,l:`${m.id}. ${m.short}`}))).concat([{s:8,l:'Summary'}]);
+ $('#steps').innerHTML=st.map(x=>{const r=S.res[x.s];const m=MISSIONS.find(mm=>mm.id===x.s);
+  const dot=m?`<i class="${r?(r.score===m.max?'done':'part'):''}"></i>`:'';
+  return `<button class="step ${S.step===x.s?'cur':''}" data-act="step" data-s="${x.s}" ${S.step===x.s?'aria-current="step"':''}>${dot}${x.l}</button>`}).join('');
+}
+
+/* ---------- Main render ---------- */
+function render(){
+ const sc=$('.scroll');const pos=sc?[sc.scrollLeft,sc.scrollTop]:null;
+ const a=document.activeElement;const fk=a&&a.dataset?{act:a.dataset.act,r:a.dataset.r,c:a.dataset.c,q:a.dataset.q,i:a.dataset.i,k:a.dataset.k}:null;
+ renderTop();
+ const main=$('#main');
+ if(S.step===0)main.innerHTML=briefing();
+ else if(S.step===8)main.innerHTML=summary();
+ else main.innerHTML=`<div class="grid"><section class="panel mpanel" aria-labelledby="mt">${missionPanel()}</section><section class="panel work" aria-label="Workspace">${S.step===7?acmeWork():matrixWork()}</section></div>`;
+ const sc2=$('.scroll');if(sc2&&pos){sc2.scrollLeft=pos[0];sc2.scrollTop=pos[1]}
+ if(fk&&fk.act){let sel=`[data-act="${fk.act}"]`;['r','c','q','i','k'].forEach(x=>{if(fk[x]!==undefined)sel+=`[data-${x}="${CSS.escape(fk[x])}"]`});const el=document.querySelector(sel);if(el&&el.tagName==='BUTTON')el.focus({preventScroll:true})}
+ save();
+}
+
+/* ---------- Briefing ---------- */
+function briefing(){
+ const demo=[['Regina Moore','-','A','W'],['Lisa Zhang','W','-','-'],['Rachel Li','R','-','R']];
+ const kl=g=>KSA.filter(k=>k.g===g).map(k=>`<li><b>${k.id}</b><span>${k.n}</span></li>`).join('');
+ return `<section class="panel hero">
+  <div><h2>Access Review Week</h2>
+  <p class="lead">You’re the access control analyst for two clients with audits on the calendar. FreshFlow Systems, a food-packaging manufacturer in Lima, Ohio, needs its matrix cleaned up before a cybersecurity audit. ACME Technology Services needs its CMMC Level 2 scope and zone matrix checked.</p>
+  <p>Work through seven missions inside a live access control matrix. Every change you make is logged, and at the end you’ll print or save an evidence package with your scores, findings, and change history.</p>
+  <div class="checkrow" style="border:0;padding:0;margin-top:20px"><button class="btn primary" data-act="step" data-s="1">Start mission 1</button><button class="btn" data-act="step" data-s="8">See the summary page</button></div></div>
+  <figure><table class="mini" aria-hidden="true"><tr><th></th><th>PLC</th><th class="hl">HMI</th><th>FW</th></tr>
+  ${demo.map((r,i)=>`<tr><th class="r ${i===0?'hl':''}">${r[0]}</th>${r.slice(1).map((v,j)=>`<td class="${pc(v)} ${i===0&&j===1?'hit':''}">${glyph(v)}</td>`).join('')}</tr>`).join('')}</table>
+  <figcaption class="cap">Read a cell where a row meets a column: Regina Moore has Admin on HMI Stations.</figcaption></figure>
+ </section>
+ <section class="panel how"><h3>How it works</h3><ol>
+  <li>The matrix on the right of each mission is your workspace. Hover or tab through it and the readout names the row, column, and right.</li>
+  <li>Each mission switches the matrix into a mode: find, select, edit, or review. The mode label above the matrix tells you what a click does.</li>
+  <li>Press Check mission whenever you’re ready. You can fix things and check again; your latest result counts.</li>
+  <li>Your progress saves in this browser. Start over clears it.</li></ol>
+  <div class="legend" style="margin-top:12px"><span><i class="pA" style="background:var(--pA-bg);color:var(--pA)">A</i>Admin: full control</span><span><i style="background:var(--pW-bg);color:var(--pW)">W</i>Write: read and modify</span><span><i style="background:var(--pR-bg);color:var(--pR)">R</i>Read: view only</span><span><i style="color:var(--pD)">–</i>Deny: no access</span></div>
+ </section>
+ <section class="cols">
+  <div class="panel"><h3>Knowledge</h3><ul class="ksal">${kl('Knowledge')}</ul></div>
+  <div class="panel"><h3>Skills</h3><ul class="ksal">${kl('Skills')}</ul></div>
+  <div class="panel"><h3>Abilities</h3><ul class="ksal">${kl('Abilities')}</ul></div>
+ </section>`;
+}
+
+/* ---------- Mission panel ---------- */
+function mq(id,m){const q=Q[id];const sel=S.ans[id];const graded=!!S.res[m]&&sel!==undefined;
+ return `<fieldset class="q"><legend>${q.p}</legend>${q.o.map((x,i)=>{let c='';if(sel===i)c='on';if(graded){if(i===q.a)c='right';else if(sel===i)c='wrong'}
+  return `<button type="button" class="opt ${c}" data-act="ans" data-q="${id}" data-i="${i}" aria-pressed="${sel===i}">${x}</button>`}).join('')}${graded?`<p class="exp">${q.e}</p>`:''}</fieldset>`}
+function head(m,scen){return `<div class="mhead"><div class="mnum">Mission ${m.id} of 7</div><h2 id="mt">${m.title}</h2>
+ <div class="tags">${m.ksa.map(k=>`<span class="k" title="${esc(KSAN[k])}">${k}</span>`).join('')}${m.nist.map(n=>`<span>${/^\d/.test(n)?'NIST 800-171 ':''}${n}</span>`).join('')}</div></div><div class="scen">${scen}</div>`}
+function foot(m){const r=S.res[m.id];
+ let h=`<div class="checkrow"><button class="btn primary" data-act="check" data-m="${m.id}">Check mission</button>${r?`<button class="btn" data-act="step" data-s="${m.id+1}">${m.id<7?'Next mission':'Go to summary'}</button>`:''}</div>`;
+ if(r)h+=`<div class="res" aria-live="polite"><h4>${r.score} of ${m.max} points${r.score===m.max?', mission complete':''}</h4><ul>${r.items.map(it=>`<li><span class="${it.ok?'y':'n'}" aria-hidden="true">${it.ok?'✓':'✕'}</span><span><b>${it.l}</b>${it.d?`<small>${it.d}</small>`:''}</span></li>`).join('')}</ul></div>`;
+ return h}
+const cellNow=(n,c)=>{const e=emp(n);return e?PN[e.p[c]]:'not found'};
+
+function missionPanel(){
+ const m=MISSIONS.find(x=>x.id===S.step);
+ if(m.id===1){
+  const i=S.m1.i;
+  return head(m,'The auditor emails three quick lookup questions. Answer each one by clicking the exact cell in FreshFlow’s matrix, then answer two questions about what you saw.')+
+  `<h3>Find the cells</h3><ul class="tasks">${M1T.map((t,j)=>`<li class="${S.m1.found[j]?'ok':(j===i?'now':'')}"><span>What access does ${t[0]} have to ${SYSNAME[t[1]]}?${S.m1.found[j]?`<small>Answer: ${cellNow(t[0],t[1])}</small>`:(j===i?'<small>Follow the row across to the column, then click the cell.</small>':'')}</span></li>`).join('')}</ul>
+  <h3>Questions</h3>${mq('q1a',1)}${mq('q1b',1)}`+foot(m);
+ }
+ if(m.id===2){
+  const ph=S.m2.ph;const s0=S.m2.sel[0],s1=S.m2.sel[1];
+  return head(m,'The auditor wants two exports: everyone who can reach Backup Systems, and everything Jennifer Martinez can reach. Build each one by selecting cells in the matrix.')+
+  `<h3>Choose the list you’re building</h3>
+  <div class="seg2"><button class="btn ${ph===0?'on':''}" data-act="ph" data-p="0" aria-pressed="${ph===0}">ACL: Backup Systems</button><button class="btn ${ph===1?'on':''}" data-act="ph" data-p="1" aria-pressed="${ph===1}">Capabilities: Jennifer</button></div>
+  <ul class="tasks"><li class="${ph===0?'now':''}"><span>Select every cell in the Backup Systems (BKP) column that grants any access.<small>${s0.length} selected</small><span class="chips">${s0.map(k=>`<span>${esc(k.split('|')[0])} (${SYSNAME[k.split('|')[1]]})</span>`).join('')}</span></span></li>
+  <li class="${ph===1?'now':''}"><span>Select every cell in Jennifer Martinez’s row that grants any access.<small>${s1.length} selected</small><span class="chips">${s1.map(k=>`<span>${SYSNAME[k.split('|')[1]]}${k.split('|')[0]!=='Jennifer Martinez'?' ('+esc(k.split('|')[0])+')':''}</span>`).join('')}</span></span></li></ul>
+  <p class="note" style="margin-top:8px">Click a selected cell again to remove it.</p>
+  <h3>Questions</h3>${mq('q2a',2)}${mq('q2b',2)}`+foot(m);
+ }
+ if(m.id===3){
+  const rp=emp('Regina Moore').p.PLC, jf=emp('Jason Trujillo').p.FW, jx=S.exp['Jason Trujillo|FW'];
+  return head(m,'Two change tickets are approved. Regina Moore was promoted to OT Systems Manager and now administers PLC Controls. Jason Trujillo needs Admin on Firewall Admin for a weekend maintenance window, and the grant must expire.')+
+  `<h3>Tasks</h3><ul class="tasks">
+  <li class="${rp==='A'&&S.just['Regina Moore|PLC']?'ok':''}"><span>Set Regina Moore × PLC Controls to Admin, with a justification.<small>Currently ${PN[rp]}</small></span></li>
+  <li class="${jf==='A'&&jx&&S.just['Jason Trujillo|FW']?'ok':''}"><span>Set Jason Trujillo × Firewall Admin to Admin, with a justification and an expiry date.<small>Currently ${PN[jf]}${jx?', expires '+esc(jx):''}</small></span></li>
+  <li><span>Leave every other cell in their rows as it is.</span></li></ul>
+  <p class="note" style="margin-top:8px">Click a cell to open the editor. A small dot in a cell marks a grant with an expiry date.</p>
+  <h3>Question</h3>${mq('q3a',3)}`+foot(m);
+ }
+ if(m.id===4){
+  const mk=emp('Mike Chen'),sw=emp('Sarah Williams');
+  return head(m,'HR sends two personnel actions. Mike Chen (IT Support) is transferring to Logistics. Sarah Williams (Contract Coordinator) resigned effective today.')+
+  `<h3>Tasks</h3><ul class="tasks">
+  <li class="now"><span>Click an employee’s name in the matrix to open account actions.</span></li>
+  <li class="${mk.off?'ok':''}"><span>Revoke all of Mike Chen’s access and record the reason as a department transfer.${mk.off?`<small>Revoked: ${esc(mk.offReason)}, ${esc(mk.offDate)}</small>`:''}</span></li>
+  <li class="${sw.off?'ok':''}"><span>Revoke all of Sarah Williams’s access and record the reason as a resignation.${sw.off?`<small>Revoked: ${esc(sw.offReason)}, ${esc(sw.offDate)}</small>`:''}</span></li></ul>
+  <h3>Questions</h3>${mq('q4a',4)}${mq('q4b',4)}`+foot(m);
+ }
+ if(m.id===5){
+  const f=S.form;
+  return head(m,'Two new hires start Monday. Add each one to the matrix, then grant only what their job description needs.')+
+  `<div class="jd"><b>Maria Rodriguez, Quality Control Manager</b><p>Approves inspection records in the Quality Control System and reviews, but never changes, batch data in the Production Database. Uses email and may use the file server. No financial, OT control, or IT administration duties.</p></div>
+  <div class="jd"><b>David Kim, IT Security Analyst</b><p>Watches Network Monitoring dashboards and reviews Security Camera footage during investigations. May view firewall rules and backup status but never changes them. Uses email and may use the file server. Holds no administrator rights.</p></div>
+  <h3>Add an employee</h3><div class="form">
+  <label>Full name<input type="text" data-bind="nuName" value="${esc(f.nuName||'')}" autocomplete="off"></label>
+  <label>Job role<select data-bind="nuRole">${['','Quality Control Manager','IT Security Analyst','Production Supervisor','Finance Analyst'].map(r=>`<option value="${r}" ${f.nuRole===r?'selected':''}>${r||'Choose a role'}</option>`).join('')}</select></label>
+  <label>Start date<input type="date" data-bind="nuDate" value="${esc(f.nuDate||today())}"></label>
+  <button class="btn primary" data-act="addUser">Add employee</button></div>
+  <p class="note" style="margin-top:8px">New rows appear at the bottom of the matrix with a green edge. Then click their cells to grant rights.</p>
+  <h3>Question</h3>${mq('q5a',5)}`+foot(m);
+ }
+ if(m.id===6){
+  const nf=Object.keys(S.flags).length;
+  return head(m,'It’s time for the quarterly access review. Four cells in FreshFlow’s matrix break policy. Use the context notes, flag each problem with the right category, then fix it.')+
+  `<h3>Context notes</h3><ul class="notes">
+  <li>Lisa Zhang moved from Production Supervisor to Warehouse Manager in March. Her transfer request added the warehouse systems.</li>
+  <li>Amanda Foster’s HR team creates new-hire records that feed payroll. Finance runs payroll.</li>
+  <li>Kevin Brown’s sales team builds quotes from CRM pricing. Invoicing belongs to Finance.</li>
+  <li>Robert Johnson records inspection results in the Quality Control System. The Production Database is owned by the Production Supervisor.</li>
+  <li>Dr. Nia Clarke administers Security Cameras and Network Monitoring as owner of the security program.</li>
+  <li>Regina Moore’s and Jason Trujillo’s Admin grants came through approved change tickets.</li></ul>
+  <h3>Work in two passes</h3>
+  <div class="seg2"><button class="btn ${S.m6==='flag'?'on':''}" data-act="m6" data-p="flag" aria-pressed="${S.m6==='flag'}">Flag findings</button><button class="btn ${S.m6==='edit'?'on':''}" data-act="m6" data-p="edit" aria-pressed="${S.m6==='edit'}">Fix findings</button></div>
+  <ul class="tasks"><li class="${S.m6==='flag'?'now':''}"><span>Flag pass: click each problem cell and choose its category.<small>${nf} cell${nf===1?'':'s'} flagged</small></span></li>
+  <li class="${S.m6==='edit'?'now':''}"><span>Fix pass: change each flagged cell to the least access the job needs, with a justification.</span></li></ul>
+  ${nf?`<span class="chips">${Object.entries(S.flags).map(([k,f])=>`<span>${esc(keyName(k))}: ${FLAGN[f].n}</span>`).join('')}</span>`:''}`+foot(m);
+ }
+ if(m.id===7){
+  return head(m,'Second client. ACME Technology Services handles CUI on DoD contracts and is preparing for a CMMC Level 2 assessment. Scope its assets, then repair its role-based zone matrix.')+
+  `<h3>Asset categories</h3><ul class="notes">
+  <li><b>CUI assets</b> process, store, or transmit CUI.</li>
+  <li><b>Security protection assets</b> provide security functions for the CUI environment.</li>
+  <li><b>Contractor risk managed assets</b> can, but aren’t intended to, process CUI because of policy, procedures, and practices.</li>
+  <li><b>Out-of-scope assets</b> can’t process, store, or transmit CUI and are separated from it.</li></ul>
+  <h3>Role duties</h3><ul class="notes">${ROLES.map(r=>`<li><b>${r[0]}:</b> ${r[1]}.</li>`).join('')}</ul>
+  <h3>Tasks</h3><ul class="tasks"><li><span>Classify all 14 assets.</span></li><li><span>In the zone matrix, find the three role grants that break segmentation and set them to deny. Click a cell to cycle Deny, Read, Write, Admin.</span></li></ul>
+  <h3>Questions</h3>${mq('q7a',7)}${mq('q7b',7)}`+foot(m);
+ }
+}
+
+/* ---------- Matrix workspace ---------- */
+const MODE_TEXT={find:'Find mode: click the cell that answers the question',select:'Select mode: click cells to add them to your list',edit:'Edit mode: click a cell to change it, or a name for account actions',flag:'Review mode: click a cell to flag it',view:'View mode'};
+function matrixWork(){
+ const mode=currentMode();
+ const selSet=S.step===2?new Set(S.m2.sel[S.m2.ph]):new Set();
+ const foundSet=S.step===1?new Set(M1T.filter((t,j)=>S.m1.found[j]).map(t=>t[0]+'|'+t[1])):new Set();
+ let h=`<div class="wtool"><span class="mode" data-m="${mode}">${MODE_TEXT[mode]}</span>
+ <div class="legend" aria-hidden="true"><span><i style="background:var(--pA-bg);color:var(--pA)">A</i>Admin</span><span><i style="background:var(--pW-bg);color:var(--pW)">W</i>Write</span><span><i style="background:var(--pR-bg);color:var(--pR)">R</i>Read</span><span><i style="color:var(--pD)">–</i>Deny</span></div></div>
+ <p class="readout" id="readout">Hover or focus a cell to read it.</p>
+ <div class="scroll ${mode==='view'?'view':''} ${mode==='edit'?'edit':''}"><table class="acm" id="acm"><caption class="sr" style="position:absolute;left:-9999px">FreshFlow Systems access control matrix</caption><thead><tr><th class="corner" scope="col">Employee</th>${CODES.map(c=>`<th scope="col" data-c="${c}"><abbr title="${SYSNAME[c]}">${c}</abbr></th>`).join('')}</tr></thead><tbody>`;
+ S.emps.forEach((e,ri)=>{
+  h+=`<tr class="${e.off?'off':''} ${e.isNew?'new':''}" data-r="${ri}"><th scope="row"><button class="rowbtn" data-act="row" data-r="${ri}" ${mode==='edit'?'':'tabindex="-1"'}><span class="nm">${esc(e.n)}</span><span class="rl">${esc(e.role)}${e.off?' (access revoked)':''}</span></button></th>`;
+  CODES.forEach(c=>{const v=e.p[c];const k=e.n+'|'+c;let cls='cell '+pc(v);
+   if(selSet.has(k))cls+=' sel';if(foundSet.has(k))cls+=' found';if(S.exp[k]&&v!=='-')cls+=' tmp';
+   const fl=S.flags[k];if(fl)cls+=' flg';
+   h+=`<td data-c="${c}"><button class="${cls}" ${fl?`data-f="${FLAGN[fl].s}"`:''} data-act="cell" data-r="${ri}" data-c="${c}" aria-label="${esc(e.n)}, ${SYSNAME[c]}: ${PN[v]}${fl?', flagged '+FLAGN[fl].n:''}">${glyph(v)}</button></td>`});
+  h+='</tr>'});
+ h+=`</tbody></table></div>
+ <details class="more"><summary>System codes</summary><div class="key">${SYS.map(s=>`<span><b>${s[0]}</b>${s[1]}</span>`).join('')}</div></details>
+ <details class="more"><summary>Change log (${S.log.length})</summary><ul class="logl">${S.log.slice().reverse().slice(0,40).map(l=>`<li>${esc(l.a)}: ${esc(l.d)}<small>${esc(l.t)}</small></li>`).join('')||'<li>No changes yet.</li>'}</ul></details>`;
+ return h}
+
+/* ---------- ACME workspace ---------- */
+function acmeWork(){
+ let h=`<div class="wsec"><h3>Asset scoping board</h3><p class="note">Pick a category for each ACME asset.</p><ul class="assets" style="margin-top:8px">`;
+ ASSETS.forEach((a,i)=>{const cur=S.assets[a[0]];
+  h+=`<li><span><b>${a[0]}</b><small>${a[2]}</small></span><span class="segc" role="group" aria-label="Category for ${a[0]}">${CATS.map(c=>`<button data-act="cls" data-k="${i}|${c[0]}" class="${cur===c[0]?'on':''}" aria-pressed="${cur===c[0]}" title="${c[1]}">${c[0]}</button>`).join('')}</span></li>`});
+ h+=`</ul></div><div class="wsec"><h3>Network zone matrix (roles)</h3><p class="note">Click a cell to cycle Deny, Read, Write, Admin.</p>
+ <div style="overflow-x:auto"><table class="zone"><thead><tr><th></th>${ZONES.map(z=>`<th scope="col">${z[1]}</th>`).join('')}</tr></thead><tbody>`;
+ ROLES.forEach(r=>{h+=`<tr><th scope="row">${r[0]}</th>${ZONES.map(z=>{const k=r[0]+'|'+z[0];const v=S.rbac[k];return `<td><button class="cell ${pc(v)}" data-act="rb" data-k="${k}" aria-label="${r[0]}, ${z[1]}: ${PN[v]}">${glyph(v)}</button></td>`}).join('')}</tr>`});
+ h+='</tbody></table></div></div>';
+ return h}
+
+/* ---------- Pop-over ---------- */
+const pop=$('#pop');let pend=null;let lastAnchor=null;
+function openPop(anchor,html){pop.innerHTML=html;pop.hidden=false;lastAnchor=anchor;
+ const r=anchor.getBoundingClientRect();const w=pop.offsetWidth,hh=pop.offsetHeight;
+ let left=Math.min(Math.max(8,r.left),innerWidth-w-8);let top=r.bottom+6;if(top+hh>innerHeight-8)top=Math.max(8,r.top-hh-6);
+ pop.style.left=left+'px';pop.style.top=top+'px';
+ const f=pop.querySelector('textarea,select,button');if(f)f.focus({preventScroll:true})}
+function closePop(){if(pop.hidden)return;pop.hidden=true;pend=null;if(lastAnchor&&document.body.contains(lastAnchor))lastAnchor.focus({preventScroll:true})}
+
+function cellEditor(ri,c,anchor){const e=S.emps[ri];const k=e.n+'|'+c;const v=e.p[c];pend={ri,c,v};
+ openPop(anchor,`<h4>${esc(e.n)} × ${SYSNAME[c]}</h4><p class="cur">${esc(e.role)}. Current right: ${PN[v]}</p>
+ <div class="seg" role="group" aria-label="New right">${['-','R','W','A'].map(x=>`<button data-act="pick" data-v="${x}" class="${pc(x)} ${x===v?'on':''}" aria-pressed="${x===v}">${x==='-'?'Deny':PN[x]}</button>`).join('')}</div>
+ <label>Justification<textarea id="pj" placeholder="Business reason, ticket number, approver">${esc(S.just[k]||'')}</textarea></label>
+ <label>Expires (temporary grants only)<input type="date" id="pe" value="${esc(S.exp[k]||'')}"></label>
+ <div class="act"><button class="btn primary" data-act="saveCell">Save change</button><button class="btn" data-act="closePop">Cancel</button></div><p class="err" id="perr"></p>`)}
+function rowPanel(ri,anchor){const e=S.emps[ri];pend={ri};
+ if(!e.off)openPop(anchor,`<h4>${esc(e.n)}</h4><p class="cur">${esc(e.role)}</p>
+ <label>Reason<select id="rr"><option value="">Choose a reason</option><option>Resignation</option><option>Termination</option><option>Department transfer</option><option>Role change</option></select></label>
+ <label>Effective date<input type="date" id="rd" value="${today()}"></label>
+ <div class="act"><button class="btn danger" data-act="revoke">Revoke all access</button><button class="btn" data-act="closePop">Cancel</button></div><p class="err" id="perr"></p>`);
+ else openPop(anchor,`<h4>${esc(e.n)}</h4><p class="cur">All access revoked on ${esc(e.offDate)} (${esc(e.offReason)}).</p><p class="note">Re-enabling restores the account but not its old rights.</p>
+ <div class="act"><button class="btn" data-act="reenable">Re-enable account</button><button class="btn" data-act="closePop">Close</button></div>`)}
+function flagger(ri,c,anchor){const e=S.emps[ri];const k=e.n+'|'+c;const cur=S.flags[k];pend={k};
+ openPop(anchor,`<h4>${esc(e.n)} × ${SYSNAME[c]}</h4><p class="cur">${esc(e.role)}. Current right: ${PN[e.p[c]]}</p>
+ <div class="stack">${FLAGS.map(f=>`<button data-act="setFlag" data-f="${f.k}" class="${cur===f.k?'on':''}"><strong>${f.n}</strong><span>${f.d}</span></button>`).join('')}
+ ${cur?'<button data-act="setFlag" data-f="">Remove flag</button>':''}</div>`)}
+
+/* ---------- Actions ---------- */
+const A={
+ step(b){closePop();S.step=+b.dataset.s;render();scrollTo({top:0})},
+ theme(){S.theme=S.theme==='dark'?'light':'dark';render()},
+ reset(){if(confirm('Start over? This clears your answers, changes, and scores.')){closePop();S=fresh(S.theme);render();toast('Activity reset. The matrix is back to its starting state.')}},
+ ans(b){S.ans[b.dataset.q]=+b.dataset.i;render()},
+ ph(b){S.m2.ph=+b.dataset.p;render()},
+ m6(b){closePop();S.m6=b.dataset.p;render()},
+ cell(b){
+  const ri=+b.dataset.r,c=b.dataset.c,e=S.emps[ri],mode=currentMode();
+  if(mode==='find'){const t=M1T[S.m1.i];
+   if(!t){toast('All three cells are found. Answer the questions, then check the mission.');return}
+   if(e.n===t[0]&&c===t[1]){S.m1.found[S.m1.i]=1;S.m1.i++;log('Lookup',`${e.n} × ${SYSNAME[c]} = ${PN[e.p[c]]}`);toast(`Found it: ${e.n} has ${PN[e.p[c]]} on ${SYSNAME[c]}.`,'ok');render()}
+   else{S.m1.miss[S.m1.i]++;save();b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake');toast(`That cell is ${e.n} × ${SYSNAME[c]}. Follow ${t[0]}’s row across to the ${t[1]} column.`,'warn')}
+   return}
+  if(mode==='select'){const k=e.n+'|'+c;const arr=S.m2.sel[S.m2.ph];const i=arr.indexOf(k);if(i>=0)arr.splice(i,1);else arr.push(k);render();return}
+  if(mode==='edit'){if(e.off){toast(`${e.n}’s account is revoked. Click the name to re-enable it first.`,'warn');return}cellEditor(ri,c,b);return}
+  if(mode==='flag'){flagger(ri,c,b);return}
+ },
+ row(b){if(currentMode()!=='edit')return;rowPanel(+b.dataset.r,b)},
+ pick(b){pend.v=b.dataset.v;pop.querySelectorAll('[data-act="pick"]').forEach(x=>{const on=x.dataset.v===pend.v;x.classList.toggle('on',on);x.setAttribute('aria-pressed',on)})},
+ saveCell(){const e=S.emps[pend.ri];const c=pend.c;const k=e.n+'|'+c;const old=e.p[c];const nv=pend.v;
+  const j=$('#pj').value.trim();const x=$('#pe').value;
+  if(nv===old&&(S.exp[k]||'')===x&&(S.just[k]||'')===j){closePop();return}
+  if(j.length<8){$('#perr').textContent='Add a business reason of at least 8 characters. Every change needs one for the audit trail.';return}
+  e.p[c]=nv;S.just[k]=j;if(x&&nv!=='-')S.exp[k]=x;else delete S.exp[k];
+  log('Right changed',`${e.n} × ${SYSNAME[c]}: ${PN[old]} to ${PN[nv]}${x&&nv!=='-'?', expires '+x:''}. Reason: ${j}`);
+  pend=null;pop.hidden=true;render();toast(`Saved: ${e.n} × ${SYSNAME[c]} is now ${PN[nv]}.`,'ok')},
+ revoke(){const e=S.emps[pend.ri];const r=$('#rr').value,d=$('#rd').value;
+  if(!r||!d){$('#perr').textContent='Choose a reason and an effective date before revoking.';return}
+  CODES.forEach(c=>{e.p[c]='-';delete S.exp[e.n+'|'+c]});e.off=true;e.offReason=r;e.offDate=d;
+  log('Access revoked',`${e.n} (${e.role}): all rights removed. Reason: ${r}. Effective ${d}`);
+  pend=null;pop.hidden=true;render();toast(`${e.n}: all access revoked and logged.`,'ok')},
+ reenable(){const e=S.emps[pend.ri];e.off=false;log('Account re-enabled',`${e.n}: account enabled with no rights`);delete e.offReason;delete e.offDate;pend=null;pop.hidden=true;render()},
+ setFlag(b){const f=b.dataset.f;if(f)S.flags[pend.k]=f;else delete S.flags[pend.k];
+  log(f?'Finding flagged':'Flag removed',`${keyName(pend.k)}${f?': '+FLAGN[f].n:''}`);pend=null;pop.hidden=true;render()},
+ closePop(){closePop()},
+ addUser(){const f=S.form;const n=(f.nuName||'').trim().replace(/\s+/g,' ');const r=f.nuRole||'';const d=f.nuDate||today();
+  if(!n){toast('Enter the employee’s full name.','warn');return}
+  if(!r){toast('Choose a job role.','warn');return}
+  if(emp(n)){toast(`${n} is already in the matrix.`,'warn');return}
+  S.emps.push({n,role:r,p:Object.fromEntries(CODES.map(c=>[c,'-'])),off:false,isNew:true,start:d});
+  log('Employee added',`${n} as ${r}, start ${d}. All rights default to deny`);
+  S.form={nuDate:today()};render();toast(`${n} added with every cell set to deny. Click a cell in the new row to grant access.`,'ok');
+  const sc=$('.scroll');if(sc)sc.scrollTop=sc.scrollHeight},
+ cls(b){const[i,c]=b.dataset.k.split('|');S.assets[ASSETS[+i][0]]=c;render()},
+ rb(b){const k=b.dataset.k;const order=['-','R','W','A'];const old=S.rbac[k];S.rbac[k]=order[(order.indexOf(old)+1)%4];
+  const[r,z]=k.split('|');log('Zone right changed',`${r} × ${ZONES.find(x=>x[0]===z)[1]}: ${PN[old]} to ${PN[S.rbac[k]]}`);render()},
+ check(b){runCheck(+b.dataset.m)},
+ print(){window.print()},
+ dlReport(){const html=`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>ACM review summary</title><style>:root{--ink:#13213C;--muted:#56657F;--rule:#C9D3E0;--sunk:#EEF2F7;--navy:#0047AB;--green:#00875A;--bad:#B42318;--serif:Charter,Georgia,serif;--sans:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}body{margin:24px auto;max-width:1000px;padding:0 16px}${RP_CSS}</style></head><body>${reportHTML()}</body></html>`;
+  download(html,`ACM_Review_Summary_${fileName()}.html`,'text/html');log('Report exported','Summary report downloaded');save()},
+ dlCsv(){const rows=[['Employee','Role','Status',...SYS.map(s=>s[1])]].concat(S.emps.map(e=>[e.n,e.role,e.off?'Revoked':'Active',...CODES.map(c=>e.p[c])]));
+  download(rows.map(r=>r.map(x=>`"${String(x).replace(/"/g,'""')}"`).join(',')).join('\n'),`FreshFlow_ACM_${fileName()}.csv`,'text/csv');log('Matrix exported','Matrix CSV downloaded');save()}
+};
+function fileName(){return ((S.name||'student').trim().replace(/[^\w-]+/g,'_')||'student')+'_'+today()}
+function download(text,name,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}
+
+document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');
+ if(!b){if(!pop.hidden&&!e.target.closest('#pop'))closePop();return}
+ const f=A[b.dataset.act];if(f)f(b,e)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closePop()});
+document.addEventListener('input',e=>{const b=e.target.dataset&&e.target.dataset.bind;if(!b)return;
+ if(b==='name'||b==='statement'){S[b]=e.target.value;save();const p=$('#rpbox');if(p)p.innerHTML=reportHTML();renderTop()}
+ else{S.form[b]=e.target.value;save()}});
+document.addEventListener('change',e=>{const b=e.target.dataset&&e.target.dataset.bind;if(b&&b.startsWith('nu')){S.form[b]=e.target.value;save()}});
+function hoverAt(t){const td=t.closest&&t.closest('#acm td, #acm thead th[data-c], #acm tbody th');const tbl=$('#acm');if(!tbl)return;
+ tbl.querySelectorAll('.xh').forEach(x=>x.classList.remove('xh'));tbl.querySelectorAll('.xr').forEach(x=>x.classList.remove('xr'));
+ if(!td)return;const tr=td.closest('tr');const c=td.dataset.c;
+ if(c)tbl.querySelectorAll(`[data-c="${c}"]`).forEach(x=>x.classList.add('xh'));
+ if(tr&&tr.dataset.r!==undefined)tr.classList.add('xr');
+ const ro=$('#readout');if(!ro)return;
+ if(tr&&tr.dataset.r!==undefined&&c){const e=S.emps[+tr.dataset.r];const k=e.n+'|'+c;
+  ro.innerHTML=`<b>${esc(e.n)}</b> × <b>${SYSNAME[c]}</b>: ${PN[e.p[c]]}${S.exp[k]&&e.p[c]!=='-'?', expires '+esc(S.exp[k]):''}${S.flags[k]?', flagged as '+FLAGN[S.flags[k]].n:''}`}
+ else if(tr&&tr.dataset.r!==undefined){const e=S.emps[+tr.dataset.r];const n=CODES.filter(x=>e.p[x]!=='-').length;ro.innerHTML=`<b>${esc(e.n)}</b> (${esc(e.role)}) holds rights on ${n} of ${CODES.length} systems`}
+ else if(c){const n=S.emps.filter(e=>!e.off&&e.p[c]!=='-').length;ro.innerHTML=`<b>${SYSNAME[c]}</b>: ${n} active employee${n===1?'':'s'} have access`}}
+document.addEventListener('mouseover',e=>hoverAt(e.target));
+document.addEventListener('focusin',e=>hoverAt(e.target));
+
+/* ---------- Checks ---------- */
+function qItem(id){const q=Q[id];const a=S.ans[id];return{ok:a===q.a,l:'Question: '+q.s,d:a===undefined?'Not answered':(a===q.a?'Correct':'Not quite. See the explanation above.')}}
+function cmpSets(sel,target,fmt){const s=new Set(sel),t=new Set(target);const miss=target.filter(x=>!s.has(x)),extra=sel.filter(x=>!t.has(x));
+ return{ok:!miss.length&&!extra.length,d:!miss.length&&!extra.length?`All ${target.length} cells, nothing extra`:[miss.length?`${miss.length} cell${miss.length>1?'s':''} missing`:'',extra.length?`Remove: ${extra.map(fmt).join(', ')}`:''].filter(Boolean).join('. ')}}
+function rulesCheck(e,rules){const probs=[];CODES.forEach(c=>{const ok=rules[c]||['-'];if(!ok.includes(e.p[c]))probs.push(`${SYSNAME[c]} is ${PN[e.p[c]]}; ${ok.length===1&&ok[0]==='-'?'this job needs no access here':'expected '+ok.map(x=>PN[x]).join(' or ')}`)});return probs}
+const CHECKS={
+ 1(){return M1T.map((t,j)=>({ok:!!S.m1.found[j],l:`Located ${t[0]} × ${SYSNAME[t[1]]}`,d:S.m1.found[j]?(S.m1.miss[j]?`Found after ${S.m1.miss[j]} wrong click${S.m1.miss[j]>1?'s':''}`:'Found on the first try'):'Not found yet'})).concat([qItem('q1a'),qItem('q1b')])},
+ 2(){const acl=S.emps.filter(e=>!e.off&&e.p.BKP!=='-').map(e=>e.n+'|BKP');
+  const jn=emp('Jennifer Martinez');const cap=CODES.filter(c=>jn.p[c]!=='-').map(c=>jn.n+'|'+c);
+  const a=cmpSets(S.m2.sel[0],acl,keyName),b=cmpSets(S.m2.sel[1],cap,keyName);
+  return[{ok:a.ok,l:'ACL for Backup Systems',d:a.d},{ok:b.ok,l:'Capability list for Jennifer Martinez',d:b.d},qItem('q2a'),qItem('q2b')]},
+ 3(){const r=emp('Regina Moore'),j=emp('Jason Trujillo');
+  const rOk=r.p.PLC==='A'&&!!S.just['Regina Moore|PLC'];const jOk=j.p.FW==='A'&&!!S.just['Jason Trujillo|FW']&&!!S.exp['Jason Trujillo|FW'];
+  const coll=[];[[r,'PLC'],[j,'FW']].forEach(([e,t])=>CODES.forEach(c=>{if(c!==t&&e.p[c]!==ORIG[e.n][c])coll.push(`${e.n} × ${SYSNAME[c]}`)}));
+  return[{ok:rOk,l:'Regina Moore has Admin on PLC Controls with a justification',d:rOk?'Logged':`Currently ${PN[r.p.PLC]}${S.just['Regina Moore|PLC']?'':', no justification yet'}`},
+   {ok:jOk,l:'Jason Trujillo has temporary Admin on Firewall Admin',d:jOk?`Expires ${S.exp['Jason Trujillo|FW']}`:[j.p.FW!=='A'?`Currently ${PN[j.p.FW]}`:'',!S.exp['Jason Trujillo|FW']?'Set an expiry date':''].filter(Boolean).join('. ')},
+   {ok:!coll.length,l:'No other rights changed in their rows',d:coll.length?'Changed: '+coll.join(', '):'Least privilege kept'},qItem('q3a')]},
+ 4(){const mk=emp('Mike Chen'),sw=emp('Sarah Williams');const clean=e=>e.off&&CODES.every(c=>e.p[c]==='-');
+  const others=S.emps.filter(e=>e.off&&!['Mike Chen','Sarah Williams'].includes(e.n)&&ORIG[e.n]).map(e=>e.n);
+  const mOk=clean(mk)&&mk.offReason==='Department transfer',sOk=clean(sw)&&sw.offReason==='Resignation';
+  return[{ok:mOk,l:'Mike Chen revoked as a department transfer',d:mOk?'Logged with effective date':(mk.off?`Recorded as ${mk.offReason}`:'Not revoked yet')},
+   {ok:sOk,l:'Sarah Williams revoked as a resignation',d:sOk?'Logged with effective date':(sw.off?`Recorded as ${sw.offReason}`:'Not revoked yet')},
+   {ok:!others.length,l:'No other accounts revoked',d:others.length?'Also revoked: '+others.join(', '):'Only the two leavers were touched'},qItem('q4a'),qItem('q4b')]},
+ 5(){const out=[];
+  [['Maria Rodriguez','Quality Control Manager',{QCS:['W'],PDB:['R'],EML:['R','W'],FS:['-','R','W']}],
+   ['David Kim','IT Security Analyst',{NMON:['R','W'],CAM:['R'],FW:['-','R'],BKP:['-','R'],EML:['R','W'],FS:['-','R','W']}]].forEach(([n,role,rules])=>{
+   const e=emp(n);
+   out.push({ok:!!e&&e.role===role&&!e.off,l:`${n} added as ${role}`,d:!e?'Not in the matrix yet':(e.role!==role?`Role is ${e.role}`:'Account created')});
+   const p=e?rulesCheck(e,rules):['Add the employee first'];
+   out.push({ok:!!e&&!p.length,l:`${n} has least-privilege rights`,d:p.length?p.join('. '):'Exactly what the job needs'})});
+  return out.concat([qItem('q5a')])},
+ 6(){const items=[];const pk=new Set(PLANTED.map(p=>p.k));
+  PLANTED.forEach((p,i)=>{const f=S.flags[p.k];items.push({ok:f===p.f,l:`Finding ${i+1} flagged and classified`,d:!f?'Not flagged yet':(f===p.f?`${keyName(p.k)}: ${FLAGN[f].n}`:`${keyName(p.k)} is flagged, but the category isn’t right`)})});
+  const extra=Object.keys(S.flags).filter(k=>!pk.has(k));
+  items.push({ok:!extra.length,l:'No false positives',d:extra.length?'Not a policy problem: '+extra.map(keyName).join(', '):'Every flag is a real finding'});
+  PLANTED.forEach((p,i)=>{const[n,c]=p.k.split('|');const v=emp(n).p[c];const flagged=S.flags[p.k]===p.f;
+   items.push({ok:flagged&&v===p.fix,l:`Finding ${i+1} remediated`,d:!flagged?'Flag it correctly first':(v===p.fix?`${keyName(p.k)} set to ${PN[v]}`:`${keyName(p.k)} is ${PN[v]}; reduce it to the least access the job needs`)})});
+  return items},
+ 7(){const items=CATS.map(([c,label])=>{const of=ASSETS.filter(a=>a[1]===c);const wrong=of.filter(a=>S.assets[a[0]]&&S.assets[a[0]]!==c),un=of.filter(a=>!S.assets[a[0]]);
+   return{ok:!wrong.length&&!un.length,l:`${label}s identified`,d:!wrong.length&&!un.length?`All ${of.length} correct`:[wrong.length?`${wrong.length} of ${of.length} placed in another category`:'',un.length?`${un.length} not classified yet`:''].filter(Boolean).join('. ')}});
+  RB_PLANT.forEach((k,i)=>items.push({ok:S.rbac[k]==='-',l:`Segmentation fix ${i+1}`,d:S.rbac[k]==='-'?`${k.replace('|',' × ')} zone set to deny`:'One role still has a zone grant its duties don’t justify'}));
+  const changed=Object.keys(RBAC0).filter(k=>!RB_PLANT.includes(k)&&S.rbac[k]!==RBAC0[k]);
+  items.push({ok:!changed.length,l:'Legitimate zone grants left alone',d:changed.length?'Changed without cause: '+changed.map(k=>k.replace('|',' × ')).join(', '):'No collateral changes'});
+  return items.concat([qItem('q7a'),qItem('q7b')])}
+};
+function runCheck(m){const items=CHECKS[m]();const sc=items.filter(i=>i.ok).length;const prev=S.res[m];
+ S.res[m]={score:sc,items,tries:(prev?prev.tries:0)+1,t:new Date().toLocaleString()};
+ const mx=MISSIONS.find(x=>x.id===m).max;
+ log('Mission checked',`Mission ${m}: ${sc} of ${mx} points`);
+ render();toast(sc===mx?`Mission ${m} complete: ${sc} of ${mx} points.`:`Mission ${m}: ${sc} of ${mx} points. Review the items marked with an ✕.`,sc===mx?'ok':'warn');
+ const r=$('.res');if(r)r.scrollIntoView({block:'nearest',behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'})}
+
+/* ---------- Summary & report ---------- */
+function ksaPct(k){
+ if(k.m[0]==='report'){return Math.round(MISSIONS.filter(m=>S.res[m.id]).length/MISSIONS.length*100)}
+ if(k.m[0]==='statement'){const l=(S.statement||'').trim().length;return l>=60?100:l>0?50:0}
+ let s=0,mx=0;k.m.forEach(id=>{const m=MISSIONS.find(x=>x.id===id);mx+=m.max;s+=S.res[id]?S.res[id].score:0});return mx?Math.round(s/mx*100):0}
+function reportHTML(){
+ const sc=score(),pct=Math.round(sc/TOTAL*100);
+ const verdict=pct>=90?'Audit-ready':pct>=75?'Nearly there':'More practice needed';
+ const mrows=MISSIONS.map(m=>{const r=S.res[m.id];return `<tr><td>${m.id}. ${m.title}</td><td>${r?r.score:0} / ${m.max}</td><td>${r?r.tries:0}</td><td>${!r?'Not checked':(r.score===m.max?'<span class="ok">Complete</span>':'<span class="no">Partial</span>')}</td></tr>`}).join('');
+ const krows=['Knowledge','Skills','Abilities'].map(g=>`<tr><th colspan="3">${g}</th></tr>`+KSA.filter(k=>k.g===g).map(k=>{const p=ksaPct(k);return `<tr><td><b>${k.id}</b> ${k.n}</td><td style="width:160px"><div class="bar2"><i style="width:${p}%"></i></div></td><td style="width:56px">${p}%</td></tr>`}).join('')).join('');
+ const frows=Object.entries(S.flags).map(([k,f])=>{const[n,c]=k.split('|');const e=emp(n);const p=PLANTED.find(x=>x.k===k);const status=!p?'Not a finding':(p.f!==f?'Misclassified':(e.p[c]===p.fix?'Remediated':'Open'));
+  return `<tr><td>${esc(keyName(k))}</td><td>${FLAGN[f].n}</td><td>${PN[e.p[c]]}</td><td>${status==='Remediated'?'<span class="ok">Remediated</span>':status}</td></tr>`}).join('')||'<tr><td colspan="4">No findings flagged.</td></tr>';
+ const lrows=S.log.filter(l=>!/^Mission checked|^Lookup|^Report|^Matrix exported/.test(l.a)).map(l=>`<tr><td style="white-space:nowrap">${esc(l.t)}</td><td>${esc(l.a)}</td><td>${esc(l.d)}</td></tr>`).join('')||'<tr><td colspan="3">No changes recorded.</td></tr>';
+ const mx=`<table class="mx"><tr><th style="text-align:left">Employee</th>${CODES.map(c=>`<th title="${SYSNAME[c]}">${c}</th>`).join('')}</tr>${S.emps.map(e=>`<tr><td class="nm">${esc(e.n)}${e.off?' (revoked)':''}</td>${CODES.map(c=>`<td>${glyph(e.p[c])}</td>`).join('')}</tr>`).join('')}</table>`;
+ return `<div class="rp"><h2>Access Review Week: summary</h2>
+ <p class="meta">${esc(S.name||'Student name not entered')}. Generated ${new Date().toLocaleString()}.</p>
+ <div class="big"><div><b>${sc} / ${TOTAL}</b>points</div><div><b>${pct}%</b>overall</div><div><b>${MISSIONS.filter(m=>S.res[m.id]&&S.res[m.id].score===m.max).length} / 7</b>missions complete</div><div><b>${verdict}</b>status</div></div>
+ <h3>Mission results</h3><table><tr><th>Mission</th><th>Score</th><th>Checks</th><th>Status</th></tr>${mrows}</table>
+ <h3>Knowledge, skills, and abilities</h3><table>${krows}</table>
+ <h3>Reviewer’s statement to the auditor</h3><div class="stmt">${esc(S.statement)||'No statement written yet.'}</div>
+ <h3>Access review findings (FreshFlow Systems)</h3><table><tr><th>Cell</th><th>Category</th><th>Current right</th><th>Status</th></tr>${frows}</table>
+ <h3>Change log</h3><table><tr><th>Time</th><th>Action</th><th>Detail</th></tr>${lrows}</table>
+ <h3>Final FreshFlow matrix</h3><div class="rpwrap">${mx}</div>
+ <p class="meta" style="margin-top:8px">Key: A Admin, W Write, R Read, – Deny. ${SYS.map(s=>s[0]+' '+s[1]).join('; ')}.</p></div>`}
+const RP_CSS=[...document.styleSheets[0].cssRules].filter(r=>r.selectorText&&r.selectorText.startsWith('.rp')).map(r=>r.cssText).join('\n');
+function summary(){
+ const missing=MISSIONS.filter(m=>!S.res[m.id]);
+ return `<div class="sumgrid"><aside class="panel sumctl"><h2 style="font-size:24px">Your evidence package</h2>
+ <label style="display:grid;gap:4px;font-weight:600;font-size:14px">Your name<input type="text" data-bind="name" value="${esc(S.name)}" autocomplete="name"></label>
+ <label style="display:grid;gap:4px;font-weight:600;font-size:14px">Statement to the auditor<textarea data-bind="statement" rows="6" placeholder="In two or three sentences, summarize the biggest access risk you found, what you changed, and what FreshFlow or ACME should do next.">${esc(S.statement)}</textarea></label>
+ <p class="note">The statement demonstrates ability A3. Aim for at least 60 characters.</p>
+ ${missing.length?`<p class="note">Not yet checked: missions ${missing.map(m=>m.id).join(', ')}.</p>`:''}
+ <button class="btn primary" data-act="print">Print or save as PDF</button>
+ <button class="btn" data-act="dlReport">Download report (HTML)</button>
+ <button class="btn" data-act="dlCsv">Export matrix (CSV)</button>
+ <p class="note">To save a PDF, choose Save as PDF as the printer.</p></aside>
+ <section class="panel" id="rpbox">${reportHTML()}</section></div>`}
+
+render();
+</script>
+</body>
+</html>
