@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Risk Register Challenge: Inventory, Analyze, and Manage Cybersecurity Risk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F2F5F9; --surface:#FFFFFF; --surface2:#E9EFF7; --ink:#14223B; --muted:#56637B; --line:#D3DCE8;
+  --navy:#0047AB; --on-navy:#FFFFFF; --navy-soft:rgba(0,71,171,.08); --green:#00A86B; --green-soft:rgba(0,168,107,.12);
+  --ok:#0A8454; --ok-soft:rgba(10,132,84,.10); --bad:#BF3328; --bad-soft:rgba(191,51,40,.09);
+  --low:#2E9F68; --med:#D9A520; --high:#E2742E; --crit:#C9372E;
+  --low-bg:rgba(46,159,104,.20); --med-bg:rgba(217,165,32,.24); --high-bg:rgba(226,116,46,.24); --crit-bg:rgba(201,55,46,.24);
+  --shadow:0 1px 2px rgba(20,34,59,.05),0 8px 22px rgba(20,34,59,.06);
+  --display:'Archivo','Helvetica Neue',Arial,sans-serif;
+  --body:'Source Sans 3','Segoe UI',system-ui,-apple-system,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0C1423; --surface:#14203A; --surface2:#1B2A49; --ink:#E6ECF6; --muted:#9DABC4; --line:#2A3B5E;
+    --navy:#6E9EF2; --on-navy:#0C1423; --navy-soft:rgba(110,158,242,.13); --green:#2FCB8F; --green-soft:rgba(47,203,143,.14);
+    --ok:#3BD49B; --ok-soft:rgba(59,212,155,.12); --bad:#FF8073; --bad-soft:rgba(255,128,115,.12);
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 22px rgba(0,0,0,.25); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0C1423; --surface:#14203A; --surface2:#1B2A49; --ink:#E6ECF6; --muted:#9DABC4; --line:#2A3B5E;
+  --navy:#6E9EF2; --on-navy:#0C1423; --navy-soft:rgba(110,158,242,.13); --green:#2FCB8F; --green-soft:rgba(47,203,143,.14);
+  --ok:#3BD49B; --ok-soft:rgba(59,212,155,.12); --bad:#FF8073; --bad-soft:rgba(255,128,115,.12);
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 22px rgba(0,0,0,.25); color-scheme:dark;
+}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 80px);background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:1.0625rem;line-height:1.55}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+h1,h2,h3{font-family:var(--display);line-height:1.15;margin:0 0 .5em;letter-spacing:-.01em}
+h1{font-size:clamp(2rem,4.2vw,3.05rem);font-weight:800;letter-spacing:-.025em;line-height:1.04}
+h2{font-size:1.75rem;font-weight:800}
+h3{font-size:1.12rem;font-weight:700}
+p{margin:0 0 .9em;max-width:72ch}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--navy);outline-offset:2px;border-radius:6px}
+img,svg{max-width:100%}
+
+/* Top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
+.top-in{max-width:1260px;margin:0 auto;display:flex;align-items:center;gap:18px;padding:10px 20px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;font-size:1.05rem;white-space:nowrap}
+.glyph{display:grid;grid-template-columns:repeat(3,7px);gap:2px}
+.glyph i{width:7px;height:7px;border-radius:1.5px}
+.prog{flex:1;display:flex;align-items:center;gap:10px;min-width:120px}
+.prog-bar{flex:1;height:8px;background:var(--surface2);border-radius:99px;overflow:hidden}
+.prog-bar span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--navy),var(--green));transition:width .4s ease}
+.prog-txt{font-size:.9rem;color:var(--muted);white-space:nowrap}
+.theme-btn{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:6px 14px;cursor:pointer;font-weight:600;font-size:.92rem;white-space:nowrap}
+.theme-btn:hover{border-color:var(--navy)}
+
+/* Shell */
+.shell{max-width:1260px;margin:0 auto;display:grid;grid-template-columns:236px minmax(0,1fr);gap:30px;padding:26px 20px 70px}
+.rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 78px);align-self:start}
+.rail ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.rail button{width:100%;display:flex;align-items:center;gap:12px;text-align:left;background:none;border:0;border-radius:10px;padding:9px 10px;cursor:pointer;color:var(--muted);font-weight:600}
+.rail button:hover{background:var(--surface2);color:var(--ink)}
+.rail button[aria-current="step"]{background:var(--navy-soft);color:var(--ink)}
+.rail .n{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--line);font-family:var(--display);font-size:.85rem;background:var(--surface)}
+.rail button[aria-current="step"] .n{border-color:var(--navy);color:var(--navy)}
+.rail li.done .n{background:var(--green);border-color:var(--green);color:#fff}
+.rail .phase{font-size:.78rem;color:var(--muted);padding:14px 10px 4px;font-weight:600}
+.station{display:none}
+.station.active{display:block;animation:enter .35s ease}
+@keyframes enter{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){.station.active{animation:none}.prog-bar span{transition:none}}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:24px;margin-bottom:18px;box-shadow:var(--shadow)}
+.panel.flat{box-shadow:none;background:var(--surface2);border-color:transparent}
+.st-head{margin-bottom:18px}
+.st-head p{color:var(--muted)}
+.ksa-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.ksa-tags span{font-size:.82rem;font-weight:600;padding:3px 10px;border-radius:99px;background:var(--navy-soft);color:var(--navy)}
+.task{display:flex;gap:10px;align-items:baseline;margin-bottom:12px}
+.task h3{margin:0}
+.hint{font-size:.95rem;color:var(--muted)}
+
+.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid transparent;border-radius:9px;padding:10px 18px;font-weight:700;cursor:pointer;background:var(--navy);color:var(--on-navy)}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--navy);border-color:var(--line)}
+.btn.ghost:hover{border-color:var(--navy);filter:none}
+.btn.green{background:var(--green);color:#fff}
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:16px}
+.nav-row{display:flex;justify-content:space-between;gap:10px;margin-top:8px}
+
+.fb{margin-top:12px;padding:10px 14px;border-radius:9px;font-size:.98rem;display:none}
+.fb.show{display:block}
+.fb.ok{background:var(--ok-soft);color:var(--ink);border-left:4px solid var(--ok)}
+.fb.bad{background:var(--bad-soft);color:var(--ink);border-left:4px solid var(--bad)}
+.fb.info{background:var(--navy-soft);border-left:4px solid var(--navy)}
+
+/* Briefing */
+.hero{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:34px;align-items:center}
+.hero .lede{font-size:1.15rem;color:var(--muted)}
+.hero-matrix{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;max-width:330px;margin-left:auto}
+.hero-matrix i{aspect-ratio:1;border-radius:6px;display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:.85rem;color:var(--ink);font-style:normal}
+.hero-cap{font-size:.85rem;color:var(--muted);text-align:right;margin-top:8px}
+.field{display:flex;flex-direction:column;gap:6px;max-width:360px}
+.field label{font-weight:600;font-size:.95rem}
+.field input{border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:10px 12px}
+.ksa-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.ksa-col h3{display:flex;align-items:center;gap:8px}
+.ksa-col ul{margin:0;padding-left:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+.ksa-col li{font-size:.95rem;display:grid;grid-template-columns:34px 1fr;gap:6px}
+.ksa-col b{font-family:var(--display);color:var(--navy)}
+.route{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-top:6px}
+.route div{background:var(--surface2);border-radius:10px;padding:10px;font-size:.88rem}
+.route b{display:block;font-family:var(--display);font-size:.95rem}
+
+/* Matching */
+.match{display:grid;grid-template-columns:minmax(0,.7fr) minmax(0,1.3fr);gap:18px}
+.term,.def{display:flex;align-items:flex-start;gap:10px;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;margin-bottom:8px;line-height:1.4}
+.term:hover,.def:hover{border-color:var(--navy)}
+.term.sel{border-color:var(--navy);background:var(--navy-soft);box-shadow:0 0 0 2px var(--navy) inset}
+.term.paired{opacity:.7}
+.tag,.slot{flex:none;width:26px;height:26px;border-radius:7px;display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:.85rem}
+.tag{background:var(--navy);color:var(--on-navy)}
+.slot{border:2px dashed var(--line);color:var(--navy)}
+.def.has .slot{border-style:solid;border-color:var(--navy);background:var(--navy-soft)}
+.def.ok{border-color:var(--ok);background:var(--ok-soft)}
+.def.bad{border-color:var(--bad);background:var(--bad-soft)}
+
+/* Ordering */
+.order{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.ocard{position:relative;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:14px 14px 14px 52px;cursor:pointer;min-height:92px;line-height:1.45}
+.ocard:hover{border-color:var(--navy)}
+.ocard .num{position:absolute;left:12px;top:14px;width:28px;height:28px;border-radius:50%;border:2px dashed var(--line);display:grid;place-items:center;font-family:var(--display);font-weight:800}
+.ocard.picked .num{border-style:solid;border-color:var(--navy);background:var(--navy);color:var(--on-navy)}
+.ocard .nm{display:block;font-family:var(--display);font-weight:700;margin-bottom:2px;color:var(--ok)}
+.ocard.ok{border-color:var(--ok);background:var(--ok-soft)}
+.ocard.bad{border-color:var(--bad);background:var(--bad-soft)}
+
+/* Segmented rows */
+.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 16px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.row-text{margin:0}
+.row.ok{background:linear-gradient(90deg,var(--ok-soft),transparent 70%)}
+.row.bad{background:linear-gradient(90deg,var(--bad-soft),transparent 70%)}
+.row-why{grid-column:1/-1;margin:0;font-size:.93rem;color:var(--muted)}
+.rows.wide .row{grid-template-columns:1fr}
+.seg{display:flex;flex-wrap:wrap;gap:4px;background:var(--surface2);padding:4px;border-radius:10px}
+.seg button{border:0;background:transparent;padding:6px 12px;border-radius:7px;cursor:pointer;font-weight:600;font-size:.93rem;color:var(--muted)}
+.seg button:hover{color:var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--navy);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+
+/* MCQ */
+.mcq{border:0;padding:0;margin:0 0 18px}
+.mcq legend{font-weight:600;margin-bottom:8px;padding:0}
+.opts{display:grid;gap:6px}
+.opt{text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:9px 12px;cursor:pointer}
+.opt:hover{border-color:var(--navy)}
+.opt.ok{border-color:var(--ok);background:var(--ok-soft)}
+.opt.bad{border-color:var(--bad);background:var(--bad-soft)}
+.mcq-fb{margin:8px 0 0;font-size:.95rem}
+
+/* Cost builder */
+.costs{display:grid;gap:6px}
+.cost{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--line);border-radius:9px;cursor:pointer;background:var(--surface)}
+.cost input{width:18px;height:18px;accent-color:var(--navy)}
+.cost .amt{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:600}
+.cost.ok{border-color:var(--ok)}.cost.bad{border-color:var(--bad);background:var(--bad-soft)}
+.inline-in{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px}
+.money-in,.num-in{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 10px;width:130px;font-variant-numeric:tabular-nums}
+.money-in.ok,.num-in.ok,select.ok{border-color:var(--ok);background:var(--ok-soft)}
+.money-in.bad,.num-in.bad,select.bad{border-color:var(--bad);background:var(--bad-soft)}
+select{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 10px}
+
+/* Tables */
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{padding:10px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+th{font-family:var(--display);font-size:.88rem;color:var(--muted);font-weight:700}
+td .money-in,td .num-in{width:112px}
+.formula{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 14px}
+.formula div{background:var(--surface2);border-radius:10px;padding:10px 12px;font-size:.92rem}
+.formula b{display:block;font-family:var(--display)}
+.av-badge{display:inline-flex;align-items:baseline;gap:8px;background:var(--navy-soft);border-radius:10px;padding:8px 14px;margin-bottom:14px}
+.av-badge strong{font-family:var(--display);font-size:1.4rem;color:var(--navy)}
+details.work{margin-top:12px}
+details.work summary{cursor:pointer;font-weight:700;color:var(--navy)}
+.cba{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.cba .panel{margin:0}
+.cba label{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:8px;font-size:.95rem}
+
+/* Matrix */
+.qual{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:22px;align-items:start}
+.events{display:grid;gap:8px}
+.ev{text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:11px;padding:11px 12px;cursor:pointer;line-height:1.42}
+.ev:hover{border-color:var(--navy)}
+.ev.sel{border-color:var(--navy);box-shadow:0 0 0 2px var(--navy) inset;background:var(--navy-soft)}
+.ev .eh{display:flex;align-items:center;gap:8px;font-weight:700;margin-bottom:3px}
+.ev .eid{font-family:var(--display);background:var(--ink);color:var(--surface);border-radius:6px;padding:1px 7px;font-size:.82rem}
+.ev .placed{margin-left:auto;font-size:.8rem;font-weight:600;color:var(--muted)}
+.ev p{margin:0;font-size:.93rem;color:var(--muted)}
+.ev.ok{border-color:var(--ok)}.ev.bad{border-color:var(--bad)}
+.mx-wrap{position:sticky;top:calc(env(safe-area-inset-top,0px) + 82px)}
+.mx{display:grid;grid-template-columns:96px repeat(5,minmax(0,1fr));gap:4px}
+.mx .yl{font-size:.8rem;color:var(--muted);display:flex;align-items:center;justify-content:flex-end;text-align:right;padding-right:6px;line-height:1.15}
+.mx .xl{font-size:.8rem;color:var(--muted);text-align:center;padding-top:4px;line-height:1.15}
+.cell{position:relative;aspect-ratio:1;border:0;border-radius:8px;cursor:pointer;padding:4px;display:flex;flex-wrap:wrap;align-content:flex-start;gap:3px}
+.cell .sc{position:absolute;right:6px;bottom:4px;font-family:var(--display);font-weight:700;font-size:.8rem;opacity:.55}
+.cell:hover{outline:2px solid var(--navy);outline-offset:-2px}
+.chip{font-family:var(--display);font-size:.72rem;font-weight:700;background:var(--ink);color:var(--surface);border-radius:5px;padding:1px 5px}
+.b-low{background:var(--low-bg)}.b-med{background:var(--med-bg)}.b-high{background:var(--high-bg)}.b-crit{background:var(--crit-bg)}
+.axis-t{font-family:var(--display);font-weight:700;font-size:.85rem;text-align:center;margin-top:6px}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:.85rem;margin-top:10px}
+.legend span{display:flex;align-items:center;gap:6px}
+.legend i{width:14px;height:14px;border-radius:4px;display:inline-block}
+.scales{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;font-size:.9rem}
+.scales ol{margin:0;padding-left:20px}
+.scales li{margin-bottom:3px}
+
+/* Plan */
+.plan{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:22px;align-items:start}
+.cms{display:grid;gap:10px}
+.cm{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:12px 14px;cursor:pointer}
+.cm:hover{border-color:var(--navy)}
+.cm[aria-pressed="true"]{border-color:var(--green);box-shadow:0 0 0 2px var(--green) inset;background:var(--green-soft)}
+.cm .box{width:22px;height:22px;border-radius:6px;border:2px solid var(--line);display:grid;place-items:center;font-weight:800;color:#fff;margin-top:2px}
+.cm[aria-pressed="true"] .box{background:var(--green);border-color:var(--green)}
+.cm h3{margin:0 0 2px;font-size:1rem}
+.cm p{margin:0;font-size:.9rem;color:var(--muted)}
+.cm .cost-tag{font-family:var(--display);font-weight:700;white-space:nowrap}
+.dash{position:sticky;top:calc(env(safe-area-inset-top,0px) + 82px)}
+.meter{margin-bottom:14px}
+.meter-top{display:flex;justify-content:space-between;font-size:.92rem;font-weight:600;margin-bottom:5px}
+.meter-bar{height:12px;background:var(--surface2);border-radius:99px;overflow:hidden}
+.meter-bar span{display:block;height:100%;background:var(--navy);transition:width .3s ease;width:0}
+.meter-bar.over span{background:var(--bad)}
+.big{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.big div{background:var(--surface2);border-radius:10px;padding:10px 12px}
+.big small{display:block;color:var(--muted);font-size:.82rem}
+.big strong{font-family:var(--display);font-size:1.35rem}
+.resid td:last-child,.resid th:last-child{text-align:right}
+.pill{display:inline-block;padding:1px 9px;border-radius:99px;font-size:.8rem;font-weight:700}
+textarea{width:100%;min-height:120px;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:12px;line-height:1.5;resize:vertical}
+.wc{font-size:.88rem;color:var(--muted)}
+
+/* Summary */
+.report h2{margin-top:0}
+.report h3{margin-top:22px}
+.report .meta{display:flex;flex-wrap:wrap;gap:8px 26px;color:var(--muted);margin-bottom:14px}
+.score-hero{display:flex;align-items:center;gap:22px;flex-wrap:wrap;margin:8px 0 18px}
+.ring{width:118px;height:118px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--green) calc(var(--p)*1%),var(--surface2) 0)}
+.ring div{width:92px;height:92px;border-radius:50%;background:var(--surface);display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:1.6rem}
+.mbar{height:9px;background:var(--surface2);border-radius:99px;overflow:hidden;min-width:90px}
+.mbar span{display:block;height:100%}
+.status{font-weight:700;font-size:.88rem}
+.rec-box{background:var(--surface2);border-radius:10px;padding:12px 14px;white-space:pre-wrap}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 20px);transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--surface);padding:10px 18px;border-radius:10px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:50}
+.toast.show{opacity:1;transform:translateX(-50%)}
+footer{font-size:.85rem;color:var(--muted);margin-top:28px}
+
+@media (max-width: 960px){
+  .shell{grid-template-columns:1fr;gap:16px}
+  .rail{position:static}
+  .rail ol{flex-direction:row;overflow-x:auto;gap:6px;padding-bottom:6px}
+  .rail li{flex:none}
+  .rail .phase{display:none}
+  .rail button{padding:7px 10px;white-space:nowrap}
+  .hero,.qual,.plan,.match{grid-template-columns:1fr}
+  .hero-matrix{margin:0}
+  .hero-cap{text-align:left}
+  .mx-wrap,.dash{position:static}
+  .ksa-grid{grid-template-columns:1fr}
+  .route{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media (max-width: 620px){
+  .top-in{flex-wrap:wrap;gap:10px}
+  .prog{order:3;flex-basis:100%}
+  .brand{flex:1}
+  .order,.cba,.formula,.scales{grid-template-columns:1fr}
+  .row{grid-template-columns:1fr}
+  .panel{padding:18px}
+  .mx{grid-template-columns:70px repeat(5,minmax(0,1fr))}
+  .route{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media print{
+  body{background:#fff;color:#000}
+  .top,.rail,.station,.no-print,.toast,body::before{display:none !important}
+  #summary{display:block !important;animation:none}
+  .shell{display:block;padding:0}
+  .panel{box-shadow:none;border:0;padding:0}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <div class="brand"><span class="glyph" aria-hidden="true" id="glyph"></span>Risk Register Challenge</div>
+    <div class="prog" aria-label="Activity progress"><div class="prog-bar"><span id="progBar"></span></div><span class="prog-txt" id="progTxt">0 of 16 checks</span></div>
+    <button class="theme-btn" id="themeBtn" type="button" aria-pressed="false"><span aria-hidden="true" id="themeIcon">☾</span><span id="themeLabel">Dark mode</span></button>
+  </div>
+</header>
+
+<div class="shell">
+  <nav class="rail" aria-label="Activity stations"><ol id="rail"></ol></nav>
+
+  <main id="main">
+  <!-- BRIEFING -->
+  <section class="station active" id="brief" aria-labelledby="h-brief">
+    <div class="panel">
+      <div class="hero">
+        <div>
+          <h1 id="h-brief">Lakeshore Clinic needs a risk register by Friday.</h1>
+          <p class="lede">You’re the first cybersecurity risk analyst at Lakeshore Community Health Clinic: 120 staff, an electronic health record (EHR) system, a telehealth portal, and a pharmacy that takes card payments. Leadership has a $30,000 annual security budget and wants to know where to spend it.</p>
+          <p>Work through six stations. You’ll inventory assets, analyze risk two ways, choose responses, and defend a funded treatment plan. Every check gives feedback, and you can retry as often as you like. Your summary scores your first attempt on each check.</p>
+          <div class="field"><label for="learnerName">Your name (appears on your summary)</label><input id="learnerName" autocomplete="name" placeholder="First and last name"></div>
+          <div class="actions"><button class="btn" data-go="frame" type="button">Start station 1</button></div>
+        </div>
+        <div aria-hidden="true">
+          <div class="hero-matrix" id="heroMatrix"></div>
+          <p class="hero-cap">Impact × probability = risk score</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>What this activity reviews</h2>
+      <p class="hint">Each station is tagged with the knowledge, skills, and abilities it practices. Your summary reports mastery for each one.</p>
+      <div class="ksa-grid" id="ksaGrid"></div>
+    </div>
+
+    <div class="panel flat">
+      <h3>Your route through the risk management process</h3>
+      <div class="route">
+        <div><b>1 Frame</b>Terms and process</div>
+        <div><b>2 Inventory</b>Assets and asset value</div>
+        <div><b>3 Quantify</b>SLE, ARO, ALE, cost-benefit</div>
+        <div><b>4 Qualify</b>Heat map and risk scores</div>
+        <div><b>5 Respond</b>Strategies and controls</div>
+        <div><b>6 Decide</b>Funded plan and monitoring</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATION 1 -->
+  <section class="station" id="frame" aria-labelledby="h-frame">
+    <div class="st-head">
+      <h2 id="h-frame">1. Frame the risk</h2>
+      <p>Before you can measure risk, you and leadership need a shared vocabulary and a shared process.</p>
+      <div class="ksa-tags"><span>K1 Terminology</span><span>K2 Process</span></div>
+    </div>
+    <div class="panel">
+      <div class="task"><h3>Match each term to its definition</h3></div>
+      <p class="hint">Select a term, then select its definition. Select a matched definition again to clear it.</p>
+      <div class="match"><div id="termList"></div><div id="defList"></div></div>
+      <div class="actions"><button class="btn" id="chkTerms" type="button">Check matches</button></div>
+      <div class="fb" id="fbTerms" aria-live="polite"></div>
+    </div>
+    <div class="panel">
+      <div class="task"><h3>Put the risk management process in order</h3></div>
+      <p class="hint">Select the descriptions in the order they happen. Select a card again to remove it and everything after it.</p>
+      <div class="order" id="orderBox"></div>
+      <div class="actions"><button class="btn" id="chkOrder" type="button">Check order</button><button class="btn ghost" id="resetOrder" type="button">Clear order</button></div>
+      <div class="fb" id="fbOrder" aria-live="polite"></div>
+    </div>
+    <div class="nav-row"><button class="btn ghost" data-go="brief" type="button">Back</button><button class="btn" data-go="inventory" type="button">Next: inventory assets</button></div>
+  </section>
+
+  <!-- STATION 2 -->
+  <section class="station" id="inventory" aria-labelledby="h-inv">
+    <div class="st-head">
+      <h2 id="h-inv">2. Inventory assets</h2>
+      <p>You can’t protect what you haven’t listed. Build the clinic’s asset register and value the first asset you’ll analyze.</p>
+      <div class="ksa-tags"><span>K3 Methods</span><span>S1 Inventory and value</span></div>
+    </div>
+    <div class="panel">
+      <div class="task"><h3>Classify each asset as tangible or intangible</h3></div>
+      <div class="rows" id="classifyBox"></div>
+      <div class="actions"><button class="btn" id="chkClassify" type="button">Check register</button></div>
+      <div class="fb" id="fbClassify" aria-live="polite"></div>
+    </div>
+    <div class="panel">
+      <div class="task"><h3>Pick the right analysis method</h3></div>
+      <div id="methodBox"></div>
+    </div>
+    <div class="panel">
+      <div class="task"><h3>Calculate the asset value of the pharmacy POS system</h3></div>
+      <p class="hint">Asset value is the total expenditure it takes to replace the asset. Select only the costs that belong in it, then enter the total.</p>
+      <div class="costs" id="costBox"></div>
+      <div class="inline-in"><label for="avInput"><strong>Asset value (AV)</strong></label><input class="money-in" id="avInput" inputmode="decimal" placeholder="$0"></div>
+      <div class="actions"><button class="btn" id="chkAV" type="button">Check asset value</button></div>
+      <div class="fb" id="fbAV" aria-live="polite"></div>
+    </div>
+    <div class="nav-row"><button class="btn ghost" data-go="frame" type="button">Back</button><button class="btn" data-go="quant" type="button">Next: quantitative analysis</button></div>
+  </section>
+
+  <!-- STATION 3 -->
+  <section class="station" id="quant" aria-labelledby="h-quant">
+    <div class="st-head">
+      <h2 id="h-quant">3. Quantitative analysis</h2>
+      <p>The POS system is tangible and has good historical data, so leadership wants dollar figures.</p>
+      <div class="ksa-tags"><span>K3 Methods</span><span>S2 SLE, ARO, ALE</span><span>S4 Cost-benefit</span></div>
+    </div>
+    <div class="panel">
+      <div class="task"><h3>Complete the risk analysis table</h3></div>
+      <div class="av-badge"><span>Pharmacy POS asset value</span><strong>$20,000</strong></div>
+      <div class="formula">
+        <div><b>SLE</b>AV × EF</div>
+        <div><b>ARO</b>Events per year (1 ÷ years, or 12 ÷ months)</div>
+        <div><b>ALE</b>SLE × ARO</div>
+        <div><b>Total ALE</b>Sum of every threat’s ALE</div>
+      </div>
+      <div class="tbl-wrap"><table id="quantTbl"></table></div>
+      <div class="inline-in"><label for="totalALE"><strong>Total ALE for all threats</strong></label><input class="money-in" id="totalALE" inputmode="decimal" placeholder="$0"></div>
+      <div class="actions"><button class="btn" id="chkQuant" type="button">Check table</button></div>
+      <div class="fb" id="fbQuant" aria-live="polite"></div>
+      <details class="work" id="quantWork" hidden><summary>Show the worked solution</summary><div id="quantWorkBody"></div></details>
+    </div>
+    <div class="panel">
+      <div class="task"><h3>Is the countermeasure worth it?</h3></div>
+      <p class="hint">Annual value of a countermeasure = ALE before − ALE after − annual cost. A countermeasure that costs more than it saves isn’t justified.</p>
+      <div class="cba" id="cbaBox"></div>
+      <div class="actions"><button class="btn" id="chkCBA" type="button">Check cost-benefit</button></div>
+      <div class="fb" id="fbCBA" aria-live="polite"></div>
+    </div>
+    <div class="nav-row"><button class="btn ghost" data-go="inventory" type="button">Back</button><button class="btn" data-go="qual" type="button">Next: qualitative analysis</button></div>
+  </section>
+
+  <!-- STATION 4 -->
+  <section class="station" id="qual" aria-labelledby="h-qual">
+    <div class="st-head">
+      <h2 id="h-qual">4. Qualitative analysis</h2>
+      <p>Clinic-wide risks involve patient trust, regulators, and safety, which are hard to price. Rate them on the clinic’s scales and plot them on the heat map.</p>
+      <div class="ksa-tags"><span>K3 Methods</span><span>S3 Risk matrix</span><span>A1 Prioritize</span></div>
+    </div>
+    <div class="panel flat">
+      <details open><summary><strong>Lakeshore’s rating scales</strong></summary>
+        <div class="scales" style="margin-top:10px">
+          <div><h3>Probability</h3><ol>
+            <li>Rare: less than once in 20 years</li><li>Unlikely: once in 5 to 20 years</li><li>Possible: once in 1 to 5 years</li><li>Probable: 1 to 3 times a year</li><li>Highly probable: more than 3 times a year</li></ol></div>
+          <div><h3>Impact</h3><ol>
+            <li>Very low: no disruption, no data exposed</li><li>Minor: internal disruption under 4 hours, no patients affected</li><li>Moderate: patient services delayed up to 1 day, or fewer than 100 records exposed</li><li>Major: services down 1 to 7 days, or 100 to 10,000 records exposed with regulatory reporting</li><li>Severe: services down more than a week, or more than 10,000 records exposed</li></ol></div>
+        </div>
+      </details>
+    </div>
+    <div class="panel">
+      <div class="task"><h3>Plot each event on the heat map</h3></div>
+      <p class="hint">Select an event, then select the cell that matches its probability and impact. Risk score = impact × probability.</p>
+      <div class="qual">
+        <div class="events" id="eventList"></div>
+        <div class="mx-wrap">
+          <div class="mx" id="matrix" role="grid" aria-label="Risk heat map"></div>
+          <div class="axis-t">Impact</div>
+          <div class="legend"><span><i style="background:var(--low)"></i>Low 1–4</span><span><i style="background:var(--med)"></i>Medium 5–9</span><span><i style="background:var(--high)"></i>High 10–14</span><span><i style="background:var(--crit)"></i>Critical 15–25</span></div>
+        </div>
+      </div>
+      <div class="actions"><button class="btn" id="chkMatrix" type="button">Check heat map</button></div>
+      <div class="fb" id="fbMatrix" aria-live="polite"></div>
+    </div>
+    <div class="panel">
+      <div class="task"><h3>Read the heat map</h3></div>
+      <div id="priorityBox"></div>
+      <div id="qualMethodBox"></div>
+    </div>
+    <div class="nav-row"><button class="btn ghost" data-go="quant" type="button">Back</button><button class="btn" data-go="respond" type="button">Next: respond to risk</button></div>
+  </section>
+
+  <!-- STATION 5 -->
+  <section class="station" id="respond" aria-labelledby="h-resp">
+    <div class="st-head">
+      <h2 id="h-resp">5. Respond to risk</h2>
+      <p>Risk can be eliminated, mitigated, transferred, or accepted. Controls do different jobs, and how much care you take matters legally.</p>
+      <div class="ksa-tags"><span>K4 Responses and controls</span><span>K5 Due care</span><span>A2 Select responses</span></div>
+    </div>
+    <div class="panel">
+      <div class="task"><h3>Choose a response strategy for each decision</h3></div>
+      <div class="rows" id="stratBox"></div>
+      <div class="actions"><button class="btn" id="chkStrat" type="button">Check strategies</button></div>
+      <div class="fb" id="fbStrat" aria-live="polite"></div>
+    </div>
+    <div class="panel">
+      <div class="task"><h3>Identify each control’s function</h3></div>
+      <div class="rows wide" id="ctrlBox"></div>
+      <div class="actions"><button class="btn" id="chkCtrl" type="button">Check controls</button></div>
+      <div class="fb" id="fbCtrl" aria-live="polite"></div>
+    </div>
+    <div class="panel">
+      <div class="task"><h3>Due care, due diligence, or negligence?</h3></div>
+      <p class="hint">The clinic issues new tablets to every nurse. Threats: stolen tablets, damaged tablets, and exposure of patient data. Label each approach.</p>
+      <div class="rows" id="dueBox"></div>
+      <div class="actions"><button class="btn" id="chkDue" type="button">Check labels</button></div>
+      <div class="fb" id="fbDue" aria-live="polite"></div>
+    </div>
+    <div class="nav-row"><button class="btn ghost" data-go="qual" type="button">Back</button><button class="btn" data-go="plan" type="button">Next: treatment plan</button></div>
+  </section>
+
+  <!-- STATION 6 -->
+  <section class="station" id="plan" aria-labelledby="h-plan">
+    <div class="st-head">
+      <h2 id="h-plan">6. Build the treatment plan</h2>
+      <p>Finance estimated clinic-wide ALE for the top five risks. Fund the countermeasures that buy the most risk reduction within the $30,000 annual budget. Whatever you don’t treat, the clinic accepts.</p>
+      <div class="ksa-tags"><span>S4 Cost-benefit</span><span>A1 Prioritize</span><span>A2 Select responses</span><span>A3 Justify decisions</span></div>
+    </div>
+    <div class="panel">
+      <div class="plan">
+        <div>
+          <h3>Countermeasures</h3>
+          <p class="hint">Reductions can’t exceed a risk’s current ALE. Overlapping measures on the same risk stop adding value once that risk is at zero.</p>
+          <div class="cms" id="cmList"></div>
+        </div>
+        <div class="dash">
+          <div class="meter"><div class="meter-top"><span>Budget used</span><span id="budgetTxt">$0 of $30,000</span></div><div class="meter-bar" id="budgetBar"><span></span></div></div>
+          <div class="big">
+            <div><small>Total ALE now</small><strong id="aleBefore">$125,000</strong></div>
+            <div><small>ALE after plan</small><strong id="aleAfter">$125,000</strong></div>
+            <div><small>Annual cost</small><strong id="planCost">$0</strong></div>
+            <div><small>Net annual value</small><strong id="planNet">$0</strong></div>
+          </div>
+          <div class="tbl-wrap"><table class="resid" id="residTbl"></table></div>
+          <div class="actions"><button class="btn" id="chkPlan" type="button">Submit plan</button></div>
+          <div class="fb" id="fbPlan" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="task"><h3>Write your recommendation to leadership</h3></div>
+      <p class="hint">In 3 to 5 sentences (at least 25 words): what you funded, why, which risks the clinic is accepting, and how you’ll monitor them.</p>
+      <textarea id="recText" placeholder="I recommend funding…"></textarea>
+      <div class="actions"><button class="btn" id="saveRec" type="button">Add to summary</button><span class="wc" id="wc">0 words</span></div>
+      <div class="fb" id="fbRec" aria-live="polite"></div>
+    </div>
+    <div class="panel">
+      <div class="task"><h3>Monitor the risk</h3></div>
+      <div id="monitorBox"></div>
+    </div>
+    <div class="nav-row"><button class="btn ghost" data-go="respond" type="button">Back</button><button class="btn green" data-go="summary" type="button">View my summary</button></div>
+  </section>
+
+  <!-- SUMMARY -->
+  <section class="station" id="summary" aria-labelledby="h-sum">
+    <div class="panel no-print">
+      <div class="field"><label for="learnerName2">Name on summary</label><input id="learnerName2" autocomplete="name" placeholder="First and last name"></div>
+      <div class="actions"><button class="btn" id="printBtn" type="button">Print summary</button><button class="btn ghost" id="saveBtn" type="button">Save summary</button><button class="btn ghost" id="restartBtn" type="button">Start over</button></div>
+      <p class="hint" style="margin-top:10px">Save downloads the summary as a web page you can print or submit. If printing is blocked in this view, save the file and print it from your browser.</p>
+    </div>
+    <div class="panel report" id="report"></div>
+  </section>
+
+  <footer>Built on the Risk Analysis and Risk Management learning modules, developed with funding from the National Science Foundation under Grant # DUE 1601612.</footer>
+  </main>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const money=n=>(n<0?'−$':'$')+Math.abs(Math.round(n)).toLocaleString('en-US');
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num=v=>{const t=String(v).replace(/[$,\s%]/g,'').replace('−','-');return t===''?NaN:Number(t)};
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const band=s=>s<=4?'low':s<=9?'med':s<=14?'high':'crit';
+const bandName={low:'Low',med:'Medium',high:'High',crit:'Critical'};
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('show'),2600)}
+function fb(el,kind,html){el.className='fb show '+(kind===true?'ok':kind===false?'bad':'info');el.innerHTML=html}
+
+/* ---------- Theme ---------- */
+const root=document.documentElement;
+function setTheme(t){root.setAttribute('data-theme',t);try{localStorage.setItem('rrc-theme',t)}catch(e){}
+  $('#themeBtn').setAttribute('aria-pressed',String(t==='dark'));$('#themeLabel').textContent=t==='dark'?'Light mode':'Dark mode';$('#themeIcon').textContent=t==='dark'?'☀':'☾'}
+let savedTheme='light';try{savedTheme=localStorage.getItem('rrc-theme')||'light'}catch(e){}
+setTheme(savedTheme==='dark'?'dark':'light');
+$('#themeBtn').addEventListener('click',()=>setTheme(root.getAttribute('data-theme')==='dark'?'light':'dark'));
+
+/* ---------- Decorative grids ---------- */
+$('#glyph').innerHTML=[[3,6,9],[2,4,6],[1,2,3]].flat().map(s=>`<i style="background:var(--${band(s*1.7|0)})"></i>`).join('');
+let hm='';for(let p=5;p>=1;p--)for(let i=1;i<=5;i++){const s=p*i;hm+=`<i class="b-${band(s)}">${s}</i>`}
+$('#heroMatrix').innerHTML=hm;
+
+/* ---------- KSAs ---------- */
+const KSA=[
+ ['K1','Knowledge','Define core risk terms: asset, threat, threat agent, vulnerability, exposure, risk, countermeasure, impact.',['terms']],
+ ['K2','Knowledge','Describe the risk management process: frame, assess, respond, monitor.',['order','monitor']],
+ ['K3','Knowledge','Distinguish quantitative and qualitative analysis and when each fits tangible or intangible assets.',['classify','method','qualmethod']],
+ ['K4','Knowledge','Explain risk responses (eliminate, mitigate, transfer, accept) and control functions.',['strat','ctrl']],
+ ['K5','Knowledge','Differentiate due care, due diligence, and negligence.',['due']],
+ ['S1','Skill','Inventory and classify assets and calculate asset value.',['classify','av']],
+ ['S2','Skill','Calculate SLE, convert frequencies to ARO, and calculate ALE.',['quant']],
+ ['S3','Skill','Rate probability and impact, plot a risk matrix, and calculate risk scores.',['matrix']],
+ ['S4','Skill','Perform cost-benefit analysis of countermeasures.',['cba','plan']],
+ ['A1','Ability','Prioritize risks for treatment using analysis results.',['priority','plan']],
+ ['A2','Ability','Select responses and controls that fit risk and budget constraints.',['strat','plan']],
+ ['A3','Ability','Justify and communicate risk decisions, including accepted and residual risk.',['rec']]
+];
+$('#ksaGrid').innerHTML=['Knowledge','Skill','Ability'].map(g=>`<div class="ksa-col"><h3>${g==='Ability'?'Abilities':g==='Skill'?'Skills':'Knowledge'}</h3><ul>${KSA.filter(k=>k[1]===g).map(k=>`<li><b>${k[0]}</b><span>${k[2]}</span></li>`).join('')}</ul></div>`).join('');
+
+/* ---------- Results & progress ---------- */
+const R={}; const D={};
+const ALLKEYS=['terms','order','classify','method','av','quant','cba','matrix','priority','qualmethod','strat','ctrl','due','plan','rec','monitor'];
+const STATION_KEYS={frame:['terms','order'],inventory:['classify','method','av'],quant:['quant','cba'],qual:['matrix','priority','qualmethod'],respond:['strat','ctrl','due'],plan:['plan','rec','monitor']};
+function record(key,c,t){if(!(key in R)){R[key]={c,t};}updateProgress()}
+function updateProgress(){const n=ALLKEYS.filter(k=>k in R).length;$('#progBar').style.width=(n/ALLKEYS.length*100)+'%';$('#progTxt').textContent=`${n} of ${ALLKEYS.length} checks`;
+  Object.entries(STATION_KEYS).forEach(([s,ks])=>{const li=$(`#rail li[data-s="${s}"]`);if(li)li.classList.toggle('done',ks.every(k=>k in R))})}
+
+/* ---------- Navigation ---------- */
+const STATIONS=[['brief','Briefing',''],['frame','Frame the risk','1'],['inventory','Inventory assets','2'],['quant','Quantitative analysis','3'],['qual','Qualitative analysis','4'],['respond','Respond to risk','5'],['plan','Treatment plan','6'],['summary','Summary','']];
+$('#rail').innerHTML=STATIONS.map(([id,name,n])=>(id==='frame'?'<li class="phase">Stations</li>':'')+(id==='summary'?'<li class="phase">Wrap up</li>':'')+`<li data-s="${id}"><button type="button" data-go="${id}"><span class="n">${n||(id==='brief'?'◆':'✓')}</span>${name}</button></li>`).join('');
+function go(id){$$('.station').forEach(s=>s.classList.toggle('active',s.id===id));$$('#rail button').forEach(b=>{if(b.dataset.go===id)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current')});
+  if(id==='summary')renderReport();window.scrollTo({top:0,behavior:'auto'});const h=$('#'+id+' h1, #'+id+' h2');if(h){h.setAttribute('tabindex','-1');h.focus({preventScroll:true})}}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b)go(b.dataset.go)});
+$('#rail button[data-go="brief"]').setAttribute('aria-current','step');
+
+/* ---------- Generic: segmented rows ---------- */
+function segRows(box,items,opts){
+  const sel=new Array(items.length).fill(null);
+  box.innerHTML=items.map((it,i)=>`<div class="row" data-i="${i}"><p class="row-text">${it.text}</p><div class="seg" role="group" aria-label="Choose an answer">${opts.map(o=>`<button type="button" data-o="${o}" aria-pressed="false">${o}</button>`).join('')}</div><p class="row-why" hidden></p></div>`).join('');
+  box.addEventListener('click',e=>{const b=e.target.closest('.seg button');if(!b)return;const row=b.closest('.row');const i=+row.dataset.i;sel[i]=b.dataset.o;
+    $$('.seg button',row).forEach(x=>x.setAttribute('aria-pressed',String(x===b)));row.classList.remove('ok','bad');row.querySelector('.row-why').hidden=true});
+  return{check(){if(sel.some(s=>s===null))return null;let c=0;items.forEach((it,i)=>{const row=box.children[i];const ok=sel[i]===it.ans;if(ok)c++;row.classList.toggle('ok',ok);row.classList.toggle('bad',!ok);const w=row.querySelector('.row-why');w.hidden=false;w.innerHTML=(ok?'<strong>Correct.</strong> ':'<strong>Not quite.</strong> ')+it.why});return c}};
+}
+/* ---------- Generic: MCQ ---------- */
+function mcq(box,key,qs){const first={};
+  box.innerHTML=qs.map((q,qi)=>`<fieldset class="mcq" data-q="${qi}"><legend>${q.q}</legend><div class="opts">${q.o.map((o,oi)=>`<button type="button" class="opt" data-o="${oi}">${o}</button>`).join('')}</div><p class="mcq-fb" aria-live="polite"></p></fieldset>`).join('');
+  box.addEventListener('click',e=>{const b=e.target.closest('.opt');if(!b)return;const fs=b.closest('.mcq');const qi=+fs.dataset.q,oi=+b.dataset.o,q=qs[qi];const ok=oi===q.a;
+    $$('.opt',fs).forEach(x=>x.classList.remove('ok','bad'));b.classList.add(ok?'ok':'bad');
+    fs.querySelector('.mcq-fb').innerHTML=ok?'<strong>Correct.</strong> '+q.why:'<strong>Try again.</strong> '+q.hint;
+    if(!(qi in first)){first[qi]=ok;if(Object.keys(first).length===qs.length)record(key,Object.values(first).filter(Boolean).length,qs.length)}});
+}
+
+/* ========== STATION 1: Terms ========== */
+const TERMS=[
+ ['asset','Asset','Anything of value needed to complete a business task: equipment, software, data, facilities, people, and reputation.'],
+ ['threat','Threat','A malicious act or unexpected event that damages information systems or other organizational assets.'],
+ ['agent','Threat agent','An individual or group that acts, or has the power, to exploit a vulnerability or carry out damaging activity.'],
+ ['vuln','Vulnerability','A flaw or weakness that would allow a threat to cause harm and damage an asset.'],
+ ['exposure','Exposure','The percentage of loss the organization suffers if a risk materializes.'],
+ ['risk','Risk','The probability of loss due to a threat to the organization’s assets.'],
+ ['counter','Countermeasure','An action, device, procedure, or technique that reduces a threat or vulnerability by eliminating or preventing it.'],
+ ['impact','Impact','The damage incurred by an event that causes loss of an asset or disruption of service.']];
+(function(){const L='ABCDEFGH';let sel=null;const pairs={};let marks={};const defs=shuffle(TERMS);
+  function owner(d){return Object.keys(pairs).find(k=>pairs[k]===d)}
+  function render(){
+    $('#termList').innerHTML=TERMS.map((t,i)=>`<button type="button" class="term ${sel===t[0]?'sel':''} ${pairs[t[0]]?'paired':''}" data-t="${t[0]}" aria-pressed="${sel===t[0]}"><span class="tag">${L[i]}</span><span>${t[1]}</span></button>`).join('');
+    $('#defList').innerHTML=defs.map(d=>{const o=owner(d[0]);const idx=o?TERMS.findIndex(t=>t[0]===o):-1;return `<button type="button" class="def ${idx>=0?'has':''} ${marks[d[0]]||''}" data-d="${d[0]}"><span class="slot">${idx>=0?L[idx]:''}</span><span>${d[2]}</span></button>`}).join('')}
+  $('#termList').addEventListener('click',e=>{const b=e.target.closest('.term');if(!b)return;sel=b.dataset.t;render()});
+  $('#defList').addEventListener('click',e=>{const b=e.target.closest('.def');if(!b)return;const d=b.dataset.d;marks={};
+    if(sel){const o=owner(d);if(o)delete pairs[o];pairs[sel]=d;const next=TERMS.find(t=>!pairs[t[0]]);sel=next?next[0]:null}else{const o=owner(d);if(o)delete pairs[o]}render()});
+  $('#chkTerms').addEventListener('click',()=>{if(Object.keys(pairs).length<8)return fb($('#fbTerms'),null,'Match all eight terms before checking.');
+    let c=0;marks={};TERMS.forEach(t=>{const ok=pairs[t[0]]===t[0];if(ok)c++;marks[pairs[t[0]]]=ok?'ok':'bad'});render();record('terms',c,8);
+    fb($('#fbTerms'),c===8,c===8?'All eight matched. Notice how they connect: a <em>threat agent</em> uses a <em>threat</em> to exploit a <em>vulnerability</em> in an <em>asset</em>, and a <em>countermeasure</em> reduces the resulting <em>risk</em>.':`${c} of 8 correct. Definitions marked in red are paired with the wrong term. Reassign them and check again.`)});
+  sel='asset';render();})();
+
+/* ========== STATION 1: Order ========== */
+const STEPS=[
+ ['frame','Frame risk','Identify threats across the organization: processes, attacks, failure or disruption of services, damage to reputation, legal liability, and loss of intellectual property.'],
+ ['assess','Assess risk','Analyze each identified risk to determine its severity, by financial impact (quantitative) or by a scaled impact on operations (qualitative).'],
+ ['respond','Respond to risk','Rank and prioritize threats, then build an action plan that eliminates, mitigates, transfers, or accepts each one.'],
+ ['monitor','Monitor risk','Continuously review risk reductions and closely watch accepted risks, because some risk is always present.']];
+(function(){const cards=shuffle(STEPS);let seq=[];let marks={};
+  function render(){$('#orderBox').innerHTML=cards.map(s=>{const i=seq.indexOf(s[0]);return `<button type="button" class="ocard ${i>=0?'picked':''} ${marks[s[0]]||''}" data-s="${s[0]}"><span class="num">${i>=0?i+1:''}</span>${marks[s[0]]?`<span class="nm">${s[1]}</span>`:''}${s[2]}</button>`}).join('')}
+  $('#orderBox').addEventListener('click',e=>{const b=e.target.closest('.ocard');if(!b)return;marks={};const id=b.dataset.s;const i=seq.indexOf(id);if(i>=0)seq=seq.slice(0,i);else seq.push(id);render()});
+  $('#resetOrder').addEventListener('click',()=>{seq=[];marks={};render();$('#fbOrder').className='fb'});
+  $('#chkOrder').addEventListener('click',()=>{if(seq.length<4)return fb($('#fbOrder'),null,'Place all four steps before checking.');
+    let c=0;seq.forEach((id,i)=>{const ok=STEPS[i][0]===id;if(ok)c++;marks[id]=ok?'ok':'bad'});render();record('order',c,4);
+    fb($('#fbOrder'),c===4,c===4?'Correct: frame, assess, respond, monitor. Monitoring loops back to framing as threats change, so risk management never really ends.':`${c} of 4 in the right position. Step names are now shown. Clear the order and try again.`)});
+  render();})();
+
+/* ========== STATION 2: Classify ========== */
+const ASSETS=[
+ ['EHR database server','Tangible','A physical system with a known replacement cost.'],
+ ['Patient trust and community reputation','Intangible','Reputation has no purchase price; its value shows up as business impact.'],
+ ['Pharmacy point-of-sale terminals','Tangible','Hardware you can buy, install, and replace.'],
+ ['Insurance claims receivable','Intangible','Accounts receivable is treated as an intangible asset in this course: money owed, not a physical item.'],
+ ['Nurse tablets','Tangible','Physical devices with a purchase price.'],
+ ['Clinic building and server closet','Tangible','Buildings are tangible assets.'],
+ ['Proprietary patient-scheduling algorithm','Intangible','Intellectual property is intangible.'],
+ ['Medication inventory','Tangible','Inventory is a tangible asset.'],
+ ['Goodwill with referring hospitals','Intangible','Business relationships and goodwill are intangible.'],
+ ['Core network switches','Tangible','Network hardware is tangible.']];
+const cls=segRows($('#classifyBox'),ASSETS.map(a=>({text:a[0],ans:a[1],why:a[2]})),['Tangible','Intangible']);
+$('#chkClassify').addEventListener('click',()=>{const c=cls.check();if(c===null)return fb($('#fbClassify'),null,'Classify all ten assets before checking.');record('classify',c,10);
+  fb($('#fbClassify'),c===10,c===10?'Register complete. Tangible assets are good candidates for quantitative analysis; intangible assets usually call for qualitative analysis.':`${c} of 10 correct. Read the explanations, adjust, and check again.`)});
+
+mcq($('#methodBox'),'method',[
+ {q:'The pharmacy POS terminals have a known purchase price and three years of failure records. Which analysis fits best?',o:['Quantitative','Qualitative'],a:0,why:'Tangible asset plus historical data means you can calculate dollar values like SLE and ALE.',hint:'Think about what the purchase price and failure records let you calculate.'},
+ {q:'Leadership is worried about losing patient trust after a publicized breach. Which analysis fits best?',o:['Quantitative','Qualitative'],a:1,why:'Reputation is intangible and hard to price, so a scaled rating such as low, medium, or high is more defensible.',hint:'Can you put a reliable dollar figure on patient trust?'}]);
+
+/* ========== STATION 2: Asset value ========== */
+const COSTS=[['POS hardware purchase price',14000,true,'Part of replacement cost.'],['Installation and configuration',4000,true,'Part of replacement cost: you’d pay it again to rebuild.'],['Payment software license',2000,true,'Licensing is an initial cost of the asset.'],['Pharmacy’s annual sales revenue',1200000,false,'Revenue is business impact, not the cost to replace the system.'],['Lobby Wi-Fi monthly bill',90,false,'Unrelated operating expense.'],['Clinic-wide cyber-insurance premium',8500,false,'Insurance is a risk transfer cost, not part of this asset’s value.']];
+$('#costBox').innerHTML=COSTS.map((c,i)=>`<label class="cost" data-i="${i}"><input type="checkbox" value="${i}"><span>${c[0]}</span><span class="amt">${money(c[1])}</span></label>`).join('');
+$('#chkAV').addEventListener('click',()=>{const av=num($('#avInput').value);if(isNaN(av))return fb($('#fbAV'),null,'Enter the asset value before checking.');
+  let c=0;const wrong=[];$$('#costBox .cost').forEach(l=>{const i=+l.dataset.i;const on=$('input',l).checked;const ok=on===COSTS[i][2];if(ok)c++;else wrong.push(COSTS[i][0]+': '+COSTS[i][3]);l.classList.toggle('ok',ok&&on);l.classList.toggle('bad',!ok)});
+  const avOk=Math.abs(av-20000)<1;$('#avInput').className='money-in '+(avOk?'ok':'bad');if(avOk)c++;D.av=av;record('av',c,7);
+  fb($('#fbAV'),c===7,c===7?'AV = $14,000 + $4,000 + $2,000 = <strong>$20,000</strong>. You’ll use this value in the next station.':`${c} of 7 correct.${wrong.length?'<br>'+wrong.map(esc).join('<br>'):''}${avOk?'':'<br>Recheck your total: add only the replacement costs.'}`)});
+
+/* ========== STATION 3: Quant table ========== */
+const AV=20000;
+const QROWS=[
+ {id:'fail',name:'Equipment failure',ef:.30,freq:'Manufacturer life expectancy: 40 months',aro:.3,why:'12 ÷ 40 months = 0.3'},
+ {id:'ransom',name:'Ransomware',ef:.75,freq:'Once every 5 years',aro:.2,why:'1 ÷ 5 years = 0.2'},
+ {id:'theft',name:'Theft of a terminal',ef:1,freq:'Once every 10 years',aro:.1,why:'1 ÷ 10 years = 0.1'},
+ {id:'surge',name:'Power surge damage',ef:.10,freq:'3 times a year',aro:3,why:'3 events in one year = 3'}];
+QROWS.forEach(r=>{r.sle=Math.round(AV*r.ef);r.ale=Math.round(r.sle*r.aro)});
+const TOTAL_ALE=QROWS.reduce((a,r)=>a+r.ale,0);
+$('#quantTbl').innerHTML=`<thead><tr><th>Threat</th><th>EF</th><th>Frequency</th><th>SLE</th><th>ARO</th><th>ALE</th></tr></thead><tbody>${QROWS.map(r=>`<tr><td><strong>${r.name}</strong></td><td>${Math.round(r.ef*100)}% (${r.ef})</td><td>${r.freq}</td><td><input class="money-in" data-r="${r.id}" data-f="sle" inputmode="decimal" aria-label="${r.name} SLE" placeholder="$"></td><td><input class="num-in" data-r="${r.id}" data-f="aro" inputmode="decimal" aria-label="${r.name} ARO" placeholder="0.0"></td><td><input class="money-in" data-r="${r.id}" data-f="ale" inputmode="decimal" aria-label="${r.name} ALE" placeholder="$"></td></tr>`).join('')}</tbody>`;
+$('#quantWorkBody').innerHTML=`<div class="tbl-wrap"><table><thead><tr><th>Threat</th><th>SLE = AV × EF</th><th>ARO</th><th>ALE = SLE × ARO</th></tr></thead><tbody>${QROWS.map(r=>`<tr><td>${r.name}</td><td>$20,000 × ${r.ef} = ${money(r.sle)}</td><td>${r.why}</td><td>${money(r.sle)} × ${r.aro} = ${money(r.ale)}</td></tr>`).join('')}<tr><td colspan="3"><strong>Total ALE</strong></td><td><strong>${money(TOTAL_ALE)}</strong></td></tr></tbody></table></div><p class="hint" style="margin-top:8px">The surge has the smallest SLE but the largest ALE. Frequent small losses can cost more each year than rare large ones.</p>`;
+$('#chkQuant').addEventListener('click',()=>{const ins=$$('#quantTbl input');if(ins.some(i=>i.value.trim()==='')||$('#totalALE').value.trim()==='')return fb($('#fbQuant'),null,'Fill in every SLE, ARO, and ALE cell plus the total before checking.');
+  let c=0;D.quant={};ins.forEach(inp=>{const r=QROWS.find(x=>x.id===inp.dataset.r),f=inp.dataset.f,v=num(inp.value);const exp=r[f];const tol=f==='aro'?.005:1;const ok=Math.abs(v-exp)<=tol;if(ok)c++;inp.className=(f==='aro'?'num-in ':'money-in ')+(ok?'ok':'bad');(D.quant[r.id]=D.quant[r.id]||{})[f]=v});
+  const tv=num($('#totalALE').value);const tok=Math.abs(tv-TOTAL_ALE)<=1;$('#totalALE').className='money-in '+(tok?'ok':'bad');if(tok)c++;D.quant.total=tv;
+  record('quant',c,13);$('#quantWork').hidden=false;
+  fb($('#fbQuant'),c===13,c===13?`All 13 values correct. Total ALE is <strong>${money(TOTAL_ALE)}</strong> a year.`:`${c} of 13 correct. Red cells need another look. Tip: convert the frequency to events per year before you multiply.`)});
+
+/* ========== STATION 3: Cost-benefit ========== */
+const CBA=[
+ {id:'ups',title:'Surge-protected UPS units',desc:'Annual cost $1,200. Reduces power-surge ARO from 3 to 0.2.',before:6000,after:400,net:4400,dec:'Implement'},
+ {id:'lock',title:'Locked, tamper-alarmed terminal enclosures',desc:'Annual cost $2,500. Reduces theft ARO from 0.1 to 0.05.',before:2000,after:1000,net:-1500,dec:'Don’t implement'}];
+$('#cbaBox').innerHTML=CBA.map(m=>`<div class="panel flat" data-m="${m.id}"><h3>${m.title}</h3><p class="hint" style="margin:0">${m.desc} ALE before: ${money(m.before)}.</p>
+ <label>ALE after <input class="money-in" data-f="after" inputmode="decimal" placeholder="$"></label>
+ <label>Net annual value <input class="money-in" data-f="net" inputmode="decimal" placeholder="$ (can be negative)"></label>
+ <label>Decision <select data-f="dec"><option value="">Choose</option><option>Implement</option><option>Don’t implement</option></select></label></div>`).join('');
+$('#chkCBA').addEventListener('click',()=>{const els=$$('#cbaBox [data-f]');if(els.some(e=>e.value.trim()===''))return fb($('#fbCBA'),null,'Complete both countermeasures before checking.');
+  let c=0;D.cba={};CBA.forEach(m=>{const box=$(`#cbaBox [data-m="${m.id}"]`);const a=$('[data-f="after"]',box),n=$('[data-f="net"]',box),d=$('[data-f="dec"]',box);
+    const ok1=Math.abs(num(a.value)-m.after)<=1,ok2=Math.abs(num(n.value)-m.net)<=1,ok3=d.value===m.dec;[[a,ok1],[n,ok2],[d,ok3]].forEach(([el,ok])=>{el.classList.remove('ok','bad');el.classList.add(ok?'ok':'bad');if(ok)c++});D.cba[m.id]={after:num(a.value),net:num(n.value),dec:d.value}});
+  record('cba',c,6);
+  fb($('#fbCBA'),c===6,c===6?'Right. UPS: $6,000 − $400 − $1,200 = <strong>$4,400</strong> saved a year, so implement it. Enclosures: $2,000 − $1,000 − $2,500 = <strong>−$1,500</strong>, so the clinic should accept that theft risk instead.':`${c} of 6 correct. ALE after = SLE × new ARO. Surge SLE is $2,000; theft SLE is $20,000.`)});
+
+/* ========== STATION 4: Matrix ========== */
+const PN=['','Rare','Unlikely','Possible','Probable','Highly probable'],IN=['','Very low','Minor','Moderate','Major','Severe'];
+const EVENTS=[
+ {id:'E1',t:'Phishing credential theft',d:'Staff clicked phishing links 4 to 6 times last year. A compromised account could expose a few dozen patient records before detection.',p:5,i:3,why:'More than 3 times a year is highly probable (5). A few dozen records is fewer than 100: moderate (3). Score 15.'},
+ {id:'E2',t:'Telehealth portal DDoS',d:'Happened once in the last 3 years. The portal was down about 6 hours; telehealth visits were rescheduled the same day.',p:3,i:3,why:'Once in 1 to 5 years is possible (3). Patient services delayed up to a day is moderate (3). Score 9.'},
+ {id:'E3',t:'Ransomware on the EHR',d:'Regional peers were hit; the clinic estimates once in about 8 years. EHR would be down 10+ days and all 40,000 records could be exposed.',p:2,i:5,why:'Once in 5 to 20 years is unlikely (2). Down more than a week with 40,000 records is severe (5). Score 10.'},
+ {id:'E4',t:'Tornado destroys the server closet',d:'The weather service estimates a direct hit once in 50 years. Services would be down for more than a week.',p:1,i:5,why:'Less than once in 20 years is rare (1). More than a week down is severe (5). Score 5.'},
+ {id:'E5',t:'Lost USB drive with shift schedules',d:'Happens about twice a year. The drive holds staff schedules only, no patient data, and IT reissues the file in minutes.',p:4,i:1,why:'Twice a year is probable (4). No disruption and no data exposed is very low (1). Score 4.'},
+ {id:'E6',t:'Insider snooping in patient records',d:'Audits catch an employee viewing records without need about once a year. Each case exposes 150 to 500 records and requires regulatory reporting.',p:4,i:4,why:'About once a year is probable (4). 150 to 500 records with reporting is major (4). Score 16.'}];
+(function(){let selE='E1';const place={};let marks={};
+  function render(){
+    $('#eventList').innerHTML=EVENTS.map(e=>{const pl=place[e.id];return `<button type="button" class="ev ${selE===e.id?'sel':''} ${marks[e.id]||''}" data-e="${e.id}" aria-pressed="${selE===e.id}"><span class="eh"><span class="eid">${e.id}</span>${e.t}<span class="placed">${pl?`P${pl.p} × I${pl.i} = ${pl.p*pl.i}`:'Not placed'}</span></span><p>${e.d}</p></button>`}).join('');
+    let h='';for(let p=5;p>=1;p--){h+=`<div class="yl">${p} ${PN[p]}</div>`;for(let i=1;i<=5;i++){const s=p*i;const here=EVENTS.filter(e=>place[e.id]&&place[e.id].p===p&&place[e.id].i===i);
+      h+=`<button type="button" class="cell b-${band(s)}" data-p="${p}" data-i="${i}" aria-label="Probability ${PN[p]}, impact ${IN[i]}, score ${s}${here.length?', contains '+here.map(e=>e.id).join(' '):''}">${here.map(e=>`<span class="chip">${e.id}</span>`).join('')}<span class="sc">${s}</span></button>`}}
+    h+='<div></div>'+[1,2,3,4,5].map(i=>`<div class="xl">${i} ${IN[i]}</div>`).join('');$('#matrix').innerHTML=h}
+  $('#eventList').addEventListener('click',e=>{const b=e.target.closest('.ev');if(!b)return;selE=b.dataset.e;render()});
+  $('#matrix').addEventListener('click',e=>{const c=e.target.closest('.cell');if(!c)return;if(!selE)return toast('Select an event first');marks={};place[selE]={p:+c.dataset.p,i:+c.dataset.i};
+    const next=EVENTS.find(x=>!place[x.id]);selE=next?next.id:null;render()});
+  $('#chkMatrix').addEventListener('click',()=>{if(EVENTS.some(e=>!place[e.id]))return fb($('#fbMatrix'),null,'Place all six events on the heat map before checking.');
+    let c=0;const notes=[];marks={};EVENTS.forEach(e=>{const pl=place[e.id];const ok=pl.p===e.p&&pl.i===e.i;if(ok)c++;marks[e.id]=ok?'ok':'bad';if(!ok)notes.push(`<strong>${e.id}:</strong> ${e.why}`)});
+    D.matrix=JSON.parse(JSON.stringify(place));render();record('matrix',c,6);
+    fb($('#fbMatrix'),c===6,c===6?'Every event is plotted correctly. Two risks land in the critical band, and neither is the dramatic one.':`${c} of 6 correct.<br>${notes.join('<br>')}<br>Move the events and check again.`)});
+  render();})();
+mcq($('#priorityBox'),'priority',[{q:'Based on risk score, which risk should leadership treat first?',o:['E3 Ransomware on the EHR (headline-grabbing, severe impact)','E6 Insider snooping in patient records','E4 Tornado destroys the server closet','E2 Telehealth portal DDoS'],a:1,why:'E6 scores 16 (probable 4 × major 4), the highest on the map. E1 phishing at 15 is a close second.',hint:'Compare the scores, not how alarming the event sounds.'}]);
+mcq($('#qualMethodBox'),'qualmethod',[{q:'Why is a qualitative matrix a better fit for these six events than calculating ALE?',o:['Qualitative analysis is always more accurate than quantitative analysis.','Several impacts, such as patient trust, regulatory exposure, and safety, are intangible and lack reliable loss data.','ALE can only be used for natural disasters.','Qualitative analysis removes the need for management judgment.'],a:1,why:'Qualitative analysis prioritizes risks when impacts are intangible or historical data is thin. Assigning numbers to the matrix makes it more objective.',hint:'Think about which kinds of assets each method works best for.'}]);
+
+/* ========== STATION 5 ========== */
+const STRAT=[
+ {text:'The fax-to-email gateway can’t be patched, so the clinic retires it and moves to the secure portal.',ans:'Avoid',why:'Removing the vulnerable system eliminates the risk entirely (avoid, or eliminate).'},
+ {text:'Buy cyber-liability insurance that covers breach notification and legal costs.',ans:'Transfer',why:'Insurance shifts the financial impact to a third party.'},
+ {text:'Require MFA and run quarterly phishing-awareness training.',ans:'Mitigate',why:'Controls reduce the likelihood and impact of phishing (mitigate).'},
+ {text:'Lost USB drives with shift schedules: document the risk and take no further action.',ans:'Accept',why:'A low score (4) and a low impact make acceptance reasonable.'},
+ {text:'Outsource card processing to a PCI-compliant processor that assumes liability for card data.',ans:'Transfer',why:'Contractual liability moves the risk to the processor.'},
+ {text:'Shut down the unused public lobby Wi-Fi that was flagged in the vulnerability scan.',ans:'Avoid',why:'Stopping the activity removes the exposure altogether.'},
+ {text:'Add role-based access and audit-log alerts to the EHR.',ans:'Mitigate',why:'These controls reduce insider snooping risk (E6).'},
+ {text:'Tornado: management signs off that the residual risk is within appetite and reviews it annually.',ans:'Accept',why:'Formal, documented acceptance with periodic review is how accepted risk stays managed.'}];
+const strat=segRows($('#stratBox'),STRAT,['Avoid','Mitigate','Transfer','Accept']);
+$('#chkStrat').addEventListener('click',()=>{const c=strat.check();if(c===null)return fb($('#fbStrat'),null,'Choose a strategy for all eight decisions.');record('strat',c,8);fb($('#fbStrat'),c===8,c===8?'All eight correct. Every risk response falls into one of these four families.':`${c} of 8 correct. Read the explanations and try again.`)});
+const CTRL=[
+ {text:'A firewall rule blocks all inbound Remote Desktop traffic from the internet.',ans:'Preventive',why:'It stops an attack before it happens.'},
+ {text:'The SIEM alerts when one account opens more than 50 patient records in an hour.',ans:'Detective',why:'It identifies an incident in progress.'},
+ {text:'Endpoint protection quarantines an infected attachment and removes the malware.',ans:'Corrective',why:'It fixes the affected system after the event is detected.'},
+ {text:'A login banner warns that all EHR activity is monitored and audited.',ans:'Deterrent',why:'It discourages misuse; it doesn’t technically block it.'},
+ {text:'After a ransomware test, IT rebuilds the EHR from offline, immutable backups.',ans:'Recovery',why:'It restores operations and data after a loss.'},
+ {text:'The legacy lab analyzer can’t support MFA, so it’s isolated on its own VLAN with strict access lists.',ans:'Compensating',why:'An alternative control stands in when the required control isn’t feasible.'}];
+const ctrl=segRows($('#ctrlBox'),CTRL,['Preventive','Detective','Corrective','Deterrent','Recovery','Compensating']);
+$('#chkCtrl').addEventListener('click',()=>{const c=ctrl.check();if(c===null)return fb($('#fbCtrl'),null,'Label all six controls before checking.');record('ctrl',c,6);fb($('#fbCtrl'),c===6,c===6?'All six control functions identified. Layering different functions is defense in depth.':`${c} of 6 correct. Ask: does it stop, find, fix, discourage, restore, or substitute?`)});
+const DUE=[
+ {text:'Tablets are issued with no insurance, no encryption, and no usage policy.',ans:'Negligence',why:'No actions or controls are taken to lower the risk.'},
+ {text:'A policy requires patient data on tablets to be encrypted, and every nurse is trained to encrypt and decrypt it.',ans:'Due care',why:'Reasonable steps lower the risk, but the risk still depends on people following the policy.'},
+ {text:'Tablets are insured, and device management enforces automatic full-disk encryption on every tablet.',ans:'Due diligence',why:'Multiple controls work together to prevent potential loss.'}];
+const due=segRows($('#dueBox'),DUE,['Negligence','Due care','Due diligence']);
+$('#chkDue').addEventListener('click',()=>{const c=due.check();if(c===null)return fb($('#fbDue'),null,'Label all three approaches before checking.');record('due',c,3);fb($('#fbDue'),c===3,c===3?'Correct. Negligence takes no action, due care takes reasonable steps, and due diligence layers multiple controls.':`${c} of 3 correct. Compare how many controls each approach puts in place.`)});
+
+/* ========== STATION 6: Plan ========== */
+const BUDGET=30000;
+const RISKS=[['ransom','Ransomware on the EHR',50000],['phish','Phishing credential theft',36000],['insider','Insider snooping',24000],['ddos','Telehealth DDoS',9000],['surge','POS power surges',6000]];
+const CMS=[
+ {id:'a',t:'Immutable offline backups and EDR',d:'Cuts ransomware ALE by $35,000.',cost:14000,red:{ransom:35000}},
+ {id:'b',t:'MFA and phishing-awareness training',d:'Cuts phishing ALE by $27,000.',cost:9000,red:{phish:27000}},
+ {id:'c',t:'EHR access analytics (UEBA)',d:'Cuts insider snooping ALE by $16,000.',cost:12000,red:{insider:16000}},
+ {id:'d',t:'Managed DDoS scrubbing service',d:'Cuts telehealth DDoS ALE by $6,000.',cost:10000,red:{ddos:6000}},
+ {id:'e',t:'Surge-protected UPS units',d:'Cuts POS surge ALE by $5,600.',cost:1200,red:{surge:5600}},
+ {id:'f',t:'24/7 outsourced SOC monitoring',d:'Cuts insider ALE by $12,000 and ransomware ALE by $14,000.',cost:28000,red:{insider:12000,ransom:14000}}];
+function evalPlan(ids){const cost=ids.reduce((a,id)=>a+CMS.find(c=>c.id===id).cost,0);const after={};RISKS.forEach(([k,,ale])=>{const r=ids.reduce((a,id)=>a+(CMS.find(c=>c.id===id).red[k]||0),0);after[k]=Math.max(0,ale-r)});
+  const before=RISKS.reduce((a,r)=>a+r[2],0),aft=Object.values(after).reduce((a,b)=>a+b,0);return{cost,after,before,aft,net:before-aft-cost}}
+let OPT=null;(function(){let best=-Infinity,bestIds=[];for(let m=0;m<64;m++){const ids=CMS.filter((c,i)=>m&(1<<i)).map(c=>c.id);const ev=evalPlan(ids);if(ev.cost<=BUDGET&&ev.net>best){best=ev.net;bestIds=ids}}OPT={net:best,ids:bestIds}})();
+const chosen=new Set();
+$('#cmList').innerHTML=CMS.map(c=>`<button type="button" class="cm" data-c="${c.id}" aria-pressed="false"><span class="box" aria-hidden="true">✓</span><span><h3>${c.t}</h3><p>${c.d}</p></span><span class="cost-tag">${money(c.cost)}/yr</span></button>`).join('');
+function renderPlan(){const ev=evalPlan([...chosen]);$('#budgetTxt').textContent=`${money(ev.cost)} of ${money(BUDGET)}`;const bb=$('#budgetBar');bb.classList.toggle('over',ev.cost>BUDGET);$('span',bb).style.width=Math.min(100,ev.cost/BUDGET*100)+'%';
+  $('#aleBefore').textContent=money(ev.before);$('#aleAfter').textContent=money(ev.aft);$('#planCost').textContent=money(ev.cost);$('#planNet').textContent=money(ev.net);$('#planNet').style.color=ev.net<0?'var(--bad)':'var(--ok)';
+  $('#residTbl').innerHTML=`<thead><tr><th>Risk</th><th>ALE now</th><th>Residual ALE</th></tr></thead><tbody>${RISKS.map(([k,n,a])=>`<tr><td>${n}</td><td>${money(a)}</td><td><strong>${money(ev.after[k])}</strong></td></tr>`).join('')}</tbody>`}
+$('#cmList').addEventListener('click',e=>{const b=e.target.closest('.cm');if(!b)return;const id=b.dataset.c;if(chosen.has(id))chosen.delete(id);else chosen.add(id);b.setAttribute('aria-pressed',String(chosen.has(id)));renderPlan()});
+$('#chkPlan').addEventListener('click',()=>{const ids=[...chosen];const ev=evalPlan(ids);if(!ids.length)return fb($('#fbPlan'),null,'Select at least one countermeasure.');
+  if(ev.cost>BUDGET)return fb($('#fbPlan'),false,`Your plan costs ${money(ev.cost)}, which is ${money(ev.cost-BUDGET)} over budget. Remove a countermeasure and submit again.`);
+  const neg=ids.filter(id=>{const c=CMS.find(x=>x.id===id);const solo=evalPlan([id]);return solo.net<0});
+  const ratio=ev.net/OPT.net;let c=1;if(!neg.length)c++;if(ratio>=.999)c+=2;else if(ratio>=.6)c+=1;
+  D.plan={ids,ev};record('plan',c,4);
+  const optNames=OPT.ids.map(id=>CMS.find(x=>x.id===id).t).join(', ');
+  let msg=`Your plan returns <strong>${money(ev.net)}</strong> in net annual value (${Math.round(ratio*100)}% of the best possible ${money(OPT.net)}).`;
+  if(neg.length)msg+=`<br>${neg.map(id=>CMS.find(x=>x.id===id).t).join(' and ')} ${neg.length>1?'cost':'costs'} more than ${neg.length>1?'they save':'it saves'} on its own. A countermeasure shouldn’t cost more than the loss it prevents.`;
+  msg+=ratio>=.999?'<br>That’s the optimal plan. The clinic accepts the remaining residual risk.':`<br>Hint: rank countermeasures by net value (reduction − cost), fund the highest first, and stop when the budget runs out. The optimal set is ${optNames}.`;
+  fb($('#fbPlan'),ratio>=.999&&!neg.length,msg)});
+renderPlan();
+$('#recText').addEventListener('input',()=>{const n=($('#recText').value.trim().match(/\S+/g)||[]).length;$('#wc').textContent=n+(n===1?' word':' words')});
+$('#saveRec').addEventListener('click',()=>{const t=$('#recText').value.trim();const n=(t.match(/\S+/g)||[]).length;if(n<25)return fb($('#fbRec'),null,`Write at least 25 words (you have ${n}). Cover what you funded, why, what you’re accepting, and how you’ll monitor it.`);
+  D.rec=t;const has=k=>new RegExp(k,'i').test(t);const parts=[['funded or recommended measures','fund|recommend|implement|purchase|invest'],['accepted or residual risk','accept|residual'],['monitoring','monitor|review|reassess|track']];const missing=parts.filter(p=>!has(p[1])).map(p=>p[0]);
+  record('rec',missing.length?1:2,2);
+  fb($('#fbRec'),!missing.length,missing.length?`Added to your summary. To strengthen it, mention ${missing.join(' and ')}.`:'Added to your summary. It covers what you funded, what you’re accepting, and how you’ll monitor it.')});
+mcq($('#monitorBox'),'monitor',[
+ {q:'Six months after your plan goes live, the clinic adds a new vendor portal for lab results. What does the Monitor step call for?',o:['Nothing; the risk register was completed last spring.','Add the portal to the asset inventory and reassess the risk, then update the plan.','Accept the portal’s risk automatically because the budget is spent.','Remove older risks from the register to make room.'],a:1,why:'Risk management is continuous. New assets and changing threats send you back to framing and assessment.',hint:'Remember that the process loops: monitoring feeds back into framing.'},
+ {q:'Leadership accepted the DDoS risk instead of funding the scrubbing service. What does that acceptance require going forward?',o:['Document the decision and watch the risk closely with periodic review.','Delete the risk from the register.','Transfer the risk to the telehealth vendor without a contract.','Nothing; accepted risks are closed.'],a:0,why:'Accepted risks must be closely monitored because some risk is always present and conditions change.',hint:'Accepted risk is still risk.'}]);
+
+/* ========== Names ========== */
+['#learnerName','#learnerName2'].forEach((s,_,arr)=>$(s).addEventListener('input',e=>{D.name=e.target.value;arr.forEach(o=>{if($(o)!==e.target)$(o).value=e.target.value});if($('#summary').classList.contains('active'))renderReport()}));
+
+/* ========== Report ========== */
+const SNAMES={frame:'1. Frame the risk',inventory:'2. Inventory assets',quant:'3. Quantitative analysis',qual:'4. Qualitative analysis',respond:'5. Respond to risk',plan:'6. Treatment plan'};
+function agg(keys){let c=0,t=0,any=false;keys.forEach(k=>{if(R[k]){c+=R[k].c;t+=R[k].t;any=true}});return any?{c,t,p:Math.round(c/t*100)}:null}
+function status(p){return p==null?['Not attempted','var(--muted)']:p>=85?['Mastered','var(--ok)']:p>=70?['Proficient','var(--navy)']:['Review','var(--bad)']}
+function buildReport(){
+  const all=agg(ALLKEYS);const pct=all?all.p:0;const done=ALLKEYS.filter(k=>k in R).length;
+  const d=new Date();const date=d.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  const stRows=Object.entries(STATION_KEYS).map(([s,ks])=>{const a=agg(ks);const [st,col]=status(a&&a.p);return `<tr><td>${SNAMES[s]}</td><td>${a?`${a.c} / ${a.t}`:'—'}</td><td>${a?a.p+'%':'—'}</td><td class="status" style="color:${col}">${st}</td></tr>`}).join('');
+  const kRows=KSA.map(k=>{const a=agg(k[3]);const [st,col]=status(a&&a.p);return `<tr><td><strong>${k[0]}</strong></td><td>${k[2]}</td><td><div class="mbar"><span style="width:${a?a.p:0}%;background:${col}"></span></div></td><td>${a?a.p+'%':'—'}</td><td class="status" style="color:${col}">${st}</td></tr>`}).join('');
+  let work='';
+  work+=`<h3>Asset value</h3><p>Pharmacy POS asset value entered: <strong>${D.av!=null&&!isNaN(D.av)?money(D.av):'not attempted'}</strong> (correct: $20,000).</p>`;
+  if(D.quant){work+=`<h3>Quantitative analysis</h3><div class="tbl-wrap"><table><thead><tr><th>Threat</th><th>Your SLE</th><th>Your ARO</th><th>Your ALE</th><th>Correct ALE</th></tr></thead><tbody>${QROWS.map(r=>{const q=D.quant[r.id]||{};return `<tr><td>${r.name}</td><td>${isNaN(q.sle)?'—':money(q.sle)}</td><td>${isNaN(q.aro)?'—':q.aro}</td><td>${isNaN(q.ale)?'—':money(q.ale)}</td><td>${money(r.ale)}</td></tr>`}).join('')}<tr><td><strong>Total</strong></td><td></td><td></td><td><strong>${isNaN(D.quant.total)?'—':money(D.quant.total)}</strong></td><td><strong>${money(TOTAL_ALE)}</strong></td></tr></tbody></table></div>`}
+  if(D.matrix){work+=`<h3>Qualitative heat map</h3><div class="tbl-wrap"><table><thead><tr><th>Event</th><th>Your rating</th><th>Your score</th><th>Expected</th></tr></thead><tbody>${EVENTS.map(e=>{const p=D.matrix[e.id];const s=p.p*p.i;return `<tr><td>${e.id} ${e.t}</td><td>P${p.p} × I${p.i}</td><td><span class="pill b-${band(s)}">${s} ${bandName[band(s)]}</span></td><td>P${e.p} × I${e.i} = ${e.p*e.i}</td></tr>`}).join('')}</tbody></table></div>`}
+  if(D.plan){const ev=D.plan.ev;work+=`<h3>Treatment plan</h3><p>Funded: ${D.plan.ids.map(id=>esc(CMS.find(c=>c.id===id).t)).join('; ')}.</p><p>Annual cost ${money(ev.cost)} of ${money(BUDGET)}. Total ALE reduced from ${money(ev.before)} to ${money(ev.aft)}. Net annual value <strong>${money(ev.net)}</strong> (optimal: ${money(OPT.net)}).</p>`}
+  work+=`<h3>Recommendation to leadership</h3>${D.rec?`<div class="rec-box">${esc(D.rec)}</div>`:'<p>Not yet written.</p>'}`;
+  return `<h2 id="h-sum">Risk Register Challenge: performance summary</h2>
+  <div class="meta"><span><strong>Learner:</strong> ${D.name?esc(D.name):'(enter your name above)'}</span><span><strong>Date:</strong> ${date}</span><span><strong>Checks completed:</strong> ${done} of ${ALLKEYS.length}</span></div>
+  <div class="score-hero"><div class="ring" style="--p:${pct}"><div>${pct}%</div></div><div><p style="margin:0"><strong>First-attempt score:</strong> ${all?`${all.c} of ${all.t} points`:'no checks completed yet'}</p><p class="hint" style="margin:0">Mastered 85% or higher, proficient 70–84%, review below 70%.</p></div></div>
+  <h3>Stations</h3><div class="tbl-wrap"><table><thead><tr><th>Station</th><th>Points</th><th>Score</th><th>Status</th></tr></thead><tbody>${stRows}</tbody></table></div>
+  <h3>Knowledge, skills, and abilities</h3><div class="tbl-wrap"><table><thead><tr><th>Code</th><th>Description</th><th>Mastery</th><th></th><th>Status</th></tr></thead><tbody>${kRows}</tbody></table></div>
+  ${work}`}
+function renderReport(){$('#report').innerHTML=buildReport()}
+
+/* ========== Print & save ========== */
+$('#printBtn').addEventListener('click',()=>{renderReport();try{window.print()}catch(e){toast('Printing is blocked here. Save the summary and print the file.')}});
+const dlReady=(window.claude&&typeof window.claude.use==='function')?window.claude.use('downloads').catch(()=>null):Promise.resolve(null);
+function reportDoc(){const css=`body{font-family:'Source Sans 3','Segoe UI',Arial,sans-serif;color:#14223B;max-width:900px;margin:32px auto;padding:0 20px;line-height:1.5}h2,h3{font-family:Archivo,Arial,sans-serif}table{border-collapse:collapse;width:100%;margin-bottom:10px}th,td{border-bottom:1px solid #D3DCE8;padding:7px 8px;text-align:left}th{font-size:.85rem;color:#56637B}.meta{display:flex;flex-wrap:wrap;gap:8px 24px;color:#56637B}.score-hero{display:flex;align-items:center;gap:20px}.ring{width:110px;height:110px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(#00A86B calc(var(--p)*1%),#E9EFF7 0)}.ring div{width:86px;height:86px;border-radius:50%;background:#fff;display:grid;place-items:center;font-weight:800;font-size:1.5rem}.mbar{height:9px;background:#E9EFF7;border-radius:99px;overflow:hidden;min-width:80px}.mbar span{display:block;height:100%}.pill{padding:1px 8px;border-radius:99px;font-size:.8rem;font-weight:700}.b-low{background:rgba(46,159,104,.2)}.b-med{background:rgba(217,165,32,.24)}.b-high{background:rgba(226,116,46,.24)}.b-crit{background:rgba(201,55,46,.24)}.rec-box{background:#E9EFF7;border-radius:8px;padding:12px;white-space:pre-wrap}.hint{color:#56637B;font-size:.9rem}`;
+  const html=buildReport().replace(/var\(--ok\)/g,'#0A8454').replace(/var\(--navy\)/g,'#0047AB').replace(/var\(--bad\)/g,'#BF3328').replace(/var\(--muted\)/g,'#56637B');
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Risk Register Challenge summary${D.name?' – '+esc(D.name):''}</title><style>${css}</style></head><body>${html}<p class="hint">Generated by the Risk Register Challenge learning activity.</p></body></html>`}
+$('#saveBtn').addEventListener('click',async()=>{renderReport();const slug=(D.name||'learner').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'learner';const filename=`risk-register-summary-${slug}.html`;const data=reportDoc();
+  const dl=await dlReady;if(dl){try{await dl.save({filename,data});toast('Summary saved');}catch(e){toast(e&&e.code==='declined'?'Save canceled':'Saving isn’t available here. Use Print instead.')}return}
+  try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'text/html'}));a.download=filename;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500);toast('Summary saved')}catch(e){toast('Saving isn’t available here. Use Print instead.')}});
+$('#restartBtn').addEventListener('click',e=>{const b=e.currentTarget;if(b.dataset.armed){location.reload();return}b.dataset.armed='1';b.textContent='Select again to clear everything';setTimeout(()=>{delete b.dataset.armed;b.textContent='Start over'},4000)});
+updateProgress();
+})();
+</script>
+</body>
+</html>
