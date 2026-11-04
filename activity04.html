@@ -265,6 +265,7 @@ input[type=text]{min-width:240px}
     <div class="progress"><i id="progBar"></i></div>
     <span class="progress-label" id="progLabel">0% complete</span>
   </div>
+  <button class="theme-btn" id="topResetBtn" title="Clear all answers and start over">Start over</button>
   <button class="theme-btn" id="themeBtn" aria-pressed="false">Dark mode</button>
 </header>
 
@@ -1119,9 +1120,20 @@ document.getElementById("dlBtn").addEventListener("click",()=>{
   a.href=URL.createObjectURL(blob);a.download=`FFSI-summary-${(S.name||"learner").replace(/\s+/g,"-")}.html`;
   document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 });
-document.getElementById("resetBtn").addEventListener("click",()=>{
-  if(!confirm("Reset all answers and start the activity over?"))return;
-  S=blank();save();sel=null;caseIdx=0;buildAll();go("briefing");});
+function resetActivity(){
+  if(!confirm("Start over? This clears every answer, your finding, and your reflection. Your light or dark setting is kept."))return;
+  try{localStorage.removeItem(KEY);}catch(e){}
+  S=blank();sel=null;caseIdx=0;refLvl="all";refQ="";allOpen=false;
+  document.getElementById("refSearch").value="";
+  document.getElementById("expandAll").textContent="Expand all";
+  document.querySelectorAll(".seg button").forEach(x=>x.setAttribute("aria-pressed",x.dataset.lvl==="all"));
+  document.getElementById("m2Log").textContent="";
+  const mb=document.getElementById("modelBox");mb.className="model";mb.innerHTML="";
+  document.getElementById("reflection").value="";
+  save();buildAll();go("briefing");
+}
+document.getElementById("resetBtn").addEventListener("click",resetActivity);
+document.getElementById("topResetBtn").addEventListener("click",resetActivity);
 
 /* ---------- INIT ---------- */
 function buildAll(){buildBriefing();buildRef();buildM1();buildM2();buildM3();buildM4();buildM5();buildM6();}
