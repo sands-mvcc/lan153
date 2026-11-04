@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>VPN Lab: Build and Test a Site-to-Site and a Point-to-Point VPN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F2F5FA;--surface:#FFFFFF;--surface2:#E8EEF7;--ink:#13203A;--muted:#52627C;--line:#D2DBE8;
+  --navy:#0047AB;--on-navy:#FFFFFF;--green:#00a86b;--green-soft:#DDF5EB;--amber:#A86F00;--amber-soft:#FFF1D1;
+  --red:#C8102E;--red-soft:#FBE3E7;--navy-soft:#E1EBFA;
+  --term:#0B1A2E;--term-ink:#D3E0F2;--term-dim:#7489AA;--term-ok:#43DE9C;--term-warn:#FFC857;--term-err:#FF7A7A;--term-cmd:#A9C9FF;--term-tip:#8FE3FF;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#0D1524;--surface:#152038;--surface2:#1B2944;--ink:#E3EAF5;--muted:#98A9C4;--line:#2A3A5A;
+  --navy:#6FA8FF;--on-navy:#0A1324;--green:#2BD08E;--green-soft:#123A2C;--amber:#F2B53A;--amber-soft:#3A2D10;
+  --red:#FF6F82;--red-soft:#3C1820;--navy-soft:#1A2E52;--term:#060E1B;}}
+:root[data-theme="dark"]{
+  --paper:#0D1524;--surface:#152038;--surface2:#1B2944;--ink:#E3EAF5;--muted:#98A9C4;--line:#2A3A5A;
+  --navy:#6FA8FF;--on-navy:#0A1324;--green:#2BD08E;--green-soft:#123A2C;--amber:#F2B53A;--amber-soft:#3A2D10;
+  --red:#FF6F82;--red-soft:#3C1820;--navy-soft:#1A2E52;--term:#060E1B;}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+img,svg{max-width:100%}
+a{color:var(--navy)}
+:focus-visible{outline:3px solid var(--green);outline-offset:2px;border-radius:4px}
+.wrap{max-width:1260px;margin:0 auto;padding:0 20px}
+header.top{padding:28px 0 18px;border-bottom:1px solid var(--line);background:var(--surface)}
+.top .wrap{display:flex;gap:24px;align-items:flex-end;justify-content:space-between;flex-wrap:wrap}
+.title-block h1{font-size:clamp(1.7rem,3.2vw,2.5rem);line-height:1.1;margin:0 0 8px;letter-spacing:-.015em;font-weight:700}
+.title-block p{margin:0;color:var(--muted);max-width:68ch}
+.top-tools{display:flex;gap:14px;align-items:center}
+.meter{min-width:220px}
+.meter-label{display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted);margin-bottom:6px}
+.meter-bar{height:10px;border-radius:6px;background:var(--surface2);overflow:hidden;border:1px solid var(--line)}
+.meter-fill{height:100%;width:0;background:linear-gradient(90deg,var(--navy),var(--green));transition:width .5s ease}
+.btn{font:inherit;font-weight:600;font-size:.92rem;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 14px;border-radius:8px;cursor:pointer}
+.btn:hover{border-color:var(--navy)}
+.btn.primary{background:var(--navy);color:var(--on-navy);border-color:var(--navy)}
+.btn.go{background:var(--green);color:#fff;border-color:var(--green)}
+.btn.small{padding:4px 10px;font-size:.82rem;font-weight:500}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--paper);border-bottom:1px solid var(--line)}
+.tabs .wrap{display:flex;gap:4px;overflow-x:auto;scrollbar-width:thin}
+.tab{font:inherit;font-weight:600;font-size:.95rem;background:none;border:0;border-bottom:3px solid transparent;color:var(--muted);padding:14px 14px 11px;cursor:pointer;white-space:nowrap}
+.tab[aria-selected="true"]{color:var(--navy);border-bottom-color:var(--navy)}
+.tab .tick{display:inline-block;margin-left:6px;color:var(--green);font-weight:700}
+main{padding:28px 0 60px}
+.panel[hidden]{display:none}
+h2{font-size:1.6rem;line-height:1.2;margin:0 0 10px;letter-spacing:-.01em}
+h3{font-size:1.15rem;margin:0 0 8px}
+.lede{color:var(--muted);max-width:75ch;margin:0 0 22px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 20px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:960px){.lab,.grid2{grid-template-columns:minmax(0,1fr)}}
+.stack>*+*{margin-top:18px}
+/* topology */
+.topo{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 10px 4px;position:relative}
+.topo svg{display:block;width:100%;height:auto}
+.topo .lbl{font-family:var(--sans);font-size:12.5px;fill:var(--muted)}
+.topo .lbl-strong{font-family:var(--sans);font-size:14px;font-weight:600;fill:var(--ink)}
+.topo .wire{stroke:var(--line);stroke-width:3}
+.topo .node-fill{fill:var(--surface2);stroke:var(--navy);stroke-width:2}
+.topo .node-text{font-family:var(--sans);font-weight:700;font-size:15px;fill:var(--navy);text-anchor:middle;dominant-baseline:central}
+.topo .clickable{cursor:pointer}
+.topo .clickable:hover .node-fill,.topo .clickable:focus .node-fill{fill:var(--navy-soft)}
+.topo .clickable.active .node-fill{fill:var(--navy);}
+.topo .clickable.active .node-text{fill:var(--on-navy)}
+.tun-shell{fill:none;stroke:var(--line);stroke-width:14;stroke-linecap:round;transition:stroke .4s}
+.tun-core{fill:none;stroke:var(--muted);stroke-width:2;stroke-dasharray:6 8;opacity:.6}
+.up .tun-shell{stroke:color-mix(in srgb,var(--green) 35%,transparent)}
+.up .tun-core{stroke:var(--green);opacity:1;stroke-width:3;animation:flow 1.2s linear infinite}
+.half .tun-shell{stroke:color-mix(in srgb,var(--amber) 30%,transparent)}
+@keyframes flow{to{stroke-dashoffset:-28}}
+.tun-state{font-family:var(--sans);font-weight:600;font-size:13px;text-anchor:middle;fill:var(--muted)}
+.up .tun-state{fill:var(--green)}
+.half .tun-state{fill:var(--amber)}
+.pkt{fill:var(--green);stroke:var(--surface);stroke-width:2;opacity:0}
+/* terminal */
+.term{background:var(--term);border-radius:12px;overflow:hidden;border:1px solid #1E3150;display:flex;flex-direction:column;min-height:460px}
+.term-bar{display:flex;align-items:center;gap:6px;padding:8px 10px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.06);flex-wrap:wrap}
+.dev-btn{font:500 .85rem var(--mono);color:var(--term-dim);background:transparent;border:1px solid transparent;border-radius:6px;padding:4px 10px;cursor:pointer}
+.dev-btn[aria-pressed="true"]{color:#fff;background:rgba(111,168,255,.18);border-color:rgba(111,168,255,.45)}
+.term-bar .spacer{flex:1}
+.term-bar .tbtn{font:500 .78rem var(--sans);color:var(--term-dim);background:transparent;border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:3px 9px;cursor:pointer}
+.term-bar .tbtn:hover{color:#fff}
+.term-out{flex:1;overflow:auto;padding:12px 14px 4px;font:13.5px/1.5 var(--mono);color:var(--term-ink);height:400px;white-space:pre-wrap;word-break:break-word}
+.ln.cmd{color:var(--term-cmd)}
+.ln.ok{color:var(--term-ok)}
+.ln.err{color:var(--term-err)}
+.ln.dbg{color:var(--term-warn)}
+.ln.tip{color:var(--term-tip);font-family:var(--sans);font-size:13px;border-left:2px solid var(--term-tip);padding-left:8px;margin:4px 0}
+.ln.sys{color:var(--term-dim)}
+.ln.key{color:#fff;cursor:copy;text-decoration:underline dotted rgba(255,255,255,.35);text-underline-offset:4px}
+.ln.key::after{content:"  click to copy";color:var(--term-dim);font-size:11px}
+.ln.key.copied::after{content:"  copied";color:var(--term-ok)}
+.term-in{display:flex;align-items:center;gap:6px;padding:8px 14px 12px;font:13.5px var(--mono);color:var(--term-ok)}
+.term-in input{flex:1;background:transparent;border:0;color:#fff;font:inherit;outline:none;min-width:0;caret-color:var(--term-ok)}
+.term-in:focus-within{background:rgba(255,255,255,.03)}
+/* checklist */
+.checklist{list-style:none;margin:0;padding:0}
+.checklist li{display:grid;grid-template-columns:26px 1fr;gap:8px;padding:9px 0;border-top:1px solid var(--line)}
+.checklist li:first-child{border-top:0}
+.cb{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-size:13px;font-weight:700;color:transparent;transition:all .3s;margin-top:1px}
+.done .cb{background:var(--green);border-color:var(--green);color:#fff}
+.task-t{font-weight:500}
+.done .task-t{color:var(--muted)}
+.hint-btn{font:500 .8rem var(--sans);background:none;border:0;color:var(--navy);padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.hint{font:12.5px/1.5 var(--mono);background:var(--surface2);border-radius:8px;padding:8px 10px;margin:6px 0 0;white-space:pre-wrap;overflow-x:auto}
+.group-h{font-size:.9rem;font-weight:600;color:var(--navy);margin:16px 0 2px;padding-bottom:4px;border-bottom:2px solid var(--navy-soft)}
+.group-h:first-child{margin-top:0}
+/* spec */
+.spec{width:100%;border-collapse:collapse;font-size:.92rem}
+.spec th,.spec td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.spec th{font-weight:600;color:var(--muted);font-size:.85rem}
+.spec td code,.mono{font-family:var(--mono);font-size:.86rem}
+.tablewrap{overflow-x:auto}
+.st{display:inline-block;font-size:.78rem;font-weight:600;padding:2px 8px;border-radius:20px;white-space:nowrap}
+.st.ok{background:var(--green-soft);color:var(--green)}
+.st.bad{background:var(--red-soft);color:var(--red)}
+.st.na{background:var(--surface2);color:var(--muted)}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.st.weak{background:var(--amber-soft);color:var(--amber);margin-left:6px}
+/* encapsulation */
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:14px}
+.seg button{font:600 .88rem var(--sans);border:0;background:var(--surface);color:var(--muted);padding:7px 14px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--navy);color:var(--on-navy)}
+.pkt-row{display:flex;align-items:stretch;gap:0;flex-wrap:nowrap;overflow-x:auto;padding:4px 0 30px}
+.blk{border:2px solid var(--ink);padding:8px 10px;min-width:92px;font-size:.8rem;line-height:1.3;background:var(--surface);margin-left:-2px}
+.blk b{display:block;font-size:.84rem}
+.blk.new{background:var(--navy);color:var(--on-navy);border-color:var(--navy)}
+.blk.orig{background:var(--navy-soft)}
+.blk.esp{background:var(--amber-soft)}
+.blk.icv{background:var(--amber-soft)}
+.blk.data{background:var(--surface2)}
+.enc{display:flex;position:relative;background:repeating-linear-gradient(135deg,transparent 0 8px,color-mix(in srgb,var(--green) 18%,transparent) 8px 10px);outline:2px solid var(--green);outline-offset:-2px}
+.enc .blk{background:transparent}
+.enc::after{content:"Encrypted";position:absolute;left:0;right:0;bottom:-22px;text-align:center;font-size:.75rem;font-weight:600;color:var(--green)}
+.auth{display:flex;position:relative;border-top:4px solid var(--amber);padding-top:0}
+.auth::before{content:"Integrity protected by the ESP ICV";position:absolute;left:0;top:-22px;font-size:.75rem;font-weight:600;color:var(--amber);white-space:nowrap}
+.pkt-wrap{padding-top:22px}
+.pkt-cap{font-size:.85rem;color:var(--muted);margin:2px 0 4px}
+/* accordions */
+details.acc{background:var(--surface);border:1px solid var(--line);border-radius:10px;margin-bottom:10px}
+details.acc>summary{cursor:pointer;padding:14px 18px;font-weight:600;font-size:1.05rem;list-style:none;display:flex;justify-content:space-between;align-items:center}
+details.acc>summary::-webkit-details-marker{display:none}
+details.acc>summary::after{content:"+";font-size:1.4rem;color:var(--navy);font-weight:400}
+details.acc[open]>summary::after{content:"\2212"}
+.acc-body{padding:0 18px 16px}
+.acc-body ul{padding-left:20px;margin:6px 0}
+.acc-body li{margin:4px 0}
+.acc-body p{max-width:80ch}
+pre.code{font:12.8px/1.55 var(--mono);background:var(--term);color:var(--term-ink);padding:12px 14px;border-radius:8px;overflow-x:auto;position:relative;margin:8px 0 14px}
+pre.code .c{color:var(--term-dim)}
+.copy-code{position:absolute;top:8px;right:8px;font:500 .75rem var(--sans);background:rgba(255,255,255,.08);color:var(--term-ink);border:1px solid rgba(255,255,255,.15);border-radius:5px;padding:2px 8px;cursor:pointer}
+.compare{width:100%;border-collapse:collapse;font-size:.9rem;min-width:640px}
+.compare th,.compare td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+.compare thead th{background:var(--navy);color:var(--on-navy);border-color:var(--navy)}
+.compare tbody th{background:var(--surface2);font-weight:600}
+ol.steps{counter-reset:s;list-style:none;padding:0;margin:8px 0}
+ol.steps li{counter-increment:s;position:relative;padding:8px 0 8px 44px;border-top:1px solid var(--line)}
+ol.steps li::before{content:counter(s);position:absolute;left:0;top:8px;width:30px;height:30px;border-radius:50%;background:var(--navy);color:var(--on-navy);display:grid;place-items:center;font-weight:700;font-size:.9rem}
+/* glossary */
+.flips{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:10px}
+.flip{perspective:900px;background:none;border:0;padding:0;height:150px;cursor:pointer;font:inherit;color:inherit;text-align:left}
+.flip-in{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d}
+.flip.flipped .flip-in{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;border-radius:10px;padding:14px;border:1px solid var(--line);display:flex;flex-direction:column;justify-content:center}
+.face.front{background:var(--surface);font-weight:700;font-size:1.1rem;color:var(--navy);align-items:center;text-align:center}
+.face.front small{font-weight:400;font-size:.78rem;color:var(--muted);margin-top:6px}
+.face.back{background:var(--navy);color:var(--on-navy);transform:rotateY(180deg);font-size:.88rem;line-height:1.4}
+/* banners */
+.banner{border-radius:10px;padding:12px 16px;margin-bottom:14px;border:1px solid}
+.banner.info{background:var(--navy-soft);border-color:var(--navy);color:var(--ink)}
+.banner.good{background:var(--green-soft);border-color:var(--green)}
+.banner.warn{background:var(--amber-soft);border-color:var(--amber)}
+.banner[hidden]{display:none}
+.issues{margin:8px 0 0;padding-left:20px}
+/* key map */
+.keymap{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:560px){.keymap{grid-template-columns:1fr}}
+.kcol h4{margin:0 0 6px;font-size:.95rem}
+.krow{display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:.84rem;padding:6px 0;border-top:1px dashed var(--line)}
+.krow .mono{color:var(--muted)}
+/* quiz */
+.q{margin-bottom:16px}
+.q fieldset{border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:0;background:var(--surface)}
+.q legend{font-weight:600;padding:0 6px;max-width:75ch}
+.q label{display:flex;gap:10px;align-items:flex-start;padding:6px 8px;border-radius:6px;cursor:pointer}
+.q label:hover{background:var(--surface2)}
+.q input{margin-top:5px;accent-color:var(--navy)}
+.q .fb{margin-top:8px;padding:8px 12px;border-radius:8px;font-size:.92rem}
+.q .fb.right{background:var(--green-soft)}
+.q .fb.wrong{background:var(--red-soft)}
+.q label.correct{outline:2px solid var(--green)}
+/* report */
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
+.field label{font-weight:600;font-size:.9rem}
+.field input,.field textarea{font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
+.field textarea{min-height:90px;resize:vertical}
+.summary-list{list-style:none;padding:0;margin:0;columns:2;column-gap:28px}
+@media (max-width:700px){.summary-list{columns:1}}
+.summary-list li{break-inside:avoid;padding:4px 0;font-size:.9rem}
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(5,12,25,.6);display:grid;place-items:center;z-index:50;padding:16px}
+.modal[hidden]{display:none}
+.modal-box{background:var(--term);color:var(--term-ink);border-radius:12px;width:min(720px,100%);max-height:90vh;display:flex;flex-direction:column;border:1px solid #29406A}
+.modal-head{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;font:600 .9rem var(--mono);border-bottom:1px solid rgba(255,255,255,.08);gap:8px;flex-wrap:wrap}
+.modal-box textarea{flex:1;min-height:340px;background:transparent;color:#fff;border:0;padding:14px;font:14px/1.6 var(--mono);resize:vertical;outline:none}
+.modal-foot{display:flex;gap:8px;justify-content:space-between;align-items:center;padding:10px 14px;border-top:1px solid rgba(255,255,255,.08);flex-wrap:wrap}
+.modal-foot small{color:var(--term-dim);font-family:var(--sans)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 18px;border-radius:8px;font-weight:600;z-index:60;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+.hero-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:18px 0 26px}
+@media (max-width:800px){.hero-strip{grid-template-columns:1fr}}
+.hero-strip .card h3{color:var(--navy)}
+.hero-strip .card p{margin:0;font-size:.93rem;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media print{
+  header.top .top-tools,nav.tabs,.panel:not(#report),.no-print{display:none!important}
+  #report{display:block!important}
+  body{background:#fff;color:#000}
+  .card{border-color:#999}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="title-block">
+      <h1>Build and test two VPNs</h1>
+      <p>Configure an IPsec site-to-site tunnel between two company offices, then a WireGuard point-to-point link from a home office. Network+ and Security+ aligned.</p>
+    </div>
+    <div class="top-tools">
+      <div class="meter" aria-live="polite">
+        <div class="meter-label"><span>Lab progress</span><span id="meterTxt">0 of 23 tasks</span></div>
+        <div class="meter-bar"><div class="meter-fill" id="meterFill"></div></div>
+      </div>
+      <button class="btn" id="themeBtn" type="button" aria-label="Toggle dark mode">Dark mode</button>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs" aria-label="Lab sections">
+  <div class="wrap" role="tablist">
+    <button class="tab" role="tab" data-tab="brief" aria-selected="true">Briefing</button>
+    <button class="tab" role="tab" data-tab="partA" aria-selected="false">Part A: Site-to-site, tunnel mode<span class="tick" id="tickA"></span></button>
+    <button class="tab" role="tab" data-tab="partB" aria-selected="false">Part B: Point-to-point<span class="tick" id="tickB"></span></button>
+    <button class="tab" role="tab" data-tab="quiz" aria-selected="false">Knowledge check<span class="tick" id="tickQ"></span></button>
+    <button class="tab" role="tab" data-tab="report" aria-selected="false">Lab report</button>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<!-- ================= BRIEFING ================= -->
+<section class="panel" id="brief" role="tabpanel">
+  <h2>What a network administrator needs to know about VPNs</h2>
+  <p class="lede">A VPN carries private traffic across a network you don't control. The administrator's job runs the full life cycle: plan it, configure it, prove it works, and keep it working. Read this briefing, then complete Parts A and B.</p>
+
+  <div class="hero-strip">
+    <div class="card"><h3>Site-to-site</h3><p>Two gateways (routers or firewalls) protect whole networks. Users never run VPN software. Part A builds this with IPsec in tunnel mode.</p></div>
+    <div class="card"><h3>Point-to-point</h3><p>A one-to-one tunnel between exactly two endpoints, such as a home-office laptop and an office server. Part B builds this with WireGuard.</p></div>
+    <div class="card"><h3>Remote access</h3><p>Many individual users connect to one concentrator with a client app (IKEv2, SSL/TLS, OpenVPN). Covered in this briefing and the knowledge check.</p></div>
+  </div>
+
+  <details class="acc" open>
+    <summary>Knowledge an administrator needs</summary>
+    <div class="acc-body grid2">
+      <div>
+        <h3>Concepts</h3>
+        <ul>
+          <li><strong>VPN topologies:</strong> site-to-site, remote access (client-to-site), point-to-point (host-to-host), hub-and-spoke, full mesh, and dynamic multipoint (DMVPN).</li>
+          <li><strong>Tunnel vs transport mode:</strong> tunnel mode wraps the entire original packet in a new IP header (gateway to gateway). Transport mode protects only the payload and keeps the original header (host to host, or GRE over IPsec).</li>
+          <li><strong>Cryptography basics:</strong> symmetric ciphers (AES-GCM, AES-CBC, ChaCha20), integrity (HMAC-SHA-256/384), key exchange (Diffie-Hellman groups 14, 19, 20, 21), authentication (pre-shared keys vs. certificates/PKI).</li>
+          <li><strong>IPsec architecture:</strong> IKE phase 1 (IKE SA, management channel) and phase 2 (IPsec/child SAs that carry data), security parameter index (SPI), lifetimes and rekeying, perfect forward secrecy (PFS).</li>
+          <li><strong>Policy-based vs route-based VPNs:</strong> crypto ACLs ("interesting traffic") vs. virtual tunnel interfaces (VTI) with routing.</li>
+          <li><strong>Split vs full tunneling</strong> and their security and bandwidth trade-offs.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Supporting network knowledge</h3>
+        <ul>
+          <li><strong>IP addressing:</strong> non-overlapping private subnets at every site, wildcard masks, CIDR.</li>
+          <li><strong>NAT and NAT traversal:</strong> NAT exemption for VPN traffic, NAT-T over UDP 4500, why AH breaks behind NAT.</li>
+          <li><strong>Firewalls and ports:</strong> UDP 500/4500, ESP (IP 50), WireGuard UDP 51820, TLS 443.</li>
+          <li><strong>MTU and MSS:</strong> encryption overhead (50 to 80 bytes) causes fragmentation; adjust TCP MSS to around 1360.</li>
+          <li><strong>Identity:</strong> AAA, RADIUS (UDP 1812/1813), LDAP/Active Directory, SAML, multifactor authentication.</li>
+          <li><strong>Supporting services:</strong> DNS (split DNS for internal names), NTP (certificate validation and log timestamps), syslog/SIEM.</li>
+        </ul>
+      </div>
+    </div>
+  </details>
+
+  <details class="acc">
+    <summary>Skills an administrator must demonstrate</summary>
+    <div class="acc-body grid2">
+      <div>
+        <h3>Plan</h3>
+        <ul>
+          <li>Gather requirements: who connects, to what, how many users, required throughput and uptime.</li>
+          <li>Choose the VPN type, protocol, and crypto suite that meet security policy and device support.</li>
+          <li>Design addressing, routing, and which traffic is protected (split or full tunnel).</li>
+          <li>Plan authentication, key and certificate management, and firewall/NAT changes.</li>
+        </ul>
+        <h3>Configure</h3>
+        <ul>
+          <li>Build IKE/IPsec policies, keys, transform sets, crypto ACLs or tunnel interfaces from the CLI.</li>
+          <li>Configure VPN on SOHO routers and firewalls through a web GUI.</li>
+          <li>Generate and distribute keys (WireGuard), certificates (PKI), and client profiles.</li>
+          <li>Open the right firewall ports and create NAT exemptions.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Test and troubleshoot</h3>
+        <ul>
+          <li>Verify underlay reachability first, then the tunnel.</li>
+          <li>Read SA tables (<span class="mono">show crypto isakmp sa</span>, <span class="mono">wg show</span>) and packet counters.</li>
+          <li>Use debugs and packet captures to isolate phase 1, phase 2, routing, or firewall problems.</li>
+        </ul>
+        <h3>Maintain</h3>
+        <ul>
+          <li>Rotate keys and renew certificates before expiration.</li>
+          <li>Patch VPN firmware promptly; VPN gateways are a top target for attackers.</li>
+          <li>Monitor tunnel state, logs, capacity, and failed logins; review access regularly.</li>
+          <li>Document configurations, addressing, and change history.</li>
+        </ul>
+      </div>
+    </div>
+  </details>
+
+  <details class="acc">
+    <summary>SOHO vs. enterprise: what changes</summary>
+    <div class="acc-body tablewrap">
+      <table class="compare">
+        <thead><tr><th>Area</th><th>Small office/home office (SOHO)</th><th>Enterprise</th></tr></thead>
+        <tbody>
+          <tr><th>Typical use</th><td>A few remote workers, one small branch, or a home lab linked to the cloud</td><td>Many branches, thousands of remote users, partner (extranet) links, cloud VPCs</td></tr>
+          <tr><th>Devices</th><td>All-in-one router/firewall, a Linux host, or a NAS running WireGuard/OpenVPN</td><td>Dedicated firewalls/VPN concentrators, ISR/ASR routers, SD-WAN edges, cloud VPN gateways</td></tr>
+          <tr><th>Protocols</th><td>WireGuard, OpenVPN, IKEv2 built into the router</td><td>IPsec IKEv2 (route-based VTI, DMVPN), SSL/TLS remote access, ZTNA alongside VPN</td></tr>
+          <tr><th>Authentication</th><td>Pre-shared keys or key pairs, local accounts</td><td>Certificates (PKI), RADIUS/AD, SAML single sign-on, MFA, device posture checks</td></tr>
+          <tr><th>Availability</th><td>Single gateway, single ISP</td><td>Redundant gateways, dual ISPs, dead peer detection, dynamic routing over tunnels</td></tr>
+          <tr><th>Management</th><td>Web GUI, manual key exchange</td><td>Central management, templates, automation (Ansible/APIs), SIEM logging, change control</td></tr>
+          <tr><th>Skill emphasis</th><td>Port forwarding, dynamic DNS, NAT, basic key handling</td><td>Crypto policy design, routing, scale, HA, compliance (NIST, CMMC), incident response</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+
+  <details class="acc">
+    <summary>Common VPN protocols and ports</summary>
+    <div class="acc-body tablewrap">
+      <table class="compare">
+        <thead><tr><th>Protocol</th><th>What it does</th><th>Ports / IP protocol</th><th>Where you'll see it</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><th>IKEv2</th><td>Negotiates keys and security associations for IPsec</td><td>UDP 500; UDP 4500 with NAT-T</td><td>Site-to-site, mobile clients</td><td>Recommended</td></tr>
+          <tr><th>IKEv1</th><td>Older IPsec key exchange (main/aggressive mode)</td><td>UDP 500, 4500</td><td>Legacy site-to-site (used in Part A because it's still common on exams and in the field)</td><td>Migrate to IKEv2</td></tr>
+          <tr><th>ESP</th><td>Encrypts and authenticates IPsec data</td><td>IP protocol 50 (or inside UDP 4500)</td><td>All modern IPsec</td><td>Recommended</td></tr>
+          <tr><th>AH</th><td>Authenticates only, no encryption; breaks with NAT</td><td>IP protocol 51</td><td>Rare, legacy</td><td>Avoid</td></tr>
+          <tr><th>SSL/TLS VPN</th><td>Remote access over HTTPS (Cisco Secure Client, GlobalProtect, FortiClient)</td><td>TCP 443, DTLS UDP 443</td><td>Enterprise remote access</td><td>Common</td></tr>
+          <tr><th>OpenVPN</th><td>TLS-based, flexible, open source</td><td>UDP 1194 default (or TCP)</td><td>SOHO routers, small business</td><td>Common</td></tr>
+          <tr><th>WireGuard</th><td>Lean modern VPN: Curve25519, ChaCha20-Poly1305</td><td>UDP 51820 default</td><td>SOHO, cloud, point-to-point (Part B)</td><td>Growing fast</td></tr>
+          <tr><th>L2TP/IPsec</th><td>Layer 2 tunnel protected by IPsec</td><td>UDP 1701 inside IPsec, UDP 500, 4500</td><td>Older client VPNs</td><td>Legacy</td></tr>
+          <tr><th>GRE</th><td>Unencrypted tunnel that carries multicast and routing protocols</td><td>IP protocol 47</td><td>GRE over IPsec, DMVPN</td><td>Pair with IPsec</td></tr>
+          <tr><th>PPTP</th><td>Broken MS-CHAPv2 authentication</td><td>TCP 1723 + GRE</td><td>Should not be found</td><td>Insecure, do not use</td></tr>
+          <tr><th>SSTP</th><td>Microsoft VPN over TLS</td><td>TCP 443</td><td>Windows clients</td><td>Niche</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+
+  <details class="acc">
+    <summary>VPN life cycle: plan, configure, verify, maintain</summary>
+    <div class="acc-body">
+      <ol class="steps">
+        <li><strong>Gather requirements.</strong> Sites, users, applications, bandwidth, uptime, and compliance rules.</li>
+        <li><strong>Design addressing and topology.</strong> Confirm subnets don't overlap; pick site-to-site, remote access, or point-to-point.</li>
+        <li><strong>Select protocols and crypto.</strong> For example IKEv2, AES-256-GCM, SHA-256, DH group 14 or higher, PFS.</li>
+        <li><strong>Plan authentication.</strong> Pre-shared keys for labs and small sites; certificates and MFA for production.</li>
+        <li><strong>Prepare the edge.</strong> Allow UDP 500/4500 and ESP (or UDP 51820), add NAT exemptions, reserve static public IPs or dynamic DNS.</li>
+        <li><strong>Configure both ends</strong> with mirror-image parameters.</li>
+        <li><strong>Verify.</strong> Test underlay first, generate interesting traffic, check SAs, counters, and application access.</li>
+        <li><strong>Document and hand off.</strong> Diagrams, parameters (never the keys themselves), and a test record.</li>
+        <li><strong>Monitor and maintain.</strong> Log review, rekey and certificate renewals, firmware patches, capacity checks.</li>
+      </ol>
+    </div>
+  </details>
+
+  <details class="acc">
+    <summary>Command reference</summary>
+    <div class="acc-body">
+      <h3>Cisco IOS: policy-based IKEv1 site-to-site (Part A)</h3>
+<pre class="code">crypto isakmp policy 10
+ encryption aes 256
+ hash sha256
+ authentication pre-share
+ group 14
+ lifetime 86400
+crypto isakmp key MVCC-Lab-2026 address 198.51.100.1
+crypto ipsec transform-set TS esp-aes 256 esp-sha256-hmac
+ mode tunnel
+ip access-list extended VPN-TRAFFIC
+ permit ip 10.1.1.0 0.0.0.255 10.2.2.0 0.0.0.255
+crypto map VPN-MAP 10 ipsec-isakmp
+ set peer 198.51.100.1
+ set transform-set TS
+ match address VPN-TRAFFIC
+interface GigabitEthernet0/0
+ crypto map VPN-MAP</pre>
+      <h3>Cisco IOS: route-based IKEv2 with a virtual tunnel interface (enterprise)</h3>
+<pre class="code">crypto ikev2 proposal PROP
+ encryption aes-cbc-256
+ integrity sha256
+ group 14
+crypto ikev2 policy POL
+ proposal PROP
+crypto ikev2 keyring KR
+ peer BRANCH
+  address 198.51.100.1
+  pre-shared-key MVCC-Lab-2026
+crypto ikev2 profile PROF
+ match identity remote address 198.51.100.1 255.255.255.255
+ authentication remote pre-share
+ authentication local pre-share
+ keyring local KR
+crypto ipsec profile IPSEC-PROF
+ set transform-set TS
+ set ikev2-profile PROF
+interface Tunnel0
+ ip address 172.16.0.1 255.255.255.252
+ ip tcp adjust-mss 1360
+ tunnel source GigabitEthernet0/0
+ tunnel destination 198.51.100.1
+ tunnel mode ipsec ipv4
+ tunnel protection ipsec profile IPSEC-PROF
+ip route 10.2.2.0 255.255.255.0 Tunnel0</pre>
+      <h3>Cisco verification and troubleshooting</h3>
+<pre class="code">show crypto isakmp sa          <span class="c">! phase 1 state: QM_IDLE = good, MM_NO_STATE = failing</span>
+show crypto ipsec sa           <span class="c">! phase 2 SAs, encaps/decaps counters</span>
+show crypto ikev2 sa           <span class="c">! IKEv2 equivalent</span>
+show crypto map
+show crypto session detail
+debug crypto isakmp            <span class="c">! then generate traffic; undebug all when done</span>
+clear crypto sa                <span class="c">! force renegotiation</span>
+ping 10.2.2.1 source g0/1      <span class="c">! source from the LAN so traffic matches the ACL</span></pre>
+      <h3>Linux: WireGuard (Part B)</h3>
+<pre class="code">sudo apt install wireguard
+umask 077; wg genkey | tee privatekey | wg pubkey &gt; publickey
+sudo nano /etc/wireguard/wg0.conf
+sudo ufw allow 51820/udp
+sudo wg-quick up wg0
+sudo wg show
+sudo systemctl enable wg-quick@wg0</pre>
+      <h3>Linux: strongSwan IPsec</h3>
+<pre class="code">sudo apt install strongswan strongswan-swanctl
+sudo swanctl --load-all        <span class="c"># load /etc/swanctl/swanctl.conf</span>
+sudo swanctl --initiate --child net-net
+sudo swanctl --list-sas
+sudo tcpdump -ni eth0 'udp port 500 or udp port 4500 or esp'</pre>
+      <h3>Windows client (PowerShell)</h3>
+<pre class="code">Add-VpnConnection -Name "Office" -ServerAddress "vpn.example.com" `
+  -TunnelType Ikev2 -AuthenticationMethod Eap -EncryptionLevel Required -SplitTunneling
+Get-VpnConnection
+rasdial "Office"               <span class="c"># connect; rasdial "Office" /disconnect to drop</span>
+Test-NetConnection 10.2.2.10 -Port 443</pre>
+    </div>
+  </details>
+
+  <details class="acc">
+    <summary>Troubleshooting guide</summary>
+    <div class="acc-body tablewrap">
+      <table class="compare">
+        <thead><tr><th>Symptom</th><th>Likely cause</th><th>What to check</th></tr></thead>
+        <tbody>
+          <tr><th>No SA at all</th><td>No interesting traffic, crypto map not applied, peer unreachable</td><td>Ping the peer's public IP; confirm the map is on the outside interface; ping with a LAN source</td></tr>
+          <tr><th>MM_NO_STATE</th><td>Phase 1 mismatch, wrong pre-shared key, UDP 500 blocked</td><td><span class="mono">show crypto isakmp policy</span> on both ends; <span class="mono">debug crypto isakmp</span></td></tr>
+          <tr><th>QM_IDLE but no encrypted packets</th><td>Phase 2 mismatch: transform set, mode, or ACLs that don't mirror</td><td><span class="mono">show crypto ipsec sa</span>; compare ACLs line by line</td></tr>
+          <tr><th>Encaps rise, decaps stay at 0</th><td>Peer can't route the reply, peer NATs the traffic, or a firewall drops ESP</td><td>Peer routing table, NAT exemption, ESP/UDP 4500 rules</td></tr>
+          <tr><th>Ping works, web pages or file shares hang</th><td>MTU/fragmentation from encryption overhead</td><td><span class="mono">ip tcp adjust-mss 1360</span>; ping with DF bit set</td></tr>
+          <tr><th>Tunnel drops at regular intervals</th><td>Lifetime, rekey, or dead peer detection mismatch</td><td>Lifetimes and DPD settings on both ends; logs at drop time</td></tr>
+          <tr><th>WireGuard: no "latest handshake"</th><td>Wrong public key, endpoint, port, or firewall</td><td><span class="mono">sudo wg show</span> on both ends; <span class="mono">ufw status</span></td></tr>
+          <tr><th>WireGuard: handshake but no ping</th><td>AllowedIPs doesn't cover the source or destination</td><td>AllowedIPs on both peers</td></tr>
+          <tr><th>Remote users connect but can't reach servers</th><td>Split-tunnel routes or internal DNS missing</td><td>Client route table, pushed DNS servers</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+
+  <details class="acc">
+    <summary>Glossary flip cards</summary>
+    <div class="acc-body"><p>Select a card to flip it.</p><div class="flips" id="flips"></div></div>
+  </details>
+
+  <p style="margin-top:22px"><button class="btn primary" type="button" data-goto="partA">Start Part A</button></p>
+</section>
+
+<!-- ================= PART A ================= -->
+<section class="panel" id="partA" role="tabpanel" hidden>
+  <h2>Part A: IPsec site-to-site VPN in tunnel mode</h2>
+  <p class="lede">The company's HQ and branch office each have a router connected to the internet. Your job is to protect all traffic between the two office LANs. Configure both routers so their settings mirror each other, then prove the tunnel works. Select a router in the diagram or the console tabs to switch devices.</p>
+
+  <div class="lab">
+    <div class="stack">
+      <div class="topo" id="topoA">
+        <svg viewBox="0 0 760 270" role="img" aria-labelledby="topoATitle">
+          <title id="topoATitle">HQ LAN, router R1, the internet, router R2, and branch LAN, with an IPsec tunnel arcing between R1 and R2</title>
+          <g id="tunA">
+            <path class="tun-shell" d="M200 150 C 270 30, 490 30, 560 150"/>
+            <path class="tun-core" id="tunPathA" d="M200 150 C 270 30, 490 30, 560 150"/>
+            <text class="tun-state" x="380" y="40" id="tunTxtA">IPsec tunnel: down</text>
+          </g>
+          <line class="wire" x1="70" y1="180" x2="174" y2="180"/>
+          <line class="wire" x1="226" y1="180" x2="320" y2="180"/>
+          <line class="wire" x1="440" y1="180" x2="534" y2="180"/>
+          <line class="wire" x1="586" y1="180" x2="690" y2="180"/>
+          <g><rect x="38" y="160" width="46" height="32" rx="4" class="node-fill"/><rect x="54" y="193" width="14" height="6" fill="var(--navy)"/><text class="lbl-strong" x="61" y="222" text-anchor="middle">PC-A</text><text class="lbl" x="61" y="239" text-anchor="middle">10.1.1.10</text></g>
+          <g class="clickable" data-dev="R1" tabindex="0" role="button" aria-label="Open R1 console"><circle cx="200" cy="180" r="27" class="node-fill"/><text class="node-text" x="200" y="180">R1</text></g>
+          <text class="lbl-strong" x="200" y="226" text-anchor="middle">HQ</text>
+          <text class="lbl" x="200" y="243" text-anchor="middle">G0/1 10.1.1.1/24</text>
+          <text class="lbl" x="200" y="259" text-anchor="middle">G0/0 203.0.113.1/30</text>
+          <path d="M335 192 a22 22 0 0 1 8 -40 a30 30 0 0 1 52 -10 a24 24 0 0 1 40 14 a20 20 0 0 1 -4 36 z" class="node-fill" style="stroke:var(--muted)"/>
+          <text class="lbl-strong" x="385" y="226" text-anchor="middle">Internet</text>
+          <text class="lbl" x="385" y="243" text-anchor="middle">untrusted ISP path</text>
+          <g class="clickable" data-dev="R2" tabindex="0" role="button" aria-label="Open R2 console"><circle cx="560" cy="180" r="27" class="node-fill"/><text class="node-text" x="560" y="180">R2</text></g>
+          <text class="lbl-strong" x="560" y="226" text-anchor="middle">Branch</text>
+          <text class="lbl" x="560" y="243" text-anchor="middle">G0/1 10.2.2.1/24</text>
+          <text class="lbl" x="560" y="259" text-anchor="middle">G0/0 198.51.100.1/30</text>
+          <g><rect x="676" y="160" width="46" height="32" rx="4" class="node-fill"/><rect x="692" y="193" width="14" height="6" fill="var(--navy)"/><text class="lbl-strong" x="699" y="222" text-anchor="middle">PC-B</text><text class="lbl" x="699" y="239" text-anchor="middle">10.2.2.10</text></g>
+          <circle r="8" class="pkt" id="pktA"/>
+        </svg>
+      </div>
+
+      <div class="card">
+        <h3>Security policy for this tunnel</h3>
+        <div class="tablewrap"><table class="spec">
+          <tr><th>Setting</th><th>Required value</th></tr>
+          <tr><td>Phase 1 (ISAKMP) policy</td><td><code>10</code>: AES-256, SHA-256, pre-shared key, DH group 14, lifetime 86400 s</td></tr>
+          <tr><td>Pre-shared key</td><td><code>MVCC-Lab-2026</code></td></tr>
+          <tr><td>Phase 2 transform set</td><td><code>TS</code>: <code>esp-aes 256 esp-sha256-hmac</code>, mode tunnel</td></tr>
+          <tr><td>Interesting-traffic ACL</td><td><code>VPN-TRAFFIC</code>: HQ 10.1.1.0/24 to branch 10.2.2.0/24 (mirror it on R2)</td></tr>
+          <tr><td>Crypto map</td><td><code>VPN-MAP 10</code>, applied to G0/0 on both routers</td></tr>
+        </table></div>
+        <p class="pkt-cap" style="margin-top:10px">Interfaces, IP addresses, and default routes are already configured.</p>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+          <h3 style="margin:0">Parameter comparison</h3>
+          <button class="btn small" type="button" id="explainA">Explain what's failing</button>
+        </div>
+        <p class="pkt-cap">Both peers must agree on every phase 1 and phase 2 setting. This table updates as you type.</p>
+        <div id="paramWrap" class="tablewrap"></div>
+        <div id="explainOut" class="banner warn" hidden></div>
+      </div>
+    </div>
+
+    <div class="stack">
+      <div class="term" id="termA">
+        <div class="term-bar">
+          <button class="dev-btn" data-part="A" data-dev="R1" aria-pressed="true">R1 (HQ)</button>
+          <button class="dev-btn" data-part="A" data-dev="R2" aria-pressed="false">R2 (Branch)</button>
+          <span class="spacer"></span>
+          <button class="tbtn" type="button" data-clear="A">Clear screen</button>
+          <button class="tbtn" type="button" data-reset="A">Reset Part A</button>
+        </div>
+        <div class="term-out" id="outA" aria-live="polite"></div>
+        <div class="term-in"><label for="inA" id="promptA">R1&gt;</label><input id="inA" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="R1 command line"></div>
+      </div>
+
+      <div class="card">
+        <h3>Tasks</h3>
+        <p class="pkt-cap">Tasks check themselves as you work. Use a hint only after you've tried.</p>
+        <div id="tasksA"></div>
+      </div>
+
+      <div class="card">
+        <h3>Troubleshooting challenge</h3>
+        <div id="chalBanner" class="banner info" hidden></div>
+        <p class="pkt-cap" id="chalTxt">Once your tunnel is up, inject a hidden fault on one router. Find it using only show, debug, and ping, then fix it.</p>
+        <button class="btn primary" type="button" id="chalBtn" disabled>Inject a fault</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:20px">
+    <h3>Inside the packet: tunnel mode vs. transport mode</h3>
+    <p class="pkt-cap">This is the ping from PC-A to PC-B as it crosses the internet. Switch modes to compare what an eavesdropper on the ISP path can see.</p>
+    <div class="seg" role="group" aria-label="IPsec mode">
+      <button type="button" data-encap="tunnel" aria-pressed="true">Tunnel mode</button>
+      <button type="button" data-encap="transport" aria-pressed="false">Transport mode</button>
+    </div>
+    <p class="pkt-cap">Original packet</p>
+    <div class="pkt-row" style="padding-bottom:10px">
+      <div class="blk orig"><b>IP header</b>10.1.1.10 to 10.2.2.10</div><div class="blk data"><b>ICMP</b>echo request</div><div class="blk data"><b>Data</b>payload</div>
+    </div>
+    <p class="pkt-cap">After IPsec ESP</p>
+    <div class="pkt-wrap"><div class="pkt-row" id="encapRow"></div></div>
+    <p id="encapNote" style="max-width:80ch;margin:0"></p>
+  </div>
+</section>
+
+<!-- ================= PART B ================= -->
+<section class="panel" id="partB" role="tabpanel" hidden>
+  <h2>Part B: WireGuard point-to-point VPN</h2>
+  <p class="lede">An employee works from a home office behind a typical SOHO router. Build a dedicated one-to-one tunnel between the employee's laptop and the office VPN server <span class="mono">vpn-gw</span>. Each side generates a key pair and must hold the <em>other</em> side's public key. Click any key printed in the console to copy it.</p>
+
+  <div class="lab">
+    <div class="stack">
+      <div class="topo" id="topoB">
+        <svg viewBox="0 0 760 270" role="img" aria-labelledby="topoBTitle">
+          <title id="topoBTitle">Laptop behind a home NAT router, the internet, and the office server vpn-gw, with a WireGuard tunnel arcing from laptop to server</title>
+          <g id="tunB">
+            <path class="tun-shell" d="M70 150 C 160 20, 600 20, 660 150"/>
+            <path class="tun-core" id="tunPathB" d="M70 150 C 160 20, 600 20, 660 150"/>
+            <text class="tun-state" x="365" y="34" id="tunTxtB">WireGuard tunnel: down</text>
+          </g>
+          <line class="wire" x1="96" y1="180" x2="196" y2="180"/>
+          <line class="wire" x1="248" y1="180" x2="330" y2="180"/>
+          <line class="wire" x1="450" y1="180" x2="630" y2="180"/>
+          <g class="clickable" data-devb="laptop" tabindex="0" role="button" aria-label="Open laptop console"><rect x="44" y="160" width="52" height="34" rx="4" class="node-fill"/><path d="M36 196 h68 l-6 8 h-56 z" fill="var(--navy)"/></g>
+          <text class="lbl-strong" x="70" y="226" text-anchor="middle">Laptop</text>
+          <text class="lbl" x="70" y="243" text-anchor="middle">wlan0 192.168.1.50</text>
+          <text class="lbl" x="70" y="259" text-anchor="middle">wg0 10.10.0.2</text>
+          <g><rect x="196" y="164" width="52" height="32" rx="6" class="node-fill" style="stroke:var(--muted)"/><text class="lbl" x="222" y="184" text-anchor="middle" style="font-weight:600">NAT</text></g>
+          <text class="lbl-strong" x="222" y="226" text-anchor="middle">Home router</text>
+          <text class="lbl" x="222" y="243" text-anchor="middle">public 198.51.100.77</text>
+          <path d="M345 192 a22 22 0 0 1 8 -40 a30 30 0 0 1 52 -10 a24 24 0 0 1 40 14 a20 20 0 0 1 -4 36 z" class="node-fill" style="stroke:var(--muted)"/>
+          <text class="lbl-strong" x="395" y="226" text-anchor="middle">Internet</text>
+          <g class="clickable" data-devb="server" tabindex="0" role="button" aria-label="Open vpn-gw console"><rect x="636" y="152" width="48" height="56" rx="5" class="node-fill"/><line x1="646" y1="168" x2="674" y2="168" stroke="var(--navy)" stroke-width="3"/><line x1="646" y1="180" x2="674" y2="180" stroke="var(--navy)" stroke-width="3"/><line x1="646" y1="192" x2="674" y2="192" stroke="var(--navy)" stroke-width="3"/></g>
+          <text class="lbl-strong" x="660" y="226" text-anchor="middle">vpn-gw (office)</text>
+          <text class="lbl" x="660" y="243" text-anchor="middle">eth0 203.0.113.10</text>
+          <text class="lbl" x="660" y="259" text-anchor="middle">wg0 10.10.0.1</text>
+          <circle r="8" class="pkt" id="pktB"/>
+        </svg>
+      </div>
+
+      <div class="card">
+        <h3>Tunnel plan</h3>
+        <div class="tablewrap"><table class="spec">
+          <tr><th>Setting</th><th>vpn-gw (server)</th><th>Laptop</th></tr>
+          <tr><td>Interface</td><td><code>wg0</code></td><td><code>wg0</code></td></tr>
+          <tr><td>Address</td><td><code>10.10.0.1/24</code></td><td><code>10.10.0.2/24</code></td></tr>
+          <tr><td>ListenPort</td><td><code>51820</code></td><td>(not needed)</td></tr>
+          <tr><td>[Peer] PublicKey</td><td>laptop's public key</td><td>vpn-gw's public key</td></tr>
+          <tr><td>[Peer] Endpoint</td><td>(learned automatically)</td><td><code>203.0.113.10:51820</code></td></tr>
+          <tr><td>[Peer] AllowedIPs</td><td><code>10.10.0.2/32</code></td><td><code>10.10.0.1/32</code></td></tr>
+          <tr><td>PersistentKeepalive</td><td>(not needed)</td><td><code>25</code> (keeps the home NAT mapping open)</td></tr>
+        </table></div>
+        <p class="pkt-cap" style="margin-top:10px">The /32 AllowedIPs make this a true point-to-point link: each side sends and accepts only the single address of its partner.</p>
+      </div>
+
+      <div class="card">
+        <h3>Key exchange and readiness</h3>
+        <p class="pkt-cap">Based on the saved <span class="mono">wg0.conf</span> files. Keys are shortened.</p>
+        <div id="keymap"></div>
+      </div>
+    </div>
+
+    <div class="stack">
+      <div class="term" id="termB">
+        <div class="term-bar">
+          <button class="dev-btn" data-part="B" data-dev="laptop" aria-pressed="true">laptop (home)</button>
+          <button class="dev-btn" data-part="B" data-dev="server" aria-pressed="false">vpn-gw (office)</button>
+          <span class="spacer"></span>
+          <button class="tbtn" type="button" data-clear="B">Clear screen</button>
+          <button class="tbtn" type="button" data-reset="B">Reset Part B</button>
+        </div>
+        <div class="term-out" id="outB" aria-live="polite"></div>
+        <div class="term-in"><label for="inB" id="promptB">student@laptop:~$</label><input id="inB" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="laptop command line"></div>
+      </div>
+      <div class="card">
+        <h3>Tasks</h3>
+        <div id="tasksB"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:20px">
+    <h3>Inside a WireGuard packet</h3>
+    <p class="pkt-cap">The laptop's ping to 10.10.0.1 after it leaves the home router. NAT rewrote the outer source address; the inner packet is untouched and unreadable.</p>
+    <div class="pkt-wrap"><div class="pkt-row">
+      <div class="blk new"><b>Outer IP</b>198.51.100.77 to 203.0.113.10</div>
+      <div class="blk esp"><b>UDP</b>41824 to 51820</div>
+      <div class="auth" style="border-top-color:var(--amber)">
+        <div class="blk esp"><b>WG header</b>type 4, receiver index, counter</div>
+        <div class="enc"><div class="blk orig"><b>Inner IP</b>10.10.0.2 to 10.10.0.1</div><div class="blk data"><b>ICMP</b>echo</div><div class="blk data"><b>Data</b></div></div>
+        <div class="blk icv"><b>Poly1305 tag</b>16 bytes</div>
+      </div>
+    </div></div>
+    <p style="max-width:80ch;margin:0">Like IPsec tunnel mode, WireGuard hides the inner addresses. Unlike IPsec, it always uses UDP, which passes through NAT easily, and it has no cipher negotiation: every peer uses ChaCha20-Poly1305, so there's nothing to mismatch except keys, addresses, and ports.</p>
+  </div>
+</section>
+
+<!-- ================= QUIZ ================= -->
+<section class="panel" id="quiz" role="tabpanel" hidden>
+  <h2>Knowledge check</h2>
+  <p class="lede">Ten questions. Answer all, then check your answers to see explanations. Your score goes into the lab report.</p>
+  <form id="quizForm" onsubmit="return false"></form>
+  <p><button class="btn primary" type="button" id="quizCheck">Check answers</button> <button class="btn" type="button" id="quizReset">Try again</button></p>
+  <div id="quizScore" class="banner good" hidden></div>
+</section>
+
+<!-- ================= REPORT ================= -->
+<section class="panel" id="report" role="tabpanel" hidden>
+  <h2>Lab report</h2>
+  <p class="lede no-print">Fill in your details and reflections, then print or save as PDF to submit. Your typing is saved in this browser.</p>
+  <div class="grid2">
+    <div class="card">
+      <div class="field"><label for="rName">Student name</label><input id="rName" data-save></div>
+      <div class="field"><label for="rCourse">Course and section</label><input id="rCourse" data-save></div>
+      <div class="field"><label for="rDate">Date</label><input id="rDate" data-save></div>
+      <h3 style="margin-top:14px">Completion record</h3>
+      <ul class="summary-list" id="summary"></ul>
+    </div>
+    <div class="card">
+      <div class="field"><label for="r1">1. Using the packet view, explain what an eavesdropper on the internet can and can't see in tunnel mode versus transport mode.</label><textarea id="r1" data-save></textarea></div>
+      <div class="field"><label for="r2">2. Describe a problem you hit (or the injected fault). Which command revealed it, and how did you fix it?</label><textarea id="r2" data-save></textarea></div>
+      <div class="field"><label for="r3">3. Why must the crypto ACLs on R1 and R2 be mirror images of each other?</label><textarea id="r3" data-save></textarea></div>
+      <div class="field"><label for="r4">4. A 10-person accounting firm and a 5,000-employee hospital both need VPNs. Recommend a protocol and authentication method for each, and justify your choice.</label><textarea id="r4" data-save></textarea></div>
+    </div>
+  </div>
+  <p class="no-print" style="margin-top:16px"><button class="btn primary" type="button" onclick="window.print()">Print or save as PDF</button></p>
+</section>
+</main>
+
+<div class="modal" id="editor" hidden role="dialog" aria-modal="true" aria-labelledby="edTitle">
+  <div class="modal-box">
+    <div class="modal-head"><span id="edTitle">GNU nano  /etc/wireguard/wg0.conf</span><button class="tbtn btn small" type="button" id="edTemplate">Insert template</button></div>
+    <textarea id="edText" spellcheck="false" aria-label="wg0.conf contents"></textarea>
+    <div class="modal-foot"><small>Paste keys exactly. Delete any line you leave empty.</small><span><button class="btn small" type="button" id="edCancel">Exit without saving</button> <button class="btn small go" type="button" id="edSave">Save and exit</button></span></div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+"use strict";
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>el.classList.remove('show'),1800)}
+
+/* ---------- theme ---------- */
+(function(){const t=store.get('vpnlab-theme');if(t)document.documentElement.dataset.theme=t;setThemeLabel()})();
+function curTheme(){return document.documentElement.dataset.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')}
+function setThemeLabel(){const b=document.getElementById('themeBtn');if(b)b.textContent=curTheme()==='dark'?'Light mode':'Dark mode'}
+$('#themeBtn').onclick=()=>{const n=curTheme()==='dark'?'light':'dark';document.documentElement.dataset.theme=n;store.set('vpnlab-theme',n);setThemeLabel()};
+
+/* ---------- tabs ---------- */
+function showTab(id){$$('.tab').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===id)));$$('.panel').forEach(p=>p.hidden=p.id!==id);if(id==='report')renderSummary();window.scrollTo({top:0})}
+$$('.tab').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+$$('[data-goto]').forEach(b=>b.onclick=()=>showTab(b.dataset.goto));
+
+/* ---------- copy buttons on code ---------- */
+$$('pre.code').forEach(pre=>{const b=document.createElement('button');b.className='copy-code';b.type='button';b.textContent='Copy';b.onclick=()=>{const txt=pre.innerText.replace(/^Copy\n?/,'').replace(/\s+[!#] .*$/gm,'');copyText(txt.replace(/Copy$/,'').trim());b.textContent='Copied';setTimeout(()=>b.textContent='Copy',1200)};pre.appendChild(b)});
+function copyText(t){try{navigator.clipboard.writeText(t).catch(()=>fallbackCopy(t))}catch(e){fallbackCopy(t)}}
+function fallbackCopy(t){const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand('copy')}catch(e){}ta.remove()}
+
+/* ---------- glossary ---------- */
+const GLOSS=[
+ ['IKE','Internet Key Exchange','Protocol that authenticates peers and negotiates keys and SAs for IPsec. Uses UDP 500, and UDP 4500 when NAT is detected.'],
+ ['ESP','Encapsulating Security Payload','IPsec protocol (IP 50) that encrypts and integrity-protects data. Works in tunnel or transport mode.'],
+ ['AH','Authentication Header','IPsec protocol (IP 51) that authenticates but does not encrypt. Fails through NAT because it covers the IP header.'],
+ ['SA','Security association','A one-way agreement on keys and algorithms between peers. Each tunnel needs an inbound and an outbound IPsec SA.'],
+ ['SPI','Security parameter index','A number in the ESP header that tells the receiver which SA (and keys) to use to decrypt the packet.'],
+ ['Transform set','Phase 2 proposal','Cisco term for the ESP encryption and integrity algorithms plus the mode (tunnel or transport).'],
+ ['PFS','Perfect forward secrecy','A fresh Diffie-Hellman exchange for each phase 2 rekey so one stolen key cannot decrypt past sessions.'],
+ ['NAT-T','NAT traversal','Wraps ESP inside UDP 4500 so IPsec can pass through NAT devices.'],
+ ['Split tunnel','Partial tunneling','Only corporate destinations go through the VPN; internet traffic goes directly out. Saves bandwidth, reduces visibility.'],
+ ['AllowedIPs','WireGuard cryptokey routing','Addresses routed into the tunnel toward a peer, and the only inner source addresses accepted from that peer.'],
+ ['DH group 14','Diffie-Hellman 2048-bit','Key-exchange group that lets two peers derive a shared secret over an untrusted network. Group 14 is a common minimum.'],
+ ['Interesting traffic','Crypto ACL match','Traffic that matches the crypto ACL. Only interesting traffic triggers and travels through a policy-based tunnel.']];
+$('#flips').innerHTML=GLOSS.map(g=>`<button class="flip" type="button" aria-label="${esc(g[0])}: select to reveal definition"><div class="flip-in"><div class="face front">${esc(g[0])}<small>${esc(g[1])}</small></div><div class="face back">${esc(g[2])}</div></div></button>`).join('');
+$$('.flip').forEach(f=>f.onclick=()=>f.classList.toggle('flipped'));
+
+/* ---------- encapsulation viewer ---------- */
+function renderEncap(mode){
+  $$('[data-encap]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.encap===mode)));
+  const inner='<div class="blk data"><b>ICMP</b>echo request</div><div class="blk data"><b>Data</b>payload</div><div class="blk esp"><b>ESP trailer</b>padding, next header</div>';
+  if(mode==='tunnel'){
+    $('#encapRow').innerHTML='<div class="blk new"><b>New IP header</b>203.0.113.1 to 198.51.100.1<br>protocol 50 (ESP)</div><div class="auth"><div class="blk esp"><b>ESP header</b>SPI, sequence</div><div class="enc"><div class="blk orig"><b>Original IP header</b>10.1.1.10 to 10.2.2.10</div>'+inner+'</div></div><div class="blk icv"><b>ESP ICV</b>integrity check</div>';
+    $('#encapNote').textContent='Tunnel mode encrypts the entire original packet, including the private 10.x addresses. An eavesdropper only sees the two routers\u2019 public addresses talking ESP. This is the default for site-to-site gateways.';
+  }else{
+    $('#encapRow').innerHTML='<div class="blk orig"><b>Original IP header</b>10.1.1.10 to 10.2.2.10<br>protocol 50 (ESP)</div><div class="auth"><div class="blk esp"><b>ESP header</b>SPI, sequence</div><div class="enc">'+inner+'</div></div><div class="blk icv"><b>ESP ICV</b>integrity check</div>';
+    $('#encapNote').textContent='Transport mode keeps the original IP header, so the real source and destination stay visible and routable. It is used between two hosts that are themselves the endpoints, or to protect GRE tunnels. Private 10.x addresses could not cross the internet this way, which is why site-to-site uses tunnel mode.';
+  }
+}
+$$('[data-encap]').forEach(b=>b.onclick=()=>renderEncap(b.dataset.encap));renderEncap('tunnel');
+
+/* ======================================================================
+   Generic terminal plumbing
+   ====================================================================== */
+function push(d,text,cls){String(text).split('\n').forEach(t=>d.buf.push({t,c:cls||''}));if(d.buf.length>600)d.buf.splice(0,d.buf.length-600)}
+function emit(d,r){if(r==null||r==='')return;if(typeof r==='string'){push(d,r);return}
+  if(r.o)push(d,r.o,r.c||'');if(r.keyLine)push(d,r.keyLine,'key');if(r.dbg)push(d,r.dbg,'dbg');if(r.ok)push(d,r.ok,'ok');if(r.tip)push(d,'Tip: '+r.tip,'tip')}
+function renderTerm(P){const d=P.dev[P.cur];const out=$('#out'+P.id);
+  out.innerHTML=d.buf.map(l=>`<div class="ln ${l.c}">${esc(l.t)||'&nbsp;'}</div>`).join('');out.scrollTop=out.scrollHeight;
+  $('#prompt'+P.id).textContent=P.prompt(d);$('#in'+P.id).setAttribute('aria-label',P.label(d)+' command line');
+  $$(`.dev-btn[data-part="${P.id}"]`).forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.dev===P.cur)));}
+function wireTerm(P){
+  const inp=$('#in'+P.id);
+  const runLine=v=>{const d=P.dev[P.cur];push(d,P.prompt(d)+v,'cmd');if(v.trim()){d.hist.push(v)}d.hi=d.hist.length;
+    if(/^\s*clear\s*$/i.test(v)&&P.id==='B'){d.buf=[];}else{emit(d,P.run(d,v))}};
+  inp.addEventListener('keydown',e=>{const d=P.dev[P.cur];
+    if(e.key==='Enter'){const v=inp.value;inp.value='';runLine(v);renderTerm(P);P.update()}
+    else if(e.key==='ArrowUp'){if(d.hi>0){d.hi--;inp.value=d.hist[d.hi]}e.preventDefault()}
+    else if(e.key==='ArrowDown'){if(d.hi<d.hist.length-1){d.hi++;inp.value=d.hist[d.hi]}else{d.hi=d.hist.length;inp.value=''}e.preventDefault()}
+    else if(e.key==='l'&&e.ctrlKey){d.buf=[];renderTerm(P);e.preventDefault()}});
+  inp.addEventListener('paste',e=>{const t=(e.clipboardData||window.clipboardData).getData('text');if(t&&/\n/.test(t.trim())){e.preventDefault();t.replace(/\r/g,'').split('\n').forEach(l=>{if(l.trim()!=='')runLine(l)});renderTerm(P);P.update()}});
+  $('#out'+P.id).addEventListener('click',e=>{const k=e.target.closest('.ln.key');if(k){copyText(k.textContent.trim());k.classList.add('copied');setTimeout(()=>k.classList.remove('copied'),1400)}else if(!getSelection().toString())inp.focus()});
+  $$(`.dev-btn[data-part="${P.id}"]`).forEach(b=>b.onclick=()=>{P.cur=b.dataset.dev;renderTerm(P);P.update();inp.focus()});
+  $(`[data-clear="${P.id}"]`).onclick=()=>{P.dev[P.cur].buf=[];renderTerm(P);inp.focus()};
+  $(`[data-reset="${P.id}"]`).onclick=()=>{if(confirm('Reset all devices in Part '+P.id+'? Your configuration will be erased.')){P.reset();renderTerm(P);P.update()}};
+}
+function animatePacket(svgId,pathId,pktId){
+  const path=$('#'+pathId),pk=$('#'+pktId);if(!path||!pk)return;
+  if(reduceMotion){pk.style.opacity=0;return}
+  const L=path.getTotalLength();let start=null;const dur=1100;
+  function step(ts){if(!start)start=ts;const t=(ts-start)/dur;if(t>=2){pk.style.opacity=0;return}
+    const f=t<1?t:2-t,p=path.getPointAtLength(L*f);pk.setAttribute('cx',p.x);pk.setAttribute('cy',p.y);pk.style.opacity=1;requestAnimationFrame(step)}
+  requestAnimationFrame(step);
+}
+function taskHTML(groups,state,prefix){
+  return groups.map(g=>`<div class="group-h">${esc(g.g)}</div><ul class="checklist">`+g.items.map(it=>{const done=it.chk();state[it.id]=done;
+    return `<li class="${done?'done':''}"><span class="cb" aria-hidden="true">\u2713</span><div><div class="task-t">${esc(it.t)}<span class="sr-only">${done?' (complete)':''}</span></div>${it.h?`<button class="hint-btn" type="button" data-hint="${prefix}${it.id}">Show hint</button><pre class="hint" id="hint-${prefix}${it.id}" hidden>${esc(it.h)}</pre>`:''}</div></li>`}).join('')+'</ul>').join('');
+}
+const openHints=new Set();
+function bindHints(container){container.querySelectorAll('[data-hint]').forEach(b=>{const id=b.dataset.hint,pre=$('#hint-'+id);
+  if(openHints.has(id)){pre.hidden=false;b.textContent='Hide hint'}
+  b.onclick=()=>{pre.hidden=!pre.hidden;b.textContent=pre.hidden?'Show hint':'Hide hint';pre.hidden?openHints.delete(id):openHints.add(id)}})}
+
+/* ======================================================================
+   PART A: Cisco IOS IPsec simulator
+   ====================================================================== */
+const SPEC={enc:'aes 256',hash:'sha256',auth:'pre-share',group:14,key:'MVCC-Lab-2026',tsEnc:'esp-aes 256',tsAuth:'esp-sha256-hmac'};
+const SUF={user:'>',priv:'#',config:'(config)#',isakmp:'(config-isakmp)#',ts:'(cfg-crypto-trans)#',acl:'(config-ext-nacl)#',cmap:'(config-crypto-map)#',iface:'(config-if)#'};
+function mkRouter(name,pub,gw,lan,net,peerPub,peerNet){return{name,pub,gw,lan,net,peerPub,peerNet,mode:'user',ctx:null,debug:false,policies:{},keys:{},ts:{},acls:{},maps:{},
+  ifs:{g0:{ip:pub,mask:'255.255.255.252',map:null,desc:'To ISP'},g1:{ip:lan,mask:'255.255.255.0',desc:name==='R1'?'HQ LAN':'Branch LAN'}},buf:[],hist:[],hi:0}}
+const A={};
+function resetA(){Object.assign(A,{established:false,attempted:false,pkts:0,flags:{under:false,lan:false,isakmp:false,ipsec:false,chal:false},chal:{active:false,fault:null},
+  dev:{R1:mkRouter('R1','203.0.113.1','203.0.113.2','10.1.1.1','10.1.1.0','198.51.100.1','10.2.2.0'),R2:mkRouter('R2','198.51.100.1','198.51.100.2','10.2.2.1','10.2.2.0','203.0.113.1','10.1.1.0')}});
+  ['R1','R2'].forEach(n=>push(A.dev[n],`${n} console connected. Interfaces and routing are preconfigured.\nType enable to begin, ? for help. Multi-line pastes run line by line.\n`,'sys'));
+  if(typeof PA!=='undefined'){PA.dev=A.dev;PA.cur='R1'}$('#chalBanner').hidden=true;}
+const other=r=>r===A.dev.R1?A.dev.R2:A.dev.R1;
+
+/* regex builders */
+function rxe(s){return s.replace(/[.*+?^${}()|[\]\\\/-]/g,'\\$&')}
+function ab(w,m){let o='';for(let i=w.length-1;i>=m;i--)o='(?:'+rxe(w[i])+o+')?';return rxe(w.slice(0,m))+o}
+function C(spec){return new RegExp('^'+spec.split(' ').map(t=>{const m=t.match(/^([a-z0-9-]+)\/(\d+)$/i);return m?ab(m[1],+m[2]):t}).join('\\s+')+'$','i')}
+const IP='(\\d{1,3}(?:\\.\\d{1,3}){3})';
+const IFP='(?:'+ab('gigabitethernet',1)+')\\s*0\\/([01])';
+const SP='(any|host\\s+\\S+|\\S+\\s+\\S+)';
+const IFRX=new RegExp('^'+IFP+'$','i');
+function parseSpec(s){s=s.trim().toLowerCase();if(s==='any')return{net:'0.0.0.0',wc:'255.255.255.255'};let m=s.match(/^host\s+(\S+)$/);if(m)return{net:m[1],wc:'0.0.0.0'};m=s.match(/^(\S+)\s+(\S+)$/);return m?{net:m[1],wc:m[2]}:null}
+function fmtSpec(s){return s.wc==='255.255.255.255'?'any':s.wc==='0.0.0.0'?'host '+s.net:s.net+' '+s.wc}
+const ip2n=ip=>ip.split('.').reduce((a,o)=>(a*256+(+o))>>>0,0);
+const inSpec=(ip,s)=>{const w=ip2n(s.wc);return ((ip2n(ip)&~w)>>>0)===((ip2n(s.net)&~w)>>>0)};
+const sameSpec=(a,b)=>a&&b&&a.net===b.net&&a.wc===b.wc;
+const permitOf=(r,acl)=>acl&&r.acls[acl]?r.acls[acl].find(e=>e.act==='permit')||null:null;
+function mapOf(r){const n=r.ifs.g0.map;return n&&r.maps[n]?Object.assign({name:n},r.maps[n]):null}
+function addAclEntry(r,name,act,s,d){const S=parseSpec(s),D=parseSpec(d);if(!S||!D)return'% Invalid input detected at \'^\' marker.';r.acls[name]=r.acls[name]||[];r.acls[name].push({act:act.toLowerCase(),src:S,dst:D})}
+const normEnc=e=>{e=e.toLowerCase().replace(/\s+/g,' ');return e==='esp-aes'?'esp-aes 128':e};
+const VALID_GROUPS=[1,2,5,14,15,16,19,20,21,24];
+
+const H={};
+H.ping=[C(`ping/2 ${IP}(?:\\s+${ab('source',2)}\\s+(\\S+))?`),(r,m)=>doPing(r,m[1],m[2])];
+H.user=[[C('enable/2'),r=>{r.mode='priv'}],H.ping,[C('exit'),()=>'Console session stays open in this simulator. Type enable to continue.']];
+H.priv=[
+ [C('configure/4 terminal/1'),r=>{r.mode='config';return 'Enter configuration commands, one per line.  End with CNTL/Z.'}],
+ [C('configure/4'),r=>{r.mode='config';return 'Configuring from terminal, memory, or network [terminal]? \nEnter configuration commands, one per line.  End with CNTL/Z.'}],
+ [C('disable/4'),r=>{r.mode='user'}],[C('exit'),r=>{r.mode='user'}],
+ [C('show/2 running-config/3'),r=>runConf(r)],
+ [C('show/2 ip/2 interface/3 brief/2'),r=>ipBrief(r)],
+ [C('show/2 crypto/3 isakmp/3 sa'),r=>showIsakmp(r)],
+ [C('show/2 crypto/3 isakmp/3 policy/3'),r=>showPolicy(r)],
+ [C('show/2 crypto/3 ipsec/3 sa'),r=>showIpsec(r)],
+ [C('show/2 crypto/3 ipsec/3 transform-set/5'),r=>showTs(r)],
+ [C('show/2 crypto/3 map/1'),r=>showMap(r)],
+ [C('show/2 access-lists/6'),r=>showAcl(r)],
+ H.ping,
+ [C('debug/3 crypto/3 (isakmp|ipsec)'),(r,m)=>{r.debug=true;return 'Crypto '+m[1].toUpperCase()+' debugging is on'}],
+ [/^(?:undebug\s+all|u\s+all|un\s+all|no\s+debug\s+all)$/i,r=>{r.debug=false;return 'All possible debugging has been turned off'}],
+ [C('clear/3 crypto/3 (?:sa|isakmp|session)'),()=>{A.established=false;A.attempted=false;A.pkts=0}],
+ [C('copy/3 running-config/3 startup-config/3'),()=>'Destination filename [startup-config]? \nBuilding configuration...\n[OK]'],
+ [/^wr(?:i(?:t(?:e)?)?)?(?:\s+mem(?:o(?:r(?:y)?)?)?)?$/i,()=>'Building configuration...\n[OK]'],
+];
+H.config=[
+ [C('crypto/3 isakmp/3 policy/3 (\\d+)'),(r,m)=>{const n=+m[1];r.policies[n]=r.policies[n]||{enc:'des',hash:'sha',auth:'rsa-sig',group:1,life:86400};r.mode='isakmp';r.ctx=n}],
+ [C(`crypto/3 isakmp/3 key/3 (\\S+) address/3 ${IP}(?:\\s+255\\.255\\.255\\.255)?`),(r,m)=>{r.keys[m[2]]=m[1];if(m[2]!==r.peerPub)return{tip:`The key is tied to ${m[2]}, but this router's peer is ${r.peerPub}.`}}],
+ [C(`crypto/3 ipsec/3 transform-set/5 (\\S+) (esp-aes(?:\\s+(?:128|192|256))?|esp-3des|esp-des) (esp-(?:sha|sha256|sha384|sha512|md5)-hmac)`),(r,m)=>{r.ts[m[1]]={enc:normEnc(m[2]),auth:m[3].toLowerCase(),mode:(r.ts[m[1]]||{}).mode||'tunnel'};r.mode='ts';r.ctx=m[1]}],
+ [C('ip/2 access-list/8 extended/2 (\\S+)'),(r,m)=>{r.acls[m[1]]=r.acls[m[1]]||[];r.mode='acl';r.ctx=m[1]}],
+ [C(`access-list/8 (1\\d\\d) (permit|deny) ip ${SP} ${SP}`),(r,m)=>addAclEntry(r,m[1],m[2],m[3],m[4])],
+ [C(`crypto/3 map/3 (\\S+) (\\d+)(?:\\s+${ab('ipsec-isakmp',7)})?`),(r,m)=>{const isNew=!r.maps[m[1]];if(isNew)r.maps[m[1]]={seq:+m[2],peer:null,ts:null,acl:null,pfs:null};r.mode='cmap';r.ctx=m[1];
+    if(isNew)return '% NOTE: This new crypto map will remain disabled until a peer\n        and a valid access list have been configured.'}],
+ [C(`interface/3 ${IFP}`),(r,m)=>{r.mode='iface';r.ctx='g'+m[1]}],
+ [C(`no crypto/3 isakmp/3 key/3 (\\S+) address/3 ${IP}`),(r,m)=>{delete r.keys[m[2]]}],
+ [C('no crypto/3 isakmp/3 policy/3 (\\d+)'),(r,m)=>{delete r.policies[+m[1]]}],
+ [C('no crypto/3 ipsec/3 transform-set/5 (\\S+)'),(r,m)=>{delete r.ts[m[1]]}],
+ [C('no ip/2 access-list/8 extended/2 (\\S+)'),(r,m)=>{delete r.acls[m[1]]}],
+ [C('no access-list/8 (\\d+)'),(r,m)=>{delete r.acls[m[1]]}],
+ [C('no crypto/3 map/3 (\\S+)(?:\\s+\\d+)?'),(r,m)=>{delete r.maps[m[1]];if(r.ifs.g0.map===m[1])return{tip:'The map is still referenced on G0/0. Remove it there too, or recreate the map.'}}],
+ [C('hostname/4 (\\S+)'),()=>({tip:'Keep the hostnames R1 and R2 for this lab.'})],
+ [C('end'),r=>{r.mode='priv'}],[C('exit'),r=>{r.mode='priv'}],
+];
+const subExit=[[C('exit'),r=>{r.mode='config'}],[C('end'),r=>{r.mode='priv'}]];
+H.isakmp=[
+ [C('encryption/4 (aes|3des|des)(?:\\s+(128|192|256))?'),(r,m)=>{r.policies[r.ctx].enc=m[1].toLowerCase()==='aes'?'aes '+(m[2]||'128'):m[1].toLowerCase()}],
+ [C('hash/2 (sha|sha256|sha384|sha512|md5)'),(r,m)=>{r.policies[r.ctx].hash=m[1].toLowerCase()}],
+ [C('authentication/4 (pre-share|rsa-sig|rsa-encr)'),(r,m)=>{r.policies[r.ctx].auth=m[1].toLowerCase()}],
+ [C('group/2 (\\d+)'),(r,m)=>{const g=+m[1];if(!VALID_GROUPS.includes(g))return '% Invalid input detected at \'^\' marker.';r.policies[r.ctx].group=g}],
+ [C('lifetime/4 (\\d+)'),(r,m)=>{r.policies[r.ctx].life=+m[1]}],...subExit];
+H.ts=[[C('mode/2 (tunnel|transport)'),(r,m)=>{r.ts[r.ctx].mode=m[1].toLowerCase()}],...subExit];
+H.acl=[[C(`(?:\\d+\\s+)?(permit|deny) ip ${SP} ${SP}`),(r,m)=>addAclEntry(r,r.ctx,m[1],m[2],m[3])],[/^remark\s+.+$/i,()=>''],...subExit];
+H.cmap=[
+ [C(`set/2 peer/2 ${IP}`),(r,m)=>{r.maps[r.ctx].peer=m[1];if(m[1]!==r.peerPub)return{tip:`The peer should be the other router's public address, ${r.peerPub}.`}}],
+ [C('set/2 transform-set/5 (\\S+)'),(r,m)=>{r.maps[r.ctx].ts=m[1];if(!r.ts[m[1]])return{tip:`Transform set ${m[1]} doesn't exist yet. Names are case-sensitive.`}}],
+ [C('match/2 address/3 (\\S+)'),(r,m)=>{r.maps[r.ctx].acl=m[1];if(!r.acls[m[1]])return{tip:`ACL ${m[1]} doesn't exist yet. Names are case-sensitive.`}}],
+ [C('set/2 pfs/2(?:\\s+(group\\d+))?'),(r,m)=>{r.maps[r.ctx].pfs=(m[1]||'group1').toLowerCase()}],
+ [C('no set/2 peer/2(?:\\s+\\S+)?'),r=>{r.maps[r.ctx].peer=null}],...subExit];
+H.iface=[
+ [C('crypto/3 map/3 (\\S+)'),(r,m)=>{if(r.ctx!=='g0')return{tip:'Apply the crypto map to G0/0, the interface that faces the internet. Type exit, then interface g0/0.'};r.ifs.g0.map=m[1];
+    return {o:'*Oct 12 14:02:11.317: %CRYPTO-6-ISAKMP_ON_OFF: ISAKMP is ON',c:'sys',tip:r.maps[m[1]]?'':'Note: crypto map '+m[1]+' does not exist yet.'}}],
+ [C('no crypto/3 map/3(?:\\s+\\S+)?'),r=>{if(r.ctx==='g0'){r.ifs.g0.map=null;return{o:'*Oct 12 14:03:40.102: %CRYPTO-6-ISAKMP_ON_OFF: ISAKMP is OFF',c:'sys'}}}],
+ [C('no shutdown/4'),()=>''],[C('shutdown/4'),()=>({tip:'Interfaces stay up in this lab, so shutdown is disabled.'})],
+ [C(`ip/2 address/3 ${IP} ${IP}`),()=>({tip:'Addressing is preconfigured. Leave it as is.'})],[C('description/4 .+'),()=>''],...subExit];
+
+const CFG=['config','isakmp','ts','acl','cmap','iface'];
+function tryMode(r,mode,t){for(const [re,fn] of H[mode]){const m=t.match(re);if(m){const v=fn(r,m);return v===undefined?'':v}}return undefined}
+const matchesAny=(mode,t)=>H[mode].some(([re])=>re.test(t));
+const INV='% Invalid input detected at \'^\' marker.';
+function execA(r,line){
+  const t=line.trim().replace(/\s+/g,' ');if(!t)return '';
+  if(/\?$/.test(t))return helpA(r);
+  let m;
+  if(CFG.includes(r.mode)&&(m=t.match(/^do (.+)$/i))){const v=tryMode(r,'priv',m[1]);return v===undefined?INV:v}
+  let res=tryMode(r,r.mode,t);if(res!==undefined)return res;
+  if(CFG.includes(r.mode)&&r.mode!=='config'){const save=r.mode,sc=r.ctx;r.mode='config';res=tryMode(r,'config',t);if(res!==undefined)return res;r.mode=save;r.ctx=sc}
+  if(r.mode==='user'&&(matchesAny('priv',t)||matchesAny('config',t)))return{o:INV,c:'err',tip:'You are in user EXEC mode (>). Type enable first.'};
+  if(r.mode==='priv'&&matchesAny('config',t))return{o:INV,c:'err',tip:'That is a configuration command. Type configure terminal first.'};
+  if(r.mode==='priv'&&['isakmp','ts','acl','cmap','iface'].some(md=>matchesAny(md,t)))return{o:INV,c:'err',tip:'That command belongs inside a sub-mode. Enter configure terminal, then the parent command (for example crypto isakmp policy 10).'};
+  if(CFG.includes(r.mode)&&matchesAny('priv',t))return{o:INV,c:'err',tip:'That is an EXEC command. Prefix it with do (for example do show run) or type end first.'};
+  if(r.mode==='config'&&['isakmp','ts','acl','cmap','iface'].some(md=>matchesAny(md,t)))return{o:INV,c:'err',tip:'That command belongs inside a sub-mode. Enter the parent command first, for example crypto map VPN-MAP 10 ipsec-isakmp or interface g0/0.'};
+  return{o:/^(crypto|ip|show|sh|ping)$/i.test(t)||/^crypto (isakmp|ipsec|map)$/i.test(t)?'% Incomplete command.':INV,c:'err',tip:nearTip(t)};
+}
+function nearTip(t){const s=t.toLowerCase();
+  if(s.startsWith('crypto isakmp'))return'Syntax: crypto isakmp policy <number>, or crypto isakmp key <key> address <peer-ip>';
+  if(s.startsWith('crypto ipsec'))return'Syntax: crypto ipsec transform-set <name> esp-aes 256 esp-sha256-hmac';
+  if(s.startsWith('crypto map'))return'Syntax: crypto map <name> <seq> ipsec-isakmp (in global config) or crypto map <name> (on the interface)';
+  if(s.includes('access-list'))return'Syntax: ip access-list extended <name>, then permit ip <src> <wildcard> <dst> <wildcard>';
+  if(s.startsWith('ping'))return'Syntax: ping <ip> [source <interface|ip>]';
+  return'Type ? to list the commands available in this mode.'}
+function helpA(r){const H2={
+ user:'  enable                 Turn on privileged commands\n  ping <ip>              Send echo messages',
+ priv:'  configure terminal     Enter configuration mode\n  show running-config    Current configuration\n  show ip interface brief\n  show crypto isakmp sa  Phase 1 security associations\n  show crypto isakmp policy\n  show crypto ipsec sa   Phase 2 security associations and counters\n  show crypto ipsec transform-set\n  show crypto map\n  show access-lists\n  ping <ip> [source <intf|ip>]\n  debug crypto isakmp    Watch negotiation (undebug all to stop)\n  clear crypto sa        Tear down SAs\n  copy running-config startup-config',
+ config:'  crypto isakmp policy <n>\n  crypto isakmp key <key> address <peer-ip>\n  crypto ipsec transform-set <name> <esp-enc> <esp-auth>\n  ip access-list extended <name>\n  crypto map <name> <seq> ipsec-isakmp\n  interface g0/0 | g0/1\n  no <command>           Remove a setting\n  do <exec command>      For example do show run\n  end',
+ isakmp:'  encryption aes 256 | aes 128 | 3des | des\n  hash sha256 | sha384 | sha | md5\n  authentication pre-share | rsa-sig\n  group 14 | 19 | 20 | 5 | 2\n  lifetime <seconds>\n  exit',
+ ts:'  mode tunnel | transport\n  exit',
+ acl:'  permit ip <src> <wildcard> <dst> <wildcard>\n  deny ip ...\n  exit',
+ cmap:'  set peer <ip>\n  set transform-set <name>\n  match address <acl-name>\n  set pfs group14\n  exit',
+ iface:'  crypto map <name>\n  no crypto map\n  exit'};return{o:H2[r.mode],c:'sys'}}
+
+/* ---------- tunnel evaluation ---------- */
+function evalA(){
+  const R1=A.dev.R1,R2=A.dev.R2,iss=[];const add=(stage,code,msg)=>iss.push({stage,code,msg});
+  for(const [r,p] of [[R1,R2],[R2,R1]]){
+    const mn=r.ifs.g0.map;
+    if(!mn){add('map','nomap',`${r.name} has no crypto map applied to G0/0, its internet-facing interface.`);continue}
+    const m=r.maps[mn];if(!m){add('map','nomap',`${r.name}: crypto map ${mn} is applied to G0/0 but was never created.`);continue}
+    if(m.peer!==p.pub)add('peer','peer',`${r.name}: the crypto map peer is ${m.peer||'not set'}; it must be ${p.pub}.`);
+    if(!m.ts||!r.ts[m.ts])add('map','nots',`${r.name}: the crypto map has no valid transform set${m.ts?` (${m.ts} doesn't exist)`:''}.`);
+    if(!m.acl||!permitOf(r,m.acl))add('map','noacl',`${r.name}: the crypto map has no valid match address ACL${m.acl?` (${m.acl} is missing or has no permit line)`:''}.`);
+  }
+  const P1=Object.values(R1.policies),P2=Object.values(R2.policies);
+  if(!P1.length||!P2.length)add('p1','nopol',`${!P1.length?'R1':'R2'} has no ISAKMP (phase 1) policy.`);
+  else{const pair=P1.flatMap(x=>P2.filter(y=>x.enc===y.enc&&x.hash===y.hash&&x.auth===y.auth&&x.group===y.group));
+    if(!pair.length)add('p1','pol','No ISAKMP (phase 1) policy matches on both routers. Compare encryption, hash, authentication, and DH group.');
+    else if(!pair.some(x=>x.auth==='pre-share'))add('p1','pol','The matching ISAKMP policies use certificates (rsa-sig), but this lab uses a pre-shared key. Set authentication pre-share.');}
+  const k1=R1.keys[R2.pub],k2=R2.keys[R1.pub];
+  if(!k1)add('p1','nokey','R1 has no pre-shared key configured for its peer 198.51.100.1.');
+  if(!k2)add('p1','nokey','R2 has no pre-shared key configured for its peer 203.0.113.1.');
+  if(k1&&k2&&k1!==k2)add('p1','keymis','The pre-shared keys on R1 and R2 are different. Keys are case-sensitive.');
+  const m1=mapOf(R1),m2=mapOf(R2);
+  if(m1&&m2&&R1.ts[m1.ts]&&R2.ts[m2.ts]){const t1=R1.ts[m1.ts],t2=R2.ts[m2.ts];
+    if(t1.enc!==t2.enc||t1.auth!==t2.auth)add('p2','tsmis',`Transform sets differ: R1 uses ${t1.enc} ${t1.auth}, R2 uses ${t2.enc} ${t2.auth}.`);
+    if(t1.mode!==t2.mode)add('p2','tsmis',`IPsec modes differ: R1 is ${t1.mode} mode, R2 is ${t2.mode} mode.`);}
+  const e1=m1&&permitOf(R1,m1.acl),e2=m2&&permitOf(R2,m2.acl);
+  if(e1&&e2&&!(sameSpec(e1.src,e2.dst)&&sameSpec(e1.dst,e2.src)))add('p2','aclmis','The crypto ACLs are not mirror images. R2\u2019s ACL must swap R1\u2019s source and destination.');
+  if(e1&&!(inSpec('10.1.1.10',e1.src)&&inSpec('10.2.2.10',e1.dst)))add('p2','aclmis','R1\u2019s crypto ACL does not match HQ LAN to branch LAN traffic.');
+  return{up:!iss.length,iss,p1ok:!iss.some(i=>i.stage==='p1'||i.stage==='peer')};
+}
+function dbgFor(iss,r,p){const i=iss.find(x=>x.stage==='peer')||iss.find(x=>x.stage==='p1')||iss.find(x=>x.stage==='p2')||iss[0];if(!i)return'';
+  const ts='*Oct 12 14:05:'+String(10+Math.floor(Math.random()*40))+'.'+String(100+Math.floor(Math.random()*800))+': ';
+  const L={peer:[`ISAKMP:(0): beginning Main Mode exchange`,`ISAKMP:(0): retransmitting phase 1 MM_NO_STATE...`,`ISAKMP:(0): deleting SA reason "Death by retransmission P1"`],
+   nopol:[`ISAKMP:(0): processing SA payload. message ID = 0`,`ISAKMP:(0): Checking ISAKMP transform 1 against priority 10 policy`,`ISAKMP:(0): atts are not acceptable. Next payload is 0`,`%CRYPTO-6-IKMP_MODE_FAILURE: Processing of Main mode failed with peer at ${p.pub}`],
+   nokey:[`ISAKMP:(0): No pre-shared key with ${p.pub}!`,`%CRYPTO-6-IKMP_MODE_FAILURE: Processing of Main mode failed with peer at ${p.pub}`],
+   keymis:[`ISAKMP:(1001): processing ID payload. message ID = 0`,`%CRYPTO-4-IKMP_BAD_MESSAGE: IKE message from ${p.pub} failed its sanity check or is malformed`],
+   tsmis:[`ISAKMP:(1001): processing SA payload. message ID = 2741592`,`ISAKMP:(1001): atts not acceptable.`,`IPSEC(validate_proposal_request): proposal part #1 not supported`,`%CRYPTO-6-IKMP_MODE_FAILURE: Processing of Quick mode failed with peer at ${p.pub}`],
+   aclmis:[`IPSEC(validate_transform_proposal): proxy identities not supported`,`ISAKMP:(1001): IPSec policy invalidated proposal with error 32`],
+   nomap:[`ISAKMP:(1001): IPSec policy invalidated proposal with error 256`],nots:[`ISAKMP:(1001): IPSec policy invalidated proposal with error 256`],noacl:[`ISAKMP:(1001): IPSec policy invalidated proposal with error 256`]};
+  L.pol=L.nopol;return (L[i.code]||['ISAKMP: negotiation failed']).map(x=>ts+x).join('\n')}
+
+/* ---------- ping ---------- */
+function pingOut(target,src,pat,tip,dbg){const ok=(pat.match(/!/g)||[]).length;
+  let o=`Type escape sequence to abort.\nSending 5, 100-byte ICMP Echos to ${target}, timeout is 2 seconds:`+(src?`\nPacket sent with a source address of ${src}`:'');
+  const res=pat+'\nSuccess rate is '+(ok*20)+' percent ('+ok+'/5)'+(ok?', round-trip min/avg/max = 1/2/4 ms':'');
+  return{o,dbg,ok:ok?res:'',c:'',tip,...(ok?{}:{o:o+'\n'+res})}}
+function doPing(r,target,src){
+  const p=other(r);let srcIp=r.pub;
+  if(src){const s=src.toLowerCase(),mm=s.match(IFRX);if(mm)srcIp=mm[1]==='1'?r.lan:r.pub;else if(s===r.lan||s===r.pub)srcIp=s;else return{o:'% Invalid source address- IP address not on any of our up interfaces',c:'err'}}
+  const sShow=src?srcIp:'';
+  if([r.pub,r.gw,p.pub,r.lan,r.net.replace(/0$/,'10')].includes(target)){if(target===p.pub)A.flags.under=true;return pingOut(target,sShow,'!!!!!')}
+  const peerLan=[p.lan,p.net.replace(/0$/,'10')];
+  if(!peerLan.includes(target))return pingOut(target,sShow,'.....','That address isn\u2019t part of this lab topology.');
+  if(srcIp===r.pub)return pingOut(target,sShow,'.....','Without a source, the router uses its outside address ('+r.pub+'). That traffic doesn\u2019t match the crypto ACL, so it leaves unencrypted and the ISP drops packets to private 10.x addresses. Try: ping '+target+' source g0/1');
+  const m=mapOf(r);
+  if(!m)return pingOut(target,sShow,'.....','No crypto map is active on G0/0, so this traffic is routed to the ISP unencrypted and dropped.');
+  const e=permitOf(r,m.acl);
+  if(!e||!(inSpec(srcIp,e.src)&&inSpec(target,e.dst)))return pingOut(target,sShow,'.....','This traffic doesn\u2019t match the crypto map\u2019s ACL, so it isn\u2019t sent into the tunnel.');
+  A.attempted=true;const ev=evalA();
+  if(!ev.up){return pingOut(target,sShow,'.....',r.debug?'':'Tunnel negotiation failed. Check show crypto isakmp sa, or run debug crypto isakmp and ping again.',r.debug?dbgFor(ev.iss,r,p):'')}
+  let pat='!!!!!';if(!A.established){pat='.!!!!';A.established=true}
+  A.pkts+=(pat.match(/!/g)||[]).length;A.flags.lan=true;
+  if(A.chal.active){A.chal.active=false;A.flags.chal=true;$('#chalBanner').className='banner good';$('#chalBanner').innerHTML='<strong>Fault fixed.</strong> '+esc(A.chal.desc)+' Record how you found it in the lab report.';$('#chalBanner').hidden=false;toast('Challenge solved')}
+  setTimeout(()=>animatePacket('topoA','tunPathA','pktA'),50);
+  const dbg=r.debug&&pat[0]==='.'?['ISAKMP:(1001): Old State = IKE_I_MM5  New State = IKE_P1_COMPLETE','IPSEC(key_engine): got a queue event with 1 KMI message(s)','IPSEC(create_sa): sa created, (sa) sa_dest= '+p.pub+', sa_proto= 50'].map(x=>'*Oct 12 14:05:31.204: '+x).join('\n'):'';
+  return pingOut(target,sShow,pat,'',dbg)}
+
+/* ---------- show commands ---------- */
+const POLTXT={enc:{'aes 256':'AES - Advanced Encryption Standard (256 bit keys).','aes 192':'AES - Advanced Encryption Standard (192 bit keys).','aes 128':'AES - Advanced Encryption Standard (128 bit keys).','3des':'Three key triple DES','des':'DES - Data Encryption Standard (56 bit keys).'},
+ hash:{sha:'Secure Hash Standard',sha256:'Secure Hash Standard 2 (256 bit)',sha384:'Secure Hash Standard 2 (384 bit)',sha512:'Secure Hash Standard 2 (512 bit)',md5:'Message Digest 5'},
+ auth:{'pre-share':'Pre-Shared Key','rsa-sig':'Rivest-Shamir-Adleman Signature','rsa-encr':'Rivest-Shamir-Adleman Encryption'}};
+const GBITS={1:'768',2:'1024',5:'1536',14:'2048',15:'3072',16:'4096',19:'256 bit ECP',20:'384 bit ECP',21:'521 bit ECP',24:'2048 bit, 256 bit subgroup'};
+function showPolicy(r){const ks=Object.keys(r.policies).sort((a,b)=>a-b);let o='Global IKE policy\n';
+  ks.forEach(n=>{const p=r.policies[n];o+=`Protection suite of priority ${n}\n        encryption algorithm:   ${POLTXT.enc[p.enc]}\n        hash algorithm:         ${POLTXT.hash[p.hash]}\n        authentication method:  ${POLTXT.auth[p.auth]}\n        Diffie-Hellman group:   #${p.group} (${GBITS[p.group]} bit)\n        lifetime:               ${p.life} seconds, no volume limit\n`});
+  return o+`Default protection suite\n        encryption algorithm:   DES - Data Encryption Standard (56 bit keys).\n        hash algorithm:         Secure Hash Standard\n        authentication method:  Rivest-Shamir-Adleman Signature\n        Diffie-Hellman group:   #1 (768 bit)\n        lifetime:               86400 seconds, no volume limit`}
+function runConf(r){const L=['Building configuration...','','Current configuration : 1874 bytes','!','hostname '+r.name,'!'];
+  Object.keys(r.policies).sort((a,b)=>a-b).forEach(n=>{const p=r.policies[n];L.push('crypto isakmp policy '+n,' encr '+p.enc,...(p.hash!=='sha'?[' hash '+p.hash]:[]),' authentication '+p.auth,' group '+p.group);if(p.life!==86400)L.push(' lifetime '+p.life)});
+  Object.entries(r.keys).forEach(([a,k])=>L.push(`crypto isakmp key ${k} address ${a}`));L.push('!');
+  Object.entries(r.ts).forEach(([n,t])=>L.push(`crypto ipsec transform-set ${n} ${t.enc} ${t.auth}`,' mode '+t.mode));if(Object.keys(r.ts).length)L.push('!');
+  Object.entries(r.maps).forEach(([n,m])=>{L.push(`crypto map ${n} ${m.seq} ipsec-isakmp`);if(m.peer)L.push(' set peer '+m.peer);if(m.ts)L.push(' set transform-set '+m.ts);if(m.pfs)L.push(' set pfs '+m.pfs);if(m.acl)L.push(' match address '+m.acl)});if(Object.keys(r.maps).length)L.push('!');
+  L.push('interface GigabitEthernet0/0',' description '+r.ifs.g0.desc,` ip address ${r.pub} 255.255.255.252`);if(r.ifs.g0.map)L.push(' crypto map '+r.ifs.g0.map);
+  L.push('!','interface GigabitEthernet0/1',' description '+r.ifs.g1.desc,` ip address ${r.lan} 255.255.255.0`,'!',`ip route 0.0.0.0 0.0.0.0 ${r.gw}`,'!');
+  Object.entries(r.acls).forEach(([n,es])=>{if(/^\d+$/.test(n))es.forEach(e=>L.push(`access-list ${n} ${e.act} ip ${fmtSpec(e.src)} ${fmtSpec(e.dst)}`));else{L.push('ip access-list extended '+n);es.forEach(e=>L.push(` ${e.act} ip ${fmtSpec(e.src)} ${fmtSpec(e.dst)}`))}});
+  L.push('!','end');return L.join('\n')}
+function ipBrief(r){return`Interface              IP-Address      OK? Method Status                Protocol\nGigabitEthernet0/0     ${r.pub.padEnd(15)} YES manual up                    up\nGigabitEthernet0/1     ${r.lan.padEnd(15)} YES manual up                    up\nGigabitEthernet0/2     unassigned      YES unset  administratively down down`}
+function showIsakmp(r){const p=other(r);let o='IPv4 Crypto ISAKMP SA\ndst             src             state          conn-id status';
+  if(!(A.attempted||A.established)||!r.ifs.g0.map)return o;const ev=evalA();
+  if(ev.up&&A.established){A.flags.isakmp=true;return o+`\n${p.pub.padEnd(16)}${r.pub.padEnd(16)}QM_IDLE           1001 ACTIVE`}
+  if(ev.p1ok)return{o:o+`\n${p.pub.padEnd(16)}${r.pub.padEnd(16)}QM_IDLE           1001 ACTIVE`,tip:'Phase 1 is up (QM_IDLE), but no data is flowing yet. If pings still fail, look at phase 2: show crypto ipsec sa.'};
+  return o+`\n${p.pub.padEnd(16)}${r.pub.padEnd(16)}MM_NO_STATE          0 ACTIVE (deleted)`}
+function tsName(t){return t.enc.replace('esp-aes ','esp-').replace(/^esp-(\d+)$/,'esp-$1-aes')+' '+t.auth}
+function showIpsec(r){const m=mapOf(r),p=other(r);if(!m)return'No SAs found';const ev=evalA(),live=ev.up&&A.established;const n=live?A.pkts:0;if(live&&n>0)A.flags.ipsec=true;
+  const e=permitOf(r,m.acl);const id=s=>s?`${s.net}/${wcToMask(s.wc)}`:'0.0.0.0/0.0.0.0';const t=r.ts[m.ts];
+  let o=`interface: GigabitEthernet0/0\n    Crypto map tag: ${m.name}, local addr ${r.pub}\n\n   protected vrf: (none)\n   local  ident (addr/mask/prot/port): (${id(e&&e.src)}/0/0)\n   remote ident (addr/mask/prot/port): (${id(e&&e.dst)}/0/0)\n   current_peer ${m.peer||'0.0.0.0'} port 500\n     PERMIT, flags={origin_is_acl,}\n    #pkts encaps: ${n}, #pkts encrypt: ${n}, #pkts digest: ${n}\n    #pkts decaps: ${n}, #pkts decrypt: ${n}, #pkts verify: ${n}\n    #send errors 0, #recv errors 0\n\n     local crypto endpt.: ${r.pub}, remote crypto endpt.: ${m.peer||'0.0.0.0'}\n     current outbound spi: ${live?(r.name==='R1'?'0x9C3A51E7(2620019175)':'0x4B7D20F1(1266491633)'):'0x0(0)'}`;
+  if(live&&t)o+=`\n\n     inbound esp sas:\n      spi: ${r.name==='R1'?'0x4B7D20F1(1266491633)':'0x9C3A51E7(2620019175)'}\n        transform: ${tsName(t)} ,\n        in use settings ={${t.mode==='tunnel'?'Tunnel':'Transport'}, }\n        sa timing: remaining key lifetime (k/sec): (4607998/3542)\n\n     outbound esp sas:\n      spi: ${r.name==='R1'?'0x9C3A51E7(2620019175)':'0x4B7D20F1(1266491633)'}\n        transform: ${tsName(t)} ,\n        in use settings ={${t.mode==='tunnel'?'Tunnel':'Transport'}, }`;
+  else o+='\n\n     inbound esp sas:\n\n     outbound esp sas:';
+  return o}
+function wcToMask(w){return w.split('.').map(o=>255-(+o)).join('.')}
+function showTs(r){const e=Object.entries(r.ts);if(!e.length)return'';return e.map(([n,t])=>`Transform set ${n}: { ${tsName(t).replace(' ','  ')}  }\n   will negotiate = { ${t.mode==='tunnel'?'Tunnel':'Transport'},  },`).join('\n\n')}
+function showAcl(r){return Object.entries(r.acls).map(([n,es])=>`Extended IP access list ${n}\n`+es.map((e,i)=>`    ${(i+1)*10} ${e.act} ip ${fmtSpec(e.src)} ${fmtSpec(e.dst)}`).join('\n')).join('\n')}
+function showMap(r){return Object.entries(r.maps).map(([n,m])=>{const t=r.ts[m.ts];return`Crypto Map "${n}" ${m.seq} ipsec-isakmp\n        Peer = ${m.peer||'(none)'}\n        Extended IP access list ${m.acl||'(none)'}\n`+(r.acls[m.acl]||[]).map(e=>`            access-list ${m.acl} ${e.act} ip ${fmtSpec(e.src)} ${fmtSpec(e.dst)}`).join('\n')+`\n        Security association lifetime: 4608000 kilobytes/3600 seconds\n        PFS (Y/N): ${m.pfs?'Y':'N'}\n        Transform sets={\n                ${m.ts||''}:  { ${t?tsName(t):'(missing)'} } ,\n        }\n        Interfaces using crypto map ${n}:\n`+(r.ifs.g0.map===n?'                GigabitEthernet0/0':'')}).join('\n\n')||'No crypto maps found.'}
+
+/* ---------- Part A UI ---------- */
+function chkP1(r){return Object.values(r.policies).some(p=>p.enc===SPEC.enc&&p.hash===SPEC.hash&&p.auth===SPEC.auth&&p.group===SPEC.group)}
+function chkKey(r){return r.keys[r.peerPub]===SPEC.key}
+function chkTs(r){return Object.values(r.ts).some(t=>t.enc===SPEC.tsEnc&&t.auth===SPEC.tsAuth&&t.mode==='tunnel')}
+function chkAcl(r){return Object.values(r.acls).some(a=>a.some(e=>e.act==='permit'&&e.src.net===r.net&&e.src.wc==='0.0.0.255'&&e.dst.net===r.peerNet&&e.dst.wc==='0.0.0.255'))}
+function chkMap(r){const m=mapOf(r);return!!(m&&m.peer===r.peerPub&&m.ts&&r.ts[m.ts]&&m.acl&&r.acls[m.acl])}
+function routerTasks(n){const r=()=>A.dev[n];const lan=n==='R1'?'10.1.1.0':'10.2.2.0',pn=n==='R1'?'10.2.2.0':'10.1.1.0',peer=n==='R1'?'198.51.100.1':'203.0.113.1';
+  return[
+  {id:n+'p1',t:`Create ISAKMP policy 10 that meets the security policy`,chk:()=>chkP1(r()),h:`enable\nconfigure terminal\ncrypto isakmp policy 10\n encryption aes 256\n hash sha256\n authentication pre-share\n group 14\n lifetime 86400\n exit`},
+  {id:n+'key',t:`Set the pre-shared key for peer ${peer}`,chk:()=>chkKey(r()),h:`crypto isakmp key MVCC-Lab-2026 address ${peer}`},
+  {id:n+'ts',t:'Create transform set TS (ESP AES-256, SHA-256 HMAC, tunnel mode)',chk:()=>chkTs(r()),h:`crypto ipsec transform-set TS esp-aes 256 esp-sha256-hmac\n mode tunnel\n exit`},
+  {id:n+'acl',t:`Define interesting traffic ${lan}/24 to ${pn}/24`,chk:()=>chkAcl(r()),h:`ip access-list extended VPN-TRAFFIC\n permit ip ${lan} 0.0.0.255 ${pn} 0.0.0.255\n exit`},
+  {id:n+'map',t:'Build crypto map VPN-MAP 10 and apply it to G0/0',chk:()=>chkMap(r()),h:`crypto map VPN-MAP 10 ipsec-isakmp\n set peer ${peer}\n set transform-set TS\n match address VPN-TRAFFIC\n exit\ninterface g0/0\n crypto map VPN-MAP\n end`}]}
+const TASKS_A=[
+ {g:'Before you start',items:[{id:'under',t:'Confirm R1 can reach R2\u2019s public address across the internet',chk:()=>A.flags.under,h:'R1# ping 198.51.100.1'}]},
+ {g:'R1 (HQ)',items:routerTasks('R1')},{g:'R2 (Branch)',items:routerTasks('R2')},
+ {g:'Verify',items:[
+  {id:'lan',t:'Send traffic LAN to LAN through the tunnel',chk:()=>A.flags.lan,h:'R1# ping 10.2.2.1 source g0/1\n(The first dot is normal: the tunnel is being negotiated.)'},
+  {id:'isakmp',t:'Confirm phase 1 is up (QM_IDLE)',chk:()=>A.flags.isakmp,h:'R1# show crypto isakmp sa'},
+  {id:'ipsec',t:'Confirm packets are being encrypted and decrypted',chk:()=>A.flags.ipsec,h:'R1# show crypto ipsec sa\nLook at #pkts encaps and #pkts decaps.'}]}];
+const stA={};
+const WEAK=v=>/^(des|3des|md5|sha|esp-des|esp-3des|esp-md5-hmac|esp-sha-hmac)$/.test(String(v))||[1,2,5].includes(v);
+function paramTable(){const R1=A.dev.R1,R2=A.dev.R2;
+  if(A.chal.active)return'<p class="pkt-cap">Hidden during the troubleshooting challenge. Use show commands instead.</p>';
+  const pol=r=>{const ks=Object.keys(r.policies).sort((a,b)=>a-b);return ks.length?r.policies[ks[0]]:null};
+  const p1=pol(R1),p2=pol(R2),m1=mapOf(R1),m2=mapOf(R2),t1=m1&&R1.ts[m1.ts],t2=m2&&R2.ts[m2.ts],e1=m1&&permitOf(R1,m1.acl),e2=m2&&permitOf(R2,m2.acl);
+  const cell=v=>v==null||v===''?'<span class="st na">not set</span>':`<span class="mono">${esc(v)}</span>${WEAK(v)?'<span class="st weak">weak</span>':''}`;
+  const st=(a,b,eq)=>(a==null||b==null||a===''||b==='')?'<span class="st na">Incomplete</span>':(eq!==undefined?eq:a===b)?'<span class="st ok">Match</span>':'<span class="st bad">Mismatch</span>';
+  const rows=[['Phase 1 encryption',p1&&p1.enc,p2&&p2.enc],['Phase 1 hash',p1&&p1.hash,p2&&p2.hash],['Authentication',p1&&p1.auth,p2&&p2.auth],['DH group',p1&&p1.group,p2&&p2.group]];
+  const k1=R1.keys[R2.pub],k2=R2.keys[R1.pub];
+  let h='<table class="spec"><tr><th>Setting</th><th>R1</th><th>R2</th><th>Status</th></tr>';
+  rows.forEach(([n,a,b])=>h+=`<tr><td>${n}</td><td>${cell(a)}</td><td>${cell(b)}</td><td>${st(a,b)}</td></tr>`);
+  h+=`<tr><td>Pre-shared key for peer</td><td>${k1?'<span class="mono">'+'\u2022'.repeat(8)+'</span>':cell(null)}</td><td>${k2?'<span class="mono">'+'\u2022'.repeat(8)+'</span>':cell(null)}</td><td>${st(k1,k2)}</td></tr>`;
+  h+=`<tr><td>ESP encryption</td><td>${cell(t1&&t1.enc)}</td><td>${cell(t2&&t2.enc)}</td><td>${st(t1&&t1.enc,t2&&t2.enc)}</td></tr>`;
+  h+=`<tr><td>ESP integrity</td><td>${cell(t1&&t1.auth)}</td><td>${cell(t2&&t2.auth)}</td><td>${st(t1&&t1.auth,t2&&t2.auth)}</td></tr>`;
+  h+=`<tr><td>IPsec mode</td><td>${cell(t1&&t1.mode)}</td><td>${cell(t2&&t2.mode)}</td><td>${st(t1&&t1.mode,t2&&t2.mode)}</td></tr>`;
+  const pa=m1&&m1.peer,pb=m2&&m2.peer;
+  h+=`<tr><td>Crypto map peer</td><td>${cell(pa)}</td><td>${cell(pb)}</td><td>${st(pa,pb,pa===R2.pub&&pb===R1.pub)}</td></tr>`;
+  const a1=e1?`${e1.src.net} to ${e1.dst.net}`:null,a2=e2?`${e2.src.net} to ${e2.dst.net}`:null;
+  h+=`<tr><td>Protected traffic</td><td>${cell(a1)}</td><td>${cell(a2)}</td><td>${st(a1,a2,e1&&e2&&sameSpec(e1.src,e2.dst)&&sameSpec(e1.dst,e2.src))}</td></tr>`;
+  h+=`<tr><td>Map on G0/0</td><td>${cell(R1.ifs.g0.map)}</td><td>${cell(R2.ifs.g0.map)}</td><td>${(R1.ifs.g0.map&&R2.ifs.g0.map)?'<span class="st ok">Applied</span>':'<span class="st na">Incomplete</span>'}</td></tr>`;
+  return h+'</table>'}
+function updateA(){
+  const ev=evalA();if(A.established&&!ev.up)A.established=false;
+  const g=$('#tunA');g.classList.toggle('up',ev.up&&A.established);g.classList.toggle('half',!A.established&&A.attempted&&ev.p1ok);
+  $('#tunTxtA').textContent=ev.up&&A.established?'IPsec tunnel: up, traffic encrypted':(!A.established&&A.attempted&&ev.p1ok)?'IPsec tunnel: phase 1 up, phase 2 failing':ev.up?'IPsec tunnel: ready, waiting for interesting traffic':'IPsec tunnel: down';
+  $$('#topoA .clickable').forEach(n=>n.classList.toggle('active',n.dataset.dev===PA.cur));
+  $('#tasksA').innerHTML=taskHTML(TASKS_A,stA,'a');bindHints($('#tasksA'));
+  $('#paramWrap').innerHTML=paramTable();$('#explainA').disabled=A.chal.active;
+  $('#chalBtn').disabled=!(ev.up&&A.established)||A.chal.active;
+  updateProgress()}
+$('#explainA').onclick=()=>{const ev=evalA(),box=$('#explainOut');
+  if(ev.up){box.className='banner good';box.innerHTML='Every setting lines up. If the tunnel isn\u2019t up yet, send interesting traffic: <span class="mono">ping 10.2.2.1 source g0/1</span>.'}
+  else{box.className='banner warn';box.innerHTML='<strong>What\u2019s blocking the tunnel</strong><ul class="issues">'+ev.iss.map(i=>'<li>'+esc(i.msg)+'</li>').join('')+'</ul>'}
+  box.hidden=false};
+$$('#topoA .clickable').forEach(n=>{const go=()=>{PA.cur=n.dataset.dev;renderTerm(PA);updateA();$('#inA').focus()};n.addEventListener('click',go);n.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}})});
+
+/* challenge */
+$('#chalBtn').onclick=()=>{
+  const X=Math.random()<.5?A.dev.R1:A.dev.R2,m=mapOf(X);if(!m)return;
+  const faults=[
+   ['key',()=>{X.keys[X.peerPub]=SPEC.key.replace('2026','2025')},`The pre-shared key on ${X.name} was changed to MVCC-Lab-2025.`],
+   ['ts',()=>{X.ts[m.ts].enc='esp-aes 128'},`${X.name}\u2019s transform set was changed to esp-aes 128.`],
+   ['group',()=>{Object.values(X.policies).forEach(p=>p.group=5)},`${X.name}\u2019s ISAKMP policy was changed to DH group 5.`],
+   ['acl',()=>{const e=permitOf(X,m.acl);e.dst={net:X.peerNet.replace(/\.(\d+)\.0$/,(s,a)=>'.'+(+a+1)+'.0'),wc:'0.0.0.255'}},`${X.name}\u2019s crypto ACL destination was changed to the wrong subnet.`],
+   ['peer',()=>{X.maps[m.name].peer=X.peerPub.replace(/\.\d+$/,'.9')},`${X.name}\u2019s crypto map peer was changed to the wrong address.`],
+   ['hash',()=>{Object.values(X.policies).forEach(p=>p.hash='sha')},`${X.name}\u2019s ISAKMP hash was changed to sha (SHA-1).`]];
+  const f=faults[Math.floor(Math.random()*faults.length)];f[1]();
+  A.established=false;A.attempted=false;A.pkts=0;A.chal={active:true,fault:f[0],desc:f[2]};
+  $('#explainOut').hidden=true;
+  $('#chalBanner').className='banner info';$('#chalBanner').innerHTML='<strong>A fault was injected on R1 or R2.</strong> Users report the branch can\u2019t reach HQ. Start with a LAN-sourced ping, then use show crypto isakmp sa, show crypto ipsec sa, show run, and debug crypto isakmp to find it.';$('#chalBanner').hidden=false;
+  updateA()};
+
+const PA={id:'A',cur:'R1',dev:null,prompt:d=>d.name+SUF[d.mode],label:d=>d.name,run:(d,v)=>execA(d,v),update:updateA,reset:resetA};
+resetA();PA.dev=A.dev;wireTerm(PA);
+
+/* ======================================================================
+   PART B: WireGuard simulator (Linux)
+   ====================================================================== */
+const B={};
+function mkHost(id,user,host){return{id,user,host,installed:false,priv:null,pub:null,files:{},conf:null,active:null,activeText:null,up:false,boot:false,
+  ufw:id==='server'?{on:true,allow:['22/tcp']}:{on:false,allow:[]},buf:[],hist:[],hi:0}}
+function resetB(){Object.assign(B,{hs:false,hsTime:0,rx:0,tx:0,flags:{lap:false,wgshow:false},dev:{laptop:mkHost('laptop','student','laptop'),server:mkHost('server','admin','vpn-gw')}});
+  push(B.dev.laptop,'Ubuntu 24.04 LTS (laptop, home office). Type help for the commands this lab supports.\n','sys');
+  push(B.dev.server,'Ubuntu 24.04 LTS (vpn-gw, office). Type help for the commands this lab supports.\n','sys');
+  if(typeof PB!=='undefined'){PB.dev=B.dev;PB.cur='laptop'}}
+function genKey(){const a=new Uint8Array(32);crypto.getRandomValues(a);return btoa(String.fromCharCode(...a))}
+const KEYRX=/^[A-Za-z0-9+/]{43}=$/;
+const IK=['privatekey','address','listenport','dns','mtu','table','preup','postup','predown','postdown','saveconfig','fwmark'],PK=['publickey','presharedkey','allowedips','endpoint','persistentkeepalive'];
+function parseConf(t){const o={iface:{},peer:{},err:null,empty:false,hasI:false,hasP:false};let sec=null;
+  for(const raw of String(t||'').split('\n')){const l=raw.replace(/#.*/,'').trim();if(!l)continue;
+    if(/^\[interface\]$/i.test(l)){sec='iface';o.hasI=true;continue}if(/^\[peer\]$/i.test(l)){sec='peer';o.hasP=true;continue}
+    const m=l.match(/^([A-Za-z]+)\s*=\s*(.*)$/);if(!m||!sec){o.err=o.err||"Line unrecognized: `"+l+"'";continue}
+    const k=m[1].toLowerCase(),v=m[2].trim();if(!(sec==='iface'?IK:PK).includes(k)){o.err=o.err||"Line unrecognized: `"+l+"'";continue}
+    if(!v){o.err=o.err||"Line unrecognized: `"+m[1]+"='";o.empty=true;continue}o[sec][k]=v}
+  return o}
+const cidrOk=c=>/^\d{1,3}(\.\d{1,3}){3}\/\d{1,2}$/.test(c);
+const ipOfCidr=c=>c&&cidrOk(c.trim())?c.trim().split('/')[0]:null;
+function inCidr(ip,c){if(!cidrOk(c))return false;const[n,b]=c.split('/');const bits=+b;const mask=bits===0?0:(~0<<(32-bits))>>>0;return((ip2n(ip)&mask)>>>0)===((ip2n(n)&mask)>>>0)}
+const covers=(list,ip)=>!!list&&!!ip&&list.split(',').some(c=>inCidr(ip,c.trim()));
+const nrm=s=>String(s||'').replace(/\s+/g,'');
+function evalB(){const L=B.dev.laptop,S=B.dev.server,lc=L.active,sc=S.active,r={};
+  r.up=L.up&&S.up;
+  r.lPriv=!!(lc&&L.priv&&lc.iface.privatekey===L.priv);r.sPriv=!!(sc&&S.priv&&sc.iface.privatekey===S.priv);
+  r.lPeer=!!(lc&&S.pub&&lc.peer.publickey===S.pub);r.sPeer=!!(sc&&L.pub&&sc.peer.publickey===L.pub);
+  r.port=sc&&sc.iface.listenport?+sc.iface.listenport:null;
+  r.endpoint=!!(lc&&r.port&&nrm(lc.peer.endpoint)==='203.0.113.10:'+r.port);
+  r.fw=!!r.port&&(!S.ufw.on||S.ufw.allow.some(a=>a===r.port+'/udp'||a===String(r.port)));
+  r.la=lc&&ipOfCidr(lc.iface.address);r.sa=sc&&ipOfCidr(sc.iface.address);
+  r.addr=!!(r.la&&r.sa&&r.la!==r.sa);
+  r.lAllowed=!!(lc&&covers(lc.peer.allowedips,r.sa));r.sAllowed=!!(sc&&covers(sc.peer.allowedips,r.la));
+  r.hsOk=r.up&&r.lPriv&&r.sPriv&&r.lPeer&&r.sPeer&&r.endpoint&&r.fw;r.dataOk=r.hsOk&&r.addr&&r.lAllowed&&r.sAllowed;return r}
+function hsAgo(){return Math.max(2,Math.round((Date.now()-B.hsTime)/1000))}
+function kib(n){return n<1024?n+' B':(n/1024).toFixed(2)+' KiB'}
+
+function execB(h,line){const parts=line.split(/\s*&&\s*/);const res=[];for(const p of parts){const r=execB1(h,p.trim());if(r)res.push(r);if(r&&r.fail)break}
+  if(res.length<=1)return res[0]||'';return{o:res.map(r=>typeof r==='string'?r:[r.o,r.ok].filter(Boolean).join('\n')).filter(Boolean).join('\n'),tip:res.map(r=>r.tip).filter(Boolean).pop()}}
+function needRoot(h,what){return{o:what,c:'err',fail:1,tip:'This command changes the system. Run it with sudo.'}}
+function execB1(h,cmd){
+  let c=cmd.replace(/^umask\s+0?77\s*;\s*/,''),sudo=false;if(!c)return'';
+  if(/^sudo\s+/.test(c)){sudo=true;c=c.replace(/^sudo\s+/,'')}
+  let m;const other=h.id==='laptop'?B.dev.server:B.dev.laptop;
+  if(/^help$/.test(c))return{o:'Commands supported in this lab:\n  sudo apt install wireguard\n  wg genkey | tee privatekey | wg pubkey > publickey\n  cat privatekey | cat publickey | ls\n  sudo nano /etc/wireguard/wg0.conf\n  sudo cat /etc/wireguard/wg0.conf\n  sudo ufw status | sudo ufw allow <port>/udp\n  sudo wg-quick up wg0 | sudo wg-quick down wg0\n  sudo wg show\n  ip addr | ip route\n  ping -c 4 <ip>\n  sudo systemctl enable wg-quick@wg0\n  clear   (or Ctrl+L)\nChain commands with &&.',c:'sys'};
+  if(/^whoami$/.test(c))return sudo?'root':h.user;
+  if(/^hostname$/.test(c))return h.host;
+  if(/^apt(-get)?\s+update$/.test(c))return sudo?'Hit:1 http://archive.ubuntu.com/ubuntu noble InRelease\nReading package lists... Done':needRoot(h,'E: Could not open lock file /var/lib/apt/lists/lock - open (13: Permission denied)');
+  if((m=c.match(/^apt(?:-get)?\s+install\s+(?:-y\s+)?(wireguard(?:-tools)?)(?:\s+-y)?$/))){
+    if(!sudo)return needRoot(h,'E: Could not open lock file /var/lib/dpkg/lock-frontend - open (13: Permission denied)\nE: Unable to acquire the dpkg frontend lock (/var/lib/dpkg/lock-frontend), are you root?');
+    if(h.installed)return'wireguard is already the newest version (1.0.20210914-1ubuntu4).\n0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.';
+    h.installed=true;return'Reading package lists... Done\nBuilding dependency tree... Done\nThe following NEW packages will be installed:\n  wireguard wireguard-tools\n0 upgraded, 2 newly installed, 0 to remove and 0 not upgraded.\nUnpacking wireguard-tools (1.0.20210914-1ubuntu4) ...\nSetting up wireguard-tools (1.0.20210914-1ubuntu4) ...\nSetting up wireguard (1.0.20210914-1ubuntu4) ...\nProcessing triggers for man-db (2.12.0-4build2) ...'}
+  const notFound=w=>({o:`Command '${w}' not found, but can be installed with:\nsudo apt install wireguard-tools`,c:'err',fail:1});
+  if((m=c.match(/^wg\s+genkey\s*\|\s*(?:sudo\s+)?tee\s+(\S+)\s*\|\s*wg\s+pubkey\s*>\s*(\S+)$/))){
+    if(!h.installed)return notFound('wg');const priv=genKey(),pub=genKey();h.files[m[1]]=priv;h.files[m[2]]=pub;h.priv=priv;h.pub=pub;
+    const wasUp=h.up;return{o:'',tip:wasUp?'You generated new keys while the tunnel is up. Both config files now need updating.':(m[1]!=='privatekey'?'':'')}}
+  if(/^wg\s+genkey$/.test(c)){if(!h.installed)return notFound('wg');return{o:genKey(),tip:'That key was only printed. Save keys to files: wg genkey | tee privatekey | wg pubkey > publickey'}}
+  if((m=c.match(/^cat\s+(\S+)$/))){const f=m[1];
+    if(f==='/etc/wireguard/wg0.conf'){if(!sudo)return{o:'cat: /etc/wireguard/wg0.conf: Permission denied',c:'err',fail:1};if(!h.conf)return{o:'cat: /etc/wireguard/wg0.conf: No such file or directory',c:'err'};return h.conf}
+    const k=f.replace(/^\.\//,'');if(h.files[k]!==undefined)return{keyLine:h.files[k]};return{o:`cat: ${f}: No such file or directory`,c:'err',fail:1}}
+  if(/^ls(\s+-\S+)*(\s+~|\s+\.)?$/.test(c))return Object.keys(h.files).join('  ');
+  if(/^ls(\s+-\S+)*\s+\/etc\/wireguard\/?$/.test(c))return sudo?(h.conf?'wg0.conf':''):{o:"ls: cannot open directory '/etc/wireguard': Permission denied",c:'err'};
+  if((m=c.match(/^(nano|vim?|vi)\s+\/etc\/wireguard\/wg0\.conf$/))){if(!h.installed)return{o:'[ Directory \'/etc/wireguard\' does not exist ]',c:'err',tip:'Install WireGuard first.'};
+    if(!sudo)return{o:'[ Error: /etc/wireguard/wg0.conf is not writable ]',c:'err',tip:'Editing files in /etc needs sudo: sudo nano /etc/wireguard/wg0.conf'};openEditor(h);return''}
+  if((m=c.match(/^wg-quick\s+(up|down)\s+(\S+)$/))){if(!h.installed)return notFound('wg-quick');
+    if(!sudo)return{o:`wg-quick must be run as root. Please enter the password for ${h.user} to continue:\nsudo: a password is required`,c:'err',fail:1,tip:'Use sudo wg-quick '+m[1]+' wg0'};
+    if(m[2]!=='wg0')return{o:`wg-quick: \`/etc/wireguard/${m[2]}.conf' does not exist`,c:'err',fail:1};
+    return m[1]==='up'?wgUp(h):wgDown(h)}
+  if((m=c.match(/^systemctl\s+(enable|disable)\s+(--now\s+)?wg-quick@wg0(?:\.service)?$/))){if(!h.installed)return{o:'Failed to enable unit: Unit file wg-quick@wg0.service does not exist.',c:'err'};
+    if(!sudo)return needRoot(h,'Failed to enable unit: Access denied');
+    if(m[1]==='enable'){h.boot=true;let o='Created symlink /etc/systemd/system/multi-user.target.wants/wg-quick@wg0.service \u2192 /usr/lib/systemd/system/wg-quick@.service.';if(m[2]&&!h.up){const u=wgUp(h);o+='\n'+(typeof u==='string'?u:u.o)}return o}
+    h.boot=false;return'Removed "/etc/systemd/system/multi-user.target.wants/wg-quick@wg0.service".'}
+  if(/^systemctl\s+status\s+wg-quick@wg0(?:\.service)?$/.test(c))return`\u25CF wg-quick@wg0.service - WireGuard via wg-quick(8) for wg0\n     Loaded: loaded (/usr/lib/systemd/system/wg-quick@.service; ${h.boot?'enabled':'disabled'}; preset: enabled)\n     Active: ${h.up?'active (exited)':'inactive (dead)'}`;
+  if((m=c.match(/^wg(?:\s+show(?:\s+(wg0|all))?)?$/))){if(!h.installed)return notFound('wg');
+    if(!sudo)return{o:'Unable to access interface: Operation not permitted',c:'err',tip:'wg show needs root: sudo wg show'};return wgShow(h)}
+  if((m=c.match(/^ufw\s+(.+)$/))){if(!sudo)return needRoot(h,'ERROR: You need to be root to run this script');return ufw(h,m[1].trim())}
+  if(/^ip\s+(a|addr|address)(\s+show(\s+\S+)?)?$/.test(c))return ipAddr(h);
+  if(/^ip\s+(r|route)(\s+show)?$/.test(c))return ipRoute(h);
+  if((m=c.match(/^ping\s+(.+)$/))){const tk=m[1].split(/\s+/);let n=4,target=null;for(let i=0;i<tk.length;i++){if(tk[i]==='-c'){n=Math.min(10,Math.max(1,+tk[i+1]||4));i++}else if(/^-c\d+$/.test(tk[i]))n=Math.min(10,+tk[i].slice(2)||4);else if(/^\d{1,3}(\.\d{1,3}){3}$/.test(tk[i]))target=tk[i]}
+    if(!target)return{o:'ping: usage error: Destination address required',c:'err'};return pingB(h,target,n)}
+  if(/^(nano|vim?|vi)\s+/.test(c))return{o:'In this lab you only edit /etc/wireguard/wg0.conf.',c:'sys'};
+  return{o:`${c.split(/\s+/)[0]}: command not found`,c:'err',fail:1,tip:'Type help to see the commands this lab supports.'}}
+function wgUp(h){if(h.up)return{o:"wg-quick: `wg0' already exists",c:'err',fail:1,tip:'The tunnel is already up. To apply config changes: sudo wg-quick down wg0 && sudo wg-quick up wg0'};
+  if(!h.conf)return{o:"wg-quick: `/etc/wireguard/wg0.conf' does not exist",c:'err',fail:1,tip:'Create the file first: sudo nano /etc/wireguard/wg0.conf'};
+  const c=parseConf(h.conf),pre='[#] ip link add wg0 type wireguard\n[#] wg setconf wg0 /dev/fd/63\n',fail=x=>({o:pre+x+'\nConfiguration parsing error\n[#] ip link delete dev wg0',c:'err',fail:1});
+  if(c.err)return Object.assign(fail(c.err),{tip:c.empty?'WireGuard rejects keys with empty values. Delete any line you aren\u2019t using.':'Check spelling of section names and keys, for example [Interface], [Peer], AllowedIPs.'});
+  if(!c.hasI)return Object.assign(fail('Line unrecognized: missing [Interface] section'),{});
+  for(const k of [c.iface.privatekey,c.peer.publickey])if(k&&!KEYRX.test(k))return Object.assign(fail("Key is not the correct length or format: `"+k+"'"),{tip:'Keys are 44 characters ending in =. Copy them exactly, with no spaces.'});
+  if(c.peer.endpoint&&!/^\d{1,3}(\.\d{1,3}){3}:\d+$/.test(nrm(c.peer.endpoint)))return fail("Unable to parse endpoint: `"+c.peer.endpoint+"'");
+  if(c.peer.allowedips&&!c.peer.allowedips.split(',').every(x=>cidrOk(x.trim())))return fail("Unable to parse IP address: `"+c.peer.allowedips+"'");
+  if(c.iface.listenport&&!/^\d+$/.test(c.iface.listenport))return fail("Unable to parse port: `"+c.iface.listenport+"'");
+  if(c.iface.address&&!cidrOk(c.iface.address))return{o:pre+'[#] ip -4 address add '+c.iface.address+' dev wg0\nError: any valid prefix is expected rather than "'+c.iface.address+'".\n[#] ip link delete dev wg0',c:'err',fail:1,tip:'Write Address with a prefix length, for example 10.10.0.2/24.'};
+  let o=pre+(c.iface.address?'[#] ip -4 address add '+c.iface.address+' dev wg0\n':'')+'[#] ip link set mtu 1420 up dev wg0';
+  (c.peer.allowedips||'').split(',').map(x=>x.trim()).filter(Boolean).forEach(a=>{const ip=a.split('/')[0];if(!(c.iface.address&&inCidr(ip,c.iface.address)&&+a.split('/')[1]>=+c.iface.address.split('/')[1]))o+='\n[#] ip -4 route add '+a+' dev wg0'});
+  h.up=true;h.active=c;h.activeText=h.conf;
+  const ev=evalB();if(ev.hsOk&&B.dev.laptop.active&&B.dev.laptop.active.peer.persistentkeepalive){B.hs=true;B.hsTime=Date.now()}
+  return{o,tip:c.iface.privatekey?'':'There is no PrivateKey in [Interface], so this tunnel can\u2019t authenticate.'}}
+function wgDown(h){if(!h.up)return{o:"wg-quick: `wg0' is not a WireGuard interface",c:'err',fail:1};h.up=false;h.active=null;h.activeText=null;B.hs=false;return'[#] ip link delete dev wg0'}
+function wgShow(h){if(!h.up)return'';const c=h.active,ev=evalB();const lport=c.iface.listenport||(h.id==='laptop'?'41824':'51820');
+  let o=`interface: wg0\n  public key: ${h.pub&&c.iface.privatekey===h.priv?h.pub:(c.iface.privatekey?'(derived from the configured private key)':'(none)')}\n  private key: (hidden)\n  listening port: ${lport}`;
+  if(c.hasP&&c.peer.publickey){const hsHere=B.hs&&ev.hsOk;
+    let ep=c.peer.endpoint;if(!ep&&h.id==='server'&&hsHere)ep='198.51.100.77:41824';
+    o+=`\n\npeer: ${c.peer.publickey}`+(ep?`\n  endpoint: ${nrm(ep)}`:'')+`\n  allowed ips: ${c.peer.allowedips?c.peer.allowedips.split(',').map(x=>x.trim()).join(', '):'(none)'}`;
+    if(hsHere){o+=`\n  latest handshake: ${hsAgo()} seconds ago\n  transfer: ${kib(h.id==='laptop'?B.rx:B.tx)} received, ${kib(h.id==='laptop'?B.tx:B.rx)} sent`;B.flags.wgshow=true}
+    else if(h.id==='laptop'&&B.tx>0)o+=`\n  transfer: 0 B received, ${kib(B.tx)} sent`;
+    if(c.peer.persistentkeepalive)o+=`\n  persistent keepalive: every ${c.peer.persistentkeepalive} seconds`;
+    if(!hsHere)return{o,tip:'No "latest handshake" line means the two peers have not authenticated each other. Compare keys, endpoint, port, and the server firewall.'}}
+  return o}
+function ufw(h,a){let m;
+  if(a==='status'||a==='status verbose'){if(!h.ufw.on)return'Status: inactive';return'Status: active\n\nTo                         Action      From\n--                         ------      ----\n'+h.ufw.allow.map(r=>r.padEnd(27)+'ALLOW       Anywhere').join('\n')}
+  if(a==='enable'){h.ufw.on=true;return'Firewall is active and enabled on system startup'}
+  if(a==='disable'){h.ufw.on=false;return{o:'Firewall stopped and disabled on system startup',tip:'Turning the firewall off works, but it exposes every service. Allow only the port you need instead.'}}
+  if((m=a.match(/^allow\s+(\d+)(?:\/(udp|tcp))?$/))){const r=m[1]+(m[2]?'/'+m[2]:'');if(!h.ufw.allow.includes(r))h.ufw.allow.push(r);return{o:'Rule added\nRule added (v6)',tip:m[2]==='tcp'?'WireGuard uses UDP, not TCP.':(!m[2]?'This opens both TCP and UDP. Specify /udp to open only what WireGuard needs.':'')}}
+  if((m=a.match(/^delete\s+allow\s+(\S+)$/))){h.ufw.allow=h.ufw.allow.filter(x=>x!==m[1]);return'Rule deleted\nRule deleted (v6)'}
+  return{o:'ERROR: Invalid syntax',c:'err',tip:'Try: sudo ufw allow 51820/udp'}}
+function ipAddr(h){const lan=h.id==='laptop'?'2: wlan0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP\n    inet 192.168.1.50/24 brd 192.168.1.255 scope global dynamic wlan0':'2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP\n    inet 203.0.113.10/24 brd 203.0.113.255 scope global eth0';
+  let o='1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN\n    inet 127.0.0.1/8 scope host lo\n'+lan;
+  if(h.up)o+='\n3: wg0: <POINTOPOINT,NOARP,UP,LOWER_UP> mtu 1420 qdisc noqueue state UNKNOWN group default qlen 1000\n    link/none'+(h.active.iface.address?'\n    inet '+h.active.iface.address+' scope global wg0':'');
+  return o}
+function ipRoute(h){let o=h.id==='laptop'?'default via 192.168.1.1 dev wlan0 proto dhcp metric 600\n192.168.1.0/24 dev wlan0 proto kernel scope link src 192.168.1.50':'default via 203.0.113.1 dev eth0 proto static\n203.0.113.0/24 dev eth0 proto kernel scope link src 203.0.113.10';
+  if(h.up){const c=h.active;if(c.iface.address){const[a,b]=c.iface.address.split('/');const mask=+b===0?0:(~0<<(32-b))>>>0;const net=[24,16,8,0].map(s=>((ip2n(a)&mask)>>>s)&255).join('.');o+=`\n${net}/${b} dev wg0 proto kernel scope link src ${a}`}
+    (c.peer.allowedips||'').split(',').map(x=>x.trim()).filter(Boolean).forEach(x=>{if(!(c.iface.address&&inCidr(x.split('/')[0],c.iface.address)&&+x.split('/')[1]>=+c.iface.address.split('/')[1]))o+=`\n${x} dev wg0 scope link`})}
+  return o}
+function pingReplies(t,n,base){let o=`PING ${t} (${t}) 56(84) bytes of data.`;const times=[];for(let i=1;i<=n;i++){const ms=(base+Math.random()*4+(i===1?3:0)).toFixed(1);times.push(+ms);o+=`\n64 bytes from ${t}: icmp_seq=${i} ttl=64 time=${ms} ms`}
+  const mn=Math.min(...times),mx=Math.max(...times),av=times.reduce((a,b)=>a+b,0)/n;
+  return{o,ok:`\n--- ${t} ping statistics ---\n${n} packets transmitted, ${n} received, 0% packet loss, time ${(n-1)*1001}ms\nrtt min/avg/max/mdev = ${mn.toFixed(1)}/${av.toFixed(1)}/${mx.toFixed(1)}/${((mx-mn)/2).toFixed(1)} ms`}}
+function pingLoss(t,n,tip){return{o:`PING ${t} (${t}) 56(84) bytes of data.\n\n--- ${t} ping statistics ---\n${n} packets transmitted, 0 received, 100% packet loss, time ${(n-1)*1022}ms`,c:'err',tip}}
+function pingB(h,t,n){const ev=evalB(),c=h.active;
+  const stale=h.up&&h.activeText!==h.conf?' You also edited wg0.conf after bringing wg0 up; restart it with sudo wg-quick down wg0 && sudo wg-quick up wg0.':'';
+  if(h.up&&c.iface.address&&ipOfCidr(c.iface.address)===t)return pingReplies(t,n,0.02);
+  if(h.id==='laptop'){
+    if(['192.168.1.1','203.0.113.10','8.8.8.8','1.1.1.1','192.168.1.50'].includes(t))return pingReplies(t,n,t.startsWith('192')?1.5:18);
+    if(t===ev.sa||t==='10.10.0.1'){
+      if(!h.up)return pingLoss(t,n,'wg0 is down, so this packet followed the default route to the internet, where 10.10.0.1 doesn\u2019t exist.');
+      if(!covers(c.peer.allowedips,t))return pingLoss(t,n,'The laptop\u2019s AllowedIPs doesn\u2019t include '+t+', so the packet isn\u2019t routed into the tunnel.'+stale);
+      B.tx+=148*n;
+      if(!ev.hsOk)return pingLoss(t,n,'Packets went into wg0 but no handshake completed. Run sudo wg show on both machines.'+stale);
+      if(!B.hs){B.hs=true;B.hsTime=Date.now()}
+      if(!ev.dataOk||t!==ev.sa)return pingLoss(t,n,'The handshake succeeded, but replies aren\u2019t coming back. Check AllowedIPs and Address on both peers.'+stale);
+      B.rx+=148*n;B.tx+=0;B.flags.lap=true;setTimeout(()=>animatePacket('topoB','tunPathB','pktB'),50);return pingReplies(t,n,21)}
+    return pingLoss(t,n,'')}
+  if(['203.0.113.1','8.8.8.8','1.1.1.1','203.0.113.10'].includes(t))return pingReplies(t,n,t==='203.0.113.10'?0.03:9);
+  if(t===ev.la||t==='10.10.0.2'){
+    if(!h.up)return pingLoss(t,n,'wg0 is down on vpn-gw.');
+    if(!covers(c.peer.allowedips,t)){let o=`PING ${t} (${t}) 56(84) bytes of data.`;for(let i=0;i<n;i++)o+='\nping: sendmsg: Required key not available';return{o:o+`\n\n--- ${t} ping statistics ---\n${n} packets transmitted, 0 received, 100% packet loss`,c:'err',tip:'"Required key not available" means no peer\u2019s AllowedIPs covers this destination. Check AllowedIPs on vpn-gw.'+stale}}
+    if(!B.hs||!ev.hsOk){let o=`PING ${t} (${t}) 56(84) bytes of data.`;for(let i=0;i<n;i++)o+='\nping: sendmsg: Destination address required';return{o:o+`\n\n--- ${t} ping statistics ---\n${n} packets transmitted, 0 received, 100% packet loss`,c:'err',tip:'The server has no Endpoint for the laptop. It learns one only after the laptop sends a valid handshake. PersistentKeepalive on the laptop keeps that path open through NAT.'}}
+    if(!ev.dataOk)return pingLoss(t,n,'Handshake is up but traffic is dropped. Check AllowedIPs on both peers.'+stale);
+    B.rx+=148*n;B.tx+=148*n;setTimeout(()=>animatePacket('topoB','tunPathB','pktB'),50);return pingReplies(t,n,21)}
+  return pingLoss(t,n,'')}
+
+/* editor */
+let edHost=null;
+const TEMPLATE='[Interface]\nPrivateKey = \nAddress = \nListenPort = \n\n[Peer]\nPublicKey = \nEndpoint = \nAllowedIPs = \nPersistentKeepalive = \n';
+function openEditor(h){edHost=h;$('#edTitle').textContent=`GNU nano  ${h.host}: /etc/wireguard/wg0.conf`;$('#edText').value=h.conf||'';$('#editor').hidden=false;$('#edText').focus()}
+function closeEditor(){$('#editor').hidden=true;$('#in'+'B').focus()}
+$('#edTemplate').onclick=()=>{const ta=$('#edText');if(!ta.value.trim()||confirm('Replace the current text with the template?'))ta.value=TEMPLATE;ta.focus()};
+$('#edCancel').onclick=()=>{push(edHost,'[ Exited without saving ]','sys');closeEditor();renderTerm(PB)};
+$('#edSave').onclick=()=>{const v=$('#edText').value.replace(/\r/g,'');edHost.conf=v;const n=v.split('\n').length;push(edHost,`[ Wrote ${n} lines ]`,'sys');
+  if(edHost.up)push(edHost,'Tip: wg0 is already running with the old settings. Apply changes with: sudo wg-quick down wg0 && sudo wg-quick up wg0','tip');
+  closeEditor();renderTerm(PB);updateB()};
+$('#editor').addEventListener('keydown',e=>{if(e.key==='Escape')$('#edCancel').click();if((e.ctrlKey||e.metaKey)&&(e.key==='o'||e.key==='s')){e.preventDefault();$('#edSave').click()}});
+
+/* Part B UI */
+function confOf(h){return h.conf?parseConf(h.conf):null}
+function chkServer(){const S=B.dev.server,L=B.dev.laptop,c=confOf(S);return!!(c&&!c.err&&S.priv&&c.iface.privatekey===S.priv&&nrm(c.iface.address)==='10.10.0.1/24'&&c.iface.listenport==='51820'&&L.pub&&c.peer.publickey===L.pub&&nrm(c.peer.allowedips)==='10.10.0.2/32')}
+function chkLaptop(){const S=B.dev.server,L=B.dev.laptop,c=confOf(L);return!!(c&&!c.err&&L.priv&&c.iface.privatekey===L.priv&&nrm(c.iface.address)==='10.10.0.2/24'&&S.pub&&c.peer.publickey===S.pub&&nrm(c.peer.endpoint)==='203.0.113.10:51820'&&nrm(c.peer.allowedips)==='10.10.0.1/32'&&c.peer.persistentkeepalive==='25')}
+const TASKS_B=[
+ {g:'Prepare both machines',items:[
+  {id:'inst',t:'Install WireGuard on the laptop and on vpn-gw',chk:()=>B.dev.laptop.installed&&B.dev.server.installed,h:'sudo apt install wireguard'},
+  {id:'keys',t:'Generate a key pair on each machine',chk:()=>!!(B.dev.laptop.pub&&B.dev.server.pub),h:'umask 077; wg genkey | tee privatekey | wg pubkey > publickey\ncat publickey'}]},
+ {g:'Configure',items:[
+  {id:'sconf',t:'Write wg0.conf on vpn-gw to match the tunnel plan',chk:chkServer,h:'sudo nano /etc/wireguard/wg0.conf\n\n[Interface]\nPrivateKey = <vpn-gw privatekey>\nAddress = 10.10.0.1/24\nListenPort = 51820\n\n[Peer]\nPublicKey = <laptop publickey>\nAllowedIPs = 10.10.0.2/32'},
+  {id:'lconf',t:'Write wg0.conf on the laptop to match the tunnel plan',chk:chkLaptop,h:'sudo nano /etc/wireguard/wg0.conf\n\n[Interface]\nPrivateKey = <laptop privatekey>\nAddress = 10.10.0.2/24\n\n[Peer]\nPublicKey = <vpn-gw publickey>\nEndpoint = 203.0.113.10:51820\nAllowedIPs = 10.10.0.1/32\nPersistentKeepalive = 25'},
+  {id:'fw',t:'Allow WireGuard through the vpn-gw firewall',chk:()=>B.dev.server.ufw.allow.includes('51820/udp'),h:'sudo ufw status\nsudo ufw allow 51820/udp'}]},
+ {g:'Bring up and verify',items:[
+  {id:'up',t:'Bring up wg0 on both machines',chk:()=>B.dev.laptop.up&&B.dev.server.up,h:'sudo wg-quick up wg0'},
+  {id:'ping',t:'Ping vpn-gw\u2019s tunnel address from the laptop',chk:()=>B.flags.lap,h:'ping -c 4 10.10.0.1'},
+  {id:'wgshow',t:'Show a completed handshake and transfer counters',chk:()=>B.flags.wgshow,h:'sudo wg show\nLook for "latest handshake".'},
+  {id:'boot',t:'Make the tunnel start automatically on vpn-gw',chk:()=>B.dev.server.boot,h:'sudo systemctl enable wg-quick@wg0'}]}];
+const stB={};
+const sk=k=>k?esc(k.slice(0,8))+'\u2026':'<span class="st na">none</span>';
+const okb=(b,t,f)=>b?`<span class="st ok">${t||'OK'}</span>`:`<span class="st bad">${f||'Fix'}</span>`;
+function keymapHTML(){const L=B.dev.laptop,S=B.dev.server,lc=confOf(L),sc=confOf(S);
+  const col=(h,c,o,name,oname)=>{const pk=c&&c.iface.privatekey,pp=c&&c.peer.publickey;
+    return`<div class="kcol card" style="padding:12px 14px"><h4>${name}</h4>
+    <div class="krow"><span>Own public key</span><span class="mono">${sk(h.pub)}</span></div>
+    <div class="krow"><span>[Interface] PrivateKey</span><span>${!pk?'<span class="st na">missing</span>':pk===h.priv?okb(1,'own private key'):pk===h.pub?okb(0,'','that\u2019s the public key'):okb(0,'','doesn\u2019t match')}</span></div>
+    <div class="krow"><span>[Peer] PublicKey</span><span>${!pp?'<span class="st na">missing</span>':pp===o.pub?okb(1,oname+'\u2019s key'):pp===h.pub?okb(0,'','your own key'):pp===o.priv?okb(0,'','a private key!'):okb(0,'','unknown key')}</span></div>
+    <div class="krow"><span>wg0</span><span>${h.up?'<span class="st ok">up</span>':'<span class="st na">down</span>'}${h.up&&h.activeText!==h.conf?'<span class="st weak">restart needed</span>':''}</span></div></div>`};
+  const ev=evalB();
+  let x=`<div class="keymap">${col(L,lc,S,'Laptop','vpn-gw')}${col(S,sc,L,'vpn-gw','laptop')}</div>`;
+  const sp=sc&&sc.iface.listenport;
+  x+=`<table class="spec" style="margin-top:12px"><tr><th>Check</th><th>Status</th></tr>
+  <tr><td>Laptop Endpoint points at vpn-gw\u2019s public IP and ListenPort</td><td>${!lc||!lc.peer.endpoint?'<span class="st na">not set</span>':okb(sp&&nrm(lc.peer.endpoint)==='203.0.113.10:'+sp)}</td></tr>
+  <tr><td>vpn-gw firewall allows the ListenPort over UDP</td><td>${!sp?'<span class="st na">no ListenPort</span>':okb(!S.ufw.on||S.ufw.allow.includes(sp+'/udp')||S.ufw.allow.includes(sp),'open','blocked')}</td></tr>
+  <tr><td>AllowedIPs cover each partner\u2019s tunnel address</td><td>${!lc||!sc?'<span class="st na">incomplete</span>':okb(covers(lc.peer.allowedips,ipOfCidr(sc.iface.address))&&covers(sc.peer.allowedips,ipOfCidr(lc.iface.address)))}</td></tr>
+  <tr><td>Handshake</td><td>${B.hs&&ev.hsOk?`<span class="st ok">${hsAgo()} s ago</span>`:'<span class="st na">none yet</span>'}</td></tr></table>`;
+  return x}
+function updateB(){const ev=evalB();if(B.hs&&!ev.hsOk)B.hs=false;
+  const g=$('#tunB'),up=ev.dataOk&&B.hs;g.classList.toggle('up',up);g.classList.toggle('half',!up&&B.hs&&ev.hsOk);
+  $('#tunTxtB').textContent=up?'WireGuard tunnel: up, handshake complete':(B.hs&&ev.hsOk)?'WireGuard: handshake complete, traffic blocked':ev.up?'WireGuard: interfaces up, no handshake yet':'WireGuard tunnel: down';
+  $$('#topoB .clickable').forEach(n=>n.classList.toggle('active',n.dataset.devb===PB.cur));
+  $('#tasksB').innerHTML=taskHTML(TASKS_B,stB,'b');bindHints($('#tasksB'));$('#keymap').innerHTML=keymapHTML();updateProgress()}
+$$('#topoB .clickable').forEach(n=>{const go=()=>{PB.cur=n.dataset.devb;renderTerm(PB);updateB();$('#inB').focus()};n.addEventListener('click',go);n.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}})});
+const PB={id:'B',cur:'laptop',dev:null,prompt:d=>`${d.user}@${d.host}:~$ `,label:d=>d.host,run:(d,v)=>execB(d,v),update:updateB,reset:resetB};
+resetB();PB.dev=B.dev;wireTerm(PB);
+
+/* ======================================================================
+   QUIZ
+   ====================================================================== */
+const QUIZ=[
+ {q:'In IPsec tunnel mode, what does ESP encrypt?',o:['Only the TCP or ICMP payload','The entire original IP packet, including its header','Only the original IP header','Nothing; tunnel mode only adds integrity'],a:1,e:'Tunnel mode encrypts the whole original packet and adds a new outer IP header between the gateways, hiding internal addresses.'},
+ {q:'A firewall in front of an IPsec gateway must allow which traffic for IKE with NAT traversal?',o:['TCP 443 and TCP 1723','UDP 500 and UDP 4500','UDP 1194 only','TCP 22 and UDP 51820'],a:1,e:'IKE uses UDP 500. When NAT is detected, IKE and ESP move to UDP 4500.'},
+ {q:'Which IP protocol number identifies ESP?',o:['47','50','51','6'],a:1,e:'ESP is IP protocol 50. AH is 51 and GRE is 47.'},
+ {q:'show crypto isakmp sa displays MM_NO_STATE. What is the most likely problem?',o:['The phase 2 transform sets differ','Phase 1 cannot complete: mismatched policy or pre-shared key, or UDP 500 is blocked','The tunnel is up and idle','The crypto ACLs are mirrored correctly'],a:1,e:'MM_NO_STATE means main mode (phase 1) never progressed. QM_IDLE would mean phase 1 is up.'},
+ {q:'Why did you ping with "source g0/1" when testing the site-to-site tunnel?',o:['Pings from G0/0 are blocked by IOS','The source must match the crypto ACL\u2019s interesting traffic (LAN to LAN) to trigger encryption','It forces the router to use transport mode','It makes the ping use UDP instead of ICMP'],a:1,e:'Only traffic matching the crypto ACL is encrypted. A ping sourced from the outside interface does not match 10.1.1.0/24 to 10.2.2.0/24.'},
+ {q:'What does AllowedIPs control in WireGuard?',o:['Which public IPs may connect to the listening port','Which inner addresses are routed to a peer and accepted from that peer','Which users may run wg-quick','The DNS servers pushed to clients'],a:1,e:'This is cryptokey routing: AllowedIPs acts as both the routing table toward the peer and an inbound source filter.'},
+ {q:'Which VPN protocol is considered broken and should be replaced?',o:['IKEv2','WireGuard','PPTP','OpenVPN'],a:2,e:'PPTP relies on MS-CHAPv2, which can be cracked. Use IKEv2, WireGuard, or an SSL/TLS VPN instead.'},
+ {q:'A remote user\u2019s VPN sends only company-bound traffic through the tunnel while web browsing goes directly to the internet. This is called:',o:['Full tunneling','Split tunneling','Transport mode','Hairpinning'],a:1,e:'Split tunneling saves bandwidth but reduces the organization\u2019s visibility and control of the user\u2019s internet traffic.'},
+ {q:'What is the purpose of the Diffie-Hellman group in an IKE policy?',o:['It selects the hash used for integrity','It lets peers derive a shared secret key over an untrusted network','It defines the pre-shared key length','It sets how long the tunnel stays up'],a:1,e:'DH lets both peers compute the same secret without ever sending it. Larger groups (14, 19, 20) resist attack better than 1, 2, or 5.'},
+ {q:'In Part B, why does the laptop use PersistentKeepalive = 25?',o:['To encrypt keepalives with a stronger cipher','To keep the home router\u2019s NAT mapping open so the server can reach the laptop','To renew the private key every 25 seconds','To limit the tunnel to 25 Mbps'],a:1,e:'NAT mappings expire when idle. Regular keepalives keep the path open so traffic initiated from the office side can still arrive.'}];
+function renderQuiz(){$('#quizForm').innerHTML=QUIZ.map((q,i)=>`<div class="q"><fieldset><legend>${i+1}. ${esc(q.q)}</legend>${q.o.map((o,j)=>`<label id="q${i}o${j}"><input type="radio" name="q${i}" value="${j}"> <span>${esc(o)}</span></label>`).join('')}<div class="fb" id="fb${i}" hidden></div></fieldset></div>`).join('');$('#quizScore').hidden=true}
+let quizScore=null;
+$('#quizCheck').onclick=()=>{let s=0,unanswered=0;QUIZ.forEach((q,i)=>{const sel=document.querySelector(`input[name="q${i}"]:checked`);const fb=$('#fb'+i);
+  $$(`[id^="q${i}o"]`).forEach(l=>l.classList.remove('correct'));
+  if(!sel){unanswered++;fb.hidden=true;return}const right=+sel.value===q.a;if(right)s++;
+  fb.className='fb '+(right?'right':'wrong');fb.innerHTML=(right?'<strong>Correct.</strong> ':'<strong>Not quite.</strong> ')+esc(q.e);fb.hidden=false;$(`#q${i}o${q.a}`).classList.add('correct')});
+  if(unanswered){$('#quizScore').className='banner warn';$('#quizScore').textContent=`Answer all questions first. ${unanswered} left.`;$('#quizScore').hidden=false;return}
+  quizScore=s;store.set('vpnlab-quiz',String(s));$('#quizScore').className='banner '+(s>=8?'good':'warn');$('#quizScore').innerHTML=`<strong>Score: ${s} of ${QUIZ.length}.</strong> ${s>=8?'Well done.':'Review the briefing and explanations, then try again.'}`;$('#quizScore').hidden=false;updateProgress()};
+$('#quizReset').onclick=()=>{renderQuiz();window.scrollTo({top:0})};
+renderQuiz();{const q=store.get('vpnlab-quiz');if(q!==null)quizScore=+q}
+
+/* ======================================================================
+   PROGRESS + REPORT
+   ====================================================================== */
+const allA=()=>TASKS_A.flatMap(g=>g.items),allB=()=>TASKS_B.flatMap(g=>g.items);
+function updateProgress(){const a=allA(),b=allB();const da=a.filter(t=>t.chk()).length,db=b.filter(t=>t.chk()).length,tot=a.length+b.length;
+  $('#meterTxt').textContent=`${da+db} of ${tot} tasks`;$('#meterFill').style.width=((da+db)/tot*100)+'%';
+  $('#tickA').textContent=da===a.length?'\u2713':'';$('#tickB').textContent=db===b.length?'\u2713':'';$('#tickQ').textContent=quizScore!==null?'\u2713':''}
+function renderSummary(){const li=(t,d)=>`<li>${d?'\u2705':'\u25CB'} ${esc(t)}</li>`;
+  $('#summary').innerHTML='<li><strong>Part A: IPsec site-to-site</strong></li>'+TASKS_A.flatMap(g=>g.items.map(t=>li((g.g.startsWith('R')?g.g.split(' ')[0]+': ':'')+t.t,t.chk()))).join('')+li('Troubleshooting challenge solved',A.flags.chal)+
+  '<li style="margin-top:8px"><strong>Part B: WireGuard point-to-point</strong></li>'+TASKS_B.flatMap(g=>g.items.map(t=>li(t.t,t.chk()))).join('')+
+  `<li style="margin-top:8px"><strong>Knowledge check:</strong> ${quizScore===null?'not completed':quizScore+' of '+QUIZ.length}</li>`}
+$$('[data-save]').forEach(el=>{const k='vpnlab-'+el.id,v=store.get(k);if(v!==null)el.value=v;el.addEventListener('input',()=>store.set(k,el.value))});
+if(!$('#rDate').value)$('#rDate').value=new Date().toLocaleDateString();
+
+/* init */
+renderTerm(PA);renderTerm(PB);updateA();updateB();
+</script>
+</body>
+</html>
