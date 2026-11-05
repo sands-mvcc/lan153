@@ -210,15 +210,71 @@
     margin: 0 auto;
     padding: 32px 24px 48px;
   }
+  /* Section titles — enlarged */
   .section-label {
+    font-size: 1.15rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text);
+    margin-bottom: 18px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--border);
+  }
+
+  /* ACCORDION (Course Learning Objectives) */
+  .accordion {
+    margin-bottom: 40px;
+  }
+  .accordion-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+  .accordion-toggle:hover .acc-btn { background: var(--accent); color: #fff; }
+  .accordion-toggle:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 4px;
+    border-radius: 4px;
+  }
+  .acc-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
     font-size: 0.75rem;
     font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: var(--text-muted);
-    margin-bottom: 16px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--border);
+    letter-spacing: 0.05em;
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    background: var(--accent-light);
+    transition: background 0.2s, color 0.2s;
+  }
+  .acc-chevron {
+    display: inline-block;
+    transition: transform 0.25s ease;
+  }
+  .accordion-toggle[aria-expanded="true"] .acc-chevron { transform: rotate(180deg); }
+  .accordion-panel .objectives-box { margin-bottom: 0; }
+  .accordion-panel:not([hidden]) { animation: accFade 0.25s ease; }
+  @keyframes accFade {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .accordion-panel:not([hidden]) { animation: none; }
+    .acc-chevron { transition: none; }
   }
 
   /* LEARNING OBJECTIVES */
@@ -447,6 +503,7 @@
   @media (max-width: 760px) {
     .objectives-list { grid-template-columns: 1fr; }
     .objectives-box { padding: 20px; }
+    .section-label { font-size: 1rem; }
   }
 </style>
 </head>
@@ -482,37 +539,45 @@
 
 <main>
 
-  <!-- COURSE LEARNING OBJECTIVES -->
-  <div class="section-label">🎓 Course Learning Objectives</div>
-  <div class="objectives-box">
-    <p class="objectives-intro">Upon successful completion of this course, students will be able to:</p>
-    <ol class="objectives-list" style="list-style:none;">
-      <li><span class="obj-num">1</span><span class="obj-text">Understand computer, network, and information security and why it is important.</span></li>
-      <li><span class="obj-num">2</span><span class="obj-text">Define and explain the concepts of network confidentiality, integrity, availability, and non-repudiation.</span></li>
-      <li><span class="obj-num">3</span><span class="obj-text">Demonstrate the management’s role in the development, implementation, and maintenance of the network security.</span></li>
-      <li><span class="obj-num">4</span><span class="obj-text">Understand the value of education, training, and awareness programs to the organization.</span></li>
-      <li><span class="obj-num">5</span><span class="obj-text">Define risk management and its role in security policy and security architecture.</span></li>
-      <li><span class="obj-num">6</span><span class="obj-text">Understand the relationship between risk, threats, vulnerabilities, and countermeasures.</span></li>
-      <li><span class="obj-num">7</span><span class="obj-text">Identify and describe risk mitigation strategies.</span></li>
-      <li><span class="obj-num">8</span><span class="obj-text">Define and describe disaster recovery plans and an incident response plan.</span></li>
-      <li><span class="obj-num">9</span><span class="obj-text">Define and describe a business continuity plan.</span></li>
-      <li><span class="obj-num">10</span><span class="obj-text">Describe the various functions related to database security.</span></li>
-      <li><span class="obj-num">11</span><span class="obj-text">Describe and understand a feasibility study.</span></li>
-      <li><span class="obj-num">12</span><span class="obj-text">Understand the difference between policies, procedures, standards, and guidelines.</span></li>
-      <li><span class="obj-num">13</span><span class="obj-text">Understand the process of encryption and define the key cryptography terms.</span></li>
-      <li><span class="obj-num">14</span><span class="obj-text">Understand the difference between asymmetric and symmetric encryption.</span></li>
-      <li><span class="obj-num">15</span><span class="obj-text">Discuss scanning and analysis tools.</span></li>
-      <li><span class="obj-num">16</span><span class="obj-text">Describe the various types of firewalls and the various types of intrusion detection systems.</span></li>
-      <li><span class="obj-num">17</span><span class="obj-text">Describe the operation of Virtual Private Networks.</span></li>
-      <li><span class="obj-num">18</span><span class="obj-text">Understand the importance of authentication and the characteristics of a good password.</span></li>
-      <li><span class="obj-num">19</span><span class="obj-text">Describe the various approaches to biometrics access control.</span></li>
-      <li><span class="obj-num">20</span><span class="obj-text">Understand the position of the network security element within the organization.</span></li>
-      <li><span class="obj-num">21</span><span class="obj-text">Understand the relationship between an organization's employment practices and policies and the network security function.</span></li>
-      <li><span class="obj-num">22</span><span class="obj-text">Understand the position of the CIRT element within the security function.</span></li>
-      <li><span class="obj-num">23</span><span class="obj-text">Explain the various credentials that can be acquired by the security professional and their value.</span></li>
-      <li><span class="obj-num">24</span><span class="obj-text">Identify and explain the major laws relating to network security.</span></li>
-      <li><span class="obj-num">25</span><span class="obj-text">Understand the issue of privacy and its impact upon the network security function.</span></li>
-    </ol>
+  <!-- COURSE LEARNING OBJECTIVES (accordion, collapsed by default) -->
+  <div class="accordion">
+    <button type="button" class="section-label accordion-toggle" id="objectivesToggle"
+            aria-expanded="false" aria-controls="objectivesPanel" onclick="toggleObjectives()">
+      <span>🎓 Course Learning Objectives</span>
+      <span class="acc-btn"><span class="acc-label">Expand</span> <span class="acc-chevron" aria-hidden="true">▾</span></span>
+    </button>
+    <div class="accordion-panel" id="objectivesPanel" role="region" aria-labelledby="objectivesToggle" hidden>
+      <div class="objectives-box">
+        <p class="objectives-intro">Upon successful completion of this course, students will be able to:</p>
+        <ol class="objectives-list" style="list-style:none;">
+          <li><span class="obj-num">1</span><span class="obj-text">Understand computer, network, and information security and why it is important.</span></li>
+          <li><span class="obj-num">2</span><span class="obj-text">Define and explain the concepts of network confidentiality, integrity, availability, and non-repudiation.</span></li>
+          <li><span class="obj-num">3</span><span class="obj-text">Demonstrate the management’s role in the development, implementation, and maintenance of the network security.</span></li>
+          <li><span class="obj-num">4</span><span class="obj-text">Understand the value of education, training, and awareness programs to the organization.</span></li>
+          <li><span class="obj-num">5</span><span class="obj-text">Define risk management and its role in security policy and security architecture.</span></li>
+          <li><span class="obj-num">6</span><span class="obj-text">Understand the relationship between risk, threats, vulnerabilities, and countermeasures.</span></li>
+          <li><span class="obj-num">7</span><span class="obj-text">Identify and describe risk mitigation strategies.</span></li>
+          <li><span class="obj-num">8</span><span class="obj-text">Define and describe disaster recovery plans and an incident response plan.</span></li>
+          <li><span class="obj-num">9</span><span class="obj-text">Define and describe a business continuity plan.</span></li>
+          <li><span class="obj-num">10</span><span class="obj-text">Describe the various functions related to database security.</span></li>
+          <li><span class="obj-num">11</span><span class="obj-text">Describe and understand a feasibility study.</span></li>
+          <li><span class="obj-num">12</span><span class="obj-text">Understand the difference between policies, procedures, standards, and guidelines.</span></li>
+          <li><span class="obj-num">13</span><span class="obj-text">Understand the process of encryption and define the key cryptography terms.</span></li>
+          <li><span class="obj-num">14</span><span class="obj-text">Understand the difference between asymmetric and symmetric encryption.</span></li>
+          <li><span class="obj-num">15</span><span class="obj-text">Discuss scanning and analysis tools.</span></li>
+          <li><span class="obj-num">16</span><span class="obj-text">Describe the various types of firewalls and the various types of intrusion detection systems.</span></li>
+          <li><span class="obj-num">17</span><span class="obj-text">Describe the operation of Virtual Private Networks.</span></li>
+          <li><span class="obj-num">18</span><span class="obj-text">Understand the importance of authentication and the characteristics of a good password.</span></li>
+          <li><span class="obj-num">19</span><span class="obj-text">Describe the various approaches to biometrics access control.</span></li>
+          <li><span class="obj-num">20</span><span class="obj-text">Understand the position of the network security element within the organization.</span></li>
+          <li><span class="obj-num">21</span><span class="obj-text">Understand the relationship between an organization's employment practices and policies and the network security function.</span></li>
+          <li><span class="obj-num">22</span><span class="obj-text">Understand the position of the CIRT element within the security function.</span></li>
+          <li><span class="obj-num">23</span><span class="obj-text">Explain the various credentials that can be acquired by the security professional and their value.</span></li>
+          <li><span class="obj-num">24</span><span class="obj-text">Identify and explain the major laws relating to network security.</span></li>
+          <li><span class="obj-num">25</span><span class="obj-text">Understand the issue of privacy and its impact upon the network security function.</span></li>
+        </ol>
+      </div>
+    </div>
   </div>
 
   <div class="section-label">📚 Course Lessons — 12 Days</div>
@@ -816,7 +881,7 @@
           <span class="lesson-num">Activity 5</span>
           <span class="domain-tag tag-act">Learning Activity</span>
         </div>
-        <div class="card-title">Multifactor Authentication</div>
+        <div class="card-title">Authentication</div>
         <div class="card-desc">Evaluate authentication factors, the characteristics of a strong password, multifactor authentication, and biometric approaches.</div>
       </div>
       <div class="card-footer">
@@ -1041,42 +1106,10 @@
 
   </div>
 
-  <!-- COURSE RESOURCES -->
-  <div class="section-label">🎯 Course Resources</div>
+  <!-- EXAM RESOURCES -->
+  <div class="section-label">🎯 Exam Resources</div>
   <div class="special-grid">
 
-    <a class="card special-card domain-special" href="packet-filter-cheatsheet.html">
-      <div class="card-accent-bar" style="background: linear-gradient(90deg, var(--accent), #ff9a00);"></div>
-      <div class="card-body">
-        <div class="card-header-row">
-          <span class="lesson-num">Packet Capturing User Guide</span>
-          <span class="domain-tag tag-special">User Guide</span>
-        </div>
-        <div class="card-title">🧪 Packet Capture User Guide</div>
-        <div class="card-desc">This guide is for Lab six and will provide the commands and syntax need to complete the lab. </div>
-      </div>
-      <div class="card-footer">
-        <span class="card-terms"><strong>Covers:</strong> All 5 Domains · Petesting · Capture Tools · Reviewed</span>
-        <span class="card-arrow">→</span>
-      </div>
-    </a>
-
-        <a class="card special-card domain-special" href="ids-field-guide.html">
-      <div class="card-accent-bar" style="background: linear-gradient(90deg, var(--accent), #ff9a00);"></div>
-      <div class="card-body">
-        <div class="card-header-row">
-          <span class="lesson-num">Intrusion Detection Systems/Intrusion Prevention System</span>
-          <span class="domain-tag tag-special">IDS/IPS User Guide</span>
-        </div>
-        <div class="card-title">🧪 Using IDS/IPS</div>
-        <div class="card-desc">This guide is for Lab seven and will provide the information and syntax need to complete the lab. </div>
-      </div>
-      <div class="card-footer">
-        <span class="card-terms"><strong>Covers:</strong> All 5 Domains · IDS/IPS · Intrusion Detection · Reviewed</span>
-        <span class="card-arrow">→</span>
-      </div>
-    </a>
-    
     <a class="card special-card domain-exam" href="cybercerts.html">
       <div class="card-accent-bar" style="background: var(--tag-exam);"></div>
       <div class="card-body">
@@ -1194,6 +1227,16 @@
     const saved = localStorage.getItem('secplus-theme');
     applyTheme(saved === 'dark' ? 'dark' : 'light');
   })();
+
+  // Course Learning Objectives accordion — collapsed by default on every load
+  function toggleObjectives() {
+    const btn = document.getElementById('objectivesToggle');
+    const panel = document.getElementById('objectivesPanel');
+    const expanded = btn.getAttribute('aria-expanded') === 'true';
+    btn.setAttribute('aria-expanded', String(!expanded));
+    panel.hidden = expanded;
+    btn.querySelector('.acc-label').textContent = expanded ? 'Expand' : 'Collapse';
+  }
 </script>
 </body>
 </html>
